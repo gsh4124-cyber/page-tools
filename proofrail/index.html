@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ProofRail Pilot · 정상거래 증명 인프라</title>
+<style>
+:root{--bg:#07111f;--panel:#0e1b2d;--line:#223653;--text:#edf4ff;--muted:#9fb2cc;--good:#25c27a;--warn:#f2b84b;--bad:#ff6577;--accent:#69a8ff}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 20% 0,#10294a 0,#07111f 38%,#050b14 100%);color:var(--text);font-family:Inter,Pretendard,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:1180px;margin:auto;padding:40px 22px 70px}.eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800}h1{font-size:48px;line-height:1;margin:10px 0 12px}.lead{max-width:850px;font-size:20px;line-height:1.55;color:#c9d9ed}.thesis{margin:26px 0;padding:20px 22px;border:1px solid #2d507d;border-radius:18px;background:rgba(25,54,91,.35);font-size:24px;font-weight:800}.pilot-note{color:var(--muted);font-size:14px;margin-top:10px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0}.btn{border:0;border-radius:14px;padding:14px 18px;font-weight:800;font-size:15px;cursor:pointer}.btn.good{background:var(--good);color:#052517}.btn.bad{background:var(--bad);color:#321018}.btn:hover{filter:brightness(1.06)}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.card{background:rgba(14,27,45,.93);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.18)}.card h2{font-size:17px;margin:0 0 14px}.status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;border-radius:16px;background:#0a1524;border:1px solid var(--line)}#statusText{font-size:25px;font-weight:900}.status.good #statusText{color:var(--good)}.status.bad #statusText{color:var(--bad)}.status.idle #statusText{color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.metric{padding:14px;border:1px solid var(--line);border-radius:14px;background:#0a1524}.metric b{display:block;font-size:25px;margin-top:4px}.metric span{font-size:12px;color:var(--muted)}
+.list{display:grid;gap:10px}.evidence{padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:#0a1524}.evidence .top{display:flex;justify-content:space-between;gap:10px}.badge{font-size:11px;font-weight:900;border-radius:999px;padding:4px 8px;background:#18304e;color:#b9d7ff}.badge.verified{background:rgba(37,194,122,.14);color:#76e3ad}.badge.user{background:rgba(242,184,75,.12);color:#ffd77d}.evidence small{display:block;color:var(--muted);margin-top:7px;line-height:1.4}
+.checks{display:grid;gap:8px}.check{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0a1524}.check.good{border-color:rgba(37,194,122,.35)}.check.bad{border-color:rgba(255,101,119,.45);background:rgba(92,22,35,.18)}.check.warn{border-color:rgba(242,184,75,.35)}
+.graph{display:flex;align-items:center;gap:8px;overflow:auto;padding:8px 0 4px}.node{min-width:120px;text-align:center;padding:12px;border-radius:14px;border:1px solid #2b4568;background:#0a1524;font-size:13px}.arrow{color:#6f89aa;font-weight:900}.packet{margin-top:12px;padding:16px;border-radius:14px;border:1px solid var(--line);background:#081321;white-space:pre-wrap;line-height:1.55}.packet.ready{border-color:rgba(37,194,122,.45)}.packet.blocked{border-color:rgba(255,101,119,.45);color:#ffd2d8}.section-title{margin-top:18px;color:#bed0e8;font-size:13px;font-weight:800;letter-spacing:.05em}.footer{margin-top:22px;color:#7f95b2;font-size:13px;line-height:1.6}
+@media(max-width:860px){h1{font-size:38px}.grid{grid-template-columns:1fr}.lead{font-size:18px}.thesis{font-size:20px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">FINTECH CONTEST PILOT · SYNTHETIC DATA ONLY</div>
+  <h1>ProofRail</h1>
+  <div class="lead">정상거래 증명 인프라 — 흩어진 거래 원본을 연결하고, 일치·모순·누락을 검증해 금융회사가 바로 심사할 수 있는 Evidence Packet으로 바꿉니다.</div>
+  <div class="thesis">“차단이 자동화됐다면, 증명도 자동화되어야 합니다.”</div>
+  <div class="pilot-note">이 Pilot은 지급정지 해제를 판단하지 않습니다. AI가 증거를 만들지 않고, 제공된 원본 간 검증 가능한 사실만 구조화한다는 제품 가설을 시험합니다.</div>
+
+  <div class="actions">
+    <button class="btn good" id="runNormal">A. 정상거래 검증</button>
+    <button class="btn bad" id="runTampered">B. 조작·모순 케이스</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>1 · Evidence Intake</h2>
+      <div id="evidenceList" class="list"><div class="evidence"><small>시나리오를 선택하면 원본 증빙이 표시됩니다.</small></div></div>
+      <div class="section-title">PROOF GRAPH</div>
+      <div id="graph" class="graph"><div class="node">대기 중</div></div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Integrity Gate</h2>
+      <div id="statusBox" class="status idle"><div><small>판정</small><div id="statusText">READY FOR TEST</div></div><div id="scenarioLabel">—</div></div>
+      <div class="metrics">
+        <div class="metric"><span>Supporting</span><b id="supportCount">0</b></div>
+        <div class="metric"><span>Contradictions</span><b id="contradictionCount">0</b></div>
+        <div class="metric"><span>Missing</span><b id="missingCount">0</b></div>
+      </div>
+      <div class="section-title">CROSS-CHECKS</div>
+      <div id="checks" class="checks"><div class="check">검증 전</div></div>
+      <div class="section-title">EVIDENCE PACKET</div>
+      <div id="packet" class="packet">검증을 실행하면 금융회사 제출용 구조화 패킷의 생성 가능 여부가 표시됩니다.</div>
+    </section>
+  </div>
+
+  <div class="footer">Prototype guardrail: VERIFIED/VERIFIABLE/USER PROVIDED의 신뢰등급을 구분합니다. 모순이 있으면 문장으로 덮지 않고 생성 자체를 차단합니다. 실제 금융회사·수사기관의 판단을 대신하지 않습니다.</div>
+</main>
+<script>
+const scenarios={
+ normal:{
+   label:'A · 정상 중고거래',
+   evidence:[
+    {id:'bank',name:'은행 입금내역',trust:'VERIFIED',amount:700000,party:'김민수',time:'2026-09-18 10:14',meta:'금융사 원본 · TX-7014'},
+    {id:'order',name:'플랫폼 주문내역',trust:'VERIFIED',amount:700000,party:'김민수',time:'2026-09-18 10:02',meta:'플랫폼 원본 · ORDER-18302'},
+    {id:'chat',name:'거래 채팅',trust:'VERIFIABLE',amount:700000,party:'김민수',time:'2026-09-18 09:56',meta:'플랫폼 대화 ID · CHAT-8802'},
+    {id:'ship',name:'택배 송장',trust:'VERIFIED',amount:null,party:'김민수',time:'2026-09-18 15:41',meta:'운송사 조회 · WAY-384991'},
+    {id:'delivery',name:'배송완료',trust:'VERIFIED',amount:null,party:'김민수',time:'2026-09-19 13:12',meta:'운송사 완료 이벤트'}
+   ],
+   expected:{amount:700000,party:'김민수'}, missing:['플랫폼 구매확정 이벤트(선택)']
+ },
+ tampered:{
+   label:'B · 조작·모순 케이스',
+   evidence:[
+    {id:'bank',name:'은행 입금내역',trust:'VERIFIED',amount:700000,party:'김민수',time:'2026-09-18 10:14',meta:'금융사 원본 · TX-7014'},
+    {id:'contract',name:'사용자 계약서 PDF',trust:'USER PROVIDED',amount:650000,party:'박준호',time:'2026-09-18 10:20',meta:'업로드 파일 · 원본 출처 미확인'},
+    {id:'chat',name:'캡처된 거래 채팅',trust:'USER PROVIDED',amount:700000,party:'김민수',time:'2026-09-18 09:56',meta:'이미지 캡처 · 메타데이터 없음'},
+    {id:'ship',name:'택배 송장',trust:'VERIFIABLE',amount:null,party:'박준호',time:'2026-09-17 21:10',meta:'운송장 번호는 조회 가능'},
+    {id:'delivery',name:'배송완료',trust:'VERIFIED',amount:null,party:'박준호',time:'2026-09-18 08:30',meta:'입금보다 먼저 배송 완료'}
+   ],
+   expected:{amount:700000,party:'김민수'}, missing:['플랫폼 주문 원본','계약서 발급주체 검증']
+ }
+};
+const fmt=n=>n==null?'—':n.toLocaleString('ko-KR')+'원';
+const trustClass=t=>t==='VERIFIED'||t==='VERIFIABLE'?'verified':'user';
+function run(kind){
+ const s=scenarios[kind];
+ document.querySelector('#scenarioLabel').textContent=s.label;
+ document.querySelector('#evidenceList').innerHTML=s.evidence.map(e=>`<div class="evidence"><div class="top"><strong>${e.name}</strong><span class="badge ${trustClass(e.trust)}">${e.trust}</span></div><small>${fmt(e.amount)} · 상대방 ${e.party} · ${e.time}<br>${e.meta}</small></div>`).join('');
+ const bank=s.evidence.find(x=>x.id==='bank');
+ const amountMismatches=s.evidence.filter(x=>x.amount!=null&&x.amount!==bank.amount);
+ const partyMismatches=s.evidence.filter(x=>x.party&&x.party!==bank.party);
+ const ship=s.evidence.find(x=>x.id==='ship');
+ const delivery=s.evidence.find(x=>x.id==='delivery');
+ const temporal=[];
+ if(ship && new Date(ship.time.replace(' ','T'))<new Date(bank.time.replace(' ','T'))) temporal.push('송장 시간이 입금보다 앞섬');
+ if(delivery && new Date(delivery.time.replace(' ','T'))<new Date(bank.time.replace(' ','T'))) temporal.push('배송완료가 입금보다 앞섬');
+ const contradictions=[];
+ amountMismatches.forEach(x=>contradictions.push(`금액 불일치: ${x.name} ${fmt(x.amount)} ≠ 은행 ${fmt(bank.amount)}`));
+ partyMismatches.forEach(x=>contradictions.push(`상대방 불일치: ${x.name} ${x.party} ≠ 입금자 ${bank.party}`));
+ contradictions.push(...temporal.map(x=>`시간순서 충돌: ${x}`));
+ const supports=[];
+ s.evidence.forEach(x=>{
+   if(x.id==='bank') return;
+   if((x.amount==null||x.amount===bank.amount)&&x.party===bank.party&& !contradictions.some(c=>c.includes(x.name))) supports.push(`${x.name}: 핵심 거래정보와 일치`);
+ });
+ const blocked=contradictions.length>0;
+ const box=document.querySelector('#statusBox');
+ box.className='status '+(blocked?'bad':'good');
+ document.querySelector('#statusText').textContent=blocked?'GENERATION BLOCKED':'PACKET READY';
+ document.querySelector('#supportCount').textContent=supports.length;
+ document.querySelector('#contradictionCount').textContent=contradictions.length;
+ document.querySelector('#missingCount').textContent=s.missing.length;
+ document.querySelector('#checks').innerHTML=[
+   ...supports.map(x=>`<div class="check good">✓ ${x}</div>`),
+   ...contradictions.map(x=>`<div class="check bad">✕ ${x}</div>`),
+   ...s.missing.map(x=>`<div class="check warn">△ 누락: ${x}</div>`)
+ ].join('') || '<div class="check">확인 항목 없음</div>';
+ const graphNodes= kind==='normal'
+   ? ['주문 700,000','김민수','입금 700,000','송장 발행','배송완료']
+   : ['입금 700,000','계약서 650,000','상대방 불일치','배송 선행'];
+ document.querySelector('#graph').innerHTML=graphNodes.map((x,i)=>`${i?'<span class="arrow">→</span>':''}<div class="node">${x}</div>`).join('');
+ const packet=document.querySelector('#packet');
+ if(blocked){
+   packet.className='packet blocked';
+   packet.textContent=`자동 패킷 생성 차단\n\n이유: 검증 가능한 모순 ${contradictions.length}건 발견\n- ${contradictions.join('\n- ')}\n\n사용자에게 원본 보완을 요청하고, 모순이 해소되기 전에는 정상거래 소명문을 생성하지 않습니다.`;
+ }else{
+   packet.className='packet ready';
+   packet.textContent=`[정상거래 증명 패킷 · PILOT]\n문제거래: ${fmt(bank.amount)} / ${bank.time}\n거래상대방: ${bank.party}\n\nSupporting Evidence: ${supports.length}\nContradictions: 0\nMissing: ${s.missing.length}\n\n검증된 흐름: 주문 → 입금 → 송장 → 배송완료\n\n※ 본 패킷은 지급정지 해제를 판단하지 않으며, 원본 증거와 교차검증 결과를 금융회사 심사용으로 구조화합니다.`;
+ }
+}
+document.querySelector('#runNormal').addEventListener('click',()=>run('normal'));
+document.querySelector('#runTampered').addEventListener('click',()=>run('tampered'));
+</script>
+</body>
+</html>
