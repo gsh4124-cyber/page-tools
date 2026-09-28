@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 
 const langs=['en','fr','de','zh','ru','la','pt','ar'];
-const requiredFiles=['index.html','app.js','full-reader-loader.js','ui-language-sync.js','local-file-language.js','clipboard.js','exact-search.js','i18n-layout.css','title-navigator.js','title-navigator.css'];
+const requiredFiles=['index.html','app.js','full-reader-loader.js','ui-language-sync.js','local-file-language.js','clipboard.js','exact-search.js','i18n-layout.css','title-navigator.js','title-navigator.css','verse-multiselect.js','verse-multiselect.css'];
 for(const file of requiredFiles){if(!fs.existsSync(file))throw new Error(`missing required file: ${file}`);}
 for(const lang of langs){if(!fs.existsSync(`${lang}/index.html`))throw new Error(`missing localized entry: ${lang}/index.html`);}
 
 const root=fs.readFileSync('index.html','utf8');
 if(!root.includes('<html lang="ko"')) throw new Error('root html lang must remain ko');
 if(root.includes('lang="ar" dir="rtl"')) throw new Error('root must not become globally RTL');
-for(const required of ['id="translationSelect"','id="bookSelect"','id="chapterSelect"','id="verseSelect"','id="chapterTitle"','src="title-navigator.js"','href="title-navigator.css"']){
+for(const required of ['id="translationSelect"','id="bookSelect"','id="chapterSelect"','id="verseSelect"','id="chapterTitle"','src="title-navigator.js"','href="title-navigator.css"','src="verse-multiselect.js"','href="verse-multiselect.css"']){
   if(!root.includes(required)) throw new Error(`root reader contract missing: ${required}`);
 }
 if(!root.includes('id="bookSelect" aria-label="성경책" hidden')||!root.includes('id="chapterSelect" aria-label="장" hidden')||!root.includes('id="verseSelect" aria-label="절" hidden')){
@@ -45,20 +45,7 @@ if(!layout.includes('.location-controls .top-search{display:grid!important')) th
 if(!layout.includes('word-spacing:normal!important')) throw new Error('chapter heading must preserve visible spacing between book name and chapter');
 
 const navigator=fs.readFileSync('title-navigator.js','utf8');
-for(const fragment of [
-  'title-navigator-testament-switch',
-  'data-switch="old"',
-  'data-switch="new"',
-  'activeTestament',
-  'data-step="book"',
-  'data-step="chapter"',
-  'data-step="verse"',
-  "currentStep = 'book'",
-  'renderBooks()',
-  "renderNumberGrid(chapterSelect,chapters,'chapter')",
-  "renderNumberGrid(verseSelect,verses,'verse')",
-  "backButton.addEventListener('click',goBack)",
-]){
+for(const fragment of ['title-navigator-testament-switch','data-switch="old"','data-switch="new"','activeTestament','currentStep','setStep(step','renderNumberGrid(chapterSelect,chapters,\'chapter\')','renderNumberGrid(verseSelect,verses,\'verse\')','close({restoreFocus:false})']){
   if(!navigator.includes(fragment)) throw new Error(`title navigator contract missing: ${fragment}`);
 }
 const navCss=fs.readFileSync('title-navigator.css','utf8');
@@ -66,11 +53,23 @@ if(!navCss.includes('.title-navigator-testament-switch')||navCss.includes('.titl
 
 const clipboard=fs.readFileSync('clipboard.js','utf8');
 if(!clipboard.includes('BibleI18n?.scriptureLang')) throw new Error('copied scripture references must follow translation language, not UI language');
-if(!clipboard.includes('`[${translationName()}] ${refParts(startVerse, endVerse)}')) throw new Error('copied scripture must include the selected translation before the reference');
+if(!clipboard.includes('window.BibleClipboard')) throw new Error('clipboard helpers must be exposed for multi-verse selection');
+if(!clipboard.includes('buildCopyTextForElements')) throw new Error('multi-verse clipboard formatter missing');
+if(clipboard.includes("versesRoot.addEventListener('click'")) throw new Error('verse text click must not instantly copy; click is reserved for multi-selection');
 if(!clipboard.includes('${localizedPageName()} · ${SITE_URL}')) throw new Error('copied scripture must keep localized page name and site URL on one attribution line');
 for(const lang of langs){if(!clipboard.includes(`${lang}:`)&&lang!=='ko')throw new Error(`clipboard localized page name missing for ${lang}`);}
+
+const multiselect=fs.readFileSync('verse-multiselect.js','utf8');
+for(const fragment of ["row.classList.toggle('multi-selected'","buildCopyTextForElements","toggleHighlightSelection","openSelectionNoteEditor","selectionNotes","data-tab = 'selections'","bible-reader-records-changed"]){
+  if(!multiselect.includes(fragment)) throw new Error(`multi-verse selection contract missing: ${fragment}`);
+}
+const multiselectCss=fs.readFileSync('verse-multiselect.css','utf8');
+for(const fragment of ['.verse.multi-selected','.verse-multi-actionbar','.selection-note-editor']){
+  if(!multiselectCss.includes(fragment)) throw new Error(`multi-verse selection styling missing: ${fragment}`);
+}
+
 const exactSearch=fs.readFileSync('exact-search.js','utf8');
 if(!exactSearch.includes('BibleI18n?.bookName')) throw new Error('search result references must follow translation language');
 for(const lang of langs){if(!exactSearch.includes(`${lang}:{prepare:`))throw new Error(`search runtime messages missing for ${lang}`);}
 
-console.log('i18n validation passed for the current shared reader, sequential title navigator, and loader-based localized entries');
+console.log('i18n validation passed for the current shared reader, sequential navigation, and multi-verse selection runtime');
