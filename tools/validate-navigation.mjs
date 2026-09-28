@@ -19,10 +19,16 @@ for(const fragment of [
   "title.setAttribute('aria-haspopup','dialog')",
   "data-switch=\"old\"",
   "data-switch=\"new\"",
-  "switchOld.addEventListener('click'",
-  "switchNew.addEventListener('click'",
-  "renderNumberGrid(chapterSelect,chapters)",
-  "renderNumberGrid(verseSelect,verses)",
+  "data-step=\"book\"",
+  "data-step=\"chapter\"",
+  "data-step=\"verse\"",
+  "currentStep = 'book'",
+  "setStep('chapter'",
+  "setStep('verse'",
+  "backButton.addEventListener('click',goBack)",
+  "close({restoreFocus:false})",
+  "renderNumberGrid(chapterSelect,chapters,'chapter')",
+  "renderNumberGrid(verseSelect,verses,'verse')",
   "bookSelect.dispatchEvent(new Event('change',{bubbles:true}))",
 ]){
   if(!nav.includes(fragment)) throw new Error(`title navigator regression guard missing: ${fragment}`);
@@ -33,4 +39,4 @@ if(css.includes('.title-navigator-testaments{display:grid;grid-template-columns:
 if(!layout.includes('grid-template-rows:42px!important')) throw new Error('top translation/language/search row must remain single-row');
 if(!layout.includes('grid-column:3!important;grid-row:1!important')) throw new Error('search must stay in row 1');
 
-console.log('Navigation validation passed: title owns book/chapter/verse navigation, Old/New uses switch buttons, and the compact topbar stays one row.');
+console.log('Navigation validation passed: title navigation is sequential book -> chapter -> verse with back navigation, Old/New switch buttons, and the compact topbar stays one row.');
