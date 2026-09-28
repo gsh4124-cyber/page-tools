@@ -1,8 +1,10 @@
 # PROJECT STATUS — random-ppobgi
 
-- 마지막 갱신: 2026-09-10
+- 마지막 기술상태 갱신: 2026-09-10
+- live-state owner 포인터 정합화: 2026-09-28
 - 저장소 역할: 랜덤뽑기 웹서비스의 실제 코드·배포·기술상태 원본
-- 상위 사업상태: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`, `직장/바이브코딩/운영본부_상태.json`
+- 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`
+- 빠르게 변하는 운영상태·Portfolio Mode·Gate·다음 행동: Supabase `hwangje_ops` / project key `vibecoding`
 - 표준 로컬 경로: `C:/Users/gsh41/Desktop/황제/직장/바이브코딩/페이지형/random-ppobgi`
 - 운영 주소: https://random-ppobgi.pages.dev/
 
@@ -10,7 +12,7 @@
 
 **PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / PRODUCTION QA ACTIVE / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
 
-현재 바이브코딩 Portfolio Mode는 `WAITING_EXTERNAL`이다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발이나 깊은 QA를 반복하지 않는다.
+현재 Portfolio Mode와 다음 행동은 Supabase live-state에서 회수한다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발이나 깊은 QA를 반복하지 않는다.
 
 > 구현 완료 ≠ CI PASS ≠ 배포 완료 ≠ Production Browser QA PASS ≠ 실제 외부사용 ≠ 검색노출 ≠ 수익
 
@@ -30,7 +32,7 @@
 - 같은 revision에 대한 충분한 PASS 증거가 있으면 시간경과만으로 반복 검증하지 않음
 - 인간 미세 시각·원어민 자연스러움은 자동 QA가 임의 PASS하지 않음
 
-현재 운영관제의 최신 head/CI identity는 황제 Vault `직장/바이브코딩/운영본부_상태.json`과 실제 Actions를 우선한다. 이 문서에 오래된 SHA를 현재값처럼 고정하지 않는다.
+기술 head·CI·배포 identity는 이 repo의 최신 `main + Actions + PROJECT_STATUS.md`를 우선한다. 운영 우선순위·Gate·다음 행동은 Supabase `hwangje_ops`의 현재 projection을 우선하며, 이 문서에 오래된 실행 SHA나 옛 Vault 상태 JSON을 current 값처럼 고정하지 않는다.
 
 ## 시장 telemetry
 
@@ -46,7 +48,7 @@ Production D1: `random-ppobgi-analytics`.
 
 과거 Production Browser QA가 실제 행동계측에 섞이는 문제가 확인돼 제외처리를 배포했다. **2026-09-09 이후를 clean telemetry baseline**으로 사용한다. 변경 전 수치를 외부 사용자 수요로 역산하지 않는다.
 
-운영관제 snapshot은 황제 Vault `직장/바이브코딩/페이지형/random-ppobgi_analytics_latest.json`이 소유한다.
+raw telemetry는 실제 D1/집계 원천이 기술 원본이며, 제품 운영 판단에 필요한 현재 snapshot·stale 여부·다음 행동은 Supabase `hwangje_ops`에서 회수한다. 과거 Vault analytics JSON을 현재 live-state owner로 복원하지 않는다.
 
 ## 검색 유통
 
@@ -75,6 +77,8 @@ Production D1: `random-ppobgi-analytics`.
 승인 완료나 광고수익 발생으로 승격하지 않는다.
 
 ## 현재 다음 Gate
+
+구체 현재 Gate·우선순위는 Supabase live-state를 회수한다. 장기 판단기준은 다음과 같다.
 
 1. 2026-09-09 clean baseline 이후 실제 외부 행동신호 관찰
 2. 실제 검색 색인·노출·유입 변화 관찰
