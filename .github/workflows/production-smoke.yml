@@ -57,6 +57,7 @@ jobs:
         run: |
           node tools/production-smoke.mjs
           node tools/header-layout-smoke.mjs
+          node tools/device-experience-smoke.mjs
 
   cross-browser-production:
     name: Production QA · ${{ matrix.browser }}
