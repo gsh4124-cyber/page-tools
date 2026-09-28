@@ -95,6 +95,17 @@ def rebuild_js_from_canonical(lang: str, filename: str):
     target.write_text(text, encoding='utf-8')
 
 
+def inject_experience_script(path: Path):
+    text = path.read_text(encoding='utf-8')
+    if 'device-experience.js' in text:
+        return
+    marker = '</body>'
+    if marker not in text:
+        raise RuntimeError(f'{path}: missing </body> for device-experience injection')
+    text = text.replace(marker, '<script src="device-experience.js"></script></body>', 1)
+    path.write_text(text, encoding='utf-8')
+
+
 # Raw localization must never be allowed to alter DOM structure. Restore ids,
 # classes, names and data attributes from the canonical English markup while
 # preserving visible translated text.
@@ -122,13 +133,19 @@ for locale in BATCH2 + CN_RU:
 # The shared experience runtime is deliberately not machine-translated. It only
 # exposes its enhanced UI on the Korean canonical pages, while its host redirect
 # is safe for every locale. Copy the same verified runtime beside every localized
-# HTML file so relative script references remain valid on both Cloudflare and the
-# legacy GitHub Pages surface.
+# HTML file and inject the runtime reference into every generated page. The
+# generated site is the actual Cloudflare/GitHub Pages artifact, so source-only
+# script tags are not sufficient.
 experience = Path('device-experience.js')
 if not experience.exists():
     raise RuntimeError('device-experience.js missing from source')
-for folder in [ROOT, ROOT/'en', *[ROOT/locale for locale in LOCALES]]:
+folders = [ROOT, ROOT/'en', *[ROOT/locale for locale in LOCALES]]
+for folder in folders:
     folder.mkdir(parents=True, exist_ok=True)
     shutil.copy2(experience, folder/'device-experience.js')
+    for page in PAGES:
+        html = folder/page
+        if html.exists():
+            inject_experience_script(html)
 
-print('Restored canonical DOM structure, rebuilt localized JS safely, and shipped shared DEVICE CHECKUP experience runtime')
+print('Restored canonical DOM structure, rebuilt localized JS safely, and injected shared DEVICE CHECKUP experience runtime')
