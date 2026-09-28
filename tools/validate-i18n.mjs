@@ -60,7 +60,7 @@ if(!clipboard.includes('${localizedPageName()} · ${SITE_URL}')) throw new Error
 for(const lang of langs){if(!clipboard.includes(`${lang}:`)&&lang!=='ko')throw new Error(`clipboard localized page name missing for ${lang}`);}
 
 const multiselect=fs.readFileSync('verse-multiselect.js','utf8');
-for(const fragment of ["row.classList.toggle('multi-selected'","buildCopyTextForElements","toggleHighlightSelection","openSelectionNoteEditor","selectionNotes","data-tab = 'selections'","bible-reader-records-changed"]){
+for(const fragment of ["row.classList.toggle('multi-selected'","buildCopyTextForElements","toggleHighlightSelection","openSelectionNoteEditor","selectionNotes","tab.dataset.tab = 'selections'","bible-reader-records-changed"]){
   if(!multiselect.includes(fragment)) throw new Error(`multi-verse selection contract missing: ${fragment}`);
 }
 const multiselectCss=fs.readFileSync('verse-multiselect.css','utf8');
