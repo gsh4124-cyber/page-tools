@@ -82,12 +82,58 @@ async function assertTitleNavigator(page, label) {
   assert((await page.locator('#verseSelect').inputValue()) === '3', `${label}: selected verse did not apply`);
 }
 
+async function assertMultiVerseSelection(page, label) {
+  const first = page.locator('#verses .verse[data-verse="3"]');
+  const second = page.locator('#verses .verse[data-verse="4"]');
+  await first.click();
+  await second.click();
+  const bar = page.locator('.verse-multi-actionbar');
+  await bar.waitFor({ state:'visible', timeout:5000 });
+  assert(await first.evaluate(el=>el.classList.contains('multi-selected')), `${label}: first tapped verse was not selected`);
+  assert(await second.evaluate(el=>el.classList.contains('multi-selected')), `${label}: second tapped verse was not selected`);
+  assert((await page.locator('.verse-multi-count').innerText()).includes('2'), `${label}: selection count did not become 2`);
+
+  const formatted = await page.evaluate(() => window.BibleClipboard?.buildCopyTextForElements?.([...document.querySelectorAll('#verses .verse.multi-selected')]) || '');
+  assert(formatted.includes('3') && formatted.includes('4'), `${label}: multi-verse copy formatter omitted selected verses`);
+  await page.locator('.verse-multi-copy').click();
+
+  await page.locator('.verse-multi-note').click();
+  const editor = page.locator('.selection-note-editor');
+  await editor.waitFor({state:'visible',timeout:5000});
+  await editor.locator('textarea').fill('QA multi-verse note');
+  await editor.locator('.selection-note-save').click();
+  await editor.waitFor({state:'hidden',timeout:5000});
+  assert(await bar.isVisible(), `${label}: selection should remain after saving a note`);
+
+  await page.locator('.verse-multi-highlight').click();
+  assert(await first.evaluate(el=>el.classList.contains('user-highlight')), `${label}: multi-highlight did not apply to first verse`);
+  assert(await second.evaluate(el=>el.classList.contains('user-highlight')), `${label}: multi-highlight did not apply to second verse`);
+  assert(await bar.isVisible(), `${label}: selection should remain after highlight action`);
+
+  await page.locator('.notebook-button').click();
+  const panel = page.locator('.notebook-panel');
+  await panel.waitFor({state:'visible',timeout:5000});
+  const selectionTab = panel.locator('[data-tab="selections"]');
+  await selectionTab.waitFor({state:'visible',timeout:5000});
+  await selectionTab.click();
+  const item = panel.locator('.selection-note-item').first();
+  await item.waitFor({state:'visible',timeout:5000});
+  assert((await item.locator('.record-note-text').innerText()).includes('QA multi-verse note'), `${label}: saved selection note did not appear in records`);
+  await panel.locator('.notebook-close').click();
+
+  await page.locator('.verse-multi-done').click();
+  await bar.waitFor({state:'hidden',timeout:5000});
+  assert(!(await first.evaluate(el=>el.classList.contains('multi-selected'))), `${label}: Done did not clear first selection`);
+  assert(!(await second.evaluate(el=>el.classList.contains('multi-selected'))), `${label}: Done did not clear second selection`);
+}
+
 {
   const { page, pageErrors } = await open('/');
   const initialPlaceholder = await page.locator('#searchInput').getAttribute('placeholder');
   assert((await page.locator('html').getAttribute('lang')) === 'ko', 'root: html lang must remain ko');
   await assertCompactTopbar(page, 'root mobile');
   await assertTitleNavigator(page, 'root');
+  await assertMultiVerseSelection(page, 'root multi-select');
   await page.locator('#translationSelect').selectOption('kjv');
   await page.waitForTimeout(800);
   assert((await page.locator('#translationSelect').inputValue()) === 'kjv', 'root: KJV selection failed');
@@ -137,4 +183,4 @@ if (problems.length) {
   console.error(problems.join('\n'));
   process.exit(1);
 }
-console.log('Cloudflare production browser QA passed: compact topbar stayed one row, title navigation followed book -> chapter -> verse with working back navigation, and multilingual Scripture/UI separation remained intact.');
+console.log('Cloudflare production browser QA passed: compact topbar stayed one row, title navigation followed book -> chapter -> verse, multi-verse selection supported copy/note/highlight actions, and multilingual Scripture/UI separation remained intact.');
