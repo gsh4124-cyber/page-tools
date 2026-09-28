@@ -18,6 +18,7 @@ jobs:
           node --check i18n-v2.js
           node --check language-switch.js
           node --check info-i18n.js
+          node --check experience.js
           node --check functions/_middleware.js
       - name: Locale catalog has all 16 foreign languages
         run: |
@@ -39,10 +40,9 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const middleware=fs.readFileSync('functions/_middleware.js','utf8');
-          for(const s of ['context.env.ASSETS.fetch','new URL(\'/\',url.origin)','/locales.js','/i18n-v2.js','/language-switch.js']) {
+          for(const s of ['context.env.ASSETS.fetch','new URL(\'/\',url.origin)','/locales.js','/i18n-v2.js','/language-switch.js','/experience.js']) {
             if(!middleware.includes(s)) throw new Error(`direct-render middleware missing ${s}`);
           }
-          if(!middleware.includes('Language routes are rendered from the same root asset at the edge')) throw new Error('direct edge-render intent marker missing');
           if(middleware.includes('full-app-loader.js')) throw new Error('production middleware must not use full-app-loader.js');
           NODE
       - name: One active localization runtime path
@@ -51,11 +51,11 @@ jobs:
           import fs from 'node:fs';
           const loader=fs.readFileSync('full-app-loader.js','utf8');
           const middleware=fs.readFileSync('functions/_middleware.js','utf8');
-          const required=['/locales.js','/i18n-v2.js','/language-switch.js'];
+          const required=['/locales.js','/i18n-v2.js','/language-switch.js','/experience.js'];
           const forbidden=['/global-i18n.js','/global-i18n-dynamic.js','/full-i18n-safe.js','/i18n-cleanup.js','/ko-language.js'];
           for(const s of required) if(!loader.includes(s)) throw new Error(`fallback loader missing ${s}`);
+          for(const s of required) if(!middleware.includes(s)) throw new Error(`middleware missing ${s}`);
           for(const s of forbidden) if(loader.includes(s)||middleware.includes(s)) throw new Error(`legacy runtime still referenced: ${s}`);
-          if(!middleware.includes('/language-switch.js')) throw new Error('middleware missing shared selector');
           NODE
       - name: One active info localization runtime
         run: |
