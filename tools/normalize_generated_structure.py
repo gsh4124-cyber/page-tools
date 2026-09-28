@@ -1,6 +1,7 @@
 from pathlib import Path
 import ast
 import re
+import shutil
 
 ROOT = Path('dist')
 PAGES = ['index.html','checkup.html','mobile.html','keyboard.html','mouse.html','mic.html','webcam.html','speaker.html','display.html']
@@ -118,4 +119,16 @@ for locale in BATCH2 + CN_RU:
     for filename in ['app.js', 'mobile.js']:
         rebuild_js_from_canonical(locale, filename)
 
-print('Restored canonical DOM structure and rebuilt localized JS from canonical code with safe phrase-only replacements')
+# The shared experience runtime is deliberately not machine-translated. It only
+# exposes its enhanced UI on the Korean canonical pages, while its host redirect
+# is safe for every locale. Copy the same verified runtime beside every localized
+# HTML file so relative script references remain valid on both Cloudflare and the
+# legacy GitHub Pages surface.
+experience = Path('device-experience.js')
+if not experience.exists():
+    raise RuntimeError('device-experience.js missing from source')
+for folder in [ROOT, ROOT/'en', *[ROOT/locale for locale in LOCALES]]:
+    folder.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(experience, folder/'device-experience.js')
+
+print('Restored canonical DOM structure, rebuilt localized JS safely, and shipped shared DEVICE CHECKUP experience runtime')
