@@ -51,7 +51,7 @@
     for(const candidate of candidates){
       if(!candidate.token||!whole.startsWith(candidate.token))continue;
       let rest=whole.slice(candidate.token.length);
-      rest=rest.replace(/^[:;,]+/,'');
+      rest=rest.replace(/^[:;,]+/,'').replace(/:$/,'');
       const match=rest.match(/^(\d+)(?:(?::|,)(\d+)(?:-(\d+))?)?$/u);
       if(!match)continue;
       const chapter=Number(match[1]);
