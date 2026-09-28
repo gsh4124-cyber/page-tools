@@ -1,6 +1,6 @@
 # PROJECT STATUS — random-ppobgi
 
-- 마지막 기술상태 갱신: 2026-09-10
+- 마지막 기술상태 갱신: 2026-09-28
 - live-state owner 포인터 정합화: 2026-09-28
 - 저장소 역할: 랜덤뽑기 웹서비스의 실제 코드·배포·기술상태 원본
 - 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`
@@ -10,11 +10,35 @@
 
 ## 현재 단계
 
-**PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / PRODUCTION QA ACTIVE / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
+**PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / CURRENT-REVISION PRODUCTION QA PASS / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
 
 현재 Portfolio Mode와 다음 행동은 Supabase live-state에서 회수한다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발이나 깊은 QA를 반복하지 않는다.
 
 > 구현 완료 ≠ CI PASS ≠ 배포 완료 ≠ Production Browser QA PASS ≠ 실제 외부사용 ≠ 검색노출 ≠ 수익
+
+## 2026-09-28 반복사용·공유·녹화 UX 개선
+
+검증된 사용자 경험 revision은 `945659d0e6d688be9d3695bdc3ede892f0c3b25d`다.
+
+추가 기능:
+- 이름 참가자 목록을 최대 12개까지 브라우저 localStorage에 저장·불러오기·삭제
+- 결과를 즉시 복사하거나 Web Share API로 공유하고, 미지원 환경은 클립보드로 fallback
+- 최근 결과 최대 12개를 브라우저 localStorage에서 회수·삭제
+- 지원 브라우저에서 `녹화 시작` → 사용자가 현재 탭/창/화면 선택 → 실제 뽑기 애니메이션·결과를 MediaRecorder로 녹화 → `녹화 종료` 또는 공유 종료 시 WebM 파일 저장
+- 화면녹화 API 미지원 브라우저에서는 녹화 버튼을 비활성화하고 기능을 과장하지 않음
+- 과거 GitHub Pages `/random-ppobgi/...` 경로는 가능한 진입면에서 Cloudflare production으로 path/query/hash를 보존해 넘김
+
+녹화는 서버 스트리밍이 아니라 사용자의 브라우저가 사용자가 승인한 화면을 로컬에서 녹화하는 방식이다. 운영 사이트는 화면·당첨결과 영상을 서버에 업로드하거나 저장하지 않는다.
+
+자동 Production QA는 화면공유 시스템 선택창 자체를 대신 승인하지 않는다. 대신 실제 production에서 화면녹화 API 계약을 모의해 녹화 시작/종료 상태, 참가자 목록 저장·복원, 결과 복사·공유 버튼, 최근 결과 기록, 모바일 overflow를 검사했다.
+
+같은 revision 결과:
+- i18n-smoke #107: **SUCCESS** — Static Guardrails / Browser Behavior QA / Combined Quality Gate 모두 PASS
+- Production Browser Smoke #24: **SUCCESS**
+- Security Guardrails #40: **SUCCESS**
+- Cloudflare Pages exact commit deploy: **SUCCESS**
+
+실제 OS 화면공유 선택창·권한 승인과 물리 기기의 녹화 파일 재생 품질은 자동 QA가 PASS로 과장하지 않는다. 사용 브라우저가 `getDisplayMedia + MediaRecorder`를 제공해야 하며 모바일은 브라우저별 지원 차이가 있다.
 
 ## 제품 범위
 
@@ -84,6 +108,7 @@ raw telemetry는 실제 D1/집계 원천이 기술 원본이며, 제품 운영 �
 2. 실제 검색 색인·노출·유입 변화 관찰
 3. AdSense 심사와 `ads.txt` 재탐색 결과 관찰
 4. Production/CI에 실제 FAIL이 발생하면 원인분리 후 최소복구
-5. 원어민 자연스러움이나 인간 시각검증은 그것이 다음 판단을 실제로 바꿀 때만 연다
+5. 실제 브라우저 화면녹화 사용에서 권한·저장·재생 문제가 발견되면 해당 증거로 재개
+6. 원어민 자연스러움이나 인간 시각검증은 그것이 다음 판단을 실제로 바꿀 때만 연다
 
 > **현재 제품은 더 만드는 단계보다 외부 사용·검색·수익화 증거를 기다리는 단계다. 활동량을 만들기 위해 닫힌 기술 Gate를 반복해서 열지 않는다.**
