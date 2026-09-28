@@ -53,7 +53,7 @@ function localizedApp(response,lang){
   const canonical=hrefFor(lang);
   const locale=lang==='zh'?'zh_CN':lang==='pt'?'pt_BR':lang==='ar'?'ar_AR':lang;
   const init=`<script>window.__RANDOM_PICKER_LANG__=${JSON.stringify(lang)};<\/script><script src="/locales.js"><\/script>`;
-  const runtime='<script src="/i18n-v2.js"><\/script><script src="/language-switch.js"><\/script>';
+  const runtime='<script src="/i18n-v2.js"><\/script><script src="/language-switch.js"><\/script><script src="/experience.js"><\/script>';
   return new HTMLRewriter()
     .on('html',{element(el){el.setAttribute('lang',lang);if(lang==='ar')el.setAttribute('dir','rtl');else el.removeAttribute('dir');}})
     .on('title',{element(el){el.setInnerContent(title[lang]);}})
@@ -76,8 +76,6 @@ export async function onRequest(context) {
   const infoPage=/^\/(about|guide|privacy|terms|contact)\/$/.test(url.pathname);
   const languageMatch=url.pathname.match(new RegExp(`^/(${foreign.join('|')})/$`));
 
-  // Language routes are rendered from the same root asset at the edge.
-  // This removes the old client-side "Loading… -> fetch /index.html -> document.write" step.
   if(languageMatch && (context.request.method==='GET'||context.request.method==='HEAD')){
     const lang=languageMatch[1];
     const assetUrl=new URL('/',url.origin);
@@ -97,7 +95,7 @@ export async function onRequest(context) {
   if(rootPage){
     return new HTMLRewriter()
       .on('head',{element(el){el.append(alternates(),{html:true});}})
-      .on('body',{element(el){el.append('<script src="/language-switch.js"><\/script>',{html:true});}})
+      .on('body',{element(el){el.append('<script src="/language-switch.js"><\/script><script src="/experience.js"><\/script>',{html:true});}})
       .transform(response);
   }
 
