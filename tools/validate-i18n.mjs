@@ -45,7 +45,20 @@ if(!layout.includes('.location-controls .top-search{display:grid!important')) th
 if(!layout.includes('word-spacing:normal!important')) throw new Error('chapter heading must preserve visible spacing between book name and chapter');
 
 const navigator=fs.readFileSync('title-navigator.js','utf8');
-for(const fragment of ['title-navigator-testament-switch','data-switch="old"','data-switch="new"','activeTestament','renderBooks()','renderNumberGrid(chapterSelect,chapters)','renderNumberGrid(verseSelect,verses)']){
+for(const fragment of [
+  'title-navigator-testament-switch',
+  'data-switch="old"',
+  'data-switch="new"',
+  'activeTestament',
+  'data-step="book"',
+  'data-step="chapter"',
+  'data-step="verse"',
+  "currentStep = 'book'",
+  'renderBooks()',
+  "renderNumberGrid(chapterSelect,chapters,'chapter')",
+  "renderNumberGrid(verseSelect,verses,'verse')",
+  "backButton.addEventListener('click',goBack)",
+]){
   if(!navigator.includes(fragment)) throw new Error(`title navigator contract missing: ${fragment}`);
 }
 const navCss=fs.readFileSync('title-navigator.css','utf8');
@@ -60,4 +73,4 @@ const exactSearch=fs.readFileSync('exact-search.js','utf8');
 if(!exactSearch.includes('BibleI18n?.bookName')) throw new Error('search result references must follow translation language');
 for(const lang of langs){if(!exactSearch.includes(`${lang}:{prepare:`))throw new Error(`search runtime messages missing for ${lang}`);}
 
-console.log('i18n validation passed for the current shared reader and loader-based localized entries');
+console.log('i18n validation passed for the current shared reader, sequential title navigator, and loader-based localized entries');
