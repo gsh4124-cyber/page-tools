@@ -17,7 +17,13 @@ if(redirectLegacy()) return;
 
 const basename=()=>location.pathname.split('/').filter(Boolean).pop()||'index.html';
 const isProd=()=>location.hostname==='pc-checkup.pages.dev';
-const isKo=()=>String(document.documentElement.lang||'ko').toLowerCase().startsWith('ko');
+const isKo=()=>{
+  const parts=location.pathname.split('/').filter(Boolean);
+  if(location.hostname===LEGACY_HOST&&parts[0]==='pc-checkup')parts.shift();
+  const first=parts[0]||'';
+  const localePrefixes=new Set(['en','ja','es','de','fr','pt','it','nl','id','vi','zh-CN','ru']);
+  return !localePrefixes.has(first);
+};
 const parse=(key)=>{try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch{return {};}};
 const count=(state,tests)=>{
   let ok=0,bad=0;
