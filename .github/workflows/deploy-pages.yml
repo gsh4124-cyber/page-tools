@@ -37,7 +37,7 @@ jobs:
       - name: Check required runtime files
         run: |
           set -e
-          for file in index.html styles.css features.css ui-fix.css i18n-layout.css records-enhancements.css title-navigator.css app.js extra-translations.js local-file-language.js i18n.js runtime-ui-i18n.js ui-language-sync.js full-reader-loader.js reference.js book-finder.js compare.js verse-picker.js title-navigator.js clipboard.js title-nav.js exact-search.js verse-tools.js records-enhancements.js analytics.js robots.txt sitemap.xml 193977ee04feba4a99f471a555a2aa54.txt; do
+          for file in index.html styles.css features.css ui-fix.css i18n-layout.css records-enhancements.css verse-multiselect.css title-navigator.css app.js extra-translations.js local-file-language.js i18n.js runtime-ui-i18n.js ui-language-sync.js full-reader-loader.js reference.js book-finder.js compare.js verse-picker.js title-navigator.js clipboard.js title-nav.js exact-search.js verse-tools.js records-enhancements.js verse-multiselect.js analytics.js robots.txt sitemap.xml 193977ee04feba4a99f471a555a2aa54.txt; do
             test -s "$file"
           done
           for lang in en fr de zh ru la pt ar; do
@@ -67,6 +67,8 @@ jobs:
           grep -q 'src="ui-language-sync.js"' index.html
           grep -q 'src="title-navigator.js"' index.html
           grep -q 'href="title-navigator.css"' index.html
+          grep -q 'src="verse-multiselect.js"' index.html
+          grep -q 'href="verse-multiselect.css"' index.html
           test "$(tr -d '\r\n' < 193977ee04feba4a99f471a555a2aa54.txt)" = "193977ee04feba4a99f471a555a2aa54"
 
       - name: Check retired runtime is excluded
@@ -127,15 +129,17 @@ jobs:
           for i in {1..30}; do
             sitemap=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/sitemap.xml || true)
             robots=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/robots.txt || true)
+            multiselect=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/verse-multiselect.js || true)
             if printf '%s' "$sitemap" | grep -q 'https://bible-reader-1iz.pages.dev/en/' \
               && ! printf '%s' "$sitemap" | grep -q 'gsh4124-cyber.github.io/bible-reader' \
-              && printf '%s' "$robots" | grep -q 'https://bible-reader-1iz.pages.dev/sitemap.xml'; then
-              echo "Cloudflare production SEO surface updated"
+              && printf '%s' "$robots" | grep -q 'https://bible-reader-1iz.pages.dev/sitemap.xml' \
+              && printf '%s' "$multiselect" | grep -q 'verse-multi-actionbar'; then
+              echo "Cloudflare production SEO and multi-select surface updated"
               exit 0
             fi
             sleep 10
           done
-          echo "Cloudflare production did not expose the updated sitemap/robots in time"
+          echo "Cloudflare production did not expose the updated runtime in time"
           exit 1
       - name: Run production behavior QA
         run: node tools/production-smoke.mjs
