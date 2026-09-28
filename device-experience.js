@@ -99,9 +99,9 @@ function enhancePc(){
   track('pc_start');
 }
 function init(){
-  const page=basename();
-  if(page==='checkup.html')enhancePc();
-  if(page==='mobile.html')enhanceMobile();
+  const page=basename().replace(/\.html$/,'');
+  if(page==='checkup')enhancePc();
+  if(page==='mobile')enhanceMobile();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
