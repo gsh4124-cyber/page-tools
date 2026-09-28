@@ -8,82 +8,110 @@
     히:'히브리서',약:'야고보서',벧전:'베드로전서',벧후:'베드로후서',요일:'요한일서',요이:'요한이서',요삼:'요한삼서',유:'유다서',계:'요한계시록'
   };
 
-  const normalize = value => String(value || '').trim().replace(/\s+/g,' ').toLocaleLowerCase();
+  const compact = value => String(value || '').toLocaleLowerCase().replace(/[\s._·'’]/g,'');
+  const normalizeDash = value => String(value || '').replace(/[–—~〜]/g,'-');
 
   function namesForIndex(index){
     const values=new Set([BOOKS[index]?.ko,BOOKS[index]?.file,BOOKS[index]?.osis]);
     const groups=window.BibleI18n?.bookNames;
     if(groups) Object.values(groups).forEach(names=>values.add(names?.[index]));
+    Object.entries(KO_ALIASES).forEach(([alias,name])=>{if(name===BOOKS[index]?.ko)values.add(alias)});
     return [...values].filter(Boolean);
   }
 
   function resolveBook(raw){
-    const requested=KO_ALIASES[raw] || raw;
-    const q=normalize(requested);
-    for(let i=0;i<BOOKS.length;i+=1){if(namesForIndex(i).some(name=>normalize(name)===q))return BOOKS[i];}
+    const q=compact(KO_ALIASES[raw] || raw);
+    if(!q)return null;
+    for(let i=0;i<BOOKS.length;i+=1){if(namesForIndex(i).some(name=>compact(name)===q))return BOOKS[i];}
     return null;
   }
 
-  function parseReference(raw){
-    let value=String(raw||'').trim().replace(/\s+/g,' ');
-    if(!value)return null;
-    value=value
-      .replace(/\b(?:chapter|chapitre|kapitel|глава|caput|capítulo)\b/gi,' ')
-      .replace(/\b(?:verse|verset|vers|стих|versus|versículo)\b/gi,' ')
-      .replace(/第\s*(\d+)\s*章/gu,' $1 ')
-      .replace(/第\s*(\d+)\s*节/gu,':$1')
-      .replace(/الأصحاح\s*(\d+)/gu,' $1 ')
-      .replace(/الآية\s*(\d+)/gu,':$1')
-      .replace(/(\d+)\s*장/gu,' $1 ')
-      .replace(/(\d+)\s*절/gu,':$1')
+  function normalizedReferenceInput(raw){
+    return normalizeDash(String(raw||'').trim())
+      .replace(/第\s*(\d+)\s*章/gu,'$1:')
+      .replace(/第\s*(\d+)\s*节/gu,'$1')
+      .replace(/الأصحاح\s*(\d+)/gu,'$1:')
+      .replace(/الآية\s*(\d+)/gu,'$1')
+      .replace(/(\d+)\s*장/gu,'$1:')
+      .replace(/(\d+)\s*절/gu,'$1')
+      .replace(/\b(?:chapter|chapitre|kapitel|глава|caput|capítulo)\s*(\d+)/gi,'$1:')
+      .replace(/\b(?:verse|verset|vers|стих|versus|versículo)\s*(\d+)/gi,'$1')
+      .replace(/：/g,':')
       .replace(/\s+/g,' ')
       .trim();
+  }
 
-    const match=value.match(/^(.+?)\s+(\d+)\s*(?:(?::|：|,)\s*(\d+))?$/u);
-    if(!match)return null;
-    const book=resolveBook(match[1].trim());
-    if(!book)return null;
-    return {book,chapter:Number(match[2]),verse:match[3]?Number(match[3]):null};
+  function parseReference(raw){
+    const prepared=normalizedReferenceInput(raw);
+    if(!prepared)return null;
+    const whole=compact(prepared);
+    const candidates=[];
+    BOOKS.forEach(book=>namesForIndex(book.index).forEach(name=>candidates.push({book,name,token:compact(name)})));
+    candidates.sort((a,b)=>b.token.length-a.token.length);
+    for(const candidate of candidates){
+      if(!candidate.token||!whole.startsWith(candidate.token))continue;
+      let rest=whole.slice(candidate.token.length);
+      rest=rest.replace(/^[:;,]+/,'');
+      const match=rest.match(/^(\d+)(?:(?::|,)(\d+)(?:-(\d+))?)?$/u);
+      if(!match)continue;
+      const chapter=Number(match[1]);
+      const verseStart=match[2]?Number(match[2]):null;
+      const verseEnd=match[3]?Number(match[3]):verseStart;
+      if(!chapter||chapter<1)return null;
+      if(verseStart&&(!verseEnd||verseStart<1||verseEnd<verseStart))return null;
+      return {book:candidate.book,chapter,verse:verseStart,verseStart,verseEnd};
+    }
+    return null;
   }
 
   function uiText(key,fallback){return window.BibleI18n?.ui?.(key) || fallback;}
   function bookLabel(book){return window.BibleI18n?.bookName?.(book.index) || book.ko;}
 
   function showReferenceError(message){
+    if(typeof searchPanel==='undefined'||!searchPanel)return;
     searchPanel.hidden=false;
     searchResults.innerHTML='';
     searchSummary.textContent=message;
   }
 
-  async function goToReference(reference){
+  async function goToReference(reference,{scroll=true}={}){
     let data;
-    try{data=await fetchBook(reference.book);}
-    catch(error){console.error(error);showReferenceError(uiText('loadError','본문을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'));return;}
+    try{data=await fetchBook(reference.book,typeof activeTranslationId!=='undefined'?activeTranslationId:undefined);}
+    catch(error){console.error(error);showReferenceError(uiText('loadError','본문을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'));return false;}
 
     const chapter=data.chapters.find(item=>Number(item.chapter)===reference.chapter);
-    if(!chapter){showReferenceError(`${bookLabel(reference.book)} ${reference.chapter}`);return;}
-    if(reference.verse&&!chapter.verses.some(item=>Number(item.verse)===reference.verse)){showReferenceError(`${bookLabel(reference.book)} ${reference.chapter}:${reference.verse}`);return;}
+    if(!chapter){showReferenceError(`${bookLabel(reference.book)} ${reference.chapter}`);return false;}
+    const start=reference.verseStart ?? reference.verse ?? null;
+    const end=reference.verseEnd ?? start;
+    if(start){
+      const numbers=new Set(chapter.verses.map(item=>Number(item.verse)));
+      if(!numbers.has(start)||!numbers.has(end)){showReferenceError(`${bookLabel(reference.book)} ${reference.chapter}:${start}${end!==start?`-${end}`:''}`);return false;}
+    }
 
     state.bookIndex=reference.book.index;
     state.chapter=reference.chapter;
-    await loadCurrent();
-    searchPanel.hidden=true;
-    if(!reference.verse)return;
-    requestAnimationFrame(()=>{
-      const target=versesEl.querySelector(`[data-verse="${reference.verse}"]`);
-      if(!target)return;
-      target.classList.add('searched');
-      target.scrollIntoView({behavior:'smooth',block:'center'});
-      setTimeout(()=>target.classList.remove('searched'),1800);
-    });
+    await loadCurrent({scrollTop:!start});
+    if(typeof searchPanel!=='undefined'&&searchPanel)searchPanel.hidden=true;
+    if(!start){window.ReaderExperience?.recordLocation?.(1);return true;}
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const rows=[];
+      for(let verse=start;verse<=end;verse+=1){const row=versesEl.querySelector(`[data-verse="${CSS.escape(String(verse))}"]`);if(row){row.classList.add('searched');rows.push(row)}}
+      if(scroll)rows[0]?.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>rows.forEach(row=>row.classList.remove('searched')),2400);
+      window.ReaderExperience?.recordLocation?.(start);
+    }));
+    return true;
   }
 
   document.addEventListener('submit',event=>{
     if(event.target?.id!=='searchForm')return;
-    const reference=parseReference(searchInput.value);
+    const input=document.querySelector('#searchInput');
+    const reference=parseReference(input?.value);
     if(!reference)return;
     event.preventDefault();
     event.stopImmediatePropagation();
     goToReference(reference);
   },true);
+
+  window.BibleReference={parseReference,resolveBook,goToReference};
 })();
