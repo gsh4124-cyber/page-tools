@@ -37,7 +37,7 @@ jobs:
       - name: Check required runtime files
         run: |
           set -e
-          for file in index.html styles.css features.css ui-fix.css i18n-layout.css records-enhancements.css verse-multiselect.css title-navigator.css app.js extra-translations.js local-file-language.js i18n.js runtime-ui-i18n.js ui-language-sync.js full-reader-loader.js reference.js book-finder.js compare.js verse-picker.js title-navigator.js clipboard.js title-nav.js exact-search.js verse-tools.js records-enhancements.js verse-multiselect.js analytics.js robots.txt sitemap.xml 193977ee04feba4a99f471a555a2aa54.txt; do
+          for file in index.html styles.css features.css ui-fix.css i18n-layout.css records-enhancements.css verse-multiselect.css reader-experience.css title-navigator.css app.js extra-translations.js local-file-language.js i18n.js runtime-ui-i18n.js ui-language-sync.js full-reader-loader.js reference.js book-finder.js compare.js verse-picker.js title-navigator.js clipboard.js title-nav.js exact-search.js verse-tools.js records-enhancements.js verse-multiselect.js reader-experience.js analytics.js robots.txt sitemap.xml 193977ee04feba4a99f471a555a2aa54.txt; do
             test -s "$file"
           done
           for lang in en fr de zh ru la pt ar; do
@@ -69,6 +69,8 @@ jobs:
           grep -q 'href="title-navigator.css"' index.html
           grep -q 'src="verse-multiselect.js"' index.html
           grep -q 'href="verse-multiselect.css"' index.html
+          grep -q 'src="reader-experience.js"' index.html
+          grep -q 'href="reader-experience.css"' index.html
           test "$(tr -d '\r\n' < 193977ee04feba4a99f471a555a2aa54.txt)" = "193977ee04feba4a99f471a555a2aa54"
 
       - name: Check retired runtime is excluded
@@ -130,11 +132,13 @@ jobs:
             sitemap=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/sitemap.xml || true)
             robots=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/robots.txt || true)
             multiselect=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/verse-multiselect.js || true)
+            experience=$(curl -fsS --max-time 20 https://bible-reader-1iz.pages.dev/reader-experience.js || true)
             if printf '%s' "$sitemap" | grep -q 'https://bible-reader-1iz.pages.dev/en/' \
               && ! printf '%s' "$sitemap" | grep -q 'gsh4124-cyber.github.io/bible-reader' \
               && printf '%s' "$robots" | grep -q 'https://bible-reader-1iz.pages.dev/sitemap.xml' \
-              && printf '%s' "$multiselect" | grep -q 'verse-multi-actionbar'; then
-              echo "Cloudflare production SEO and multi-select surface updated"
+              && printf '%s' "$multiselect" | grep -q 'verse-multi-actionbar' \
+              && printf '%s' "$experience" | grep -q 'reader-history-back'; then
+              echo "Cloudflare production SEO and reader experience surface updated"
               exit 0
             fi
             sleep 10
