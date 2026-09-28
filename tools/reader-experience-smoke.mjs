@@ -29,6 +29,7 @@ async function freshPage(path='/'){
   await page.locator('#searchInput').fill('요14:10-12');
   await page.locator('#searchForm').evaluate(form=>form.requestSubmit());
   await page.waitForFunction(()=>document.querySelector('#bookSelect')?.value==='42'&&document.querySelector('#chapterSelect')?.value==='14',{timeout:15000});
+  await page.locator('#verses .verse[data-verse="10"].searched').waitFor({state:'visible',timeout:5000});
   assert((await page.locator('#verses .verse.searched').count())>=3,'reference search: 요14:10-12 did not mark the verse range');
 
   const back=page.locator('.reader-history-back');
@@ -45,6 +46,7 @@ async function freshPage(path='/'){
   await page.locator('.reader-focus-toggle').click();
   assert(await page.locator('body').evaluate(el=>el.classList.contains('reader-focus')),'focus: focus mode did not activate');
   assert(await page.locator('.reader-focus-exit').isVisible(),'focus: mobile/visible exit control missing');
+  assert(await page.locator('#verses .verse-number').first().isHidden(),'focus: verse numbers should be hidden');
   await page.locator('.reader-focus-exit').click();
   assert(!(await page.locator('body').evaluate(el=>el.classList.contains('reader-focus'))),'focus: focus mode did not exit');
 
