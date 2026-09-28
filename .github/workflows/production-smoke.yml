@@ -87,4 +87,7 @@ jobs:
       - name: Run multilingual behavior QA against production
         env:
           I18N_TEST_BASE: https://random-ppobgi.pages.dev
-        run: node tests/i18n-browser-smoke.mjs
+          EXPERIENCE_TEST_BASE: https://random-ppobgi.pages.dev
+        run: |
+          node tests/i18n-browser-smoke.mjs
+          node tests/experience-browser-smoke.mjs
