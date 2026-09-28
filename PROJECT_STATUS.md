@@ -1,6 +1,6 @@
 # PROJECT STATUS — DEVICE CHECKUP
 
-- 마지막 갱신: 2026-09-15
+- 마지막 갱신: 2026-09-29
 - 저장소 역할: DEVICE CHECKUP 실제 코드·배포·기술상태 원본
 - 저장소: `gsh4124-cyber/pc-checkup` (public)
 - 현재 운영 주소: `https://pc-checkup.pages.dev/`
@@ -8,7 +8,7 @@
 
 ## 현재 단계
 
-**PUBLIC PRODUCTION / GLOBAL 13-LANGUAGE DEPLOYED / ADSENSE_REVIEW_SUBMITTED / HUMAN LAPTOP QA APPROVED / CURRENT-REVISION PRODUCTION BROWSER QA PASS / SEARCH ACCOUNT STATE PARTIAL-UNVERIFIED**
+**PUBLIC PRODUCTION / GLOBAL 13-LANGUAGE DEPLOYED / ADSENSE_REVIEW_SUBMITTED / HUMAN LAPTOP QA APPROVED / CURRENT-REVISION PRODUCTION BROWSER QA PASS / AGGREGATE PRODUCT TELEMETRY ACTIVE / SEARCH ACCOUNT STATE PARTIAL-UNVERIFIED**
 
 > 구현 완료 ≠ 정적 QA PASS ≠ 공개 배포 ≠ Production Browser QA PASS ≠ 실제 색인·유입 ≠ 시장 성공
 
@@ -22,6 +22,8 @@ PC:
 - 마이크
 - 웹캠
 - 5분 전체점검
+- 점검 결과 요약·복사·공유
+- 브라우저 밖 수동 점검 체크리스트
 
 휴대폰:
 - 터치·멀티터치
@@ -31,6 +33,14 @@ PC:
 - 스피커
 - 진동·화면회전
 - 결과/진행률 저장
+- 다음 미확인 검사 이동
+- 점검 결과 요약·복사·공유
+- 브라우저 밖 수동 점검 체크리스트
+
+공통 운영:
+- legacy `gsh4124-cyber.github.io/pc-checkup/...` DEVICE CHECKUP 경로는 현재 Cloudflare Production으로 연결한다.
+- `pc_start / mobile_start / pc_complete / mobile_complete` aggregate 제품 이벤트를 수집한다.
+- 이벤트는 제품 사용 흐름 판단용 집계이며 사용자 이름·입력내용·사용자 ID를 수집하지 않고 webdriver 자동 QA는 제외한다.
 
 핵심 판정 원칙:
 - 브라우저가 신뢰성 있게 관찰할 수 있는 신호만 자동 판정한다.
@@ -72,8 +82,41 @@ PC:
 - 대표 locale 모바일 레이아웃 / horizontal overflow
 - 언어 선택기 중복·회귀
 - 현재 공개 revision과 검사 revision 일치
+- PC/휴대폰 결과 요약 UI, 모바일 다음 미확인 검사, legacy redirect
 
 Production Browser Smoke는 공개 revision을 확인한 뒤 Chromium / Firefox / WebKit으로 실제 production을 검사한다.
+
+### 2026-09-29 DEVICE CHECKUP 경험 개선 및 pretty URL 복구
+
+추가한 경험 개선:
+- PC·휴대폰 점검 결과 요약
+- 결과 복사·공유
+- 휴대폰 `다음 미확인 검사로 이동`
+- 브라우저 밖 수동 점검 체크리스트
+- legacy GitHub Pages DEVICE CHECKUP 경로 → Cloudflare Production 연결
+- 개인정보 없는 aggregate 제품 telemetry
+
+중간 Production QA에서 Chromium이 `PC result summary missing`으로 실패했다. 기존 117 URL·레이아웃·헤더 검사는 PASS했고, 새 경험 카드 검사에서만 실패했다.
+
+ROOT_CAUSE_FIRST 결과:
+- `FAIL_EVIDENCE`: exact-revision Production Browser Smoke에서 기존 사이트 검사는 PASS했지만 새 PC 결과 요약 카드가 탐지되지 않음.
+- `ROOT_CAUSE`: Cloudflare가 `.html` 경로를 pretty URL 형태(`/checkup`, `/mobile`)로 정규화할 수 있는데, 새 shared runtime의 초기화 라우팅이 `checkup.html / mobile.html`만 정확히 비교해 초기화를 건너뜀.
+- `PRESERVE`: 기존 하드웨어 검사·13개 언어·117 URL·검색/AdSense 구조·자동판정 원칙.
+- `CHANGE_SCOPE`: `device-experience.js`의 페이지 라우팅 판별을 `.html` 유무 양쪽을 허용하도록 최소 수정. 배포 artifact의 shared runtime에는 revision query를 붙여 stale asset 재사용도 방지.
+- `PASS_CRITERIA`: 동일 experience revision에서 Deploy/Guardrails 및 Chromium·Firefox·WebKit Production Browser QA가 모두 PASS하고 새 experience smoke까지 통과.
+
+verified experience revision:
+`94cd479128016bc475e30883d6eb69a7230b6631`
+
+같은 revision 결과:
+- Deploy DEVICE CHECKUP #253: **SUCCESS**
+- Security Guardrails #94: **SUCCESS**
+- Production Browser Smoke #246: **SUCCESS**
+  - Chromium: **SUCCESS**
+  - Firefox: **SUCCESS**
+  - WebKit: **SUCCESS**
+
+따라서 이번 경험 개선과 `PC result summary missing` 회귀는 **RECOVERED / CURRENT-REVISION PRODUCTION BROWSER QA PASS**로 닫는다.
 
 ### 2026-09-13 AdSense RUM pageerror 오탐 복구
 
@@ -120,7 +163,7 @@ repair commit `991fe19cb604b44cf1004a38615de6cc48f38296`에서 정확히 해당 
   - Firefox: **SUCCESS**
   - WebKit: **SUCCESS**
 
-따라서 이 회귀는 **RECOVERED / CURRENT-REVISION PRODUCTION BROWSER QA PASS**로 닫는다.
+따라서 이 회귀는 **RECOVERED**로 닫는다.
 
 ## 키보드 / Fn 재발방지 핵심
 
@@ -135,11 +178,9 @@ repair commit `991fe19cb604b44cf1004a38615de6cc48f38296`에서 정확히 해당 
 
 ## 인간 체감 QA — 완료 상태
 
-황제가 **실제 노트북에서 DEVICE CHECKUP을 직접 점검하고 승인한 뒤 공개**했다. 이 검수로 현재 제품의 인간 체감 QA는 완료된 것으로 고정한다.
+황제가 **실제 노트북에서 DEVICE CHECKUP을 직접 점검하고 승인한 뒤 공개**했다. 이 검수로 기존 제품의 인간 체감 QA는 완료된 것으로 고정한다.
 
-- PC·Android·iPhone을 별도 반복 인간 QA Gate로 다시 요구하지 않는다.
-- 이후 제품 경험을 실질적으로 바꾸는 큰 UI·기능 변경이 생겨 새 인간 판단이 필요한 경우에만 새로운 황제 QA Gate를 연다.
-- 자동 Production QA·CI 실패는 인간 QA와 분리된 기술운영 문제로 자동복구가 먼저 처리한다.
+2026-09-29 추가한 결과 요약·공유·모바일 다음 검사·수동 체크리스트는 실제 Cloudflare Production Browser QA로 검증했다. 실제 Android/iPhone 물리기기의 터치감·native share 동작을 새로 검증했다고 주장하지 않는다. 사용자에게 반복 기기 Gate를 요구하지 않으며, 실제 사용 중 구체적 문제가 보고될 때만 해당 증거를 기준으로 다시 연다.
 
 ## AdSense 실행 상태
 
@@ -174,21 +215,24 @@ repair commit `991fe19cb604b44cf1004a38615de6cc48f38296`에서 정확히 해당 
 - 구현: PASS
 - 글로벌 빌드: PASS
 - Cloudflare production 배포: PASS
-- 정적/Artifact QA: **PASS WITH FIXES**
+- 정적/Artifact QA: **PASS**
 - Red Team: **PASS WITH FIXES**
-- current-revision Production Browser QA: **PASS** (`991fe19c...`, run #113)
-- Security Guardrails: **PASS** (`991fe19c...`, run #12)
-- 인간 체감 QA: **APPROVED — 황제 노트북 검수 완료 / 반복 기기 Gate 없음**
+- current-revision Production Browser QA: **PASS** (`94cd4791...`, run #246)
+- Security Guardrails: **PASS** (`94cd4791...`, run #94)
+- Deploy workflow: **PASS** (`94cd4791...`, run #253)
+- 경험 개선: **PASS — 결과 요약·복사·공유 / 모바일 다음 검사 / 수동 체크리스트 / legacy 연결**
+- aggregate telemetry: **CONFIGURED — pc/mobile start/complete, webdriver excluded**
+- 인간 체감 QA: **기존 노트북 QA APPROVED / 새 물리기기 체감은 별도 주장 안 함**
 - AdSense: **REVIEW SUBMITTED / 외부 결과 대기**
 - 검색엔진 최종 계정 등록상태: UNVERIFIED
 - 실제 색인·유입·시장성: UNVERIFIED
 
 ## 다음 Gate
 
-1. AdSense 심사 결과와 `ads.txt` 상태 관찰
-2. 검색 색인·노출·실제 유입 관찰
-3. Production/CI 자동관제 지속
-4. 새 기술 FAIL이 있을 때만 ROOT_CAUSE_FIRST로 복구
-5. 큰 UI·기능 변경으로 새 인간 판단이 실제 필요할 때만 황제 QA Gate 재개방
+1. 실제 aggregate 사용신호 변화 관찰
+2. AdSense 심사 결과와 `ads.txt` 상태 관찰
+3. 검색 색인·노출·실제 유입 관찰
+4. Production/CI 자동관제 지속
+5. 새 기술 FAIL이나 실제 기기 문제 보고가 있을 때만 ROOT_CAUSE_FIRST로 재개
 
-> **현재 제품은 다시 검수하라고 황제에게 되돌리는 단계가 아니라, 공개 제품의 자동운영·검색 유통·수익화 결과를 관찰하는 단계다.**
+> **현재 제품은 추가 기능을 만들기 위해 계속 열어두는 단계가 아니라, 개선된 공개 제품의 실제 사용·검색·수익화 증거를 기다리는 단계다.**
