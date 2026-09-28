@@ -6,6 +6,7 @@ body.reader-focus .topbar,body.reader-focus .ad-slot,body.reader-focus footer,bo
 body.reader-focus main{padding-top:10px}
 body.reader-focus .reader-shell{width:min(980px,calc(100vw - 28px));max-width:980px}
 body.reader-focus .verse-actions-trigger,body.reader-focus .chapter-bookmark-button{opacity:0!important;pointer-events:none!important}
+body.reader-focus .verse-number{display:none!important}
 body.reader-focus .chapter-heading{padding-top:8px}
 
 .verse.user-highlight[data-highlight-color="yellow"]{background:color-mix(in srgb,#f6d95c 34%,transparent)!important}
