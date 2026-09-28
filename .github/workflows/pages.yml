@@ -64,6 +64,15 @@ jobs:
           python tools/localize_korean_ui.py
           python tools/finalize_keyboard_help.py
           python tools/normalize_navigation_order.py
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          revision=os.environ['GITHUB_SHA']
+          for p in Path('dist').rglob('*.html'):
+              text=p.read_text(encoding='utf-8')
+              text=text.replace('device-experience.js"',f'device-experience.js?v={revision}"')
+              p.write_text(text,encoding='utf-8')
+          PY
           printf '%s\n' "$GITHUB_SHA" > dist/build-revision.txt
       - name: Validate localized artifact
         run: python tools/validate_dist.py
@@ -71,10 +80,11 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
+          import os,re
           pages=list(Path('dist').rglob('*.html'))
           assert len(pages)==117, len(pages)
           nav_order=['checkup.html','keyboard.html','mouse.html','display.html','speaker.html','mic.html','webcam.html']
+          revision=os.environ['GITHUB_SHA']
           for p in pages:
               t=p.read_text(encoding='utf-8')
               assert 'id="languagePicker"' in t, p
@@ -82,6 +92,8 @@ jobs:
               assert 'ui-polish-v5' in t, p
               assert 'data-locale=' in t, p
               assert '<details class="notice side-help">' not in t, p
+              if 'device-experience.js' in t:
+                  assert f'device-experience.js?v={revision}' in t,p
               m=re.search(r'<nav class="navlinks">([\s\S]*?)</nav>',t)
               if m:
                   hrefs=re.findall(r'href="([^"]+)"',m.group(1))
@@ -107,8 +119,8 @@ jobs:
           assert len(shared)==13, len(shared)
           for p in shared:
               assert p.stat().st_size>0,p
-          revision=Path('dist/build-revision.txt').read_text(encoding='utf-8').strip()
-          assert revision
+          revision_file=Path('dist/build-revision.txt').read_text(encoding='utf-8').strip()
+          assert revision_file
           PY
       - name: Add standalone demos after DEVICE CHECKUP QA
         run: |
