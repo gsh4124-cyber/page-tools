@@ -52,7 +52,7 @@ function summaryText(kind,stats,manual){
   return `${title}\n정상 ${stats.ok} · 문제 ${stats.bad} · 미확인 ${stats.unknown}\n브라우저 밖 수동 점검 ${checked}/${MANUAL[kind].length}\n${new Date().toLocaleString('ko-KR')}`;
 }
 function buildCard(kind,getState,tests,anchor){
-  if(!isKo()||document.querySelector(`[data-device-experience="${kind}"]`))return;
+  if(!isKo()||document.querySelector(`[data-device-experience="${kind}"]`))return ()=>{};
   style();
   const card=document.createElement('section');card.className='device-experience-card';card.dataset.deviceExperience=kind;
   card.innerHTML=`<h3>점검 결과 요약</h3><p>브라우저 검사 결과를 한 번에 복사하거나 공유하고, 웹에서 판정할 수 없는 항목은 아래에서 직접 체크하세요.</p><div class="device-experience-counts"><div class="device-experience-count"><b data-x="ok">0</b><span>정상</span></div><div class="device-experience-count"><b data-x="bad">0</b><span>문제</span></div><div class="device-experience-count"><b data-x="unknown">0</b><span>미확인</span></div></div><div class="device-experience-actions"><button class="btn" type="button" data-copy>결과 복사</button><button class="btn primary" type="button" data-share>결과 공유</button></div><details class="device-manual"><summary>브라우저 밖 수동 점검</summary><div class="device-manual-list"></div></details>`;
@@ -64,24 +64,32 @@ function buildCard(kind,getState,tests,anchor){
   anchor.parentNode.insertBefore(card,anchor);
   document.addEventListener('click',e=>{if(e.target.closest('.pill,[data-result]'))setTimeout(render,0);});
   render();
+  return render;
+}
+function watchText(target,callback){
+  if(!target||typeof MutationObserver==='undefined')return;
+  const observer=new MutationObserver(()=>callback());observer.observe(target,{childList:true,characterData:true,subtree:true});
 }
 function enhanceMobile(){
   const reset=document.getElementById('resetMobileResults');if(!reset)return;
   const getState=()=>parse('device-checkup-mobile-results-v1');
   const controls=reset.closest('.mobile-finish-controls')||reset.parentElement;
+  let renderNext=()=>{};
   if(isKo()&&!document.getElementById('nextMobileCheck')){
     const next=document.createElement('button');next.id='nextMobileCheck';next.type='button';next.className='btn primary device-next-mobile';controls.insertBefore(next,reset);
-    const renderNext=()=>{const state=getState();const id=MOBILE_TESTS.find(x=>state[x]!=='ok'&&state[x]!=='bad');next.disabled=!id;next.textContent=id?'다음 미확인 검사로 이동':'전체 점검 완료';next.dataset.target=id||'';};
+    renderNext=()=>{const state=getState();const id=MOBILE_TESTS.find(x=>state[x]!=='ok'&&state[x]!=='bad');next.disabled=!id;next.textContent=id?'다음 미확인 검사로 이동':'전체 점검 완료';next.dataset.target=id||'';};
     next.addEventListener('click',()=>{const id=next.dataset.target;document.querySelector(`[data-test-card="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'});});
     document.addEventListener('click',e=>{if(e.target.closest('[data-result]'))setTimeout(renderNext,0);});renderNext();
   }
-  buildCard('mobile',getState,MOBILE_TESTS,controls);
+  const renderCard=buildCard('mobile',getState,MOBILE_TESTS,controls);
+  watchText(document.getElementById('mobileProgressText'),()=>{renderNext();renderCard();});
   track('mobile_start');
 }
 function enhancePc(){
   const reset=document.getElementById('resetCheckup');if(!reset)return;
   const controls=reset.closest('.controls')||reset.parentElement;
-  buildCard('pc',()=>parse('pc-checkup-results-v1'),PC_TESTS,controls);
+  const renderCard=buildCard('pc',()=>parse('pc-checkup-results-v1'),PC_TESTS,controls);
+  watchText(document.getElementById('checkProgress'),renderCard);
   track('pc_start');
 }
 function init(){
