@@ -1,8 +1,10 @@
 # PROJECT STATUS — bible-reader
 
-- 마지막 갱신: 2026-09-16
+- 마지막 기술상태 갱신: 2026-09-16
+- live-state owner 포인터 정합화: 2026-09-28
 - 저장소 역할: 성경 읽기 웹서비스의 실제 코드·배포·기술상태 원본
-- 상위 사업상태: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`, `직장/바이브코딩/운영본부_상태.json`
+- 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`
+- 빠르게 변하는 운영상태·Portfolio Mode·Gate·다음 행동: Supabase `hwangje_ops` / project key `vibecoding`
 - 표준 로컬 경로: `C:/Users/gsh41/Desktop/황제/직장/바이브코딩/페이지형/bible-reader`
 - 운영 주소: https://bible-reader-1iz.pages.dev/
 
@@ -10,7 +12,7 @@
 
 **PUBLIC CLOUDFLARE PRODUCTION / 9 UI LANGUAGES / CURRENT-REVISION PRODUCTION QA PASS / CLEAN PAGE-VIEW OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
 
-현재 바이브코딩 Portfolio Mode는 `WAITING_EXTERNAL`이다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발·실기기 Gate·깊은 QA를 반복하지 않는다.
+현재 Portfolio Mode와 다음 행동은 Supabase live-state에서 회수한다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발·실기기 Gate·깊은 QA를 반복하지 않는다.
 
 > 구현 완료 ≠ 자동 QA PASS ≠ 배포 성공 ≠ 실제 브라우저 PASS ≠ 실제 외부사용 ≠ 검색노출 ≠ 수익
 
@@ -78,7 +80,7 @@ UI 언어와 선택 역본 언어를 분리한다. 사용자가 역본을 바꾸
 
 과거 Production Browser QA가 실제 page-view에 섞이는 문제가 확인돼 자동 QA analytics 제외처리를 배포했다. **2026-09-09 이후를 clean baseline**으로 사용하고 이전 집계를 외부 사용자 수요로 역산하지 않는다.
 
-운영 snapshot은 황제 Vault `직장/바이브코딩/페이지형/bible-reader_analytics_latest.json`과 `직장/바이브코딩/제품_헬스_latest.json`이 소유한다.
+raw telemetry는 실제 page-view 집계 원천이 기술 원본이며, 운영 판단에 필요한 current snapshot·stale 여부·다음 행동은 Supabase `hwangje_ops`에서 회수한다. 과거 Vault `bible-reader_analytics_latest.json`이나 `제품_헬스_latest.json`을 current live-state owner로 복원하지 않는다.
 
 ## Production / SEO
 
@@ -88,7 +90,7 @@ UI 언어와 선택 역본 언어를 분리한다. 사용자가 역본을 바꾸
 
 자동 QA는 JavaScript 문법, 필수 runtime, Cloudflare SEO origin, 다국어 무결성, UI/역본 언어 분리, 장·절 직접입력, 복사 형식, 모바일 select 회귀, 제거된 runtime 재유입, 공개 sitemap/robots와 브라우저 동작을 검사한다.
 
-같은 revision에 대한 충분한 CI·Production QA 증거가 있으면 시간경과만으로 재검증하지 않는다. 실제 기술상태와 최신 head는 Actions 및 황제 Vault 운영본부 상태를 우선 회수한다.
+같은 revision에 대한 충분한 CI·Production QA 증거가 있으면 시간경과만으로 재검증하지 않는다. 기술 head·CI·배포 identity는 이 repo 최신 `main + Actions + PROJECT_STATUS.md`가 소유하며, 운영 우선순위·Gate·다음 행동은 Supabase live-state를 우선한다.
 
 ## 모바일 재발방지
 
@@ -121,6 +123,8 @@ Google/Naver/Bing 핵심 등록·sitemap 제출이 확인됐고 Daum은 신청 �
 승인 완료나 광고수익 발생으로 승격하지 않는다.
 
 ## 현재 다음 Gate
+
+구체 current Gate·우선순위는 Supabase live-state를 회수한다. 장기 판단기준은 다음과 같다.
 
 1. 2026-09-09 clean baseline 이후 실제 외부 page-view 변화 관찰
 2. 실제 검색 색인·노출·유입 변화 관찰
