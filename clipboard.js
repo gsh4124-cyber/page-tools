@@ -38,11 +38,7 @@
     if (lang === 'ko') return startVerse === endVerse ? `${book} ${chapter}장 ${startVerse}절` : `${book} ${chapter}장 ${startVerse}–${endVerse}절`;
     if (lang === 'zh') return startVerse === endVerse ? `${book} 第${chapter}章 第${startVerse}节` : `${book} 第${chapter}章 第${startVerse}–${endVerse}节`;
     if (lang === 'ru') return startVerse === endVerse ? `${book}, глава ${chapter}, стих ${startVerse}` : `${book}, глава ${chapter}, стихи ${startVerse}–${endVerse}`;
-    if (lang === 'pt') return startVerse === endVerse ? `${book} ${chapter}:${startVerse}` : `${book} ${chapter}:${startVerse}–${endVerse}`;
-    if (lang === 'fr') return startVerse === endVerse ? `${book} ${chapter}:${startVerse}` : `${book} ${chapter}:${startVerse}–${endVerse}`;
     if (lang === 'de') return startVerse === endVerse ? `${book} ${chapter},${startVerse}` : `${book} ${chapter},${startVerse}–${endVerse}`;
-    if (lang === 'la') return startVerse === endVerse ? `${book} ${chapter}:${startVerse}` : `${book} ${chapter}:${startVerse}–${endVerse}`;
-    if (lang === 'ar') return startVerse === endVerse ? `${book} ${chapter}:${startVerse}` : `${book} ${chapter}:${startVerse}–${endVerse}`;
     return startVerse === endVerse ? `${book} ${chapter}:${startVerse}` : `${book} ${chapter}:${startVerse}–${endVerse}`;
   }
 
@@ -65,6 +61,66 @@
     return `[${translationName()}] ${refParts(startVerse, endVerse)}\n\n${lines.join('\n')}\n\n${localizedPageName()} · ${SITE_URL}`;
   }
 
+  function compressRanges(numbers) {
+    const sorted = [...new Set(numbers.map(Number).filter(Boolean))].sort((a,b)=>a-b);
+    const ranges = [];
+    for (const n of sorted) {
+      const last = ranges[ranges.length - 1];
+      if (last && n === last[1] + 1) last[1] = n;
+      else ranges.push([n,n]);
+    }
+    return ranges;
+  }
+
+  function referenceForVerseNumbers(numbers) {
+    const ranges = compressRanges(numbers);
+    if (!ranges.length) return '';
+    if (ranges.length === 1) return refParts(ranges[0][0], ranges[0][1]);
+    const lang = scriptureLang();
+    const book = currentBookName();
+    const chapter = state.chapter;
+    const body = ranges.map(([a,b]) => a === b ? String(a) : `${a}–${b}`).join(', ');
+    if (lang === 'ko') return `${book} ${chapter}장 ${body}절`;
+    if (lang === 'zh') return `${book} 第${chapter}章 第${body}节`;
+    if (lang === 'ru') return `${book}, глава ${chapter}, стихи ${body}`;
+    if (lang === 'de') return `${book} ${chapter},${body}`;
+    return `${book} ${chapter}:${body}`;
+  }
+
+  function normalizeVerseElements(elements) {
+    return [...new Set(elements || [])]
+      .filter(el => el?.matches?.('.verse[data-verse]'))
+      .sort((a,b) => Number(a.dataset.verse) - Number(b.dataset.verse));
+  }
+
+  function buildCopyTextForElements(elements) {
+    const rows = normalizeVerseElements(elements);
+    const numbers = rows.map(row => Number(row.dataset.verse)).filter(Boolean);
+    const lines = rows.map(row => verseLine(row)).filter(Boolean);
+    if (!numbers.length || !lines.length) return '';
+    return `[${translationName()}] ${referenceForVerseNumbers(numbers)}\n\n${lines.join('\n')}\n\n${localizedPageName()} · ${SITE_URL}`;
+  }
+
+  async function copyText(text) {
+    if (!text) return false;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.append(textarea);
+        textarea.select();
+        const ok = document.execCommand('copy');
+        textarea.remove();
+        return ok;
+      } catch (_) { return false; }
+    }
+  }
+
   versesRoot.addEventListener('copy', (event) => {
     const selection = window.getSelection();
     const verseElements = selectedVerseElements(selection);
@@ -85,17 +141,10 @@
     event.clipboardData.setData('text/plain', buildCopyText(startVerse, endVerse, lines));
   });
 
-  versesRoot.addEventListener('click', async (event) => {
-    const textEl = event.target.closest('.verse-text');
-    if (!textEl) return;
-    const verseEl = textEl.closest('.verse');
-    const verseNumber = Number(verseEl?.dataset.verse);
-    if (!verseNumber) return;
-    const copyText = buildCopyText(verseNumber, verseNumber, [verseLine(verseEl)]);
-    try { await navigator.clipboard.writeText(copyText); }
-    catch (_) {
-      const textarea = document.createElement('textarea');
-      textarea.value = copyText; document.body.append(textarea); textarea.select(); document.execCommand('copy'); textarea.remove();
-    }
-  }, true);
+  window.BibleClipboard = {
+    copyText,
+    buildCopyTextForElements,
+    referenceForVerseNumbers,
+    verseLine
+  };
 })();
