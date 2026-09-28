@@ -40,6 +40,7 @@ jobs:
           for file in index.html styles.css features.css ui-fix.css i18n-layout.css records-enhancements.css verse-multiselect.css reader-experience.css title-navigator.css app.js extra-translations.js local-file-language.js i18n.js runtime-ui-i18n.js ui-language-sync.js full-reader-loader.js reference.js book-finder.js compare.js verse-picker.js title-navigator.js clipboard.js title-nav.js exact-search.js verse-tools.js records-enhancements.js verse-multiselect.js reader-experience.js analytics.js robots.txt sitemap.xml 193977ee04feba4a99f471a555a2aa54.txt; do
             test -s "$file"
           done
+          test -s tools/reader-experience-smoke.mjs
           for lang in en fr de zh ru la pt ar; do
             test -s "$lang/index.html"
           done
@@ -146,7 +147,9 @@ jobs:
           echo "Cloudflare production did not expose the updated runtime in time"
           exit 1
       - name: Run production behavior QA
-        run: node tools/production-smoke.mjs
+        run: |
+          node tools/production-smoke.mjs
+          node tools/reader-experience-smoke.mjs
 
   notify-indexnow:
     name: Notify IndexNow
