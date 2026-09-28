@@ -1,7 +1,6 @@
 (() => {
   const versesRoot = document.querySelector('#verses');
   const toolbar = document.querySelector('.toolbar');
-  const searchInputEl = document.querySelector('#searchInput');
   if (!versesRoot || !toolbar || typeof state === 'undefined' || typeof BOOKS === 'undefined') return;
 
   const MARKS_KEY = 'bible-reader-verse-marks-v1';
@@ -191,9 +190,6 @@
   document.addEventListener('keydown',event=>{
     if(!noTypingTarget(event)||event.metaKey||event.ctrlKey||event.altKey)return;
     const key=event.key.toLowerCase();
-    if(event.key==='/'){event.preventDefault();searchInputEl?.focus();searchInputEl?.select();return;}
-    if(event.key==='ArrowLeft'){event.preventDefault();if(typeof moveChapter==='function')moveChapter(-1);return;}
-    if(event.key==='ArrowRight'){event.preventDefault();if(typeof moveChapter==='function')moveChapter(1);return;}
     if(key==='f'){event.preventDefault();toggleFocus();return;}
     if(key==='c'&&selectedRows().length){event.preventDefault();document.querySelector('.verse-multi-copy')?.click();return;}
     if(key==='h'&&selectedRows().length){event.preventDefault();document.querySelector('.verse-multi-highlight')?.click();return;}
