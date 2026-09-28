@@ -2,6 +2,15 @@
   const LANGS = ['ko','en','fr','de','zh','ru','la','pt','ar'];
   const DEFAULT_TRANSLATION = {ko:'krv1961',en:'kjv',fr:'lsg',de:'luth1912',zh:'cuv',ru:'synodal',la:'vulg',pt:'almeida1819',ar:'svd'};
 
+  if (location.hostname === 'gsh4124-cyber.github.io' && /^\/bible-reader(?:\/|$)/.test(location.pathname)) {
+    const target = new URL(location.href);
+    target.protocol = 'https:';
+    target.host = 'bible-reader-1iz.pages.dev';
+    target.pathname = location.pathname.replace(/^\/bible-reader(?=\/|$)/, '') || '/';
+    location.replace(target.href);
+    return;
+  }
+
   const params = new URLSearchParams(location.search);
   const queryLang = params.get('lang');
   if (location.protocol === 'file:' && LANGS.includes(queryLang)) {
