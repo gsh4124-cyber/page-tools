@@ -18,23 +18,35 @@
 
 ## 현재 검증 identity — 2026-09-28
 
-현재 사용자 경험 변경이 검증된 제품 identity는 `e289f3658be920059f70702d03664fbd10b21350`다.
+현재 사용자 경험 변경이 검증된 제품 identity는 `e25e7e5e49701d6171d6bb79965a5e661a5e4ea9`다.
 
-이번 변경은 제목을 눌러 여는 `성경 빠른 이동`을 한 화면에 책·장·절을 모두 나열하던 구조에서 다음의 순차 흐름으로 바꾼 것이다.
+이번 변경은 본문 구절 탭의 기본 동작을 `즉시 복사`에서 **다중 선택**으로 바꿨다.
+
+> **구절 탭 → 선택 상태 누적 → 복사 / 메모 / 하이라이트 → 완료 시 선택 해제**
+
+세부 동작:
+- 한 절을 탭하면 즉시 복사하지 않고 선택 상태가 된다.
+- 여러 절을 연속 또는 비연속으로 선택할 수 있다.
+- 하단 선택 툴바에서 선택 개수와 `복사 / 메모 / 하이라이트(또는 강조 해제) / 완료`를 제공한다.
+- 복사는 선택한 모든 절을 하나의 참조와 본문 묶음으로 복사한다.
+- 선택 메모는 선택 절 묶음 자체에 저장되며 `나의 기록 > 선택 메모`에서 다시 확인·수정·삭제·이동할 수 있다.
+- 다중 하이라이트는 선택된 절 전체에 한 번에 적용·해제한다.
+- 기존 `…` 개별 구절 메뉴와 직접 텍스트 드래그 복사는 유지한다.
+- 선택 메모는 기존 `verseMarks` 백업 데이터 안의 chapter metadata로 저장되어 기존 JSON 백업/복원에 포함된다.
+
+이 identity에서:
+- Security Guardrails #58: **PASS**
+- Final QA and Cloudflare Production Check #316: **PASS**
+- Static Guardrails: **PASS**
+- multilingual / sequential navigation / multi-select Behavior QA: **PASS**
+- Cloudflare Production Browser QA: **PASS**
+- Production QA가 실제 공개 Cloudflare 환경에서 `2개 구절 선택 → 복사 포맷 확인 → 선택 메모 저장 → 다중 하이라이트 → 나의 기록에서 선택 메모 확인 → 완료로 선택 해제` 흐름을 실행해 확인했다.
+
+같은 날 이전 변경으로 빠른 이동도 다음 순차 흐름으로 검증돼 있다.
 
 > **성경책 선택 → 해당 책의 장 선택 → 해당 장의 절 선택 → 팝업 닫힘 + 해당 절 이동/강조**
 
-추가로 장/절 단계에서 이전 단계로 돌아갈 수 있는 Back 동작을 유지한다. 기존 숨김 `bookSelect / chapterSelect / verseSelect`를 상태 원본으로 재사용하며, 기존 검색·역본·기록·장 이동 기능은 변경하지 않았다.
-
-이 identity에서:
-- Security Guardrails #49: **PASS**
-- Final QA and Cloudflare Production Check #307: **PASS**
-- Static Guardrails: **PASS**
-- multilingual / sequential navigation Behavior QA: **PASS**
-- Cloudflare Production Browser QA: **PASS**
-- Production QA에서 실제로 `책 선택 → 장 화면 → Back → 책 화면 → 장 선택 → 절 화면 → 절 선택 → 모달 닫힘 → 선택 절 강조 이동` 흐름을 실행해 확인했다.
-
-초기 QA에서는 기존 `validate-i18n`이 과거 동시표시 navigator 함수 signature를 요구해 실패했으며, 제품 회귀가 아니라 검증계약 stale로 원인을 분리했다. 순차 navigation 계약으로 validator와 Production Browser QA를 갱신한 뒤 동일 current revision에서 전체 PASS했다.
+장/절 단계 Back 동작을 유지하며 기존 숨김 `bookSelect / chapterSelect / verseSelect`를 상태 원본으로 재사용한다.
 
 이 PASS는 자동·실제 Cloudflare production browser 기준이다. 실제 Android/iPhone 물리기기 터치 체감을 이번 변경에서 새로 `MOBILE REAL-USE PASS`로 선언하지 않는다.
 
@@ -74,9 +86,10 @@ UI 언어와 선택 역본 언어를 분리한다. 사용자가 역본을 바꾸
 - 현재 역본 전체검색 및 성경책 직접 이동
 - 이전/다음 장, 글자 크기, 본문 폭, 라이트/다크
 - 한 면/양면 보기, 2역본 비교
-- 절 복사·선택영역 복사
+- 구절 탭 다중선택 후 일괄 복사·선택 메모·하이라이트
+- 직접 텍스트 선택영역 복사
 - 절 하이라이트·절 저장·장 저장
-- `나의 기록`과 메모
+- `나의 기록`의 하이라이트·저장한 성구·저장한 장·선택 메모
 - 기록 JSON 백업/복원
 - 마지막 읽기 위치·역본·읽기 설정·기록 localStorage 저장
 
@@ -98,7 +111,7 @@ raw telemetry는 실제 page-view 집계 원천이 기술 원본이며, 운영 �
 
 9개 언어 URL의 `html lang / title / description / canonical / reciprocal hreflang / x-default / sitemap / robots`를 Cloudflare origin과 일치하게 유지한다.
 
-자동 QA는 JavaScript 문법, 필수 runtime, Cloudflare SEO origin, 다국어 무결성, UI/역본 언어 분리, 장·절 직접입력, 순차 빠른 이동, 복사 형식, 모바일 select 회귀, 제거된 runtime 재유입, 공개 sitemap/robots와 브라우저 동작을 검사한다.
+자동 QA는 JavaScript 문법, 필수 runtime, Cloudflare SEO origin, 다국어 무결성, UI/역본 언어 분리, 장·절 직접입력, 순차 빠른 이동, 다중 구절 선택·복사·메모·하이라이트, 복사 형식, 모바일 select 회귀, 제거된 runtime 재유입, 공개 sitemap/robots와 브라우저 동작을 검사한다.
 
 같은 revision에 대한 충분한 CI·Production QA 증거가 있으면 시간경과만으로 재검증하지 않는다. 기술 head·CI·배포 identity는 이 repo 최신 `main + Actions + PROJECT_STATUS.md`가 소유하며, 운영 우선순위·Gate·다음 행동은 Supabase live-state를 우선한다.
 
@@ -110,7 +123,7 @@ raw telemetry는 실제 page-view 집계 원천이 기술 원본이며, 운영 �
 - 장/절 visible UI는 custom 숫자 input + menu 사용
 - 자동 검사 PASS만으로 실제 모바일 체감을 과장하지 않음
 
-새 UX 변경이 없는데 과거 모바일 Human Gate를 시간경과만으로 되살리지 않는다. 새 navigation UX 변경의 자동·Production Browser QA가 PASS해도 실제 물리기기 터치 결과를 자동으로 `MOBILE REAL-USE PASS`로 승격하지 않는다.
+새 UX 변경이 없는데 과거 모바일 Human Gate를 시간경과만으로 되살리지 않는다. 새 navigation 또는 multi-select UX 변경의 자동·Production Browser QA가 PASS해도 실제 물리기기 터치 결과를 자동으로 `MOBILE REAL-USE PASS`로 승격하지 않는다.
 
 ## 검색 유통
 
