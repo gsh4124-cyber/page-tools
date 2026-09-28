@@ -43,6 +43,13 @@ body.reader-focus .chapter-heading{padding-top:8px}
 .reader-undo-toast[hidden]{display:none!important}.reader-undo-button{padding:6px 9px;border:0;border-radius:999px;background:var(--hover);color:var(--text);font-weight:800}
 .verse-multi-actionbar.shared .verse-multi-share{background:var(--hover);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 18%,transparent)}
 
-@media(max-width:760px){.toolbar{width:auto!important;max-width:100%;margin-left:auto;padding:3px;gap:2px!important;overflow-x:auto;scrollbar-width:none}.toolbar::-webkit-scrollbar{display:none}.toolbar button{height:34px;min-width:34px;border-radius:10px}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}.toolbar .quick-tool{padding-inline:7px}}
-@media(max-width:620px){.verse-multi-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}.reader-undo-toast{bottom:148px}.reader-extra-tool{min-width:34px}.reader-focus-exit{right:9px;top:9px}.toolbar{box-shadow:none}}
-@media(max-width:390px){.verse-multi-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.reader-undo-toast{bottom:190px;width:max-content;max-width:calc(100vw - 24px)}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:8px}}
+/* Never hide or squeeze toolbar actions: preserve a touch-safe minimum size and pan horizontally. */
+@media(max-width:1040px){
+  .toolbar{width:100%!important;max-width:100%;min-width:0;align-self:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden;padding:4px 3px 6px;gap:3px!important;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain;touch-action:pan-x;scroll-padding-inline:4px}
+  .toolbar::-webkit-scrollbar{display:none}
+  .toolbar>button{flex:0 0 auto!important;min-width:42px!important;min-height:38px!important}
+  .toolbar .primary-tool,.toolbar .notebook-button{min-width:max-content!important;padding-inline:11px}
+}
+@media(max-width:760px){.toolbar{margin-left:0;padding:3px 2px 6px}.toolbar button{height:38px;min-width:42px!important;border-radius:10px}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}.toolbar .quick-tool{padding-inline:8px}}
+@media(max-width:620px){.verse-multi-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}.reader-undo-toast{bottom:148px}.reader-extra-tool{min-width:42px!important}.reader-focus-exit{right:9px;top:9px}.toolbar{box-shadow:none}}
+@media(max-width:390px){.verse-multi-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.reader-undo-toast{bottom:190px;width:max-content;max-width:calc(100vw - 24px)}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}}
