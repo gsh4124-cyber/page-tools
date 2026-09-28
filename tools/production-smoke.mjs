@@ -31,18 +31,55 @@ async function assertCompactTopbar(page, label) {
 
 async function assertTitleNavigator(page, label) {
   await page.locator('#chapterTitle').click();
-  await page.locator('.title-navigator').waitFor({ state: 'visible', timeout: 5000 });
+  const dialog = page.locator('.title-navigator');
+  const bookStep = page.locator('[data-step="book"]');
+  const chapterStep = page.locator('[data-step="chapter"]');
+  const verseStep = page.locator('[data-step="verse"]');
+  await dialog.waitFor({ state: 'visible', timeout: 5000 });
+
   const oldButton = page.locator('.title-navigator-testament-switch [data-switch="old"]');
   const newButton = page.locator('.title-navigator-testament-switch [data-switch="new"]');
   assert(await oldButton.count() === 1, `${label}: Old Testament switch missing`);
   assert(await newButton.count() === 1, `${label}: New Testament switch missing`);
   assert(await page.locator('.title-navigator-testament').count() === 0, `${label}: retired dual-column testament layout is still deployed`);
+  assert(await bookStep.isVisible(), `${label}: book step must open first`);
+  assert(await chapterStep.isHidden(), `${label}: chapter step must stay hidden before a book is chosen`);
+  assert(await verseStep.isHidden(), `${label}: verse step must stay hidden before a chapter is chosen`);
+
+  await oldButton.click();
   const oldCount = await page.locator('.title-navigator-books .title-navigator-choice').count();
-  assert(oldCount > 0 && oldCount <= 39, `${label}: Old Testament book list is invalid (${oldCount})`);
+  assert(oldCount === 39, `${label}: Old Testament book list is invalid (${oldCount})`);
   await newButton.click();
   const newCount = await page.locator('.title-navigator-books .title-navigator-choice').count();
-  assert(newCount > 0 && newCount <= 27, `${label}: New Testament book list is invalid (${newCount})`);
-  await page.locator('.title-navigator-close').click();
+  assert(newCount === 27, `${label}: New Testament book list is invalid (${newCount})`);
+
+  await oldButton.click();
+  await page.locator('.title-navigator-books .title-navigator-choice').first().click();
+  await page.locator('.title-navigator-chapters .title-navigator-choice').first().waitFor({ state: 'visible', timeout: 15000 });
+  assert(await bookStep.isHidden(), `${label}: book step must hide after book selection`);
+  assert(await chapterStep.isVisible(), `${label}: chapter step must appear after book selection`);
+  assert(await verseStep.isHidden(), `${label}: verse step must stay hidden until chapter selection`);
+  assert(await page.locator('.title-navigator-back').isVisible(), `${label}: back button must be available after book selection`);
+
+  await page.locator('.title-navigator-back').click();
+  assert(await bookStep.isVisible(), `${label}: back from chapter must return to book step`);
+  assert(await chapterStep.isHidden(), `${label}: chapter step must hide after returning to books`);
+
+  await page.locator('.title-navigator-books .title-navigator-choice[aria-pressed="true"]').click();
+  await page.locator('.title-navigator-chapters .title-navigator-choice').first().waitFor({ state: 'visible', timeout: 5000 });
+  const chapterTwo = page.locator('.title-navigator-chapters').getByRole('button',{name:'2',exact:true});
+  await chapterTwo.click();
+  await page.locator('.title-navigator-verses .title-navigator-choice').first().waitFor({ state: 'visible', timeout: 5000 });
+  assert(await chapterStep.isHidden(), `${label}: chapter step must hide after chapter selection`);
+  assert(await verseStep.isVisible(), `${label}: verse step must appear after chapter selection`);
+
+  const verseThree = page.locator('.title-navigator-verses').getByRole('button',{name:'3',exact:true});
+  await verseThree.click();
+  await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+  await page.locator('.verse[data-verse="3"].verse-picked').waitFor({ state: 'visible', timeout: 5000 });
+  assert((await page.locator('#bookSelect').inputValue()) === '0', `${label}: selected book did not apply`);
+  assert((await page.locator('#chapterSelect').inputValue()) === '2', `${label}: selected chapter did not apply`);
+  assert((await page.locator('#verseSelect').inputValue()) === '3', `${label}: selected verse did not apply`);
 }
 
 {
@@ -100,4 +137,4 @@ if (problems.length) {
   console.error(problems.join('\n'));
   process.exit(1);
 }
-console.log('Cloudflare production browser QA passed: compact topbar stayed one row, title navigation used Old/New switch buttons, and multilingual Scripture/UI separation remained intact.');
+console.log('Cloudflare production browser QA passed: compact topbar stayed one row, title navigation followed book -> chapter -> verse with working back navigation, and multilingual Scripture/UI separation remained intact.');
