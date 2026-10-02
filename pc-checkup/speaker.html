@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>스피커 좌우 테스트 | PC CHECKUP</title>
+<meta name="description" content="스피커와 헤드폰의 왼쪽·오른쪽 채널을 온라인으로 확인합니다.">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head><body>
+<header><div class="wrap nav">
+  <a class="brand" href="index.html">PC <span>CHECKUP</span></a>
+  <nav class="navlinks">
+    <a href="checkup.html">전체 점검</a><a href="keyboard.html">키보드</a><a href="mouse.html">마우스</a>
+    <a href="mic.html">마이크</a><a href="webcam.html">웹캠</a><a href="speaker.html">스피커</a><a href="display.html">모니터</a>
+  </nav>
+</div></header>
+
+<main><section class="tool-head"><div class="wrap"><span class="eyebrow">오디오 출력</span><h1>스피커·헤드폰 좌우 테스트</h1><p class="section-intro">볼륨을 낮춘 뒤 왼쪽, 오른쪽, 양쪽 테스트 톤을 차례대로 재생해 채널을 확인하세요.</p></div></section>
+<div class="wrap tool-layout"><section id="speakerTool" class="toolbox">
+  <div class="notice"><strong>시작 전 볼륨을 낮춰주세요.</strong> 이어폰·헤드폰은 갑작스러운 큰 소리가 불편할 수 있습니다.</div>
+  <div class="notice">상태: <strong id="speakerStatus">대기 중</strong></div>
+  <div class="channel-grid">
+    <button id="playLeft" class="channel"><span>◀</span><b>왼쪽</b><small>LEFT</small></button>
+    <button id="playBoth" class="channel"><span>●</span><b>양쪽</b><small>STEREO</small></button>
+    <button id="playRight" class="channel"><span>▶</span><b>오른쪽</b><small>RIGHT</small></button>
+  </div>
+</section><aside class="side"><div class="notice"><strong>판정</strong><br>왼쪽을 눌렀을 때 왼쪽에서만, 오른쪽은 오른쪽에서만 들리는지 확인하세요. 브라우저·OS의 모노 오디오 설정이 켜져 있으면 채널이 합쳐질 수 있습니다.</div><a class="btn primary" href="checkup.html">전체 점검으로 돌아가기</a></aside></div></main>
+<footer><div class="wrap">브라우저 안에서 바로 점검합니다. 카메라·마이크·키 입력은 서버로 전송하지 않는 구조를 기본으로 합니다.</div></footer></body></html>

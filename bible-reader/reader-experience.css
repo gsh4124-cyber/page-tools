@@ -1,0 +1,57 @@
+.reader-extra-tool{font-weight:800}
+.reader-extra-tool:disabled{opacity:.3;cursor:not-allowed}
+
+/* Reader toolbar: transparent, right-aligned, and calm against the page. */
+.toolbar{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.toolbar button{height:36px;min-width:36px;margin:0;border:1px solid transparent;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .12s ease,box-shadow .16s ease}
+.toolbar button:hover{border-color:color-mix(in srgb,var(--line) 90%,transparent);background:var(--hover);color:var(--text)}
+.toolbar button:active:not(:disabled){transform:translateY(1px)}
+.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:12px;background:color-mix(in srgb,var(--panel) 94%,var(--bg));border-color:color-mix(in srgb,var(--line) 92%,transparent);color:var(--text);font-weight:750}
+.toolbar .primary-tool[aria-pressed="true"],.toolbar .reader-focus-toggle[aria-pressed="true"],.toolbar .page-view-toggle[aria-pressed="true"]{background:color-mix(in srgb,#b8913f 16%,var(--panel));border-color:color-mix(in srgb,#9a7721 38%,var(--line));color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,#9a7721 12%,transparent)}
+.toolbar .quick-tool{padding:0 9px;color:var(--muted)}
+.toolbar .reader-history-back,.toolbar .reader-history-forward{font-size:18px}
+.toolbar .reader-focus-toggle{font-size:16px}
+.toolbar .notebook-button{white-space:nowrap}
+.toolbar>button:first-child{margin-left:auto}
+
+/* Verse tap now owns verse actions through the multi-select action bar. */
+.verse-actions-trigger,.verse-action-popover{display:none!important}
+.verse{padding-right:10px}
+.verse-text{cursor:pointer}
+
+.reader-focus-exit{display:none;position:fixed;right:14px;top:max(14px,env(safe-area-inset-top));z-index:610;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--panel) 96%,var(--bg));color:var(--text);box-shadow:0 8px 26px rgba(0,0,0,.18);font:700 12px/1 system-ui,sans-serif}
+body.reader-focus .reader-focus-exit{display:block}
+body.reader-focus .topbar,body.reader-focus .ad-slot,body.reader-focus footer,body.reader-focus .chapter-nav{display:none!important}
+body.reader-focus main{padding-top:10px}
+body.reader-focus .reader-shell{width:min(980px,calc(100vw - 28px));max-width:980px}
+body.reader-focus .verse-actions-trigger,body.reader-focus .chapter-bookmark-button{opacity:0!important;pointer-events:none!important}
+body.reader-focus .verse-number{display:none!important}
+body.reader-focus .chapter-heading{padding-top:8px}
+
+.verse.user-highlight[data-highlight-color="yellow"]{background:color-mix(in srgb,#f6d95c 34%,transparent)!important}
+.verse.user-highlight[data-highlight-color="pink"]{background:color-mix(in srgb,#f48fb1 30%,transparent)!important}
+.verse.user-highlight[data-highlight-color="green"]{background:color-mix(in srgb,#81c784 30%,transparent)!important}
+.verse.user-highlight[data-highlight-color="blue"]{background:color-mix(in srgb,#64b5f6 28%,transparent)!important}
+.verse.user-highlight[data-highlight-color="purple"]{background:color-mix(in srgb,#ba8be8 27%,transparent)!important}
+.verse.deep-linked{position:relative;box-shadow:inset 3px 0 0 #9a7721;background:color-mix(in srgb,#d8b555 16%,transparent)!important}
+
+.reader-color-popover{position:fixed;z-index:560;display:flex;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel) 98%,var(--bg));box-shadow:0 14px 38px rgba(0,0,0,.22)}
+.reader-color-swatch{width:34px;height:34px;padding:0;border:2px solid color-mix(in srgb,var(--text) 16%,transparent);border-radius:999px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.45)}
+.reader-color-swatch:hover,.reader-color-swatch:focus-visible{transform:scale(1.08);outline:2px solid color-mix(in srgb,var(--text) 35%,transparent);outline-offset:2px}
+.reader-color-yellow{background:#f6d95c}.reader-color-pink{background:#f48fb1}.reader-color-green{background:#81c784}.reader-color-blue{background:#64b5f6}.reader-color-purple{background:#ba8be8}
+
+.reader-undo-toast{position:fixed;left:50%;bottom:96px;z-index:570;display:flex;align-items:center;gap:12px;transform:translateX(-50%);padding:9px 10px 9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);box-shadow:0 10px 32px rgba(0,0,0,.22);color:var(--text);font:700 12px/1 system-ui,sans-serif}
+.reader-undo-toast[hidden]{display:none!important}.reader-undo-button{padding:6px 9px;border:0;border-radius:999px;background:var(--hover);color:var(--text);font-weight:800}
+.verse-multi-actionbar.shared .verse-multi-share{background:var(--hover);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 18%,transparent)}
+
+/* At narrow widths keep every action visible at a touch-safe size; overflow pans sideways instead of hiding buttons. */
+@media(max-width:1040px){
+  .toolbar{width:100%!important;max-width:100%;min-width:0;align-self:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden;padding:0 0 4px;gap:3px!important;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain;touch-action:pan-x;scroll-padding-inline:4px}
+  .toolbar::-webkit-scrollbar{display:none}
+  .toolbar>button{flex:0 0 auto!important;min-width:42px!important;min-height:38px!important}
+  .toolbar>button:first-child{margin-left:auto}
+  .toolbar .primary-tool,.toolbar .notebook-button{min-width:max-content!important;padding-inline:11px}
+}
+@media(max-width:760px){.toolbar{padding-bottom:4px}.toolbar button{height:38px;min-width:42px!important;border-radius:10px}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}.toolbar .quick-tool{padding-inline:8px}}
+@media(max-width:620px){.verse-multi-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}.reader-undo-toast{bottom:148px}.reader-extra-tool{min-width:42px!important}.reader-focus-exit{right:9px;top:9px}}
+@media(max-width:390px){.verse-multi-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.reader-undo-toast{bottom:190px;width:max-content;max-width:calc(100vw - 24px)}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}}

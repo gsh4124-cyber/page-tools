@@ -1,0 +1,134 @@
+name: RefundProof Wanted Demo QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'refundproof/wanted-demo.html'
+      - '.github/workflows/refundproof-wanted-demo.yml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wanted-demo:
+    name: Photo OCR, PDF intake, semantic assist, refund safety gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for public Wanted demo V11
+        run: |
+          set -euo pipefail
+          url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/wanted-demo.html'
+          for i in {1..84}; do
+            body=$(curl -fsSL --max-time 20 "$url" 2>/dev/null || true)
+            if printf '%s' "$body" | grep -q 'WANTED_DEMO_V11' \
+              && printf '%s' "$body" | grep -q 'tesseract.js@5.1.1' \
+              && printf '%s' "$body" | grep -q 'capture="environment"' \
+              && printf '%s' "$body" | grep -q 'BASIC:\[60000,60000,60000,80000,100000,120000\]' \
+              && printf '%s' "$body" | grep -q 'pdfjs-dist' \
+              && printf '%s' "$body" | grep -q 'paraphrase-multilingual-MiniLM-L12-v2'; then exit 0; fi
+            sleep 5
+          done
+          echo 'Wanted demo V11 did not become public.'
+          exit 1
+      - name: Install Playwright and PDF fixture tool
+        run: |
+          npm install --no-save playwright@1.55.0 pdf-lib@1.17.1
+          npx playwright install --with-deps chromium
+      - name: Verify photo OCR, PDF extraction, verified penalties, and safety gates
+        run: |
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          const { PDFDocument, StandardFonts } = require('pdf-lib');
+          const fs = require('fs');
+          const assert=(c,m)=>{if(!c)throw new Error(m)};
+          (async()=>{
+            const pdf=await PDFDocument.create();
+            const pagePdf=pdf.addPage([600,800]);
+            const font=await pdf.embedFont(StandardFonts.Helvetica);
+            pagePdf.drawText('Airline Korean Air\nDeparture Date 2026-09-30\nBooking Class V\nFare Basis VKOR123\nTotal Paid 635000 KRW\nIssued by Korean Air\nwholly unused',{x:40,y:730,size:12,font,lineHeight:20});
+            fs.writeFileSync('/tmp/booking.pdf',await pdf.save());
+
+            const browser=await chromium.launch({headless:true});
+            const fixture=await browser.newPage({viewport:{width:1000,height:600}});
+            await fixture.setContent(`<body style="margin:0;background:white"><div style="font:38px Arial;padding:45px;line-height:1.45;color:black">Airline Korean Air<br>Departure Date 2026-09-30<br>Booking Class V<br>Fare Basis VKOR123<br>Total Paid 635000 KRW<br>Issued by Korean Air<br>wholly unused</div></body>`);
+            await fixture.screenshot({path:'/tmp/booking.png',fullPage:true});
+            await fixture.close();
+
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            await page.goto('https://gsh4124-cyber.github.io/pc-checkup/refundproof/wanted-demo.html',{waitUntil:'domcontentloaded',timeout:60000});
+            assert((await page.getAttribute('main','data-build'))==='WANTED_DEMO_V11','V11 build');
+            assert((await page.getAttribute('#bookingFile','accept')).includes('image/*'),'booking accepts images');
+            assert((await page.getAttribute('#quoteFile','accept')).includes('image/*'),'quote accepts images');
+            assert((await page.getAttribute('#bookingCamera','capture'))==='environment','booking camera capture');
+            assert((await page.getAttribute('#quoteCamera','capture'))==='environment','quote camera capture');
+            console.log('PASS photo-first controls');
+
+            // Real image OCR populates document text.
+            await page.setInputFiles('#bookingFile','/tmp/booking.png');
+            await page.waitForFunction(()=>document.querySelector('#booking').value.includes('VKOR123'),null,{timeout:180000});
+            assert((await page.inputValue('#booking')).match(/Korean Air/i),'image OCR airline');
+            console.log('PASS image OCR');
+
+            // PDF text extraction remains supported.
+            await page.setInputFiles('#bookingFile','/tmp/booking.pdf');
+            await page.waitForFunction(()=>document.querySelector('#booking').value.includes('VKOR123'),null,{timeout:60000});
+            assert((await page.inputValue('#booking')).includes('Issued by Korean Air'),'PDF seller line extracted');
+            console.log('PASS PDF text extraction');
+
+            // STANDARD: 10 days before departure => 60,000 KRW.
+            await page.evaluate(()=>{
+              document.querySelector('#booking').value='예약번호 AB12CD\n항공사 제주항공 7C1102\n여정 인천(ICN) → 도쿄(NRT)\n출발일 2026-09-30\n운임종류 STANDARD\n예약등급 M\nFare Basis MSTANDARD\n결제금액 635,000원\n구매처 제주항공\n사용상태 전체 미사용';
+              document.querySelector('#quote').value='취소 접수일 2026-09-20\n예상 환불액 548,000원';
+              document.querySelector('#fareRule').value='';
+            });
+            await page.click('#audit');
+            assert(Number(await page.inputValue('#airPenalty'))===60000,'Jeju STANDARD penalty');
+            assert((await page.textContent('#expected')).replace(/[^0-9]/g,'')==='575000','Jeju STANDARD expected');
+            console.log('PASS Jeju STANDARD verified penalty');
+
+            // BASIC: 100 days before departure => 60,000 KRW.
+            await page.evaluate(()=>{
+              document.querySelector('#booking').value='예약번호 AB12CE\n항공사 제주항공 7C1102\n여정 인천(ICN) → 도쿄(NRT)\n출발일 2026-12-30\n운임종류 BASIC\n예약등급 M\nFare Basis MBASIC\n결제금액 635,000원\n구매처 제주항공\n사용상태 전체 미사용';
+              document.querySelector('#quote').value='취소 접수일 2026-09-21\n예상 환불액 575,000원';
+              document.querySelector('#fareRule').value='';
+            });
+            await page.click('#audit');
+            assert(Number(await page.inputValue('#airPenalty'))===60000,'Jeju BASIC 91+ day penalty');
+            assert((await page.textContent('#status')).trim()==='금액이 맞아요','Jeju BASIC verified calculation');
+            console.log('PASS Jeju BASIC verified penalty');
+
+            // Unknown seller must stop.
+            await page.evaluate(()=>{
+              document.querySelector('#booking').value='예약번호 AB12CD\n항공사 제주항공 7C1102\n여정 인천(ICN) → 도쿄(NRT)\n출발일 2026-09-30\n운임종류 STANDARD\n예약등급 M\nFare Basis MSTANDARD\n결제금액 635,000원\n구매처 임의여행사\n사용상태 전체 미사용';
+              document.querySelector('#quote').value='취소 접수일 2026-09-20\n예상 환불액 558,000원\n판매처 수수료 17,000원';
+            });
+            await page.click('#audit');
+            assert((await page.textContent('#status')).trim()==='추가 확인이 필요해요','unknown seller stop');
+            assert((await page.textContent('#expected')).trim()==='-','unknown seller no amount');
+            console.log('PASS seller whitelist safety gate');
+
+            // Exact fare rule must match Fare Basis.
+            await page.evaluate(()=>{
+              document.querySelector('#booking').value='예약번호 KE1234\n항공사 대한항공 KE703\n여정 인천(ICN) → 도쿄(NRT)\n출발일 2026-09-30\n예약등급 V\nFare Basis VKOR123\n결제금액 635,000원\n구매처 대한항공\n사용상태 전체 미사용';
+              document.querySelector('#quote').value='취소 접수일 2026-09-20\n예상 환불액 545,000원';
+              document.querySelector('#fareRule').value='Fare Basis VKOR123\n환불 위약금 90,000원';
+            });
+            await page.click('#audit');
+            assert((await page.textContent('#status')).trim()==='금액이 맞아요','exact fare match');
+            assert(Number(await page.inputValue('#airPenalty'))===90000,'exact penalty');
+            await page.evaluate(()=>{document.querySelector('#fareRule').value='Fare Basis OTHER999\n환불 위약금 90,000원';});
+            await page.click('#audit');
+            assert((await page.textContent('#status')).trim()==='추가 확인이 필요해요','basis mismatch stop');
+            assert((await page.textContent('#expected')).trim()==='-','mismatch no amount');
+            console.log('PASS fare match and mismatch gates');
+
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS

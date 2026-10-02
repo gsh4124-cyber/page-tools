@@ -1,0 +1,107 @@
+name: Production Browser Smoke
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+  workflow_dispatch:
+  schedule:
+    - cron: '30 */6 * * *'
+
+concurrency:
+  group: device-checkup-production-smoke
+  cancel-in-progress: true
+
+jobs:
+  chromium-production:
+    name: Production QA · Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Wait for exact Cloudflare deployed revision
+        run: |
+          set -euo pipefail
+          marker='https://pc-checkup.pages.dev/build-revision.txt'
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            expected="$GITHUB_SHA"
+          else
+            expected=$(curl -fsS --max-time 20 "$marker" | tr -d '\r\n')
+          fi
+          if ! printf '%s' "$expected" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "Invalid expected production revision: $expected"
+            exit 1
+          fi
+          for i in {1..30}; do
+            current=$(curl -fsS --max-time 20 "$marker" 2>/dev/null | tr -d '\r\n' || true)
+            if [ "$current" = "$expected" ]; then
+              echo "Exact Cloudflare production revision confirmed: $current"
+              exit 0
+            fi
+            echo "Waiting for Cloudflare production revision: current=${current:-missing} expected=$expected"
+            sleep 10
+          done
+          echo "Cloudflare production never reached expected revision $expected"
+          exit 1
+      - name: Run Chromium production QA
+        env:
+          DEVICE_BROWSER: chromium
+        run: |
+          node tools/production-smoke.mjs
+          node tools/header-layout-smoke.mjs
+          node tools/device-experience-smoke.mjs
+
+  cross-browser-production:
+    name: Production QA · ${{ matrix.browser }}
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps "${{ matrix.browser }}"
+      - name: Wait for exact Cloudflare deployed revision
+        run: |
+          set -euo pipefail
+          marker='https://pc-checkup.pages.dev/build-revision.txt'
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            expected="$GITHUB_SHA"
+          else
+            expected=$(curl -fsS --max-time 20 "$marker" | tr -d '\r\n')
+          fi
+          if ! printf '%s' "$expected" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "Invalid expected production revision: $expected"
+            exit 1
+          fi
+          for i in {1..30}; do
+            current=$(curl -fsS --max-time 20 "$marker" 2>/dev/null | tr -d '\r\n' || true)
+            if [ "$current" = "$expected" ]; then
+              echo "Exact Cloudflare production revision confirmed: $current"
+              exit 0
+            fi
+            echo "Waiting for Cloudflare production revision: current=${current:-missing} expected=$expected"
+            sleep 10
+          done
+          echo "Cloudflare production never reached expected revision $expected"
+          exit 1
+      - name: Run production QA
+        env:
+          DEVICE_BROWSER: ${{ matrix.browser }}
+        run: node tools/production-smoke.mjs

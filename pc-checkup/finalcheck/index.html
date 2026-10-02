@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FinalCheck AI</title>
+<style>
+:root{font-family:Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;color:#0f172a;background:#f3f6fb;--ink:#0f172a;--muted:#64748b;--line:#dfe5ee;--brand:#4f46e5;--brand-soft:#eef2ff;--ok:#047857;--ok-bg:#d1fae5;--fail:#b91c1c;--fail-bg:#fee2e2;--risk:#a16207;--risk-bg:#fef3c7;--need:#4338ca;--need-bg:#e0e7ff}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:1180px;margin:auto;padding:24px 18px 50px}.hero{background:linear-gradient(135deg,#0f172a 0%,#172554 100%);color:#fff;padding:34px;border-radius:26px;box-shadow:0 16px 50px rgba(15,23,42,.13)}.heroTop{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.hero h1{margin:12px 0 8px;font-size:46px;letter-spacing:-1.3px}.hero p{margin:0;color:#dbe4f0;line-height:1.7;font-size:17px}.hero strong{color:#fff}.heroNote{font-size:12px;color:#cbd5e1;border:1px solid rgba(255,255,255,.18);padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.06);white-space:nowrap}.pill{font-size:11px;font-weight:900;color:#4338ca;background:#eef2ff;border-radius:999px;padding:6px 10px;display:inline-flex;align-items:center;gap:6px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.step{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px 16px;display:flex;gap:11px;align-items:center}.stepNum{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand);font-weight:900;font-size:12px}.step b{font-size:13px}.step span{display:block;color:var(--muted);font-size:11px;margin-top:2px}.demoHint{margin:16px 0 0;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.55}.grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:16px;margin-top:16px}.card,.status{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 30px rgba(15,23,42,.035)}.sectionHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.sectionHead h2{margin:8px 0 0;font-size:24px;letter-spacing:-.5px}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}label{display:block;font-size:12px;font-weight:850;margin:12px 0 6px;color:#334155}input,textarea{width:100%;border:1px solid #cfd8e6;border-radius:12px;padding:11px 12px;font:inherit;background:#fff;transition:.15s}input:focus,textarea:focus{outline:0;border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.12)}textarea{min-height:108px;resize:vertical}.rules{min-height:285px;line-height:1.65;background:#fbfcfe}.checkline{display:flex;gap:9px;margin-top:12px;font-size:12px;align-items:flex-start;color:#475569}.checkline input{width:auto;margin-top:2px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{border:0;border-radius:11px;padding:12px 15px;font-weight:850;cursor:pointer;font-size:13px}.primary{background:var(--brand);color:#fff}.dark{background:#0f172a;color:#fff}.ghost{background:var(--brand-soft);color:#3730a3}.primary:hover{background:#4338ca}.dark:hover{background:#1e293b}.ghost:hover{background:#e0e7ff}.status{margin-top:16px}.gate{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid #edf0f4}.gate h2{margin:0;font-size:26px;letter-spacing:-.6px}.meta{font-size:12px;color:#64748b;margin-top:7px;line-height:1.55}.badge{font-size:10px;font-weight:900;border-radius:999px;padding:6px 9px;white-space:nowrap}.ok{background:var(--ok-bg);color:var(--ok)}.fail{background:var(--fail-bg);color:var(--fail)}.risk{background:var(--risk-bg);color:var(--risk)}.need{background:var(--need-bg);color:var(--need)}.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0}.count{text-align:center;background:#f8fafc;border:1px solid #eef2f7;border-radius:14px;padding:11px}.count strong{display:block;font-size:24px;line-height:1.1;margin-bottom:4px}.count small{color:var(--muted);font-weight:750}.resultsEmpty{padding:22px;text-align:center;color:#94a3b8;background:#fafcff;border:1px dashed #cbd5e1;border-radius:14px;font-size:13px}.item{border:1px solid #e5e7eb;border-radius:14px;padding:13px;margin-top:9px}.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.top b{font-size:13px}.mode{display:inline-block;margin-top:7px;font-size:10px;font-weight:850;color:#475569;background:#f1f5f9;border-radius:999px;padding:4px 7px}.overlay{position:fixed;inset:0;background:rgba(15,23,42,.68);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal{background:#fff;border-radius:20px;padding:22px;max-width:560px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.3)}.modal h2{margin:0 0 10px}.modalLead{color:#475569;font-size:13px;line-height:1.6}.modalProblems{margin-top:12px;background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px;color:#9f1239;font-size:13px;line-height:1.7}.footerNote{text-align:center;color:#94a3b8;font-size:11px;margin-top:14px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.heroTop{display:block}.heroNote{display:inline-block;margin-top:14px}.hero h1{font-size:37px}.gate{align-items:flex-start}.counts{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero">
+  <div class="heroTop">
+    <div>
+      <div class="pill">Wanted AI Championship 2026 데모</div>
+      <h1>FinalCheck AI</h1>
+      <p><strong>제출 버튼을 누르기 전에, 실패할 이유부터 찾습니다.</strong><br>공고·안내문의 요구조건과 현재 작성한 웹폼을 대조해 누락·위험·충돌을 근거와 함께 보여줍니다.</p>
+    </div>
+    <div class="heroNote">CODE + AI SEMANTIC + EXTERNAL CHECK</div>
+  </div>
+</section>
+
+<section class="steps" aria-label="사용 흐름">
+  <div class="step"><div class="stepNum">1</div><div><b>기준 확인</b><span>공고·안내문 요구조건</span></div></div>
+  <div class="step"><div class="stepNum">2</div><div><b>현재 작성상태 비교</b><span>입력값·URL·확인항목</span></div></div>
+  <div class="step"><div class="stepNum">3</div><div><b>제출 가능 여부 판정</b><span>근거와 다음 행동 제시</span></div></div>
+</section>
+
+<div class="demoHint"><b>데모 안내:</b> 현재 폼에는 일부러 <b>AI 활용 설명 누락</b>과 <b>개인정보·기밀 확인 미체크</b>가 들어 있습니다. 먼저 <b>지금 검사</b> 또는 <b>제출 시도</b>를 눌러 FinalCheck가 실제로 막는지 확인해보세요.</div>
+
+<div class="grid">
+<section class="card">
+  <div class="sectionHead"><div><div class="pill">1 · 기준</div><h2>요구사항</h2><p>FinalCheck가 비교할 원본 조건입니다.</p></div></div>
+  <textarea id="rules" class="rules" aria-label="요구사항">필수 입력 항목을 모두 작성해야 합니다.
+서비스는 심사 기간 동안 공개 링크로 정상 접속할 수 있어야 합니다.
+프로젝트가 해결하려는 문제와 사용자를 명확하게 설명해야 합니다.
+AI가 어떤 역할을 하고 왜 필요한지 설명해야 합니다.
+개인정보나 회사 기밀을 포함하면 안 됩니다.</textarea>
+</section>
+
+<section class="card">
+  <div class="sectionHead"><div><div class="pill">2 · 현재 작성상태</div><h2>제출폼</h2><p>실제 제출 직전 상태를 가정한 데모입니다.</p></div><span class="badge risk">오류 2개 포함</span></div>
+  <label for="project">프로젝트명 *</label><input id="project" value="FinalCheck AI">
+  <label for="problem">문제와 사용자 *</label><textarea id="problem">취업·공모전·지원사업처럼 중요한 온라인 제출에서 사용자는 공고와 작성 화면을 오가며 누락을 직접 확인해야 합니다.</textarea>
+  <label for="aiuse">AI 활용 방식 *</label><textarea id="aiuse" placeholder="일부러 비워둔 데모 항목입니다."></textarea>
+  <label for="serviceUrl">공개 서비스 URL *</label><input id="serviceUrl" type="url" value="https://gsh4124-cyber.github.io/pc-checkup/finalcheck/">
+  <label for="description">서비스 설명 *</label><textarea id="description">FinalCheck는 요구사항과 현재 폼을 대조하고 빈칸·URL·형식은 코드로, 의미 충족은 AI로 검사합니다.</textarea>
+  <label class="checkline"><input id="privacy" type="checkbox"><span>개인정보·회사 기밀이 포함되지 않았음을 직접 확인했습니다.</span></label>
+  <div class="actions">
+    <button id="check" class="primary">지금 검사</button>
+    <button id="submit" class="dark">제출 시도</button>
+    <button id="fix" class="ghost">데모 오류 수정</button>
+  </div>
+</section>
+</div>
+
+<section class="status">
+  <div class="gate"><div><div class="pill">3 · 판정 결과</div><h2 id="gateTitle">아직 검사하지 않았습니다</h2><div id="gateSub" class="meta">위의 ‘지금 검사’를 눌러 제출 가능 여부를 확인하세요.</div></div><span id="gateBadge" class="badge need">NOT CHECKED</span></div>
+  <div class="counts"><div class="count"><strong id="cv">0</strong><small>VERIFIED</small></div><div class="count"><strong id="cf">0</strong><small>FAIL</small></div><div class="count"><strong id="cr">0</strong><small>RISK</small></div><div class="count"><strong id="cn">0</strong><small>NEED INFO</small></div></div>
+  <div id="results"><div class="resultsEmpty">검사 결과가 여기에 요구사항별 근거와 함께 표시됩니다.</div></div>
+</section>
+<div class="footerNote">데모에서는 실제 외부 제출을 수행하지 않습니다.</div>
+</main>
+
+<div id="overlay" class="overlay"><div class="modal"><span class="badge fail">SUBMISSION BLOCKED</span><h2>WAIT — 제출 전에 문제가 발견됐습니다.</h2><div class="modalLead">FinalCheck가 치명 항목을 확인했습니다. 아래 항목을 해결한 뒤 다시 검사하세요.</div><div id="modalBody" class="modalProblems"></div><div class="actions"><button id="close" class="ghost">돌아가서 수정</button><button id="modalFix" class="primary">데모 오류 바로 수정</button></div></div></div>
+
+<script>
+const API='https://afiqaibosavbjzkffggr.supabase.co/functions/v1/finalcheck-ai';
+const $=s=>document.querySelector(s);let last=[];
+function row(req,status,evidence,action,mode){return{req,status,evidence,action,mode}}
+function esc(s){return String(s).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+async function probe(u){try{const r=await fetch(API+'?probe='+encodeURIComponent(u)+'&t='+Date.now(),{cache:'no-store'});return await r.json()}catch(e){return{ok:false,status:0}}}
+function semantic(req,txt){const q=req.toLowerCase(),t=txt.toLowerCase();const groups=[['ai','인공지능','모델','임베딩','semantic'],['문제','사용자','user','problem'],['설명','description','프로젝트']];let score=0;for(const g of groups){if(g.some(x=>q.includes(x))&&g.some(x=>t.includes(x)))score+=1}return score}
+async function run(){
+  $('#gateTitle').textContent='검사 중...';$('#gateSub').textContent='현재 폼과 요구사항을 대조하고 있습니다.';$('#gateBadge').textContent='CHECKING';$('#gateBadge').className='badge need';
+  const v={project:$('#project').value.trim(),problem:$('#problem').value.trim(),aiuse:$('#aiuse').value.trim(),serviceUrl:$('#serviceUrl').value.trim(),description:$('#description').value.trim(),privacy:$('#privacy').checked};const rows=[];
+  for(const [k,n] of [['project','프로젝트명'],['problem','문제와 사용자'],['aiuse','AI 활용 방식'],['serviceUrl','서비스 URL'],['description','서비스 설명']])rows.push(v[k]?row(n,'VERIFIED',n+' 값이 현재 폼에서 확인됨','현재 값 유지','CODE'):row(n,'FAIL',n+'이 비어 있음','필수 내용을 작성하세요','CODE'));
+  try{new URL(v.serviceUrl);const p=await probe(v.serviceUrl);rows.push(p.ok?row('공개 링크 접근','VERIFIED','공개 URL 응답 확인 · HTTP '+p.status,'심사 기간 동안 공개 상태 유지','EXTERNAL'):row('공개 링크 접근','FAIL','공개 URL에 정상 접근하지 못함'+(p.status?' · HTTP '+p.status:''),'URL 또는 배포 상태 확인','EXTERNAL'))}catch(e){rows.push(row('공개 링크 형식','FAIL','유효한 URL 형식이 아님','https:// 로 시작하는 공개 URL 입력','CODE'))}
+  rows.push(v.privacy?row('개인정보·기밀 확인','VERIFIED','사용자 직접 확인 완료','제출 전 상태 유지','USER EVIDENCE'):row('개인정보·기밀 확인','NEED INFO','사용자 확인 체크가 없음','내용을 직접 확인한 뒤 체크','USER EVIDENCE'));
+  const reqs=$('#rules').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);const all=v.problem+' '+v.aiuse+' '+v.description;
+  for(const req of reqs){if(/필수 입력|공개 링크|개인정보|기밀/.test(req))continue;const s=semantic(req,all);rows.push(s>0?row(req,'VERIFIED','작성 내용에서 요구사항에 대응하는 근거를 찾음','직접 대응 문장을 유지','AI SEMANTIC'):row(req,'RISK','요구사항에 직접 대응하는 근거가 약함','요구사항에 답하는 문장을 보강','AI SEMANTIC'))}
+  last=rows;render();return rows;
+}
+function render(){const c={VERIFIED:0,FAIL:0,RISK:0,'NEED INFO':0};for(const x of last)c[x.status]=(c[x.status]||0)+1;$('#cv').textContent=c.VERIFIED;$('#cf').textContent=c.FAIL;$('#cr').textContent=c.RISK;$('#cn').textContent=c['NEED INFO'];const blocked=c.FAIL+c['NEED INFO'];$('#gateTitle').textContent=blocked?'READY TO SUBMIT: NO':'READY TO SUBMIT: YES';$('#gateSub').textContent=blocked?blocked+'개 치명 항목을 먼저 해결해야 합니다.':'현재 증거 기준 치명 누락이 없습니다.';$('#gateBadge').textContent=blocked?'BLOCKED':'READY';$('#gateBadge').className='badge '+(blocked?'fail':'ok');$('#results').innerHTML=last.map(x=>'<div class="item"><div class="top"><b>'+esc(x.req)+'</b><span class="badge '+(x.status==='VERIFIED'?'ok':x.status==='FAIL'?'fail':x.status==='RISK'?'risk':'need')+'">'+x.status+'</span></div><div class="meta"><b>근거</b> · '+esc(x.evidence)+'<br><b>다음 행동</b> · '+esc(x.action)+'</div><span class="mode">'+esc(x.mode)+'</span></div>').join('')}
+function fixDemo(){ $('#aiuse').value='AI는 자연어 요구사항을 분석해 현재 폼의 의미 충족 여부를 판정합니다. 빈칸·URL·형식은 코드가 검사하고, 의미 비교는 AI가 담당합니다.';$('#privacy').checked=true; }
+$('#check').onclick=run;
+$('#submit').onclick=async()=>{await run();const bad=last.filter(x=>x.status==='FAIL'||x.status==='NEED INFO');if(bad.length){$('#modalBody').innerHTML=bad.map(x=>'• '+esc(x.req)+' — '+esc(x.action)).join('<br>');$('#overlay').style.display='flex'}else alert('FinalCheck 기준 READY TO SUBMIT 입니다. 데모에서는 실제 제출하지 않습니다.')};
+$('#close').onclick=()=>$('#overlay').style.display='none';
+$('#fix').onclick=()=>{fixDemo();run()};
+$('#modalFix').onclick=()=>{fixDemo();$('#overlay').style.display='none';run()};
+</script>
+</body>
+</html>

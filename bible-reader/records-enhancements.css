@@ -1,0 +1,12 @@
+.notebook-tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.notebook-tabs button{min-width:0;padding-inline:6px;font-size:13px;white-space:nowrap}
+.notebook-data-tools{display:flex;justify-content:flex-end;gap:7px;padding:10px 14px 0}
+.notebook-data-tools button{padding:6px 9px;border-color:var(--line);color:var(--muted);background:transparent;font-size:12px}
+.notebook-data-tools button:hover{color:var(--text);background:var(--hover)}
+.chapter-record-item{min-height:70px;align-content:center}
+.record-note-text{margin:2px 0 0!important;padding:9px 10px;border-left:3px solid #b18a28;border-radius:6px;background:color-mix(in srgb,var(--hover) 70%,transparent);color:var(--text);font:13px/1.6 system-ui,sans-serif!important}
+.saved-record-item .notebook-item-actions,.highlight-record-item .notebook-item-actions,.chapter-record-item .notebook-item-actions{margin-top:2px}
+.notebook-backdrop{position:fixed;inset:0;z-index:129;background:rgba(0,0,0,.04)}
+.record-note-backdrop{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18);backdrop-filter:blur(1px)}
+.record-note-backdrop .record-note-editor{position:relative;left:auto;top:auto;transform:none;z-index:141}
+@media(max-width:430px){.notebook-tabs button{font-size:12px;padding-inline:3px}.notebook-data-tools{justify-content:stretch}.notebook-data-tools button{flex:1}}

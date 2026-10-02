@@ -1,0 +1,60 @@
+name: RefundProof Image OCR Upgrade
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refundproof-ocr.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add image and scanned-PDF OCR support
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('refundproof/wanted-demo.html')
+          s = p.read_text(encoding='utf-8')
+
+          s = s.replace('WANTED_DEMO_V10', 'WANTED_DEMO_V11')
+          s = s.replace('PDF·문서 올리기', '이미지·PDF·문서 올리기')
+          s = s.replace('PDF·TXT·MD를 지원합니다. 텍스트가 들어있는 PDF는 브라우저에서 바로 읽습니다.', 'JPG·PNG·WEBP·PDF·TXT·MD를 지원합니다. 사진·스크린샷과 스캔 PDF는 OCR로 읽습니다.')
+
+          old_accept = 'accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"'
+          new_accept = 'accept=".pdf,.txt,.md,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp,text/plain,text/markdown"'
+          s = s.replace(old_accept, new_accept)
+
+          marker = "async function extractPdfText(file){const pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';const data=new Uint8Array(await file.arrayBuffer());const pdf=await pdfjs.getDocument({data}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();text+=c.items.map(i=>i.str).join(' ')+'\\n'}if(text.trim().length<20)throw new Error('이 PDF에서 읽을 수 있는 텍스트가 거의 없습니다. 스캔 이미지 PDF는 현재 데모에서 지원하지 않습니다.');return text}"
+
+          replacement = r"""let tesseractModule=null;
+async function getTesseract(){if(tesseractModule)return tesseractModule;const t=await import('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.esm.min.js');tesseractModule=t;return t}
+async function ocrSource(source,label='이미지'){const t=await getTesseract();$('aiStatus').className='status';$('aiStatus').textContent=`${label}에서 글자를 읽고 있어요…`;const r=await t.recognize(source,'kor+eng',{logger:m=>{if(m.status==='recognizing text'&&m.progress!=null)$('aiStatus').textContent=`${label} OCR ${Math.round(m.progress*100)}%`}});const text=r?.data?.text||'';if(text.trim().length<8)throw new Error(`${label}에서 충분한 글자를 읽지 못했습니다. 더 선명한 이미지로 다시 시도해 주세요.`);return text}
+async function extractImageText(file){return await ocrSource(file,'이미지')}
+async function extractPdfText(file){const pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';const data=new Uint8Array(await file.arrayBuffer());const pdf=await pdfjs.getDocument({data}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();text+=c.items.map(i=>i.str).join(' ')+'\n'}if(text.trim().length>=20)return text;let ocr='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const viewport=page.getViewport({scale:2});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d',{willReadFrequently:true});await page.render({canvasContext:ctx,viewport}).promise;ocr+=await ocrSource(canvas,`스캔 PDF ${p}/${pdf.numPages}페이지`)+'\n'}return ocr} """
+
+          if marker not in s:
+              raise SystemExit('extractPdfText marker not found')
+          s = s.replace(marker, replacement)
+
+          old_loader = "if(f.type==='application/pdf'||/\\.pdf$/i.test(f.name))text=await extractPdfText(f);else if(/text|markdown/.test(f.type)||/.+\\.(txt|md)$/i.test(f.name))text=await f.text();else throw new Error('현재 데모에서는 PDF, TXT, MD 파일을 지원합니다.');"
+          new_loader = "if(f.type==='application/pdf'||/\\.pdf$/i.test(f.name))text=await extractPdfText(f);else if(/^image\\//.test(f.type)||/.+\\.(jpe?g|png|webp)$/i.test(f.name))text=await extractImageText(f);else if(/text|markdown/.test(f.type)||/.+\\.(txt|md)$/i.test(f.name))text=await f.text();else throw new Error('JPG, PNG, WEBP, PDF, TXT, MD 파일을 지원합니다.');"
+          if old_loader not in s:
+              raise SystemExit('loadDocFile marker not found')
+          s = s.replace(old_loader, new_loader)
+
+          p.write_text(s, encoding='utf-8')
+      - name: Commit OCR upgrade
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add refundproof/wanted-demo.html
+          git commit -m 'Support images and scanned PDFs in RefundProof'
+          git push
+# trigger-2026-09-16-2

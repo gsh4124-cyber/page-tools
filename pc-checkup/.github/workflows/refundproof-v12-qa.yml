@@ -1,0 +1,65 @@
+name: RefundProof V12 Submission QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'refundproof/wanted-demo.html'
+      - '.github/workflows/refundproof-v12-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for public V12
+        run: |
+          set -euo pipefail
+          url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/wanted-demo.html'
+          for i in {1..84}; do
+            body=$(curl -fsSL --max-time 20 "$url" 2>/dev/null || true)
+            if printf '%s' "$body" | grep -q 'WANTED_DEMO_V12' \
+              && printf '%s' "$body" | grep -q 'REFUND AUDIT · CONSUMER SIDE' \
+              && printf '%s' "$body" | grep -q '사진·파일 올리기' \
+              && printf '%s' "$body" | grep -q 'tesseract.js@5.1.1' \
+              && printf '%s' "$body" | grep -q 'image/\\*' \
+              && printf '%s' "$body" | grep -q 'BASIC:\[60000,60000,60000,80000,100000,120000\]'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'RefundProof V12 did not become public in time.'
+          exit 1
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Browser smoke and core calculation
+        run: |
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          const assert=(c,m)=>{ if(!c) throw new Error(m); };
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            await page.goto('https://gsh4124-cyber.github.io/pc-checkup/refundproof/wanted-demo.html',{waitUntil:'domcontentloaded',timeout:60000});
+            assert((await page.locator('main').getAttribute('data-build'))==='WANTED_DEMO_V12','V12 marker');
+            assert((await page.locator('#bookingFile').getAttribute('accept')).includes('image/*'),'booking image input');
+            assert((await page.locator('#quoteFile').getAttribute('accept')).includes('image/*'),'quote image input');
+            assert((await page.locator('text=사진·파일 올리기').count())>=2,'unified upload buttons');
+            assert((await page.locator('.filebtn.camera:visible').count())===0,'camera-specific buttons hidden');
+            await page.click('#audit');
+            assert((await page.locator('#expected').textContent()).replace(/[^0-9]/g,'')==='575000','verified refund amount');
+            assert((await page.locator('#delta').textContent()).replace(/[^0-9]/g,'')==='27000','gap amount');
+            assert((await page.locator('#status').textContent()).includes('차이'),'gap status');
+            console.log('PASS V12 public UI + upload UX + deterministic refund flow');
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS

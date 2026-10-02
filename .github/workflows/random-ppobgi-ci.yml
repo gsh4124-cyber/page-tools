@@ -1,0 +1,94 @@
+name: Random Ppobgi Monorepo QA
+
+on:
+  push:
+    branches: ["migration/page-tools-monorepo"]
+    paths:
+      - 'random-ppobgi/**'
+      - '.github/workflows/random-ppobgi-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: random-ppobgi-monorepo-qa
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: random-ppobgi
+
+jobs:
+  static-smoke:
+    name: Static Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Security guardrails
+        run: python3 security_guardrails.py
+      - name: JavaScript syntax
+        run: |
+          node --check full-app-loader.js
+          node --check locales.js
+          node --check i18n-v2.js
+          node --check language-switch.js
+          node --check info-i18n.js
+          node --check experience.js
+          node --check functions/_middleware.js
+      - name: Locale catalog and routes
+        run: |
+          set -eu
+          for lang in en ja es zh fr de pt id hi pl it nl tr vi th ar; do
+            grep -q "^${lang}:{" locales.js
+            test -f "$lang/index.html"
+            grep -q 'rel="canonical"' "$lang/index.html"
+            grep -q '/full-app-loader.js' "$lang/index.html"
+          done
+          grep -q 'window.RandomPickerLocales=P' locales.js
+      - name: Sitemap and SEO contract
+        run: |
+          set -eu
+          grep -q '<loc>https://random-ppobgi.pages.dev/</loc>' sitemap.xml
+          for lang in en ja es zh fr de pt id hi pl it nl tr vi th ar; do
+            grep -q "<loc>https://random-ppobgi.pages.dev/$lang/</loc>" sitemap.xml
+          done
+          grep -q 'hreflang' functions/_middleware.js
+          grep -q 'x-default' functions/_middleware.js
+          grep -q 'canonical' functions/_middleware.js
+
+  browser-smoke:
+    name: Browser Behavior QA
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/random-picker-http.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/en/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/random-picker-http.log
+          exit 1
+      - name: Run multilingual browser smoke
+        run: node tests/i18n-browser-smoke.mjs
+
+  quality-gate:
+    name: Combined Quality Gate
+    if: always()
+    needs: [static-smoke, browser-smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require both checks
+        working-directory: .
+        env:
+          STATIC_RESULT: ${{ needs.static-smoke.result }}
+          BROWSER_RESULT: ${{ needs.browser-smoke.result }}
+        run: |
+          test "$STATIC_RESULT" = success
+          test "$BROWSER_RESULT" = success

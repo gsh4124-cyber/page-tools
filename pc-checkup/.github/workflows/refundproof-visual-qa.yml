@@ -1,0 +1,78 @@
+name: RefundProof Visual QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'refundproof/wanted-demo.html'
+      - '.github/workflows/refundproof-visual-qa.yml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-qa:
+    name: Desktop + mobile presentation QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for public Wanted demo
+        run: |
+          set -euo pipefail
+          url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/wanted-demo.html'
+          for i in {1..50}; do
+            body=$(curl -fsSL --max-time 20 "$url" 2>/dev/null || true)
+            if printf '%s' "$body" | grep -q 'WANTED_DEMO_V1'; then exit 0; fi
+            sleep 5
+          done
+          echo 'Wanted demo did not become public.'
+          exit 1
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Check responsive layout and capture screenshots
+        run: |
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          const fs=require('fs');
+          const assert=(c,m)=>{if(!c)throw new Error(m)};
+          const url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/wanted-demo.html';
+          (async()=>{
+            fs.mkdirSync('visual-qa',{recursive:true});
+            const browser=await chromium.launch({headless:true});
+            for(const v of [
+              {name:'desktop',width:1440,height:1000},
+              {name:'mobile',width:390,height:844}
+            ]){
+              const page=await browser.newPage({viewport:{width:v.width,height:v.height}});
+              await page.goto(url,{waitUntil:'networkidle',timeout:60000});
+              assert((await page.locator('h1').textContent()).trim()==='RefundProof AI',`${v.name}: title`);
+              assert(await page.locator('#demo').isVisible(),`${v.name}: demo button hidden`);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+              assert(overflow<=1,`${v.name}: horizontal overflow ${overflow}px`);
+              await page.click('#demo');
+              await page.waitForFunction(()=>document.querySelector('#status')?.textContent.trim()==='GAP',null,{timeout:120000});
+              assert((await page.textContent('#gapAmount')).includes('77,000원'),`${v.name}: gap not visible`);
+              assert(await page.locator('#pack').isVisible(),`${v.name}: evidence pack hidden`);
+              assert(await page.locator('#draft').isVisible(),`${v.name}: draft hidden`);
+              const packBox=await page.locator('#pack').boundingBox();
+              assert(packBox && packBox.width<=v.width,`${v.name}: pack width overflow`);
+              await page.screenshot({path:`visual-qa/refundproof-${v.name}.png`,fullPage:true});
+              console.log(`PASS ${v.name}: no overflow + GAP + evidence pack + draft`);
+              await page.close();
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+      - name: Upload visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: refundproof-visual-qa
+          path: visual-qa/*.png
+          retention-days: 14

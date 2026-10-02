@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bible-reader-1iz.pages.dev/sitemap.xml

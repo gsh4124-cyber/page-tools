@@ -1,0 +1,52 @@
+.language-selector-wrap{display:flex;align-items:center;min-width:0}.language-icon{display:none!important}.language-select{width:100%;min-width:0;max-width:none}.location-controls select,.location-controls input,.location-controls button{min-width:0}.location-controls select{white-space:nowrap;text-overflow:ellipsis}.top-search{min-width:0}
+
+/* Translation, language and search always share one row. */
+.location-controls>select,.language-selector-wrap select{height:42px!important;padding-top:0!important;padding-bottom:0!important;line-height:40px!important;text-align:center;text-align-last:center;vertical-align:middle}.location-controls>select option,.language-selector-wrap select option{text-align:start}.location-controls .top-search input{text-align:left!important}
+.location-controls .top-search{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:0!important;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:color-mix(in srgb,var(--panel) 82%,transparent);align-items:stretch;height:42px!important}
+.location-controls .top-search input,.location-controls .top-search input:focus{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;height:40px!important;line-height:40px!important;padding:0 12px!important}
+.location-controls .top-search button{border:0!important;border-left:1px solid var(--line)!important;border-radius:0!important;background:transparent!important;padding-inline:11px!important;height:40px!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap}.location-controls .top-search button:hover{background:var(--hover)!important}
+.location-controls>select,.language-selector-wrap select{background:color-mix(in srgb,var(--panel) 74%,transparent)}
+.toolbar #compareToggle{border-color:var(--line);background:color-mix(in srgb,var(--panel) 76%,transparent);font-weight:700}.toolbar .notebook-button{border-color:var(--line);background:color-mix(in srgb,var(--panel) 64%,transparent)}
+.chapter-heading h1,.chapter-heading .chapter-bookmark-button{top:34%!important}.chapter-heading h1{word-spacing:normal!important;font-size:clamp(46px,3vw,56px)!important;line-height:1.15!important;white-space:nowrap!important}
+
+/* The navigation row itself never wraps, regardless of viewport width. */
+.centered-nav .location-controls{display:grid!important;grid-template-columns:minmax(0,1.05fr) minmax(0,.68fr) minmax(0,1.55fr)!important;grid-template-rows:42px!important;gap:8px!important;width:100%!important;min-width:0!important;align-items:stretch!important}
+.centered-nav #translationSelect{grid-column:1!important;grid-row:1!important;width:100%!important;min-width:0!important;max-width:none!important;margin:0!important}
+.centered-nav .language-selector-wrap{grid-column:2!important;grid-row:1!important;width:100%!important;min-width:0!important;max-width:none!important;margin:0!important}
+.centered-nav .top-search{grid-column:3!important;grid-row:1!important;width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;justify-self:stretch!important}
+.centered-nav #translationSelect,.centered-nav .language-selector-wrap,.centered-nav .top-search{box-sizing:border-box!important}
+
+@media(min-width:761px){
+  .topbar{padding-block:9px}
+  .topbar-inner.centered-nav{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;width:min(1500px,100%)!important;align-items:center}
+  .centered-nav .location-controls{grid-template-columns:minmax(150px,1.05fr) minmax(105px,.68fr) minmax(220px,1.55fr)!important}
+  .toolbar{display:flex!important;gap:4px!important;align-items:center!important;justify-self:end!important;width:auto!important;min-width:max-content!important;max-width:none!important;margin:0!important}
+  .toolbar #compareToggle{min-width:86px!important}.toolbar .quick-tool{min-width:36px!important;padding-inline:0!important}.toolbar .notebook-button{min-width:76px!important}
+}
+
+@media(min-width:761px) and (max-width:1040px){
+  .topbar{padding:8px 10px}
+  .topbar-inner.centered-nav{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;width:100%!important}
+  .centered-nav .location-controls{grid-template-columns:minmax(140px,1.05fr) minmax(96px,.68fr) minmax(210px,1.55fr)!important}
+  .toolbar{align-self:flex-end!important;justify-self:auto!important;max-width:100%!important;overflow-x:auto!important;scrollbar-width:none}.toolbar::-webkit-scrollbar{display:none}
+}
+
+@media(max-width:760px){
+  .topbar{padding:8px}
+  .topbar-inner.centered-nav{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important}
+  .centered-nav .location-controls{grid-template-columns:minmax(0,1.02fr) minmax(0,.62fr) minmax(0,1.48fr)!important;gap:6px!important}
+  .location-controls>select,.language-selector-wrap select{padding-left:5px!important;padding-right:18px!important;font-size:12px!important}
+  .language-select{padding-inline:4px 16px!important;font-size:11px!important}
+  .location-controls .top-search input,.location-controls .top-search input:focus{padding-inline:7px!important;font-size:12px!important}
+  .location-controls .top-search button{padding-inline:7px!important;font-size:12px!important}
+  .chapter-heading h1{font-size:clamp(22px,6.8vw,34px)!important;line-height:1!important;white-space:nowrap!important;word-break:keep-all!important;overflow:visible!important}
+  .toolbar{width:100%;justify-content:flex-end!important;overflow-x:auto;scrollbar-width:none}.toolbar::-webkit-scrollbar{display:none}.toolbar .toolbar-divider{display:none}
+}
+
+@media(max-width:420px){
+  .topbar{padding-inline:5px}
+  .centered-nav .location-controls{grid-template-columns:minmax(0,1fr) minmax(0,.58fr) minmax(0,1.42fr)!important;gap:4px!important}
+  .location-controls>select,.language-selector-wrap select{font-size:11px!important;padding-left:3px!important;padding-right:15px!important}
+  .location-controls .top-search input,.location-controls .top-search input:focus{padding-inline:5px!important;font-size:11px!important}
+  .location-controls .top-search button{padding-inline:5px!important;font-size:11px!important}
+}

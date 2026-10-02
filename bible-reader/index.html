@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="google-site-verification" content="EF2VO-iQ2-aE8XbWLEJMWtKK4ZJ64HwWcraIycWCmkI" />
+  <meta name="naver-site-verification" content="29ad848c2a7a71d6f9ae5b2a750b5d3fbcb6cfc6" />
+  <meta name="description" content="개역한글과 여러 공개 역본을 편하게 읽고 비교할 수 있는 PC 중심 성경 읽기 웹서비스입니다." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://bible-reader-1iz.pages.dev/" />
+  <link rel="alternate" hreflang="ko" href="https://bible-reader-1iz.pages.dev/" />
+  <link rel="alternate" hreflang="en" href="https://bible-reader-1iz.pages.dev/en/" />
+  <link rel="alternate" hreflang="fr" href="https://bible-reader-1iz.pages.dev/fr/" />
+  <link rel="alternate" hreflang="de" href="https://bible-reader-1iz.pages.dev/de/" />
+  <link rel="alternate" hreflang="zh" href="https://bible-reader-1iz.pages.dev/zh/" />
+  <link rel="alternate" hreflang="ru" href="https://bible-reader-1iz.pages.dev/ru/" />
+  <link rel="alternate" hreflang="la" href="https://bible-reader-1iz.pages.dev/la/" />
+  <link rel="alternate" hreflang="pt" href="https://bible-reader-1iz.pages.dev/pt/" />
+  <link rel="alternate" hreflang="ar" href="https://bible-reader-1iz.pages.dev/ar/" />
+  <link rel="alternate" hreflang="x-default" href="https://bible-reader-1iz.pages.dev/" />
+  <title>성경 읽기 · 개역한글 및 다국어 역본 비교</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="features.css" />
+  <link rel="stylesheet" href="ui-fix.css" />
+  <link rel="stylesheet" href="i18n-layout.css" />
+  <link rel="stylesheet" href="records-enhancements.css" />
+  <link rel="stylesheet" href="verse-multiselect.css" />
+  <link rel="stylesheet" href="reader-experience.css" />
+  <link rel="stylesheet" href="title-navigator.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner centered-nav">
+      <div class="location-controls" aria-label="성경 읽기 설정">
+        <select id="translationSelect" class="translation-select" aria-label="성경 버전"><option value="krv1961">개역한글</option><option value="kjv">KJV</option><option value="web">WEB</option><option value="asv">ASV</option><option value="lsg">Louis Segond 1910</option><option value="luth1912">Lutherbibel 1912</option><option value="cuv">和合本 CUV</option><option value="synodal">Синодальный</option><option value="vulg">Vulgata</option></select>
+        <select id="bookSelect" aria-label="성경책" hidden></select>
+        <select id="chapterSelect" aria-label="장" hidden></select>
+        <select id="verseSelect" aria-label="절" hidden><option value="1">1절</option></select>
+        <form id="searchForm" class="top-search" role="search"><input id="searchInput" list="bookList" type="search" autocomplete="off" placeholder="검색" aria-label="성경 검색" /><datalist id="bookList"></datalist><button id="searchButton" type="submit">검색</button></form>
+      </div>
+      <div class="toolbar" aria-label="읽기 도구"><button id="compareToggle" class="text-button primary-tool" type="button" aria-pressed="false">비교</button><button id="fontDown" class="quick-tool">가−</button><button id="fontUp" class="quick-tool">가+</button><button id="widthToggle" class="quick-tool">↔</button><button id="pageViewToggle" class="quick-tool page-view-toggle" type="button" aria-label="양면 보기" title="양면 보기">▯</button><button id="themeToggle" class="quick-tool" aria-label="테마">◐</button></div>
+    </div>
+  </header>
+  <main><section class="reader-shell">
+    <aside class="ad-slot ad-slot-top" data-ad-slot="top" aria-label="광고 영역"><span>광고</span></aside>
+    <section id="searchPanel" class="search-panel" hidden><div class="search-panel-head"><p id="searchSummary" class="search-summary"></p><button id="closeSearch" type="button" class="search-close">닫기</button></div><div id="searchResults" class="search-results"></div></section>
+    <div class="chapter-heading"><button id="prevChapterTitle" class="title-chapter-nav" type="button">← 이전 장</button><h1 id="chapterTitle">요한복음 3장</h1><button id="nextChapterTitle" class="title-chapter-nav" type="button">다음 장 →</button></div>
+    <section id="comparePanel" class="compare-panel" hidden aria-label="역본 비교">
+      <div class="compare-head compare-head-selects"><div class="compare-translation-block"><select id="leftTranslation" aria-label="왼쪽 비교 역본"></select></div><button id="swapTranslations" type="button" class="swap-button" title="좌우 역본 바꾸기">⇄</button><div class="compare-translation-block"><select id="rightTranslation" aria-label="오른쪽 비교 역본"></select></div></div>
+      <div id="compareStatus" class="compare-status"></div><div id="compareRows" class="compare-rows"></div>
+    </section>
+    <div id="singleReader"><div id="status" class="status">본문을 불러오는 중…</div><article id="verses" class="verses"></article></div>
+    <nav class="chapter-nav"><button id="prevChapterBottom">← 이전 장</button><button id="nextChapterBottom">다음 장 →</button></nav>
+    <aside class="ad-slot ad-slot-bottom" data-ad-slot="bottom" aria-label="광고 영역"><span>광고</span></aside>
+  </section></main><footer><p id="translationAttribution">개역한글 · 대한성서공회</p><p class="source-note">외국어 역본은 공개 도메인 또는 자유 재배포가 확인된 데이터만 제공합니다.</p></footer>
+  <script src="app.js" defer></script><script src="extra-translations.js" defer></script><script src="local-file-language.js" defer></script><script src="i18n.js" defer></script><script src="reference.js" defer></script><script src="book-finder.js" defer></script><script src="compare.js" defer></script><script src="verse-picker.js" defer></script><script src="title-navigator.js" defer></script><script src="clipboard.js" defer></script><script src="title-nav.js" defer></script><script src="exact-search.js" defer></script><script src="verse-tools.js" defer></script><script src="records-enhancements.js" defer></script><script src="verse-multiselect.js" defer></script><script src="reader-experience.js" defer></script><script src="runtime-ui-i18n.js" defer></script><script src="analytics.js" defer></script><script src="ui-language-sync.js" defer></script>
+</body></html>

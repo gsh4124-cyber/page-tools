@@ -1,0 +1,66 @@
+name: RefundProof AI Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'refundproof/**'
+      - '.github/workflows/refundproof-ai-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-smoke:
+    name: RefundProof AI · Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for deployed AI build
+        run: |
+          set -euo pipefail
+          url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/'
+          for i in {1..60}; do
+            body=$(curl -fsSL --max-time 20 "$url" 2>/dev/null || true)
+            if printf '%s' "$body" | grep -q 'AI로 근거문장 찾기'; then
+              echo 'RefundProof AI build is live.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'RefundProof AI build did not become available.'
+          exit 1
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run browser-local AI extraction
+        run: |
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            page.on('console',m=>console.log('BROWSER',m.type(),m.text()));
+            await page.goto('https://gsh4124-cyber.github.io/pc-checkup/refundproof/',{waitUntil:'networkidle',timeout:60000});
+            await page.click('#extract');
+            await page.waitForFunction(()=>{
+              const t=document.querySelector('#aiStatus')?.textContent||'';
+              return t.includes('AI 추출 완료') || t.includes('AI 모델 로드 실패');
+            },null,{timeout:180000});
+            const state=(await page.locator('#aiStatus').textContent()).trim();
+            if(state.includes('AI 모델 로드 실패')) throw new Error(state);
+            if(!state.includes('AI 추출 완료')) throw new Error('AI extraction did not finish: '+state);
+            const evidence=await page.locator('#offeredEv').textContent();
+            if(!evidence.includes('AI 근거')) throw new Error('offered amount lacks AI evidence: '+evidence);
+            await page.click('#audit');
+            if((await page.locator('#status').textContent()).trim()!=='GAP') throw new Error('expected GAP after AI extraction');
+            console.log('RefundProof AI PASS:',state);
+            console.log('Evidence:',evidence);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS

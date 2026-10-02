@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마이크 테스트 | PC CHECKUP</title>
+<meta name="description" content="마이크 입력 레벨과 파형을 온라인에서 실시간으로 확인합니다.">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head><body>
+<header><div class="wrap nav">
+  <a class="brand" href="index.html">PC <span>CHECKUP</span></a>
+  <nav class="navlinks">
+    <a href="checkup.html">전체 점검</a><a href="keyboard.html">키보드</a><a href="mouse.html">마우스</a>
+    <a href="mic.html">마이크</a><a href="webcam.html">웹캠</a><a href="speaker.html">스피커</a><a href="display.html">모니터</a>
+  </nav>
+</div></header>
+
+<main><section class="tool-head"><div class="wrap"><span class="eyebrow">오디오 입력</span><h1>마이크 테스트</h1><p class="section-intro">권한을 허용하면 브라우저 안에서 실시간 입력 레벨과 파형을 확인합니다.</p></div></section>
+<div class="wrap tool-layout"><section class="toolbox">
+  <div class="controls"><button id="startMic" class="btn primary">마이크 시작</button><button id="stopMic" class="btn">정지</button></div>
+  <div class="notice">상태: <strong id="micStatus">대기 중</strong><br>장치: <span id="micDevice">—</span></div>
+  <div class="meter"><div id="micMeter"></div></div><canvas id="wave" class="wave" width="900" height="180"></canvas>
+</section><aside class="side"><div class="notice"><strong>개인정보</strong><br>이 MVP는 마이크 스트림을 서버로 전송하지 않습니다. 페이지를 닫거나 정지를 누르면 브라우저 입력을 종료합니다.</div><a class="btn primary" href="checkup.html">전체 점검으로 돌아가기</a></aside></div></main>
+<footer><div class="wrap">브라우저 안에서 바로 점검합니다. 카메라·마이크·키 입력은 서버로 전송하지 않는 구조를 기본으로 합니다.</div></footer></body></html>

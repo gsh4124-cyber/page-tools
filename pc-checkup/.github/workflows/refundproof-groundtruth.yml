@@ -1,0 +1,84 @@
+name: RefundProof Ground Truth QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'refundproof/index.html'
+      - '.github/workflows/refundproof-groundtruth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  groundtruth:
+    name: Official rules · AI extraction + calculation
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for monetary-parser public build
+        run: |
+          set -euo pipefail
+          url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/'
+          for i in {1..40}; do
+            body=$(curl -fsSL --max-time 20 "$url" 2>/dev/null || true)
+            if printf '%s' "$body" | grep -q '날짜 숫자와 금액도 분리합니다'; then exit 0; fi
+            sleep 5
+          done
+          echo 'RefundProof monetary-parser build did not become public.'
+          exit 1
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run two official-rule cases
+        run: |
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          const assert = (cond,msg)=>{ if(!cond) throw new Error(msg); };
+          const cases = [
+            {
+              name:'Korean Air V/W short-haul, 4-14 days',
+              booking:'환불대상 운임 및 세금: 635000원\n여행사 취급 수수료: 20000원',
+              quote:'판매처 제시 환불액: 525000원',
+              policy:'대한항공 한국 출발 국제선 단거리 일반석 예약 클래스 V, W는 출발 4~14일 전 환불 요청 시 환불 위약금 90,000원이 적용됩니다.',
+              expected:{base:635000,offered:525000,air:90000,ota:20000,result:525000}
+            },
+            {
+              name:'Asiana B/M short-haul, 60-15 days',
+              booking:'환불대상 운임 및 세금: 780000원',
+              quote:'판매처 제시 환불액: 730000원',
+              policy:'아시아나항공 한국 출발 국제선 전체 미사용 항공권에서 예약 클래스 B, M 단거리 항공권은 출발 60~15일 전 환불 접수 시 환불 위약금 50,000원이 적용됩니다.',
+              expected:{base:780000,offered:730000,air:50000,ota:0,result:730000}
+            }
+          ];
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            await page.goto('https://gsh4124-cyber.github.io/pc-checkup/refundproof/',{waitUntil:'networkidle',timeout:60000});
+            for(const c of cases){
+              await page.fill('#booking',c.booking);
+              await page.fill('#quote',c.quote);
+              await page.fill('#policy',c.policy);
+              await page.fill('#base','0'); await page.fill('#offered','0'); await page.fill('#airPenalty','0'); await page.fill('#otaFee','0'); await page.fill('#nonRefund','0');
+              await page.click('#extract');
+              await page.waitForFunction(()=>document.querySelector('#aiStatus')?.textContent.includes('AI 추출 완료'),null,{timeout:120000});
+              const vals={base:Number(await page.inputValue('#base')),offered:Number(await page.inputValue('#offered')),air:Number(await page.inputValue('#airPenalty')),ota:Number(await page.inputValue('#otaFee'))};
+              assert(vals.base===c.expected.base,`${c.name}: base ${vals.base}`);
+              assert(vals.offered===c.expected.offered,`${c.name}: offered ${vals.offered}`);
+              assert(vals.air===c.expected.air,`${c.name}: air penalty ${vals.air}`);
+              assert(vals.ota===c.expected.ota,`${c.name}: ota ${vals.ota}`);
+              const ev1=await page.textContent('#baseEv'),ev2=await page.textContent('#airPenaltyEv');
+              assert(ev1.includes('AI 근거')&&ev2.includes('AI 근거'),`${c.name}: AI evidence missing`);
+              await page.click('#audit');
+              assert((await page.textContent('#status')).trim()==='MATCH',`${c.name}: not MATCH`);
+              assert((await page.textContent('#expected')).replace(/[^0-9]/g,'')===String(c.expected.result),`${c.name}: expected refund mismatch`);
+              console.log('PASS',c.name,vals,'refund',c.expected.result);
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS

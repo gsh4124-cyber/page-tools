@@ -1,0 +1,61 @@
+name: RefundProof Safety QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'refundproof/index.html'
+      - '.github/workflows/refundproof-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safety:
+    name: Low-confidence fields stay unconfirmed
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for public monetary-parser build
+        run: |
+          set -euo pipefail
+          url='https://gsh4124-cyber.github.io/pc-checkup/refundproof/'
+          for i in {1..40}; do
+            body=$(curl -fsSL --max-time 20 "$url" 2>/dev/null || true)
+            if printf '%s' "$body" | grep -q '날짜 숫자와 금액도 분리합니다'; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify ambiguous data is not auto-confirmed
+        run: |
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          const assert=(c,m)=>{if(!c) throw new Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            await page.goto('https://gsh4124-cyber.github.io/pc-checkup/refundproof/',{waitUntil:'networkidle',timeout:60000});
+            await page.fill('#booking','환불대상 운임 및 세금: 635000원\n예약번호: 12345678');
+            await page.fill('#quote','판매처 제시 환불액: 535000원');
+            await page.fill('#policy','출발 4~14일 전에는 별도 규정이 적용될 수 있습니다. 여행사 수수료는 예약 상세에서 확인하세요.');
+            await page.fill('#base','0'); await page.fill('#offered','0'); await page.fill('#airPenalty','0'); await page.fill('#otaFee','0'); await page.fill('#nonRefund','0');
+            await page.click('#extract');
+            await page.waitForFunction(()=>document.querySelector('#aiStatus')?.textContent.includes('AI 추출 완료'),null,{timeout:120000});
+            assert(Number(await page.inputValue('#base'))===635000,'base should be confirmed');
+            assert(Number(await page.inputValue('#offered'))===535000,'seller offer should be confirmed');
+            assert(Number(await page.inputValue('#airPenalty'))===0,'date numbers must not become penalty');
+            assert(Number(await page.inputValue('#otaFee'))===0,'fee without explicit amount must remain unconfirmed');
+            assert((await page.textContent('#airPenaltyEv')).includes('AI 미확정'),'penalty evidence must be unconfirmed');
+            assert((await page.textContent('#otaFeeEv')).includes('AI 미확정'),'OTA evidence must be unconfirmed');
+            console.log('PASS: ambiguous/missing money did not overwrite protected fields');
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
