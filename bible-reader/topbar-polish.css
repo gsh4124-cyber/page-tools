@@ -1,0 +1,86 @@
+/* Top bar polish: align controls and give the search datalist affordance breathing room. */
+.topbar-inner.centered-nav {
+  gap: 14px;
+}
+
+.centered-nav .location-controls {
+  gap: 8px;
+}
+
+.location-controls > select,
+.location-controls .top-search input,
+.location-controls .top-search button,
+.toolbar #compareToggle,
+.toolbar .quick-tool,
+.toolbar .notebook-button {
+  height: 44px;
+  min-height: 44px;
+}
+
+.location-controls .top-search {
+  gap: 10px;
+}
+
+.location-controls .top-search input,
+.location-controls .top-search input:focus {
+  padding-left: 14px;
+  padding-right: 46px;
+}
+
+/* Chromium/Edge renders the datalist trigger with this pseudo element. */
+#searchInput::-webkit-calendar-picker-indicator {
+  opacity: .58;
+  cursor: pointer;
+  transform: translateX(-10px) scale(.82);
+  transform-origin: center;
+}
+
+#searchInput::-webkit-search-cancel-button {
+  margin-right: 4px;
+}
+
+.location-controls .top-search button {
+  min-width: 58px;
+  padding-inline: 15px;
+}
+
+.toolbar {
+  gap: 6px;
+}
+
+.toolbar #compareToggle,
+.toolbar .quick-tool,
+.toolbar .notebook-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+@media (max-width: 1250px) and (min-width: 1041px) {
+  .topbar-inner.centered-nav { gap: 10px; }
+  .centered-nav .location-controls { gap: 6px; }
+  .location-controls .top-search { gap: 8px; }
+  .toolbar { gap: 3px; }
+}
+
+@media (max-width: 1040px) {
+  .centered-nav .location-controls { gap: 8px; }
+  .location-controls .top-search { gap: 8px; }
+}
+
+@media (max-width: 760px) {
+  .location-controls > select,
+  .location-controls .top-search input,
+  .location-controls .top-search button,
+  .toolbar #compareToggle,
+  .toolbar .quick-tool,
+  .toolbar .notebook-button {
+    height: 42px;
+    min-height: 42px;
+  }
+
+  #searchInput::-webkit-calendar-picker-indicator {
+    transform: translateX(-6px) scale(.8);
+  }
+}
