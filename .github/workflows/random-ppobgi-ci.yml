@@ -85,6 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Require both checks
+        working-directory: .
         env:
           STATIC_RESULT: ${{ needs.static-smoke.result }}
           BROWSER_RESULT: ${{ needs.browser-smoke.result }}
