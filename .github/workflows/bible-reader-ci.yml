@@ -69,6 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Require both checks
+        working-directory: .
         env:
           STATIC_RESULT: ${{ needs.static-guardrails.result }}
           BEHAVIOR_RESULT: ${{ needs.behavior-qa.result }}
