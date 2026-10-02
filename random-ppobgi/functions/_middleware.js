@@ -48,6 +48,9 @@ function alternates(){
   return langs.map(l=>`<link rel="alternate" hreflang="${l}" href="${hrefFor(l)}">`).join('')+
     `<link rel="alternate" hreflang="x-default" href="${origin}/en/">`;
 }
+function cleanEscapedNewline(text){
+  if(text.text.includes('\\n')) text.replace(text.text.replaceAll('\\n',''));
+}
 
 function localizedApp(response,lang){
   const canonical=hrefFor(lang);
@@ -65,7 +68,7 @@ function localizedApp(response,lang){
     .on('meta[property="og:url"]',{element(el){el.setAttribute('content',canonical);}})
     .on('meta[name="twitter:title"]',{element(el){el.setAttribute('content',title[lang]);}})
     .on('meta[name="twitter:description"]',{element(el){el.setAttribute('content',desc[lang]);}})
-    .on('head',{element(el){el.append(alternates()+init,{html:true});}})
+    .on('head',{element(el){el.append(alternates()+init,{html:true});},text:cleanEscapedNewline})
     .on('body',{element(el){el.append(runtime,{html:true});}})
     .transform(response);
 }
@@ -94,7 +97,7 @@ export async function onRequest(context) {
 
   if(rootPage){
     return new HTMLRewriter()
-      .on('head',{element(el){el.append(alternates(),{html:true});}})
+      .on('head',{element(el){el.append(alternates(),{html:true});},text:cleanEscapedNewline})
       .on('body',{element(el){el.append('<script src="/language-switch.js"><\/script><script src="/experience.js"><\/script>',{html:true});}})
       .transform(response);
   }
