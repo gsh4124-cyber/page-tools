@@ -119,6 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Require both checks
+        working-directory: .
         env:
           SOURCE_RESULT: ${{ needs.source-guardrails.result }}
           BUILD_RESULT: ${{ needs.build-qa.result }}
