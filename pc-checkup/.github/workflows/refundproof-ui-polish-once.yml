@@ -1,0 +1,71 @@
+name: RefundProof UI polish once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refundproof-ui-polish-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply visual polish without changing product logic
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('refundproof/wanted-demo.html')
+          s=p.read_text()
+          marker='</style>'
+          css=r'''
+/* V11 visual polish: presentation only; product logic unchanged */
+:root{--surface:rgba(255,255,255,.88);--ink:#101828;--accent:#3157d5;--accent2:#6b5cff}
+body{min-height:100vh;background:radial-gradient(circle at 16% 2%,rgba(91,124,250,.16),transparent 28%),radial-gradient(circle at 88% 14%,rgba(139,92,246,.12),transparent 25%),linear-gradient(180deg,#f7f9fe 0%,#f4f6fa 48%,#f8fafc 100%);letter-spacing:-.012em}
+main{max-width:1080px;padding:52px 18px 88px}
+.hero{padding:18px 0 34px}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid rgba(49,87,213,.14);border-radius:999px;background:rgba(255,255,255,.7);box-shadow:0 8px 24px rgba(34,54,98,.06);font-size:11px;font-weight:900;letter-spacing:.08em;color:#3449a8;margin-bottom:18px}
+.eyebrow:before{content:'';width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#3157d5,#8b5cf6);box-shadow:0 0 0 4px rgba(76,91,214,.08)}
+.hero h1{font-size:clamp(46px,7vw,74px);letter-spacing:-3.5px;margin-bottom:18px;background:linear-gradient(115deg,#101828 12%,#243b76 56%,#5d4bcf 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:18px;line-height:1.65;color:#667085}.hero p strong{color:#101828;font-weight:900}
+.microflow{margin-top:18px;gap:10px}.microflow span{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.68);border:1px solid rgba(15,23,42,.055);font-weight:800;color:#667085}.microflow span+span:before{content:none}.trustline{margin:12px auto 0;color:#8a94a6;font-size:11px;font-weight:750}
+.layout{gap:20px;align-items:start}
+.card{background:var(--surface);border:1px solid rgba(255,255,255,.9);border-radius:26px;box-shadow:0 20px 60px rgba(31,42,68,.09),0 2px 10px rgba(31,42,68,.04);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:24px}
+.card h2{font-size:20px;letter-spacing:-.5px}.sub{color:#7a8496;margin-bottom:18px}
+.uploadstack{gap:12px}.upload{border:1px solid #e7ebf3;background:linear-gradient(180deg,#fcfdff,#f8faff);border-radius:18px;padding:17px;transition:.18s ease}.upload:hover{border-color:#cbd5f3;transform:translateY(-1px);box-shadow:0 10px 25px rgba(49,87,213,.06)}
+.upload b{font-size:14px}.upload p{font-size:11.5px;color:#7c8799}.attached{color:#667085;margin-top:11px}
+.filebtn{border:0;background:#111827;color:#fff;border-radius:11px;padding:9px 13px;box-shadow:0 5px 14px rgba(17,24,39,.12);transition:.18s ease}.filebtn:hover{transform:translateY(-1px);background:#1f2937}
+.primary{border-radius:15px;padding:15px 16px;background:linear-gradient(120deg,#2448c8,#5a54dc 64%,#7554d8);box-shadow:0 14px 28px rgba(66,78,205,.22);transition:.18s ease}.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 18px 34px rgba(66,78,205,.26)}
+.status{border:0;border-radius:12px;background:#f4f6f9;color:#667085}.status.ok{border:0;background:#eff9f4}.status.warn{border:0;background:#fff7e8}
+.resultcard{position:relative;overflow:hidden}.resultcard:before{content:'';position:absolute;left:24px;right:24px;top:0;height:3px;border-radius:0 0 8px 8px;background:linear-gradient(90deg,#3157d5,#7357d8,#3c82f6);opacity:.9}
+.checkwrap{border:0;border-radius:18px;background:#f6f8fb;padding:14px;margin-bottom:18px}.checkrow{border-radius:11px}.checkrow.done{background:#eaf8f1}.checkrow.warn{background:#fff6df}.checkicon{box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)}
+.resulttop{margin:2px 0 12px;padding:20px 20px 18px;border-radius:20px;background:radial-gradient(circle at 85% 10%,rgba(122,107,255,.35),transparent 32%),linear-gradient(135deg,#111827,#1f2c55 62%,#3b3c8e);box-shadow:0 16px 34px rgba(24,35,78,.18)}
+.resulttop .resultlabel{color:#cbd5e1}.mainamount{color:#fff;font-size:clamp(42px,6vw,60px);margin:5px 0 0;letter-spacing:-2.8px}
+.compare{gap:10px}.comparebox{border:1px solid #edf0f5;background:#fbfcfe;border-radius:15px;padding:13px}.comparebox span{color:#8a94a6}.comparebox b{color:#202939}
+.result{border:0;border-radius:16px;padding:15px 16px}.result.gap{box-shadow:inset 0 0 0 1px #f5c4cc}.result.match{box-shadow:inset 0 0 0 1px #b8e4d2}.result.warn{box-shadow:inset 0 0 0 1px #ead7a6}
+.detailsbtn,.secondary{border:1px solid #e4e8ef;background:#fbfcfe;border-radius:12px;transition:.16s ease}.detailsbtn:hover,.secondary:hover{background:#f4f6f9;border-color:#d8dee8}
+.chip,.metric{border:1px solid #edf0f4;background:#fbfcfd;border-radius:12px}.rule{border-left-width:3px;border-radius:12px}.draft{border-color:#e5e9f0;border-radius:13px;background:#fbfcfe}
+@media(max-width:760px){main{padding:34px 12px 64px}.hero{padding-top:8px}.hero h1{font-size:48px;letter-spacing:-2.5px}.hero p{font-size:15.5px}.card{border-radius:22px;padding:17px}.resultcard:before{left:17px;right:17px}.microflow{gap:6px}.microflow span{font-size:10.5px;padding:6px 8px}}
+'''
+          if '/* V11 visual polish:' not in s:
+              s=s.replace(marker,css+'\n'+marker,1)
+          old='<section class="hero"><h1>RefundProof AI</h1><p><strong>예약확인서와 환불안내만 올려주세요.</strong><br>구매처·약관·운임조건을 확인하고, 확인된 기준만으로 환불액을 다시 계산합니다.</p><div class="microflow"><span>PDF·문서 올리기</span><span>구매처·규정 확인</span><span>환불액 확인</span></div></section>'
+          new='<section class="hero"><div class="eyebrow">INDEPENDENT REFUND AUDIT</div><h1>RefundProof AI</h1><p><strong>예약확인서와 환불안내만 올려주세요.</strong><br>구매처·약관·운임조건을 확인하고, 확인된 기준만으로 환불액을 다시 계산합니다.</p><div class="microflow"><span>PDF·문서 올리기</span><span>구매처·규정 확인</span><span>환불액 확인</span></div><div class="trustline">근거가 확인되지 않으면 금액을 추정하지 않습니다.</div></section>'
+          if old in s:s=s.replace(old,new,1)
+          s=s.replace('<b>첨부됨</b> · demo_booking.txt','<b>데모 예시</b> · demo_booking.txt',1)
+          s=s.replace('<b>첨부됨</b> · demo_refund_notice.txt','<b>데모 예시</b> · demo_refund_notice.txt',1)
+          p.write_text(s)
+          PY
+      - name: Commit visual polish
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add refundproof/wanted-demo.html
+          git commit -m 'Polish RefundProof submission UI'
+          git push
+
+# trigger: visual-polish-2026-09-16

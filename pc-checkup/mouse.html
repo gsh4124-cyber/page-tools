@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마우스 더블클릭 테스트 | PC CHECKUP</title>
+<meta name="description" content="마우스 버튼, 휠, 더블클릭 이상을 브라우저에서 확인합니다.">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head><body>
+<header><div class="wrap nav">
+  <a class="brand" href="index.html">PC <span>CHECKUP</span></a>
+  <nav class="navlinks">
+    <a href="checkup.html">전체 점검</a><a href="keyboard.html">키보드</a><a href="mouse.html">마우스</a>
+    <a href="mic.html">마이크</a><a href="webcam.html">웹캠</a><a href="speaker.html">스피커</a><a href="display.html">모니터</a>
+  </nav>
+</div></header>
+
+<main><section class="tool-head"><div class="wrap"><span class="eyebrow">입력 장치</span><h1>마우스·더블클릭 테스트</h1><p class="section-intro">좌·우·가운데 버튼, 휠, 포인터 움직임과 비정상적으로 빠른 연속 클릭을 확인합니다.</p></div></section>
+<div class="wrap tool-layout"><section class="toolbox">
+  <div class="statrow"><div class="stat"><span>왼쪽 클릭</span><b id="leftClicks">0</b></div><div class="stat"><span>초고속 입력 후보</span><b id="doubleCount">0</b></div><div class="stat"><span>최단 간격</span><b id="minGap">—</b></div></div>
+  <div id="mousePad" class="mouse-pad"><div><strong>이 영역에서 마우스를 움직이고 클릭하세요.</strong><br><span id="mouseHint">먼저 왼쪽 버튼을 한 번씩 천천히 눌러보세요. 한 번 눌렀는데 숫자가 두 번 오르는지가 핵심입니다.</span><br>좌표: <span id="mousePos">—</span></div></div>
+  <div class="statrow"><div class="stat"><span>오른쪽 클릭</span><b id="rightClicks">0</b></div><div class="stat"><span>가운데 클릭</span><b id="middleClicks">0</b></div><div class="stat"><span>휠 누적</span><b id="wheelCount">0</b></div></div>
+  <div class="controls"><button id="resetMouse" class="btn">초기화</button></div>
+</section><aside class="side"><div class="notice"><strong>더블클릭 판정 주의</strong><br>80ms 미만의 매우 짧은 연속 입력만 보조 표시합니다. 이 숫자만으로 불량을 판정하지 않습니다. 가장 중요한 것은 한 번만 눌렀는데 클릭 수가 두 번 이상 증가하는 현상이 반복되는지입니다.</div><a class="btn primary" href="checkup.html">전체 점검으로 돌아가기</a></aside></div></main>
+<footer><div class="wrap">브라우저 안에서 바로 점검합니다. 카메라·마이크·키 입력은 서버로 전송하지 않는 구조를 기본으로 합니다.</div></footer></body></html>

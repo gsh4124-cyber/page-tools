@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>키보드 테스트 | PC CHECKUP</title>
+<meta name="description" content="키보드 키 인식과 동시입력을 온라인에서 확인합니다.">
+<link rel="stylesheet" href="styles.css">
+<style>
+.tool-layout{grid-template-columns:minmax(0,1fr) 250px}
+.keyboard-layout-toggle,.keyboard-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
+.layout-btn,.test-btn{border:1px solid var(--line);background:#121c28;color:var(--muted);padding:9px 13px;border-radius:11px;font-weight:800}
+.layout-btn.active,.test-btn.active{background:var(--accent);color:#062217;border-color:var(--accent)}
+.keyboard-note{font-size:12px;color:var(--muted);margin:0 0 7px;line-height:1.45}
+#keyboard.keyboard{display:flex;justify-content:center;align-items:flex-start;overflow:hidden;padding:4px 2px 8px;width:100%;min-height:1px}
+.keyboard-board{display:flex;align-items:flex-start;gap:14px;width:max-content;transform-origin:top center}
+.main-keyboard{width:760px;min-width:760px}
+.key-row{display:flex;gap:6px;margin-bottom:6px;height:44px}.key-row.function-row{margin-bottom:14px}
+.key{position:relative;flex:0 0 44px;width:44px;min-width:44px;min-height:44px;height:44px;cursor:default}
+.key.spacer{visibility:hidden;border:0;background:transparent;flex-basis:18px;width:18px;min-width:18px}
+.key.w125{flex-basis:56px;width:56px}.key.w15{flex-basis:68px;width:68px}.key.w175{flex-basis:80px;width:80px}.key.w2{flex-basis:92px;width:92px}.key.w225{flex-basis:104px;width:104px}.key.w275{flex-basis:128px;width:128px}
+.key.spacebar{flex:0 0 275px;width:275px;min-width:275px}.key.spacebar-ko{flex:0 0 165px;width:165px;min-width:165px}.key.langkey{font-size:10px;line-height:1.15}
+.key.active{background:var(--accent);border-color:var(--accent);color:#062217;box-shadow:0 0 0 2px rgba(255,255,255,.55) inset}
+.nav-cluster{width:144px;min-width:144px;display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:44px 2px 44px 44px 44px 44px 44px;gap:6px}
+.nav-cluster .prt{grid-column:1;grid-row:1}.nav-cluster .scr{grid-column:2;grid-row:1}.nav-cluster .pause{grid-column:3;grid-row:1}.nav-cluster .ins{grid-column:1;grid-row:3}.nav-cluster .home{grid-column:2;grid-row:3}.nav-cluster .pgup{grid-column:3;grid-row:3}.nav-cluster .del{grid-column:1;grid-row:4}.nav-cluster .end{grid-column:2;grid-row:4}.nav-cluster .pgdn{grid-column:3;grid-row:4}.nav-cluster .up{grid-column:2;grid-row:6}.nav-cluster .left{grid-column:1;grid-row:7}.nav-cluster .down{grid-column:2;grid-row:7}.nav-cluster .right{grid-column:3;grid-row:7}
+.numpad-grid{display:grid;grid-template-columns:repeat(4,44px);grid-template-rows:repeat(5,44px);gap:6px;width:194px;min-width:194px;margin-top:58px}
+.numpad-grid .num-plus{grid-column:4;grid-row:2/span 2;height:94px}.numpad-grid .num-enter{grid-column:4;grid-row:4/span 2;height:94px}.numpad-grid .num-zero{grid-column:1/span 2;width:94px}
+.fullscreen-exit{display:none;position:fixed;top:12px;right:12px;z-index:9999;background:var(--accent);color:#062217;border:0;border-radius:12px;padding:11px 16px;font-weight:900}.keyboard-test-active .fullscreen-exit{display:block}
+.keyboard-test-active header,.keyboard-test-active footer,.keyboard-test-active .tool-head,.keyboard-test-active .side{display:none!important}.keyboard-test-active main{padding:0!important;margin:0!important;width:100vw!important;max-width:none!important}
+.keyboard-test-active .tool-layout{display:block!important;box-sizing:border-box;max-width:none!important;width:100vw!important;height:100vh!important;padding:12px 68px 12px 12px!important;margin:0!important}.keyboard-test-active .toolbox{box-sizing:border-box;width:100%!important;max-width:none!important;height:calc(100vh - 24px);overflow:hidden;display:flex;flex-direction:column;padding:12px!important;margin:0!important}
+.keyboard-test-active .statrow{flex:0 0 auto;margin-bottom:4px}.keyboard-test-active .keyboard-layout-toggle{margin:5px 0 3px}.keyboard-test-active .keyboard-note{margin-bottom:3px}.keyboard-test-active .keyboard-actions{margin:5px 0 4px}.keyboard-test-active #startKeyboard{display:none}.keyboard-test-active #keyboard{flex:1 1 auto;min-height:260px;width:100%;margin:0}.keyboard-test-active .eventlog{flex:0 0 auto;margin-top:5px;min-height:42px;padding:9px}.keyboard-test-active .controls{display:none}
+@media(max-width:860px){.tool-layout{grid-template-columns:1fr}.side{grid-row:auto}.keyboard-test-active .tool-layout{padding:10px 58px 10px 10px!important}.keyboard-test-active .statrow.four{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const host=document.getElementById('keyboard');if(!host)return;
+ const isKo=(document.documentElement.lang||'').toLowerCase().startsWith('ko');
+ const layoutKey='pc-checkup-keyboard-numpad-v1';
+ let presses=0,repeats=0,unique=new Set(),current=new Set(),maxSimul=0,focusMode=false,fnArmed=false;
+ const releaseTimers=new Map(),modifierDown=new Map(),fnVisualDown=new Map();
+ const text=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+ const update=()=>{text('pressCount',presses);text('repeatCount',repeats);text('uniqueCount',unique.size);text('maxSimul',maxSimul)};
+ const makeKey=(code,label,cls='')=>{const d=document.createElement('div');d.className=`key ${cls}`.trim();if(code)d.dataset.code=code;d.textContent=label;return d};
+ const rows=[
+ [['Escape','Esc'],['','','spacer'],['F1','F1'],['F2','F2'],['F3','F3'],['F4','F4'],['','','spacer'],['F5','F5'],['F6','F6'],['F7','F7'],['F8','F8'],['','','spacer'],['F9','F9'],['F10','F10'],['F11','F11'],['F12','F12']],
+ [['Backquote','`'],['Digit1','1'],['Digit2','2'],['Digit3','3'],['Digit4','4'],['Digit5','5'],['Digit6','6'],['Digit7','7'],['Digit8','8'],['Digit9','9'],['Digit0','0'],['Minus','-'],['Equal','='],['Backspace','Backspace','w2']],
+ [['Tab','Tab','w15'],['KeyQ','Q'],['KeyW','W'],['KeyE','E'],['KeyR','R'],['KeyT','T'],['KeyY','Y'],['KeyU','U'],['KeyI','I'],['KeyO','O'],['KeyP','P'],['BracketLeft','['],['BracketRight',']'],['Backslash','\\','w15']],
+ [['CapsLock','Caps','w175'],['KeyA','A'],['KeyS','S'],['KeyD','D'],['KeyF','F'],['KeyG','G'],['KeyH','H'],['KeyJ','J'],['KeyK','K'],['KeyL','L'],['Semicolon',';'],['Quote',"'"],['Enter','Enter','w225']],
+ [['ShiftLeft','Shift','w225'],['KeyZ','Z'],['KeyX','X'],['KeyC','C'],['KeyV','V'],['KeyB','B'],['KeyN','N'],['KeyM','M'],['Comma',','],['Period','.'],['Slash','/'],['ShiftRight','Shift','w275']]
+ ];
+ const ansiBottom=[['ControlLeft','Ctrl','w125'],['MetaLeft','Win','w125'],['AltLeft','Alt','w125'],['Space','Space','spacebar'],['AltRight','Alt','w125'],['MetaRight','Win','w125'],['ContextMenu','Menu','w125'],['ControlRight','Ctrl','w125']];
+ const koreanBottom=[['ControlLeft','Ctrl','w125'],['MetaLeft','Win','w125'],['AltLeft','Alt','w125'],['HanjaMode','\uD55C\uC790','w125 langkey'],['Space','Space','spacebar-ko'],['HangulMode','\uD55C/\uC601','w125 langkey'],['AltRight','Alt','w125'],['ContextMenu','Menu','w125'],['ControlRight','Ctrl','w125']];
+ const buildMain=()=>{const main=document.createElement('div');main.className='main-keyboard';[...rows,isKo?koreanBottom:ansiBottom].forEach((row,i)=>{const r=document.createElement('div');r.className='key-row'+(i===0?' function-row':'');row.forEach(([c,l,cl])=>r.appendChild(makeKey(c,l,cl)));main.appendChild(r)});return main};
+ const buildNav=()=>{const nav=document.createElement('div');nav.className='nav-cluster';[['PrintScreen','PrtSc','prt'],['ScrollLock','ScrLk','scr'],['Pause','Pause','pause'],['Insert','Ins','ins'],['Home','Home','home'],['PageUp','PgUp','pgup'],['Delete','Del','del'],['End','End','end'],['PageDown','PgDn','pgdn'],['ArrowUp','↑','up'],['ArrowLeft','←','left'],['ArrowDown','↓','down'],['ArrowRight','→','right']].forEach(([c,l,cl])=>nav.appendChild(makeKey(c,l,cl)));return nav};
+ const buildNumpad=()=>{const pad=document.createElement('div');pad.className='numpad-grid';pad.id='numpadGrid';[['NumLock','Num'],['NumpadDivide','/'],['NumpadMultiply','*'],['NumpadSubtract','-'],['Numpad7','7'],['Numpad8','8'],['Numpad9','9'],['NumpadAdd','+','num-plus'],['Numpad4','4'],['Numpad5','5'],['Numpad6','6'],['Numpad1','1'],['Numpad2','2'],['Numpad3','3'],['NumpadEnter','Enter','num-enter'],['Numpad0','0','num-zero'],['NumpadDecimal','.']].forEach(([c,l,cl])=>pad.appendChild(makeKey(c,l,cl)));return pad};
+ const board=document.createElement('div');board.className='keyboard-board';board.appendChild(buildMain());board.appendChild(buildNav());host.innerHTML='';host.appendChild(board);
+ const fitKeyboard=()=>{board.style.transform='none';const bw=board.scrollWidth,bh=board.scrollHeight,aw=Math.max(1,host.clientWidth-10),ah=focusMode?Math.max(220,host.clientHeight-10):Infinity;const maxScale=focusMode?1.7:1;const scale=Math.min(maxScale,aw/bw,ah/bh);board.style.transform=`scale(${scale})`;host.style.height=focusMode?'auto':`${Math.ceil(bh*scale+8)}px`};
+ const applyLayout=which=>{document.getElementById('numpadGrid')?.remove();if(which==='with')board.appendChild(buildNumpad());document.querySelectorAll('.layout-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===which));try{localStorage.setItem(layoutKey,which)}catch{}requestAnimationFrame(fitKeyboard)};
+ const normalizeCode=raw=>raw==='OSLeft'?'MetaLeft':raw==='OSRight'?'MetaRight':raw;
+ const modifierFamilyFromEvent=e=>{const key=e.key||'',raw=normalizeCode(e.code||'');if(key==='Shift'||raw.startsWith('Shift'))return'Shift';if(key==='Control'||raw.startsWith('Control'))return'Control';if(key==='Alt'||key==='AltGraph'||raw.startsWith('Alt'))return'Alt';if(key==='Meta'||key==='OS'||raw.startsWith('Meta'))return'Meta';return''};
+ const resolveModifier=(family,e)=>{const raw=normalizeCode(e.code||''),loc=Number(e.location)||Number(e.keyLocation)||0,kc=Number(e.keyCode)||0;if(raw===family+'Left'||raw===family+'Right')return raw;if(loc===1)return family+'Left';if(loc===2)return family+'Right';if(family==='Meta'){if(kc===91)return'MetaLeft';if(kc===92)return'MetaRight'}return modifierDown.get(family)||''};
+ const physicalCode=e=>{const key=e.key||'',raw=normalizeCode(e.code||''),kc=Number(e.keyCode)||0;
+   if(key==='HangulMode'||key==='Hangul'||kc===21)return'HangulMode';
+   if(key==='HanjaMode'||key==='Hanja'||kc===25)return'HanjaMode';
+   if(key==='PrintScreen'||raw==='PrintScreen'||raw==='Snapshot'||kc===44)return'PrintScreen';
+   const family=modifierFamilyFromEvent(e);if(family)return resolveModifier(family,e);
+   return raw||''};
+ const fnFunctions=new Set(['Insert','Delete','Home','End','PageUp','PageDown']);
+ const paint=(code,on)=>{if(!code)return;host.querySelectorAll(`[data-code="${CSS.escape(code)}"]`).forEach(k=>k.classList.toggle('active',on))};
+ const release=code=>{if(!code)return;current.delete(code);paint(code,false);const family=code.startsWith('Shift')?'Shift':code.startsWith('Control')?'Control':code.startsWith('Alt')?'Alt':code.startsWith('Meta')?'Meta':'';if(family&&modifierDown.get(family)===code)modifierDown.delete(family);const t=releaseTimers.get(code);if(t)clearTimeout(t);releaseTimers.delete(code)};
+ const armRelease=code=>{if(!code)return;const old=releaseTimers.get(code);if(old)clearTimeout(old);releaseTimers.set(code,setTimeout(()=>release(code),900))};
+ const clearPressed=()=>{current.clear();modifierDown.clear();releaseTimers.forEach(clearTimeout);releaseTimers.clear();fnVisualDown.forEach(v=>paint(v,false));fnVisualDown.clear();host.querySelectorAll('.key.active').forEach(k=>k.classList.remove('active'))};
+ const onDown=e=>{const code=physicalCode(e);if(focusMode)e.preventDefault();if(!code){text('keyLog',`key: ${e.key} | code: ${e.code||'(none)'} | location: ${e.location} | unresolved`);return}const family=modifierFamilyFromEvent(e);if(family)modifierDown.set(family,code);if(e.repeat)repeats++;else{presses++;unique.add(code);current.add(code);maxSimul=Math.max(maxSimul,current.size)}paint(code,true);armRelease(code);
+   if(fnArmed&&fnFunctions.has(e.key||'')){const out=e.key;paint(out,true);fnVisualDown.set(code,out);text('keyLog',`Fn check ON | physical: ${e.code||code} | output: ${out} | location: ${e.location}`)}else{text('keyLog',`Fn check ${fnArmed?'ON':'OFF'} | key: ${e.key} | code: ${e.code||'(none)'} | physical: ${code} | location: ${e.location} | repeat: ${e.repeat?'yes':'no'}`)}update()};
+ const onUp=e=>{const family=modifierFamilyFromEvent(e);let code=family?modifierDown.get(family)||resolveModifier(family,e):physicalCode(e);release(code);const out=fnVisualDown.get(code);if(out){paint(out,false);fnVisualDown.delete(code)}if(e.key==='PrintScreen'||e.code==='PrintScreen'){paint('PrintScreen',true);setTimeout(()=>paint('PrintScreen',false),260)}};
+ const setFnArmed=on=>{fnArmed=on;const b=document.getElementById('fnArm');b?.classList.toggle('active',on);if(b)b.textContent=on?'Fn check ON':'Fn check';text('keyLog',on?'Fn check ON: hold Fn and press the secondary-function key.':'Fn check OFF: normal physical-key test.')};
+ const lockCodes=['Escape','Tab','Backspace','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','MetaLeft','MetaRight'];
+ const setFocus=async on=>{focusMode=on;document.body.classList.toggle('keyboard-test-active',on);const start=document.getElementById('startKeyboard');start?.classList.toggle('active',on);if(start)start.textContent=on?'Exit keyboard test':'Start keyboard test';if(on){try{await document.documentElement.requestFullscreen?.()}catch{}try{await navigator.keyboard?.lock?.(lockCodes)}catch{}}else{try{navigator.keyboard?.unlock?.()}catch{}try{if(document.fullscreenElement)await document.exitFullscreen?.()}catch{}}requestAnimationFrame(()=>{fitKeyboard();window.scrollTo(0,0)})};
+ let layout='with';try{layout=localStorage.getItem(layoutKey)||'with'}catch{}if(layout!=='without')layout='with';applyLayout(layout);
+ document.querySelectorAll('.layout-btn').forEach(b=>b.addEventListener('click',()=>applyLayout(b.dataset.mode)));document.getElementById('fnArm')?.addEventListener('click',()=>setFnArmed(!fnArmed));document.getElementById('startKeyboard')?.addEventListener('click',()=>setFocus(!focusMode));document.getElementById('exitKeyboard')?.addEventListener('click',()=>setFocus(false));
+ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&focusMode){focusMode=false;document.body.classList.remove('keyboard-test-active');try{navigator.keyboard?.unlock?.()}catch{}const b=document.getElementById('startKeyboard');b?.classList.remove('active');if(b)b.textContent='Start keyboard test';requestAnimationFrame(fitKeyboard)}});
+ window.addEventListener('resize',()=>requestAnimationFrame(fitKeyboard));window.addEventListener('blur',clearPressed);window.addEventListener('pagehide',clearPressed);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPressed()});window.addEventListener('keydown',onDown,{capture:true,passive:false});window.addEventListener('keyup',onUp,{capture:true,passive:false});
+ document.getElementById('resetKeyboard')?.addEventListener('click',()=>{presses=0;repeats=0;unique.clear();current.clear();maxSimul=0;clearPressed();setFnArmed(false);text('keyLog','');update()});update();
+});
+</script>
+</head><body>
+<button id="exitKeyboard" type="button" class="fullscreen-exit">Exit</button>
+<header><div class="wrap nav"><a class="brand" href="index.html">PC <span>CHECKUP</span></a><nav class="navlinks"><a href="checkup.html">전체 점검</a><a href="keyboard.html">키보드</a><a href="mouse.html">마우스</a><a href="mic.html">마이크</a><a href="webcam.html">웹캠</a><a href="speaker.html">스피커</a><a href="display.html">모니터</a></nav></div></header>
+<main><section class="tool-head"><div class="wrap"><span class="eyebrow">입력 장치</span><h1>키보드 테스트</h1><p class="section-intro">키를 하나씩 눌러 인식 여부를 확인하고, 여러 키를 동시에 눌러 동시입력도 확인하세요.</p></div></section>
+<div class="wrap tool-layout"><section class="toolbox"><div class="statrow four"><div class="stat"><span>실제 눌림 시작</span><b id="pressCount">0</b></div><div class="stat"><span>OS 자동반복</span><b id="repeatCount">0</b></div><div class="stat"><span>서로 다른 키</span><b id="uniqueCount">0</b></div><div class="stat"><span>최대 동시입력</span><b id="maxSimul">0</b></div></div>
+<div class="keyboard-layout-toggle"><button type="button" class="layout-btn" data-mode="with">Full-size · Numpad</button><button type="button" class="layout-btn" data-mode="without">TKL · No Numpad</button></div><p class="keyboard-note">Common ANSI-style layout. Korean 106-key and other regional keyboards may have extra or differently shaped keys.</p>
+<div class="keyboard-actions"><button id="startKeyboard" type="button" class="test-btn">Start keyboard test</button><button id="fnArm" type="button" class="test-btn">Fn check</button></div><p class="keyboard-note">Use Fn check only while testing secondary Home / End / Page Up / Page Down / Insert / Delete functions. Fullscreen blocks browser shortcuts where supported, including Windows keys when Keyboard Lock is available.</p>
+<div id="keyboard" class="keyboard"></div>
+<div id="keyLog" class="eventlog">키를 눌러보세요.</div><div class="controls"><button id="resetKeyboard" class="btn">초기화</button></div></section><aside class="side"><div class="notice"><strong>확인 방법</strong><br>모든 키가 눌릴 때 초록색으로 반응하는지 봅니다. 키를 길게 누르면 운영체제의 정상 자동반복이 별도 집계됩니다. 손을 뗀 뒤에도 입력이 계속되는 현상은 별도로 확인하세요.</div><a class="btn primary" href="checkup.html">전체 점검으로 돌아가기</a></aside></div></main>
+<footer><div class="wrap">브라우저 안에서 바로 점검합니다. 카메라·마이크·키 입력은 서버로 전송하지 않는 구조를 기본으로 합니다.</div></footer></body></html>

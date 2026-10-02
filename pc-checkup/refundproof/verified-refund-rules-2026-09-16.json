@@ -1,0 +1,78 @@
+{
+  "as_of": "2026-09-16",
+  "purpose": "RefundProof verified rule registry. Only rules with an identifiable official source are stored as confirmed. Ambiguous or fare-specific items are explicitly marked for manual confirmation.",
+  "airlines": {
+    "korean_air": {
+      "name": "대한항공",
+      "source": "https://www.koreanair.com/contents/footer/terms-and-policies/service-fee/int",
+      "confirmed": {
+        "international_refund_service_fee_krw": 30000,
+        "service_fee_rule": "운임 규정상 환불위약금이 있는 경우 환불위약금과 환불 서비스 수수료 중 높은 금액을 1회 징수",
+        "unused_korea_origin_91plus_days_service_fee_waived": true,
+        "no_show_penalty_korea_origin": {
+          "economy": 100000,
+          "premium_economy": 200000,
+          "prestige": 300000,
+          "first": 300000
+        }
+      },
+      "not_auto_confirmed": [
+        "예약등급별·취소시점별 정확한 환불위약금 전 구간",
+        "부분사용 항공권 환불액",
+        "제휴·공동운항·타사 결합 발권의 실제 적용 규정"
+      ]
+    },
+    "asiana": {
+      "name": "아시아나항공",
+      "source": "https://flyasiana.com/C/KR/KO/customer/notice/detail?id=CM202512040002527329",
+      "effective_ticketing_date": "2025-12-17",
+      "confirmed": {
+        "korea_origin_unused_ticket_91plus_days_penalty_waived": true,
+        "purchase_within_24h_unused_refund_fee_waived": true,
+        "route_groups": {
+          "short": ["일본", "중국", "홍콩", "타이베이", "가오슝", "울란바타르"],
+          "medium": ["동남아", "알마티", "타슈켄트", "사이판", "팔라우"],
+          "long": ["미주", "유럽", "호주", "중동"]
+        },
+        "full_unused_ticket_windows": ["91일 이전", "90~61일", "60~15일", "14~4일", "3일 이내"],
+        "selected_penalty_rows_krw": {
+          "C_short": [0, 30000, 50000, 60000, 80000],
+          "D_short": [0, 30000, 100000, 120000, 150000],
+          "H_E_Q_K_short": [0, 30000, 60000, 90000, 110000],
+          "S_V_T_short": [0, 30000, 70000, 90000, 110000]
+        }
+      },
+      "not_auto_confirmed": [
+        "부분사용 항공권의 실제 환불 가능 여부와 환불액",
+        "특가·프로모션·기업우대 등 개별 운임의 추가 조건",
+        "2026-12-17 이후 대한항공 통합 이관 대상 예약의 실제 처리 규정"
+      ]
+    },
+    "jeju_air": {
+      "name": "제주항공",
+      "source": "https://www.jejuair.net/ko/prepare/fare/internationalBenefit.do?index=3",
+      "effective_from": "2024-04-25",
+      "scope": "한국 출발 국제선",
+      "confirmed": {
+        "cancellation_penalty_krw": {
+          "windows": ["91일 이전", "90~61일", "60~31일", "30~6일", "5~1일", "출발 당일 이후"],
+          "BASIC": [60000, 60000, 60000, 80000, 100000, 120000],
+          "STANDARD": [0, 20000, 40000, 60000, 90000, 120000],
+          "BIZ_LITE": [0, 10000, 20000, 30000, 40000, 80000]
+        }
+      },
+      "not_auto_confirmed": [
+        "해외 출발 항공권의 원화 환산 결과",
+        "판매처가 별도로 부과하는 취급수수료",
+        "부분사용·복합여정·부가서비스까지 포함한 최종 환불액"
+      ]
+    }
+  },
+  "global_uncertainty": [
+    "항공사 규정만으로 판매처(OTA/여행사)의 별도 취급수수료를 확정할 수 없음",
+    "세금·공항시설사용료·유류할증료의 실제 환급액은 발권·사용 상태와 여정에 따라 달라질 수 있음",
+    "부분사용 항공권은 단순 전체 미사용 규정으로 계산하면 안 됨",
+    "노쇼 여부, 결항/항공사 귀책, 구매 후 24시간 이내 취소 같은 예외가 있으면 일반 위약금 규칙보다 우선할 수 있음",
+    "예약서에 fare basis/예약등급/발권처/취소시점이 없으면 자동 확정하지 않음"
+  ]
+}
