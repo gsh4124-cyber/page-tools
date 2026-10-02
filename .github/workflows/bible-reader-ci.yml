@@ -1,0 +1,77 @@
+name: Bible Reader Monorepo QA
+
+on:
+  push:
+    branches: ["migration/page-tools-monorepo"]
+    paths:
+      - 'bible-reader/**'
+      - '.github/workflows/bible-reader-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bible-reader-monorepo-qa
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: bible-reader
+
+jobs:
+  static-guardrails:
+    name: Static Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Security guardrails
+        run: python3 security_guardrails.py
+      - name: JavaScript syntax
+        run: |
+          set -e
+          for file in *.js; do node --check "$file"; done
+          for file in tools/*.mjs; do [ -e "$file" ] || continue; node --check "$file"; done
+      - name: Required runtime files
+        run: |
+          set -e
+          for file in index.html styles.css features.css ui-fix.css i18n-layout.css records-enhancements.css verse-multiselect.css reader-experience.css title-navigator.css app.js extra-translations.js local-file-language.js i18n.js runtime-ui-i18n.js ui-language-sync.js full-reader-loader.js reference.js book-finder.js compare.js verse-picker.js title-navigator.js clipboard.js title-nav.js exact-search.js verse-tools.js records-enhancements.js verse-multiselect.js reader-experience.js analytics.js robots.txt sitemap.xml 193977ee04feba4a99f471a555a2aa54.txt; do test -s "$file"; done
+          test -s tools/reader-experience-smoke.mjs
+          for lang in en fr de zh ru la pt ar; do test -s "$lang/index.html"; done
+      - name: Preserve Cloudflare SEO origin contract
+        run: |
+          set -e
+          PROD='https://bible-reader-1iz.pages.dev'
+          grep -q "rel=\"canonical\" href=\"$PROD/\"" index.html
+          grep -q '^Sitemap: https://bible-reader-1iz.pages.dev/sitemap.xml$' robots.txt
+          grep -q '<loc>https://bible-reader-1iz.pages.dev/</loc>' sitemap.xml
+          for lang in en fr de zh ru la pt ar; do
+            grep -q "hreflang=\"$lang\"" "$lang/index.html"
+            grep -q "rel=\"canonical\" href=\"$PROD/$lang/\"" "$lang/index.html"
+            grep -q "<loc>$PROD/$lang/</loc>" sitemap.xml
+          done
+          grep -q 'hreflang="x-default"' index.html
+
+  behavior-qa:
+    name: Behavior QA
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate multilingual integrity
+        run: node tools/validate-i18n.mjs
+      - name: Validate title navigation behavior
+        run: node tools/validate-navigation.mjs
+
+  quality-gate:
+    name: Combined Quality Gate
+    if: always()
+    needs: [static-guardrails, behavior-qa]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require both checks
+        env:
+          STATIC_RESULT: ${{ needs.static-guardrails.result }}
+          BEHAVIOR_RESULT: ${{ needs.behavior-qa.result }}
+        run: |
+          test "$STATIC_RESULT" = success
+          test "$BEHAVIOR_RESULT" = success
