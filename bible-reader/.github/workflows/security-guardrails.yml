@@ -1,0 +1,22 @@
+name: Security Guardrails
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-guardrails:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked files for secrets and credentials
+        run: python3 security_guardrails.py
+      - name: Audit production npm dependencies when lockfile exists
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm audit --omit=dev --audit-level=high
