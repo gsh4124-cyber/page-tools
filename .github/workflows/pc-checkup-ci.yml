@@ -2,7 +2,12 @@ name: DEVICE CHECKUP Monorepo QA
 
 on:
   push:
-    branches: ["migration/page-tools-monorepo"]
+    branches: ["main"]
+    paths:
+      - 'pc-checkup/**'
+      - '.github/workflows/pc-checkup-ci.yml'
+  pull_request:
+    branches: ["main"]
     paths:
       - 'pc-checkup/**'
       - '.github/workflows/pc-checkup-ci.yml'
