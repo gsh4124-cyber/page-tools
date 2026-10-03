@@ -2,26 +2,33 @@
 
 - 마지막 기술상태 갱신: 2026-10-04
 - 저장소 역할: `gsh4124-cyber/page-tools`의 `main / random-ppobgi/`가 랜덤뽑기 웹서비스의 실제 코드·배포·기술상태 원본
-- 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`
+- 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`
 - 빠르게 변하는 운영상태·Portfolio Mode·Gate·다음 행동: Supabase `hwangje_ops` / project key `vibecoding`
 - 로컬 checkout 경로: 환경별로 다를 수 있으며 Canonical로 고정하지 않음. 작업 시 `page-tools/main`의 실제 checkout 위치를 확인
 - 운영 주소: https://random-ppobgi.pages.dev/
 
 ## 현재 단계
 
-**PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / CURRENT-REVISION PRODUCTION QA PASS / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
+**S-DESIGN / PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / CURRENT-REVISION PRODUCTION QA PASS / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
+
+`S-DESIGN`은 현재 제품의 기술·QA·운영경계·복구구조가 S급 설계기준으로 닫혔다는 뜻이다. 실제 외부사용·검색노출·수익에서 반복 시장증거가 확인됐다는 뜻이 아니며, 그 전에는 `S-VERIFIED`로 승격하지 않는다.
 
 현재 Portfolio Mode와 다음 행동은 Supabase live-state에서 회수한다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발이나 깊은 QA를 반복하지 않는다.
 
 > 구현 완료 ≠ CI PASS ≠ 배포 완료 ≠ Production Browser QA PASS ≠ 실제 외부사용 ≠ 검색노출 ≠ 수익
 
-## 2026-10-04 monorepo 정합화
+## 2026-10-04 S-DESIGN 회귀검수
 
-- Random Ppobgi 전용 CI의 `push`/`pull_request` 기준 브랜치를 현행 `main`으로 정정했다.
+- Random Ppobgi 전용 CI의 `push`/`pull_request` 기준 브랜치를 현행 `main`으로 정정했고 실제 `main` 자동기동·SUCCESS를 확인했다.
 - 제품 README와 본 상태문서에서 폐기된 독립 repo/고정 PC 절대경로를 기술 원본으로 사용하지 않도록 정정했다.
-- 현행 전용 CI는 `main` 변경에서 실제 자동기동됨을 확인했다.
+- 제품 상태 감시 workflow의 Bash 예약변수 `RANDOM` 충돌을 제거했다.
+- 상태 감시 workflow 자체 변경 시 `main`에서 self-verification(자기검증)이 자동기동되도록 push trigger를 추가했다.
+- 수정된 현행 workflow commit에서 Product Health Monitor가 실제 SUCCESS한 것을 확인했다.
+- Health Monitor의 실서비스 readback에서 Random Ppobgi URL·`robots.txt`·`sitemap.xml` 검색표면이 정상임을 확인했다.
 - 보안 Guardrail은 tracked file의 대표 secret pattern과 민감 파일명을 검사한다.
 - 시장 telemetry API는 same-origin POST, 고정 enum payload, 1KB body limit, 자동 QA 제외, D1 aggregate count 방식으로 제한한다.
+- 과거 검증된 사용자경험 revision에서는 Production Browser Smoke와 Cloudflare exact commit deploy PASS가 기록돼 있다.
+- 현재 GitHub repo에서 Cloudflare의 최신 배포 revision 자체를 직접 증명할 수 없는 경우 이를 추정으로 승격하지 않는다. 최신 배포 identity가 다음 판단에 필요하면 Cloudflare/실서비스 배포 원본에서 별도 readback한다.
 - 이 정합화는 새 시장검증을 의미하지 않는다. 실제 외부사용·검색노출·수익 상태는 live state와 현실 readback을 별도로 본다.
 
 ## 2026-09-28 반복사용·공유·녹화 UX 개선
