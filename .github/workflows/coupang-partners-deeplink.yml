@@ -1,0 +1,42 @@
+name: Coupang Partners Deep Links
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "Coupang URLs, one per line"
+        required: true
+        type: string
+  push:
+    paths:
+      - "tools/coupang_partners/requests/current.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  deeplink:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate secrets
+        env:
+          COUPANG_ACCESS_KEY: ${{ secrets.COUPANG_PARTNERS_ACCESS_KEY }}
+          COUPANG_SECRET_KEY: ${{ secrets.COUPANG_PARTNERS_SECRET_KEY }}
+        run: |
+          test -n "$COUPANG_ACCESS_KEY" || (echo "Missing COUPANG_PARTNERS_ACCESS_KEY" && exit 2)
+          test -n "$COUPANG_SECRET_KEY" || (echo "Missing COUPANG_PARTNERS_SECRET_KEY" && exit 2)
+
+      - name: Generate affiliate deep links
+        env:
+          COUPANG_ACCESS_KEY: ${{ secrets.COUPANG_PARTNERS_ACCESS_KEY }}
+          COUPANG_SECRET_KEY: ${{ secrets.COUPANG_PARTNERS_SECRET_KEY }}
+          COUPANG_URLS: ${{ inputs.urls }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python tools/coupang_partners/deeplink.py --env
+          else
+            python tools/coupang_partners/deeplink.py --file tools/coupang_partners/requests/current.txt
+          fi
