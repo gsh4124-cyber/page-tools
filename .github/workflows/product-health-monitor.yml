@@ -1,0 +1,75 @@
+name: Vibe Coding Product Health Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '40 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vibe-coding-product-health
+  cancel-in-progress: false
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check live products
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_url() {
+            local url="$1" result code seconds ok=false
+            result=$(curl -L --retry 2 --max-time 20 -sS -o /dev/null -w '%{http_code}|%{time_total}' "$url" || printf '000|0')
+            code="${result%%|*}"; seconds="${result##*|}"
+            if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 400 ] 2>/dev/null; then ok=true; fi
+            jq -n --arg url "$url" --arg code "$code" --arg seconds "$seconds" --argjson ok "$ok" \
+              '{url:$url,http_code:(try ($code|tonumber) catch 0),response_seconds:(try ($seconds|tonumber) catch 0),ok:$ok}'
+          }
+
+          check_search() {
+            local base="$1" rc sc count has=false ok=false
+            rc=$(curl -L --retry 2 --max-time 20 -sS -o /tmp/robots -w '%{http_code}' "${base}robots.txt" || echo 000)
+            sc=$(curl -L --retry 2 --max-time 20 -sS -o /tmp/sitemap -w '%{http_code}' "${base}sitemap.xml" || echo 000)
+            count=$( (grep -o '<loc>' /tmp/sitemap || true) | wc -l | tr -d ' ')
+            if grep -Eqi '^sitemap:[[:space:]]*https?://' /tmp/robots; then has=true; fi
+            if [ "$rc" -ge 200 ] 2>/dev/null && [ "$rc" -lt 400 ] 2>/dev/null && [ "$sc" -ge 200 ] 2>/dev/null && [ "$sc" -lt 400 ] 2>/dev/null && [ "$count" -gt 0 ] && [ "$has" = true ]; then ok=true; fi
+            jq -n --arg rc "$rc" --arg sc "$sc" --arg count "$count" --argjson has "$has" --argjson ok "$ok" \
+              '{robots_http:($rc|tonumber),sitemap_http:($sc|tonumber),sitemap_url_count:($count|tonumber),robots_has_sitemap:$has,ok:$ok}'
+          }
+
+          check_ci() {
+            local repo="$1" workflow="$2" runs run_sha status conclusion
+            runs=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$repo/actions/workflows/$workflow/runs?branch=main&per_page=1")
+            run_sha=$(jq -r '.workflow_runs[0].head_sha//""' <<<"$runs")
+            status=$(jq -r '.workflow_runs[0].status//"missing"' <<<"$runs")
+            conclusion=$(jq -r '.workflow_runs[0].conclusion//""' <<<"$runs")
+            jq -n --arg repo "$repo" --arg workflow "$workflow" --arg run "$run_sha" --arg status "$status" --arg conclusion "$conclusion" \
+              '{repo:$repo,workflow:$workflow,latest_run_sha:$run,status:$status,conclusion:$conclusion}'
+          }
+
+          PAGE_REPO='gsh4124-cyber/page-tools'
+          RANDOM=$(jq -n --argjson url "$(check_url 'https://random-ppobgi.pages.dev/')" --argjson search "$(check_search 'https://random-ppobgi.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'random-ppobgi-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+          BIBLE=$(jq -n --argjson url "$(check_url 'https://bible-reader-1iz.pages.dev/')" --argjson search "$(check_search 'https://bible-reader-1iz.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'bible-reader-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+          DEVICE=$(jq -n --argjson url "$(check_url 'https://pc-checkup.pages.dev/')" --argjson search "$(check_search 'https://pc-checkup.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'pc-checkup-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+
+          jq -n --arg generated_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" --argjson random "$RANDOM" --argjson bible "$BIBLE" --argjson device "$DEVICE" \
+            '{generated_at:$generated_at,technical_repository:"gsh4124-cyber/page-tools",products:{"random-picker":$random,"bible-reader":$bible,"device-checkup":$device}}' | tee /tmp/health.json
+
+          {
+            echo "## Vibe Coding Product Health"
+            echo
+            echo '\`\`\`json'
+            cat /tmp/health.json
+            echo '\`\`\`'
+            echo
+            echo "Operational state is stored in Supabase hwangje_ops; technical source is gsh4124-cyber/page-tools; this workflow does not write runtime snapshots to Vault."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          jq -e '[.products[] | (.url.ok and .search_surface.ok)] | all' /tmp/health.json >/dev/null
