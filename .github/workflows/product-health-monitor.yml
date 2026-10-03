@@ -55,11 +55,11 @@ jobs:
           }
 
           PAGE_REPO='gsh4124-cyber/page-tools'
-          RANDOM=$(jq -n --argjson url "$(check_url 'https://random-ppobgi.pages.dev/')" --argjson search "$(check_search 'https://random-ppobgi.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'random-ppobgi-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
-          BIBLE=$(jq -n --argjson url "$(check_url 'https://bible-reader-1iz.pages.dev/')" --argjson search "$(check_search 'https://bible-reader-1iz.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'bible-reader-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
-          DEVICE=$(jq -n --argjson url "$(check_url 'https://pc-checkup.pages.dev/')" --argjson search "$(check_search 'https://pc-checkup.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'pc-checkup-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+          RANDOM_PRODUCT=$(jq -n --argjson url "$(check_url 'https://random-ppobgi.pages.dev/')" --argjson search "$(check_search 'https://random-ppobgi.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'random-ppobgi-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+          BIBLE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://bible-reader-1iz.pages.dev/')" --argjson search "$(check_search 'https://bible-reader-1iz.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'bible-reader-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+          DEVICE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://pc-checkup.pages.dev/')" --argjson search "$(check_search 'https://pc-checkup.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'pc-checkup-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
 
-          jq -n --arg generated_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" --argjson random "$RANDOM" --argjson bible "$BIBLE" --argjson device "$DEVICE" \
+          jq -n --arg generated_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" --argjson random "$RANDOM_PRODUCT" --argjson bible "$BIBLE_PRODUCT" --argjson device "$DEVICE_PRODUCT" \
             '{generated_at:$generated_at,technical_repository:"gsh4124-cyber/page-tools",products:{"random-picker":$random,"bible-reader":$bible,"device-checkup":$device}}' | tee /tmp/health.json
 
           {
