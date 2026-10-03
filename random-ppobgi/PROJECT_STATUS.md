@@ -1,11 +1,10 @@
 # PROJECT STATUS — random-ppobgi
 
-- 마지막 기술상태 갱신: 2026-09-28
-- live-state owner 포인터 정합화: 2026-09-28
-- 저장소 역할: 랜덤뽑기 웹서비스의 실제 코드·배포·기술상태 원본
+- 마지막 기술상태 갱신: 2026-10-04
+- 저장소 역할: `gsh4124-cyber/page-tools`의 `main / random-ppobgi/`가 랜덤뽑기 웹서비스의 실제 코드·배포·기술상태 원본
 - 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`, `직장/바이브코딩/페이지형/_INDEX.md`
 - 빠르게 변하는 운영상태·Portfolio Mode·Gate·다음 행동: Supabase `hwangje_ops` / project key `vibecoding`
-- 표준 로컬 경로: `C:/Users/gsh41/Desktop/황제/직장/바이브코딩/페이지형/random-ppobgi`
+- 로컬 checkout 경로: 환경별로 다를 수 있으며 Canonical로 고정하지 않음. 작업 시 `page-tools/main`의 실제 checkout 위치를 확인
 - 운영 주소: https://random-ppobgi.pages.dev/
 
 ## 현재 단계
@@ -15,6 +14,15 @@
 현재 Portfolio Mode와 다음 행동은 Supabase live-state에서 회수한다. 실제 기술 FAIL이나 의미 있는 외부 신호 없이 새 기능개발이나 깊은 QA를 반복하지 않는다.
 
 > 구현 완료 ≠ CI PASS ≠ 배포 완료 ≠ Production Browser QA PASS ≠ 실제 외부사용 ≠ 검색노출 ≠ 수익
+
+## 2026-10-04 monorepo 정합화
+
+- Random Ppobgi 전용 CI의 `push`/`pull_request` 기준 브랜치를 현행 `main`으로 정정했다.
+- 제품 README와 본 상태문서에서 폐기된 독립 repo/고정 PC 절대경로를 기술 원본으로 사용하지 않도록 정정했다.
+- 현행 전용 CI는 `main` 변경에서 실제 자동기동됨을 확인했다.
+- 보안 Guardrail은 tracked file의 대표 secret pattern과 민감 파일명을 검사한다.
+- 시장 telemetry API는 same-origin POST, 고정 enum payload, 1KB body limit, 자동 QA 제외, D1 aggregate count 방식으로 제한한다.
+- 이 정합화는 새 시장검증을 의미하지 않는다. 실제 외부사용·검색노출·수익 상태는 live state와 현실 readback을 별도로 본다.
 
 ## 2026-09-28 반복사용·공유·녹화 UX 개선
 
@@ -68,7 +76,7 @@
 
 Production D1: `random-ppobgi-analytics`.
 
-이름·입력문구·당첨내용·사용자 ID·세션 ID·광고 ID·쿠키는 수집하지 않는다.
+수집 payload는 허용된 범주값만 받으며 이름·입력문구·당첨내용·사용자 ID·세션 ID·광고 ID·쿠키는 수집하지 않는다.
 
 과거 Production Browser QA가 실제 행동계측에 섞이는 문제가 확인돼 제외처리를 배포했다. **2026-09-09 이후를 clean telemetry baseline**으로 사용한다. 변경 전 수치를 외부 사용자 수요로 역산하지 않는다.
 
