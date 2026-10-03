@@ -4,15 +4,15 @@
 
 - 운영 주소: https://random-ppobgi.pages.dev/
 - 현재 버전: v50
-- 실제 코드 저장소: `gsh4124-cyber/random-ppobgi`
-- 현재 기술상태 원본: `PROJECT_STATUS.md`
+- 실제 기술 원본: `gsh4124-cyber/page-tools`의 `main` 브랜치 / `random-ppobgi/`
+- 현재 기술상태 원본: `random-ppobgi/PROJECT_STATUS.md`
+- 사업상 장기 상태·Gate 원본: `gsh4124-cyber/hwangje-vault`의 바이브코딩 Canonical
+- 빠르게 변하는 운영 상태: Supabase `hwangje_ops`
 - ChatGPT 실행창: `랜덤뽑기 본부`
 
-## 표준 로컬 위치
+## 로컬 작업경로
 
-`C:/Users/gsh41/Desktop/황제/자동 사업운영/바이브코딩/페이지형/random-ppobgi`
-
-이 저장소는 랜덤뽑기 제품의 실제 코드와 기술상태를 관리합니다. 사업상 장기 상태와 Gate는 `gsh4124-cyber/hwangje-vault`의 바이브코딩 Canonical을 따릅니다.
+로컬 작업경로는 환경별로 달라질 수 있으므로 README에 특정 PC의 절대경로를 Canonical로 고정하지 않습니다. 작업 시 현재 `page-tools/main`을 기준으로 실제 checkout 위치를 확인합니다.
 
 ## 제품
 
