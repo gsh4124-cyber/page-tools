@@ -2,7 +2,12 @@ name: Random Ppobgi Monorepo QA
 
 on:
   push:
-    branches: ["migration/page-tools-monorepo"]
+    branches: ["main"]
+    paths:
+      - 'random-ppobgi/**'
+      - '.github/workflows/random-ppobgi-ci.yml'
+  pull_request:
+    branches: ["main"]
     paths:
       - 'random-ppobgi/**'
       - '.github/workflows/random-ppobgi-ci.yml'
@@ -12,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: random-ppobgi-monorepo-qa
+  group: random-ppobgi-monorepo-qa-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
