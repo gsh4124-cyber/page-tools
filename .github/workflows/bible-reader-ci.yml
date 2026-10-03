@@ -2,7 +2,12 @@ name: Bible Reader Monorepo QA
 
 on:
   push:
-    branches: ["migration/page-tools-monorepo"]
+    branches: ["main"]
+    paths:
+      - 'bible-reader/**'
+      - '.github/workflows/bible-reader-ci.yml'
+  pull_request:
+    branches: ["main"]
     paths:
       - 'bible-reader/**'
       - '.github/workflows/bible-reader-ci.yml'
