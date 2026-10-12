@@ -7,7 +7,9 @@ const output = 'qa_evidence/live';
 const report = {
   kind: 'public-production-browser-proof',
   target: origin,
-  commit: process.env.GITHUB_SHA || 'local-unverified',
+  test_suite_commit: process.env.GITHUB_SHA || 'local-unverified',
+  production_revision: 'UNVERIFIED',
+  checked_at: new Date().toISOString(),
   run_id: process.env.GITHUB_RUN_ID || 'local-unverified',
   cases: [],
 };
