@@ -82,6 +82,18 @@ jobs:
           exit 1
       - name: Run multilingual browser smoke
         run: node tests/i18n-browser-smoke.mjs
+      - name: Check public production in desktop and mobile Chrome
+        if: ${{ !cancelled() }}
+        timeout-minutes: 3
+        run: node tests/live-browser-proof.mjs
+      - name: Preserve browser results and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: random-picker-browser-proof-${{ github.run_id }}
+          path: random-ppobgi/qa_evidence/live/
+          if-no-files-found: warn
+          retention-days: 7
 
   quality-gate:
     name: Combined Quality Gate
