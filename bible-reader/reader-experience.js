@@ -30,6 +30,7 @@
 
   let historyState = loadHistory();
   let restoringHistory = false;
+  let historyNavigationRun = 0;
   let colorPopover = null;
   let undoSnapshot = null;
   let undoTimer = null;
@@ -66,6 +67,7 @@
   }
   async function navigateSnapshot(item){
     if(!item) return;
+    const run=++historyNavigationRun;
     restoringHistory=true;
     try{
       if(typeof TRANSLATIONS!=='undefined'&&TRANSLATIONS[item.tr]){
@@ -74,12 +76,14 @@
         localStorage.setItem('bible-reader-translation',item.tr);
       }
       state.bookIndex=item.bookIndex; state.chapter=item.chapter;
-      await loadCurrent({scrollTop:false});
+      if(!await loadCurrent({scrollTop:false})||run!==historyNavigationRun)return;
+      const resolvedLoad=loadRun;
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(run!==historyNavigationRun||resolvedLoad!==loadRun)return;
         const row=versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(item.verse||1))}"]`);
         row?.scrollIntoView({behavior:'smooth',block:'center'});
       }));
-    }finally{setTimeout(()=>{restoringHistory=false;updateHistoryButtons();},0)}
+    }finally{setTimeout(()=>{if(run===historyNavigationRun){restoringHistory=false;updateHistoryButtons();}},0)}
   }
   async function moveHistory(delta){
     const next=historyState.index+delta;
@@ -182,8 +186,11 @@
   async function applyDeepLink(){
     const params=new URLSearchParams(location.search);const parsed=parseDeepLink(params.get('ref'));if(!parsed)return;
     const tr=params.get('v');if(tr&&typeof TRANSLATIONS!=='undefined'&&TRANSLATIONS[tr]){activeTranslationId=tr;document.querySelector('#translationSelect').value=tr;localStorage.setItem('bible-reader-translation',tr)}
-    restoringHistory=true;state.bookIndex=parsed.book.index;state.chapter=parsed.chapter;await loadCurrent({scrollTop:false});restoringHistory=false;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{versesRoot.querySelectorAll('.deep-linked').forEach(row=>row.classList.remove('deep-linked'));parsed.verses.forEach(v=>versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(v))}"]`)?.classList.add('deep-linked'));const first=versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(parsed.verses[0]||1))}"]`);first?.scrollIntoView({behavior:'smooth',block:'center'});recordLocation(parsed.verses[0]||1)}));
+    restoringHistory=true;state.bookIndex=parsed.book.index;state.chapter=parsed.chapter;
+    const loaded=await loadCurrent({scrollTop:false});restoringHistory=false;
+    if(!loaded)return;
+    const resolvedLoad=loadRun;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{if(resolvedLoad!==loadRun)return;versesRoot.querySelectorAll('.deep-linked').forEach(row=>row.classList.remove('deep-linked'));parsed.verses.forEach(v=>versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(v))}"]`)?.classList.add('deep-linked'));const first=versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(parsed.verses[0]||1))}"]`);first?.scrollIntoView({behavior:'smooth',block:'center'});recordLocation(parsed.verses[0]||1)}));
   }
 
   function noTypingTarget(event){const tag=event.target?.tagName;return !['INPUT','TEXTAREA','SELECT'].includes(tag)&&!event.target?.isContentEditable;}
