@@ -53,9 +53,10 @@ const MANUAL={
 function manualState(kind){return parse(`device-checkup-manual-${kind}-v1`);}
 function saveManual(kind,state){try{localStorage.setItem(`device-checkup-manual-${kind}-v1`,JSON.stringify(state));}catch{}}
 function statusGuidance(stats){
-  if(stats.bad)return '문제로 표시한 항목은 해당 검사를 다시 확인하세요. 브라우저 결과만으로 고장을 확정하지 않습니다.';
-  if(stats.unknown)return '미확인은 검사 미완료 또는 브라우저 판정 불가이며 고장을 뜻하지 않습니다. 해당 항목을 직접 확인하세요.';
-  return '브라우저에서 확인한 항목의 결과입니다. 배터리·외관·포트 등은 별도로 점검하세요.';
+  const hints=[];
+  if(stats.bad)hints.push('문제로 표시한 항목은 다시 확인하세요. 브라우저 결과만으로 고장을 확정하지 않습니다.');
+  if(stats.unknown)hints.push('미확인은 검사 미완료 또는 브라우저 판정 불가이며 고장이 아닙니다. 해당 항목을 직접 확인하세요.');
+  return hints.join(' ')||'브라우저에서 확인한 결과입니다. 배터리·외관·포트 등은 별도로 점검하세요.';
 }
 function summaryText(kind,stats,manual){
   const title=kind==='pc'?'DEVICE CHECKUP · PC 전체 점검':'DEVICE CHECKUP · 휴대폰 전체 점검';
