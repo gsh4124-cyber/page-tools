@@ -74,10 +74,17 @@
     searchSummary.textContent=message;
   }
 
+  let referenceRun=0;
   async function goToReference(reference,{scroll=true}={}){
+    const run=++referenceRun, priorLoad=loadRun;
     let data;
     try{data=await fetchBook(reference.book,typeof activeTranslationId!=='undefined'?activeTranslationId:undefined);}
-    catch(error){console.error(error);showReferenceError(uiText('loadError','본문을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'));return false;}
+    catch(error){
+      if(run!==referenceRun||priorLoad!==loadRun)return false;
+      console.error(error);showReferenceError(uiText('loadError','본문을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'));return false;
+    }
+    // Ignore a reference request superseded by a later reference or navigation.
+    if(run!==referenceRun||priorLoad!==loadRun)return false;
 
     const chapter=data.chapters.find(item=>Number(item.chapter)===reference.chapter);
     if(!chapter){showReferenceError(`${bookLabel(reference.book)} ${reference.chapter}`);return false;}
@@ -90,10 +97,12 @@
 
     state.bookIndex=reference.book.index;
     state.chapter=reference.chapter;
-    await loadCurrent({scrollTop:!start});
+    if(!await loadCurrent({scrollTop:!start}))return false;
     if(typeof searchPanel!=='undefined'&&searchPanel)searchPanel.hidden=true;
     if(!start){window.ReaderExperience?.recordLocation?.(1);return true;}
+    const resolvedLoad=loadRun;
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(run!==referenceRun||resolvedLoad!==loadRun)return;
       const rows=[];
       for(let verse=start;verse<=end;verse+=1){const row=versesEl.querySelector(`[data-verse="${CSS.escape(String(verse))}"]`);if(row){row.classList.add('searched');rows.push(row)}}
       if(scroll)rows[0]?.scrollIntoView({behavior:'smooth',block:'center'});
