@@ -31,8 +31,8 @@ const $=s=>document.querySelector(s);
 const bookSelect=$("#bookSelect"),chapterSelect=$("#chapterSelect"),translationSelect=$("#translationSelect"),chapterTitle=$("#chapterTitle"),versesEl=$("#verses"),statusEl=$("#status");
 const prevButtons=[$("#prevChapterBottom")].filter(Boolean),nextButtons=[$("#nextChapterBottom")].filter(Boolean);
 const searchForm=$("#searchForm"),searchInput=$("#searchInput"),searchButton=$("#searchButton"),searchPanel=$("#searchPanel"),searchSummary=$("#searchSummary"),searchResults=$("#searchResults");
-const cache=new Map(); const SEARCH_LIMIT=100,SEARCH_BATCH_SIZE=6;
-let state=restoreLocation(),currentBookData=null,activeTranslationId=restoreTranslation(),searchRun=0;
+const cache=new Map(), pendingBooks=new Map(); const SEARCH_LIMIT=100,SEARCH_BATCH_SIZE=6;
+let state=restoreLocation(),currentBookData=null,activeTranslationId=restoreTranslation(),searchRun=0,loadRun=0;
 
 function restoreLocation(){try{const s=JSON.parse(localStorage.getItem("bible-reader-location"));if(s&&Number.isInteger(s.bookIndex)&&Number.isInteger(s.chapter))return{bookIndex:Math.max(0,Math.min(BOOKS.length-1,s.bookIndex)),chapter:Math.max(1,s.chapter)}}catch(_){}return{bookIndex:BOOKS.findIndex(b=>b.file==="John"),chapter:3}}
 function saveLocation(){localStorage.setItem("bible-reader-location",JSON.stringify(state))}
@@ -45,15 +45,22 @@ async function fetchBook(book,translationId=activeTranslationId){
   const tr=TRANSLATIONS[translationId]||TRANSLATIONS.krv1961;
   const key=`${tr.id}:${book.osis}`;
   if(cache.has(key))return cache.get(key);
-  let data;
-  if(tr.type==="krv"){
-    const url=`https://raw.githubusercontent.com/bluesaurel/Korean-Bible-1961-KRV/main/data/${book.file}.json`;
-    const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=await r.json();
-  }else{
-    const url=`https://raw.githubusercontent.com/midvash/bible-data/main/versions/${tr.lang}/${tr.slug}/books/${book.osis}.json`;
-    const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=normalizeMidvash(await r.json());
-  }
-  cache.set(key,data); return data;
+  // Reuse a fetch already in progress when the user clicks between chapters rapidly.
+  if(pendingBooks.has(key))return pendingBooks.get(key);
+  const request=(async()=>{
+    let data;
+    if(tr.type==="krv"){
+      const url=`https://raw.githubusercontent.com/bluesaurel/Korean-Bible-1961-KRV/main/data/${book.file}.json`;
+      const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=await r.json();
+    }else{
+      const url=`https://raw.githubusercontent.com/midvash/bible-data/main/versions/${tr.lang}/${tr.slug}/books/${book.osis}.json`;
+      const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=normalizeMidvash(await r.json());
+    }
+    cache.set(key,data);
+    return data;
+  })();
+  pendingBooks.set(key,request);
+  try{return await request}finally{pendingBooks.delete(key)}
 }
 
 function setupChapterSelect(data){chapterSelect.innerHTML="";const count=data.chapters.length;for(let c=1;c<=count;c++){const o=document.createElement("option");o.value=c;o.textContent=`${c}장`;chapterSelect.append(o)}state.chapter=Math.max(1,Math.min(count,state.chapter));chapterSelect.value=String(state.chapter)}
@@ -61,13 +68,33 @@ function setLoading(m="본문을 불러오는 중…"){statusEl.hidden=false;sta
 function setError(m){statusEl.hidden=false;statusEl.classList.add("error");statusEl.textContent=m}
 function updateNavigationState(data=currentBookData){if(!data)return;const count=data.chapters.length,atStart=state.bookIndex===0&&state.chapter===1,atEnd=state.bookIndex===BOOKS.length-1&&state.chapter===count;prevButtons.forEach(b=>{b.disabled=atStart;b.setAttribute("aria-disabled",String(atStart))});nextButtons.forEach(b=>{b.disabled=atEnd;b.setAttribute("aria-disabled",String(atEnd))})}
 function updateTranslationMeta(){const tr=TRANSLATIONS[activeTranslationId];const meta=$("#translationAttribution");if(meta)meta.textContent=tr.id==="krv1961"?"개역한글 · 대한성서공회":`${tr.name} · ${tr.language} · ${tr.rights}`}
-function renderVerses(data){const book=BOOKS[state.bookIndex],chapter=data.chapters.find(i=>Number(i.chapter)===state.chapter);chapterTitle.textContent=`${book.ko} ${state.chapter}장`;document.title=`${book.ko} ${state.chapter}장 · ${TRANSLATIONS[activeTranslationId].name}`;if(!chapter){setError("해당 장을 찾지 못했습니다.");return}const f=document.createDocumentFragment();chapter.verses.forEach(v=>{const p=document.createElement("p");p.className="verse";p.dataset.verse=v.verse;const n=document.createElement("span");n.className="verse-number";n.textContent=v.verse;const t=document.createElement("span");t.className="verse-text";t.textContent=v.text;t.title="클릭하면 이 절을 복사합니다";p.append(n,t);f.append(p)});statusEl.hidden=true;versesEl.replaceChildren(f);updateNavigationState(data);updateTranslationMeta()}
-async function loadCurrent({scrollTop=true}={}){const book=BOOKS[state.bookIndex];bookSelect.value=String(state.bookIndex);if(translationSelect)translationSelect.value=activeTranslationId;setLoading();try{currentBookData=await fetchBook(book,activeTranslationId);setupChapterSelect(currentBookData);renderVerses(currentBookData);saveLocation();if(scrollTop)window.scrollTo({top:0,behavior:"auto"})}catch(e){console.error(e);setError("본문을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.")}}
+function renderVerses(data){const book=BOOKS[state.bookIndex],chapter=data.chapters.find(i=>Number(i.chapter)===state.chapter);chapterTitle.textContent=`${book.ko} ${state.chapter}장`;document.title=`${book.ko} ${state.chapter}장 · ${TRANSLATIONS[activeTranslationId].name}`;if(!chapter){setError("해당 장을 찾지 못했습니다.");return}const f=document.createDocumentFragment();chapter.verses.forEach(v=>{const p=document.createElement("p");p.className="verse";p.dataset.verse=v.verse;const n=document.createElement("span");n.className="verse-number";n.textContent=v.verse;const t=document.createElement("span");t.className="verse-text";t.textContent=v.text;t.title="클릭하면 이 절을 복사합니다";p.append(n,t);f.append(p)});statusEl.hidden=true;versesEl.replaceChildren(f);chapterSelect.disabled=false;updateNavigationState(data);updateTranslationMeta()}
+async function loadCurrent({scrollTop=true}={}){
+  const run=++loadRun,book=BOOKS[state.bookIndex],translationId=activeTranslationId;
+  bookSelect.value=String(state.bookIndex);
+  if(translationSelect)translationSelect.value=translationId;
+  currentBookData=null;chapterSelect.disabled=true;
+  prevButtons.concat(nextButtons).forEach(b=>b.disabled=true);
+  setLoading();
+  try{
+    const data=await fetchBook(book,translationId);
+    // A slower, older request must never replace the book/translation selected last.
+    if(run!==loadRun)return false;
+    currentBookData=data;
+    setupChapterSelect(data);renderVerses(data);saveLocation();
+    if(scrollTop)window.scrollTo({top:0,behavior:"auto"});
+    return true;
+  }catch(e){
+    if(run!==loadRun)return false;
+    console.error(e);setError("본문을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.");
+    return false;
+  }
+}
 async function moveChapter(delta){if(!currentBookData)return;const count=currentBookData.chapters.length,next=state.chapter+delta;if(next>=1&&next<=count){state.chapter=next;chapterSelect.value=String(next);renderVerses(currentBookData);saveLocation();window.scrollTo({top:0,behavior:"smooth"});return}const ni=state.bookIndex+(delta>0?1:-1);if(ni<0||ni>=BOOKS.length)return;state.bookIndex=ni;state.chapter=delta>0?1:999;await loadCurrent()}
 
 function renderSearchResults(results,q,failed){searchResults.innerHTML="";searchPanel.hidden=false;if(!results.length){searchSummary.textContent=`“${q}” 검색 결과가 없습니다.${failed?` (${failed}권 로딩 실패)`:""}`;return}const limited=results.length>=SEARCH_LIMIT;searchSummary.textContent=`“${q}” ${results.length}${limited?"+":""}개 결과 · ${TRANSLATIONS[activeTranslationId].name}${failed?` · ${failed}권 로딩 실패`:""}`;const f=document.createDocumentFragment();results.slice(0,SEARCH_LIMIT).forEach(r=>{const b=document.createElement("button");b.type="button";b.className="search-result";const ref=document.createElement("strong");ref.textContent=`${r.book.ko} ${r.chapter}:${r.verse}`;const t=document.createElement("span");t.textContent=r.text;b.append(ref,t);b.addEventListener("click",()=>goToSearchResult(r));f.append(b)});searchResults.append(f)}
 async function searchBible(q){const normalized=q.trim().toLocaleLowerCase();if(!normalized)return;const run=++searchRun;searchPanel.hidden=false;searchResults.innerHTML="";searchSummary.textContent=`“${q.trim()}” 검색 준비 중…`;searchButton.disabled=true;searchInput.disabled=true;const results=[];let failed=0;try{for(let start=0;start<BOOKS.length&&results.length<SEARCH_LIMIT;start+=SEARCH_BATCH_SIZE){if(run!==searchRun)return;const batch=BOOKS.slice(start,start+SEARCH_BATCH_SIZE);searchSummary.textContent=`“${q.trim()}” 검색 중… ${Math.min(start+batch.length,BOOKS.length)}/${BOOKS.length}권`;const loaded=await Promise.all(batch.map(async book=>{try{return{book,data:await fetchBook(book,activeTranslationId)}}catch(e){console.error(e);failed++;return null}}));loaded.filter(Boolean).forEach(({book,data})=>{if(results.length>=SEARCH_LIMIT)return;data.chapters.forEach(ch=>{if(results.length>=SEARCH_LIMIT)return;ch.verses.forEach(v=>{if(results.length>=SEARCH_LIMIT)return;if(String(v.text).toLocaleLowerCase().includes(normalized))results.push({book,chapter:Number(ch.chapter),verse:Number(v.verse),text:v.text})})})})}if(run===searchRun)renderSearchResults(results,q.trim(),failed)}finally{if(run===searchRun){searchButton.disabled=false;searchInput.disabled=false;searchInput.focus()}}}
-async function goToSearchResult(r){state.bookIndex=r.book.index;state.chapter=r.chapter;await loadCurrent();searchPanel.hidden=true;requestAnimationFrame(()=>{const t=versesEl.querySelector(`[data-verse="${r.verse}"]`);if(!t)return;t.classList.add("searched");t.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>t.classList.remove("searched"),1800)})}
+async function goToSearchResult(r){state.bookIndex=r.book.index;state.chapter=r.chapter;if(!await loadCurrent())return;searchPanel.hidden=true;requestAnimationFrame(()=>{const t=versesEl.querySelector(`[data-verse="${r.verse}"]`);if(!t)return;t.classList.add("searched");t.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>t.classList.remove("searched"),1800)})}
 
 function setupControls(){
   translationSelect?.addEventListener("change",async()=>{if(!TRANSLATIONS[translationSelect.value])return;activeTranslationId=translationSelect.value;saveTranslation();searchRun++;searchPanel.hidden=true;await loadCurrent({scrollTop:false})});
