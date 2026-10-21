@@ -52,19 +52,24 @@ const MANUAL={
 };
 function manualState(kind){return parse(`device-checkup-manual-${kind}-v1`);}
 function saveManual(kind,state){try{localStorage.setItem(`device-checkup-manual-${kind}-v1`,JSON.stringify(state));}catch{}}
+function statusGuidance(stats){
+  if(stats.bad)return '문제로 표시한 항목은 해당 검사를 다시 확인하세요. 브라우저 결과만으로 고장을 확정하지 않습니다.';
+  if(stats.unknown)return '미확인은 검사 미완료 또는 브라우저 판정 불가이며 고장을 뜻하지 않습니다. 해당 항목을 직접 확인하세요.';
+  return '브라우저에서 확인한 항목의 결과입니다. 배터리·외관·포트 등은 별도로 점검하세요.';
+}
 function summaryText(kind,stats,manual){
   const title=kind==='pc'?'DEVICE CHECKUP · PC 전체 점검':'DEVICE CHECKUP · 휴대폰 전체 점검';
   const checked=Object.values(manual).filter(Boolean).length;
-  return `${title}\n정상 ${stats.ok} · 문제 ${stats.bad} · 미확인 ${stats.unknown}\n브라우저 밖 수동 점검 ${checked}/${MANUAL[kind].length}\n${new Date().toLocaleString('ko-KR')}`;
+  return `${title}\n정상 ${stats.ok} · 문제 ${stats.bad} · 미확인 ${stats.unknown}\n${statusGuidance(stats)}\n브라우저 밖 수동 점검 ${checked}/${MANUAL[kind].length}\n${new Date().toLocaleString('ko-KR')}`;
 }
 function buildCard(kind,getState,tests,anchor){
   if(!isKo()||document.querySelector(`[data-device-experience="${kind}"]`))return ()=>{};
   style();
   const card=document.createElement('section');card.className='device-experience-card';card.dataset.deviceExperience=kind;
-  card.innerHTML=`<h3>점검 결과 요약</h3><p>브라우저 검사 결과를 한 번에 복사하거나 공유하고, 웹에서 판정할 수 없는 항목은 아래에서 직접 체크하세요.</p><div class="device-experience-counts"><div class="device-experience-count"><b data-x="ok">0</b><span>정상</span></div><div class="device-experience-count"><b data-x="bad">0</b><span>문제</span></div><div class="device-experience-count"><b data-x="unknown">0</b><span>미확인</span></div></div><div class="device-experience-actions"><button class="btn" type="button" data-copy>결과 복사</button><button class="btn primary" type="button" data-share>결과 공유</button></div><details class="device-manual"><summary>브라우저 밖 수동 점검</summary><div class="device-manual-list"></div></details>`;
+  card.innerHTML=`<h3>점검 결과 요약</h3><p>브라우저 검사 결과를 한 번에 복사하거나 공유하고, 웹에서 판정할 수 없는 항목은 아래에서 직접 체크하세요.</p><div class="device-experience-counts"><div class="device-experience-count"><b data-x="ok">0</b><span>정상</span></div><div class="device-experience-count"><b data-x="bad">0</b><span>문제</span></div><div class="device-experience-count"><b data-x="unknown">0</b><span>미확인</span></div></div><p data-x="guidance" aria-live="polite">미확인 항목은 검사 미완료 또는 브라우저 판정 불가를 뜻합니다.</p><div class="device-experience-actions"><button class="btn" type="button" data-copy>결과 복사</button><button class="btn primary" type="button" data-share>결과 공유</button></div><details class="device-manual"><summary>브라우저 밖 수동 점검</summary><div class="device-manual-list"></div></details>`;
   const list=card.querySelector('.device-manual-list'),manual=manualState(kind);
   MANUAL[kind].forEach((label,i)=>{const row=document.createElement('label');row.innerHTML=`<input type="checkbox" data-manual="${i}"><span>${label}</span>`;const input=row.querySelector('input');input.checked=!!manual[i];input.addEventListener('change',()=>{manual[i]=input.checked;saveManual(kind,manual);});list.append(row);});
-  const render=()=>{const stats=count(getState(),tests);card.querySelector('[data-x="ok"]').textContent=stats.ok;card.querySelector('[data-x="bad"]').textContent=stats.bad;card.querySelector('[data-x="unknown"]').textContent=stats.unknown;if(stats.done===stats.total)track(kind==='pc'?'pc_complete':'mobile_complete');return stats;};
+  const render=()=>{const stats=count(getState(),tests);card.querySelector('[data-x="ok"]').textContent=stats.ok;card.querySelector('[data-x="bad"]').textContent=stats.bad;card.querySelector('[data-x="unknown"]').textContent=stats.unknown;card.querySelector('[data-x="guidance"]').textContent=statusGuidance(stats);if(stats.done===stats.total)track(kind==='pc'?'pc_complete':'mobile_complete');return stats;};
   card.querySelector('[data-copy]').addEventListener('click',async e=>{const ok=await copyText(summaryText(kind,render(),manual));if(ok){const old=e.currentTarget.textContent;e.currentTarget.textContent='복사됨';setTimeout(()=>e.currentTarget.textContent=old,900);}});
   card.querySelector('[data-share]').addEventListener('click',async()=>{const text=summaryText(kind,render(),manual);if(navigator.share){try{await navigator.share({title:'DEVICE CHECKUP 결과',text,url:location.href});return;}catch(e){if(e?.name==='AbortError')return;}}await copyText(`${text}\n${location.href}`);});
   anchor.parentNode.insertBefore(card,anchor);
