@@ -92,9 +92,74 @@ async function loadCurrent({scrollTop=true}={}){
 }
 async function moveChapter(delta){if(!currentBookData)return;const count=currentBookData.chapters.length,next=state.chapter+delta;if(next>=1&&next<=count){state.chapter=next;chapterSelect.value=String(next);renderVerses(currentBookData);saveLocation();window.scrollTo({top:0,behavior:"smooth"});return}const ni=state.bookIndex+(delta>0?1:-1);if(ni<0||ni>=BOOKS.length)return;state.bookIndex=ni;state.chapter=delta>0?1:999;await loadCurrent()}
 
-function renderSearchResults(results,q,failed){searchResults.innerHTML="";searchPanel.hidden=false;if(!results.length){searchSummary.textContent=`“${q}” 검색 결과가 없습니다.${failed?` (${failed}권 로딩 실패)`:""}`;return}const limited=results.length>=SEARCH_LIMIT;searchSummary.textContent=`“${q}” ${results.length}${limited?"+":""}개 결과 · ${TRANSLATIONS[activeTranslationId].name}${failed?` · ${failed}권 로딩 실패`:""}`;const f=document.createDocumentFragment();results.slice(0,SEARCH_LIMIT).forEach(r=>{const b=document.createElement("button");b.type="button";b.className="search-result";const ref=document.createElement("strong");ref.textContent=`${r.book.ko} ${r.chapter}:${r.verse}`;const t=document.createElement("span");t.textContent=r.text;b.append(ref,t);b.addEventListener("click",()=>goToSearchResult(r));f.append(b)});searchResults.append(f)}
-async function searchBible(q){const normalized=q.trim().toLocaleLowerCase();if(!normalized)return;const run=++searchRun;searchPanel.hidden=false;searchResults.innerHTML="";searchSummary.textContent=`“${q.trim()}” 검색 준비 중…`;searchButton.disabled=true;searchInput.disabled=true;const results=[];let failed=0;try{for(let start=0;start<BOOKS.length&&results.length<SEARCH_LIMIT;start+=SEARCH_BATCH_SIZE){if(run!==searchRun)return;const batch=BOOKS.slice(start,start+SEARCH_BATCH_SIZE);searchSummary.textContent=`“${q.trim()}” 검색 중… ${Math.min(start+batch.length,BOOKS.length)}/${BOOKS.length}권`;const loaded=await Promise.all(batch.map(async book=>{try{return{book,data:await fetchBook(book,activeTranslationId)}}catch(e){console.error(e);failed++;return null}}));loaded.filter(Boolean).forEach(({book,data})=>{if(results.length>=SEARCH_LIMIT)return;data.chapters.forEach(ch=>{if(results.length>=SEARCH_LIMIT)return;ch.verses.forEach(v=>{if(results.length>=SEARCH_LIMIT)return;if(String(v.text).toLocaleLowerCase().includes(normalized))results.push({book,chapter:Number(ch.chapter),verse:Number(v.verse),text:v.text})})})})}if(run===searchRun)renderSearchResults(results,q.trim(),failed)}finally{if(run===searchRun){searchButton.disabled=false;searchInput.disabled=false;searchInput.focus()}}}
-async function goToSearchResult(r){state.bookIndex=r.book.index;state.chapter=r.chapter;if(!await loadCurrent())return;searchPanel.hidden=true;requestAnimationFrame(()=>{const t=versesEl.querySelector(`[data-verse="${r.verse}"]`);if(!t)return;t.classList.add("searched");t.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>t.classList.remove("searched"),1800)})}
+function renderSearchResults(results,q,failed,{processed=null}={}){
+ searchResults.innerHTML="";
+ searchPanel.hidden=false;
+ const progress=processed!==null;
+ if(!results.length){
+  searchSummary.textContent=progress
+   ? `“${q}” 검색 중… ${processed}/${BOOKS.length}권 확인`
+   : `“${q}” 검색 결과가 없습니다.${failed?` (${failed}권 로딩 실패)`:""}`;
+  return;
+ }
+ const limited=results.length>=SEARCH_LIMIT;
+ searchSummary.textContent=progress
+  ? `“${q}” 검색 중… ${processed}/${BOOKS.length}권 · 현재 ${results.length}개 결과`
+  : `“${q}” ${results.length}${limited?"+":""}개 결과 · ${TRANSLATIONS[activeTranslationId].name}${failed?` · ${failed}권 로딩 실패`:""}`;
+ const f=document.createDocumentFragment();
+ results.slice(0,SEARCH_LIMIT).forEach(r=>{
+  const b=document.createElement("button");b.type="button";b.className="search-result";
+  const ref=document.createElement("strong");ref.textContent=`${r.book.ko} ${r.chapter}:${r.verse}`;
+  const t=document.createElement("span");t.textContent=r.text;
+  b.append(ref,t);b.addEventListener("click",()=>goToSearchResult(r));f.append(b);
+ });
+ searchResults.append(f);
+}
+async function searchBible(q){
+ const normalized=q.trim().toLocaleLowerCase();
+ if(!normalized)return;
+ const run=++searchRun,translationId=activeTranslationId;
+ searchPanel.hidden=false;searchResults.innerHTML="";
+ searchSummary.textContent=`“${q.trim()}” 검색 준비 중…`;
+ searchButton.disabled=true;searchInput.disabled=true;
+ const results=[];let failed=0;
+ try{
+  // Reuse the existing 6-book concurrency bound; publish results after each
+  // completed group so readers can navigate without waiting for all 66 books.
+  for(let start=0;start<BOOKS.length&&results.length<SEARCH_LIMIT;start+=SEARCH_BATCH_SIZE){
+   if(run!==searchRun)return;
+   const batch=BOOKS.slice(start,start+SEARCH_BATCH_SIZE);
+   const loaded=await Promise.all(batch.map(async book=>{
+    try{return {book,data:await fetchBook(book,translationId)}}
+    catch(error){console.error(error);failed++;return null}
+   }));
+   if(run!==searchRun)return;
+   for(const item of loaded){
+    if(!item||results.length>=SEARCH_LIMIT)continue;
+    const {book,data}=item;
+    for(const ch of data.chapters){
+     if(results.length>=SEARCH_LIMIT)break;
+     for(const v of ch.verses){
+      if(results.length>=SEARCH_LIMIT)break;
+      if(String(v.text).toLocaleLowerCase().includes(normalized)){
+       results.push({book,chapter:Number(ch.chapter),verse:Number(v.verse),text:v.text});
+      }
+     }
+    }
+   }
+   const processed=Math.min(start+batch.length,BOOKS.length);
+   // Partial hits are in canonical book order, and no later group can
+   // overtake earlier results. Closing/navigating cancels subsequent painting.
+   if(processed<BOOKS.length&&results.length<SEARCH_LIMIT){
+    renderSearchResults(results,q.trim(),failed,{processed});
+   }
+  }
+  if(run===searchRun)renderSearchResults(results,q.trim(),failed);
+ }finally{
+  if(run===searchRun){searchButton.disabled=false;searchInput.disabled=false;searchInput.focus()}
+ }
+}
+async function goToSearchResult(r){cancelSearch();state.bookIndex=r.book.index;state.chapter=r.chapter;if(!await loadCurrent())return;searchPanel.hidden=true;requestAnimationFrame(()=>{const t=versesEl.querySelector(`[data-verse="${r.verse}"]`);if(!t)return;t.classList.add("searched");t.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>t.classList.remove("searched"),1800)})}
 
 function cancelSearch(){
   // Invalidate in-flight searches and immediately restore the search controls.
