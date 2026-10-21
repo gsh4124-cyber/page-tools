@@ -66,6 +66,8 @@ jobs:
         run: node tools/validate-i18n.mjs
       - name: Validate title navigation behavior
         run: node tools/validate-navigation.mjs
+      - name: Validate progressive Bible search and cancellation
+        run: node tools/validate-search-progress.mjs
 
   quality-gate:
     name: Combined Quality Gate
