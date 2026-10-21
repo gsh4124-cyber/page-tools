@@ -25,8 +25,16 @@ function initMouse(){
   });
   window.addEventListener("mouseup",()=>pad.classList.remove("pressed"));
   pad.addEventListener("wheel",e=>{ e.preventDefault(); wheel += Math.sign(e.deltaY); refresh(); }, {passive:false});
+  // Coalesce high-frequency pointer events into one read/write per paint frame.
+  let pendingPointer=null,pointerFrame=0;
   pad.addEventListener("mousemove",e=>{
-    const r=pad.getBoundingClientRect(); setText("mousePos",`${Math.round(e.clientX-r.left)}, ${Math.round(e.clientY-r.top)}`);
+    pendingPointer={x:e.clientX,y:e.clientY};
+    if(pointerFrame)return;
+    pointerFrame=requestAnimationFrame(()=>{
+      pointerFrame=0;
+      const point=pendingPointer,r=pad.getBoundingClientRect();
+      setText("mousePos",`${Math.round(point.x-r.left)}, ${Math.round(point.y-r.top)}`);
+    });
   });
   $("#resetMouse")?.addEventListener("click",()=>{left=right=middle=wheel=suspicious=0;lastLeft=0;minGap=Infinity;setText("mouseHint","먼저 왼쪽 버튼을 한 번씩 천천히 눌러보세요. 한 번 눌렀는데 숫자가 두 번 오르는지가 핵심입니다.");refresh();});
   refresh();
