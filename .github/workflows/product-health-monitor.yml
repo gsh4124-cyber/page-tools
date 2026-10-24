@@ -191,7 +191,8 @@ jobs:
       - name: Random Picker desktop and mobile production interaction
         if: contains(steps.changed.outputs.projects, 'random-ppobgi')
         env:
-          DEPLOY_VERIFIED_SHA: ${{ github.sha }}
+          # A workflow/test-only push does not attest a new Cloudflare deployment.
+          DEPLOY_VERIFIED_SHA: ${{ contains(steps.changed.outputs.deploy_projects, 'random-ppobgi') && github.sha || '' }}
         run: node random-ppobgi/tests/live-browser-proof.mjs
       - name: Bible Reader production navigation and multilingual interactions
         if: contains(steps.changed.outputs.projects, 'bible-reader')
