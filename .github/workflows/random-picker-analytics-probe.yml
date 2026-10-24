@@ -23,8 +23,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          # Missing GitHub secrets are an operator configuration failure, not zero traffic.
+          # Keep the run red and identify only missing key names; never print secret values.
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN is not configured in this repository; D1 analytics were NOT queried."
+            exit 1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID is not configured in this repository; D1 analytics were NOT queried."
+            exit 1
+          fi
           SQL=$(cat <<'SQL'
           SELECT event_date,event_name,method,input_mode,participant_bucket,result_mode,SUM(count) AS total
           FROM event_counts

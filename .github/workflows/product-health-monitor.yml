@@ -37,6 +37,18 @@ jobs:
               '{url:$url,http_code:(try ($code|tonumber) catch 0),response_seconds:(try ($seconds|tonumber) catch 0),ok:$ok}'
           }
 
+          # Validate meaningful, publicly served page content rather than HTTP 200 alone.
+          # This is HTTP content QA, not browser interaction or deployment-SHA attestation.
+          check_content() {
+            local url="$1" expected="$2" file code ok=false
+            file=$(mktemp)
+            code=$(curl -L --retry 2 --max-time 20 -sS -o "$file" -w '%{http_code}' "$url" || echo 000)
+            if [ "$code" = 200 ] && grep -Fq -- "$expected" "$file"; then ok=true; fi
+            rm -f "$file"
+            jq -n --arg url "$url" --arg code "$code" --argjson ok "$ok" \
+              '{url:$url,http_code:(try ($code|tonumber) catch 0),contains_expected_content:$ok,ok:$ok}'
+          }
+
           check_search() {
             local base="$1" rc sc count has=false ok=false
             rc=$(curl -L --retry 2 --max-time 20 -sS -o /tmp/robots -w '%{http_code}' "${base}robots.txt" || echo 000)
@@ -63,8 +75,14 @@ jobs:
           BIBLE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://bible-reader-1iz.pages.dev/')" --argjson search "$(check_search 'https://bible-reader-1iz.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'bible-reader-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
           DEVICE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://pc-checkup.pages.dev/')" --argjson search "$(check_search 'https://pc-checkup.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'pc-checkup-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
 
+          # These cover the localized entry routes and device flow, independently of root health.
+          RANDOM_LOCALE=$(check_content 'https://random-ppobgi.pages.dev/en/' 'Random Picker')
+          BIBLE_LOCALE=$(check_content 'https://bible-reader-1iz.pages.dev/en/' 'Free Online Bible Reader')
+          DEVICE_MOBILE=$(check_content 'https://pc-checkup.pages.dev/mobile.html' 'mobile')
+
           jq -n --arg generated_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" --argjson random "$RANDOM_PRODUCT" --argjson bible "$BIBLE_PRODUCT" --argjson device "$DEVICE_PRODUCT" \
-            '{generated_at:$generated_at,technical_repository:"gsh4124-cyber/page-tools",products:{"random-picker":$random,"bible-reader":$bible,"device-checkup":$device}}' | tee /tmp/health.json
+            --argjson random_locale "$RANDOM_LOCALE" --argjson bible_locale "$BIBLE_LOCALE" --argjson device_mobile "$DEVICE_MOBILE" \
+            '{generated_at:$generated_at,technical_repository:"gsh4124-cyber/page-tools",products:{"random-picker":($random + {localized_entry:$random_locale}),"bible-reader":($bible + {localized_entry:$bible_locale}),"device-checkup":($device + {mobile_entry:$device_mobile})}}' | tee /tmp/health.json
 
           {
             echo "## Vibe Coding Product Health"
@@ -76,4 +94,4 @@ jobs:
             echo "Operational state is stored in Supabase hwangje_ops; technical source is gsh4124-cyber/page-tools; this workflow does not write runtime snapshots to Vault."
           } >> "$GITHUB_STEP_SUMMARY"
 
-          jq -e '[.products[] | (.url.ok and .search_surface.ok)] | all' /tmp/health.json >/dev/null
+          jq -e '[.products[] | (.url.ok and .search_surface.ok and ((.localized_entry // .mobile_entry).ok))] | all' /tmp/health.json >/dev/null

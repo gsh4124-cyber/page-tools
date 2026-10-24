@@ -54,6 +54,10 @@ jobs:
             grep -q "hreflang=\"$lang\"" "$lang/index.html"
             grep -q "rel=\"canonical\" href=\"$PROD/$lang/\"" "$lang/index.html"
             grep -q "<loc>$PROD/$lang/</loc>" sitemap.xml
+            grep -q '<main id="entry-fallback"' "$lang/index.html"
+            grep -q '<h1>' "$lang/index.html"
+            grep -q '<p class="entry-summary">' "$lang/index.html"
+            grep -q 'href="/?translation=' "$lang/index.html"
           done
           grep -q 'hreflang="x-default"' index.html
 
