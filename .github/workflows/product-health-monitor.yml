@@ -78,7 +78,7 @@ jobs:
           # These cover the localized entry routes and device flow, independently of root health.
           RANDOM_LOCALE=$(check_content 'https://random-ppobgi.pages.dev/en/' 'Random Picker')
           BIBLE_LOCALE=$(check_content 'https://bible-reader-1iz.pages.dev/en/' 'Free Online Bible Reader')
-          DEVICE_MOBILE=$(check_content 'https://pc-checkup.pages.dev/mobile.html' 'mobile')
+          DEVICE_MOBILE=$(check_content 'https://pc-checkup.pages.dev/mobile.html' 'mobile.js')
 
           jq -n --arg generated_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" --argjson random "$RANDOM_PRODUCT" --argjson bible "$BIBLE_PRODUCT" --argjson device "$DEVICE_PRODUCT" \
             --argjson random_locale "$RANDOM_LOCALE" --argjson bible_locale "$BIBLE_LOCALE" --argjson device_mobile "$DEVICE_MOBILE" \
