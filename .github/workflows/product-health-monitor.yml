@@ -18,7 +18,7 @@ permissions:
 
 concurrency:
   group: vibe-coding-product-health
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   health:
@@ -101,7 +101,7 @@ jobs:
           jq -e '[.products[] | (.url.ok and .search_surface.ok and ((.localized_entry // .mobile_entry).ok))] | all' /tmp/health.json >/dev/null
 
   production-browser:
-    name: Production Browser QA (deployed SHA)
+    name: Production Browser QA (live deployed sites)
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -118,6 +118,7 @@ jobs:
           set -euo pipefail
           if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
             echo 'projects=bible-reader random-ppobgi pc-checkup' >> "$GITHUB_OUTPUT"
+            echo 'deploy_projects=' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           before="$BEFORE_SHA"
@@ -126,16 +127,34 @@ jobs:
           fi
           files=$(git diff --name-only "$before" "$GITHUB_SHA")
           projects=()
+          deploy_projects=()
+          # A workflow-only change runs all three live tests; it does not force a site deployment.
+          if grep -Fqx '.github/workflows/product-health-monitor.yml' <<< "$files"; then
+            projects=(bible-reader random-ppobgi pc-checkup)
+          fi
           for project in bible-reader random-ppobgi pc-checkup; do
-            if grep -q "^$project/" <<< "$files"; then projects+=("$project"); fi
+            if grep -q "^$project/" <<< "$files"; then
+              if [[ ! " ${projects[*]} " =~ " $project " ]]; then projects+=("$project"); fi
+            fi
+            # These files change QA behavior only; the deployed application is unchanged.
+            case "$project" in
+              bible-reader) qa_script='bible-reader/tools/production-smoke.mjs' ;;
+              random-ppobgi) qa_script='random-ppobgi/tests/live-browser-proof.mjs' ;;
+              pc-checkup) qa_script='pc-checkup/tools/device-experience-smoke.mjs' ;;
+            esac
+            if grep -q "^$project/" <<< "$files" && grep "^$project/" <<< "$files" | grep -Fvx "$qa_script" | grep -q .; then
+              deploy_projects+=("$project")
+            fi
           done
-          echo "Changed products: ${projects[*]:-none}"
+          echo "Live browser targets: ${projects[*]:-none}"
+          echo "Require new Cloudflare deployment: ${deploy_projects[*]:-none}"
           echo "projects=${projects[*]}" >> "$GITHUB_OUTPUT"
-      - name: Verify Cloudflare deployment of each changed product matches commit
-        if: steps.changed.outputs.projects != ''
+          echo "deploy_projects=${deploy_projects[*]}" >> "$GITHUB_OUTPUT"
+      - name: Verify Cloudflare deployment of changed application source matches commit
+        if: steps.changed.outputs.deploy_projects != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          PROJECTS: ${{ steps.changed.outputs.projects }}
+          PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
         shell: bash
         run: |
           set -euo pipefail
