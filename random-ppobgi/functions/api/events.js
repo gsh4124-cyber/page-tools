@@ -58,7 +58,7 @@ function isConsistentPayload(payload) {
 }
 
 async function handlePost(context) {
-  const { request, env } = context;
+  const { request } = context;
   if (!isSameOrigin(request)) return response(403);
   if (isAutomatedQa(request)) return response(204);
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) return response(415);
@@ -76,27 +76,19 @@ async function handlePost(context) {
   }
 
   if (!isValidPayload(body) || !isConsistentPayload(body)) return response(400);
-  if (!env.ANALYTICS_DB) return response(503);
-
-  const eventDate = new Date().toISOString().slice(0, 10);
+  // Existing D1 data stays untouched as an historical archive.
+  // Only the aggregate event payload is sent to our Supabase Edge Function.
   try {
-    await env.ANALYTICS_DB.prepare(`
-      INSERT INTO event_counts (
-        event_date, event_name, method, input_mode,
-        participant_bucket, result_mode, count
-      ) VALUES (?, ?, ?, ?, ?, ?, 1)
-      ON CONFLICT (
-        event_date, event_name, method, input_mode,
-        participant_bucket, result_mode
-      ) DO UPDATE SET count = count + 1
-    `).bind(
-      eventDate,
-      body.event_name,
-      body.method,
-      body.input_mode,
-      body.participant_bucket,
-      body.result_mode,
-    ).run();
+    const upstream = await fetch('https://afiqaibosavbjzkffggr.supabase.co/functions/v1/random-picker-event', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: new URL(request.url).origin,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (upstream.status !== 204) return response(503);
   } catch {
     return response(503);
   }

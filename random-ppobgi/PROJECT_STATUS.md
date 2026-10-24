@@ -81,13 +81,13 @@
 - `reroll`
 - `exclude_reroll`
 
-Production D1: `random-ppobgi-analytics`.
+신규 통계는 Supabase `random-picker-event` / `public.random_picker_events_daily`. 과거 Cloudflare D1 `random-ppobgi-analytics` 원본은 삭제 없이 별도 보존하며 아직 이전하지 않음.
 
 수집 payload는 허용된 범주값만 받으며 이름·입력문구·당첨내용·사용자 ID·세션 ID·광고 ID·쿠키는 수집하지 않는다.
 
 과거 Production Browser QA가 실제 행동계측에 섞이는 문제가 확인돼 제외처리를 배포했다. **2026-09-09 이후를 clean telemetry baseline**으로 사용한다. 변경 전 수치를 외부 사용자 수요로 역산하지 않는다.
 
-raw telemetry는 실제 D1/집계 원천이 기술 원본이며, 제품 운영 판단에 필요한 현재 snapshot·stale 여부·다음 행동은 Supabase `hwangje_ops`에서 회수한다. 과거 Vault analytics JSON을 현재 live-state owner로 복원하지 않는다.
+신규 익명 집계 원본은 Supabase에 저장한다. 과거 D1 데이터는 임의 삭제·이관하거나 신규 Supabase 통계와 중복 합산하지 않는다. D1 접근 권한이 없어 과거 데이터 이관은 미완료이며 추후 원본 직접 조회·대조가 필요하다.
 
 ## 검색 유통
 
