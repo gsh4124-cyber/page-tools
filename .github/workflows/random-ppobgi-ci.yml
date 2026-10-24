@@ -84,6 +84,17 @@ jobs:
           for i in {1..20}; do curl -fsS http://127.0.0.1:4173/en/ >/dev/null && exit 0; sleep 1; done
           cat /tmp/random-picker-http.log
           exit 1
+      - name: Verify production Supabase telemetry safety without adding events
+        run: |
+          set -euo pipefail
+          endpoint='https://afiqaibosavbjzkffggr.supabase.co/functions/v1/random-picker-event'
+          status=$(curl -sS --retry 2 --max-time 15 -o /dev/null -w '%{http_code}' -X OPTIONS -H 'Origin: https://random-ppobgi.pages.dev' -H 'Access-Control-Request-Method: POST' "$endpoint")
+          test "$status" = 204 || { echo "Expected allowed CORS preflight=204, got $status"; exit 1; }
+          status=$(curl -sS --retry 2 --max-time 15 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://other.example' -H 'Content-Type: application/json' --data '{}' "$endpoint")
+          test "$status" = 403 || { echo "Expected blocked origin=403, got $status"; exit 1; }
+          status=$(curl -sS --retry 2 --max-time 15 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://random-ppobgi.pages.dev' -H 'Content-Type: application/json' --data '{}' "$endpoint")
+          test "$status" = 400 || { echo "Expected invalid payload=400, got $status"; exit 1; }
+          echo 'Supabase telemetry public boundary verified without storing QA events'
       - name: Run multilingual browser smoke
         run: node tests/i18n-browser-smoke.mjs
       - name: Check public production in desktop and mobile Chrome
