@@ -8,9 +8,13 @@ on:
     branches: ["main"]
     paths:
       - '.github/workflows/product-health-monitor.yml'
+      - 'random-ppobgi/**'
+      - 'bible-reader/**'
+      - 'pc-checkup/**'
 
 permissions:
   contents: read
+  checks: read
 
 concurrency:
   group: vibe-coding-product-health
@@ -95,3 +99,59 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           jq -e '[.products[] | (.url.ok and .search_surface.ok and ((.localized_entry // .mobile_entry).ok))] | all' /tmp/health.json >/dev/null
+
+  production-browser:
+    name: Production Browser QA (deployed SHA)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify all three Cloudflare deployments match this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Never mark a browser test of the previous live release as verification of this commit.
+          for attempt in $(seq 1 48); do
+            checks=$(curl -fsSL --retry 2 -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100")
+            pending=()
+            for project in bible-reader random-ppobgi pc-checkup; do
+              result=$(jq -r --arg name "Cloudflare Pages: $project" '([.check_runs[] | select(.name == $name) | .conclusion] | first) // "missing"' <<< "$checks")
+              if [ "$result" = failure ] || [ "$result" = cancelled ] || [ "$result" = timed_out ]; then
+                echo "::error::Cloudflare deployment for $project failed with $result at $GITHUB_SHA"
+                exit 1
+              fi
+              if [ "$result" != success ]; then pending+=("$project=$result"); fi
+            done
+            if [ "${#pending[@]}" -eq 0 ]; then
+              echo "All three Cloudflare projects reported a successful deployment of $GITHUB_SHA"
+              exit 0
+            fi
+            echo "Awaiting deployment of $GITHUB_SHA: ${pending[*]}"
+            sleep 10
+          done
+          echo "::error::Cloudflare deployment identity did not converge for $GITHUB_SHA"
+          exit 1
+      - name: Install supported Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Random Picker desktop and mobile production interaction
+        run: node random-ppobgi/tests/live-browser-proof.mjs
+      - name: Bible Reader production navigation and multilingual interactions
+        run: node bible-reader/tools/production-smoke.mjs
+      - name: DEVICE CHECKUP production PC and mobile result interactions
+        run: node pc-checkup/tools/device-experience-smoke.mjs
+      - name: Preserve production browser screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-tools-production-browser-${{ github.run_id }}
+          path: random-ppobgi/qa_evidence/live/
+          if-no-files-found: warn
+          retention-days: 7
