@@ -1,4 +1,8 @@
 import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+const proofDir = new URL('../qa_evidence/live/', import.meta.url);
+await mkdir(proofDir, { recursive: true });
 
 const base='https://pc-checkup.pages.dev';
 const browser=await chromium.launch({headless:true});
@@ -16,6 +20,7 @@ await page.waitForTimeout(50);
 await assert((await page.locator('[data-device-experience="pc"] [data-x="ok"]').textContent())==='1','PC result summary did not sync');
 await page.locator('[data-device-experience="pc"] summary').click();
 await assert((await page.locator('[data-device-experience="pc"] [data-manual]').count())===6,'PC manual checklist count mismatch');
+await page.screenshot({path:fileURLToPath(new URL('pc-results.png',proofDir)),fullPage:true});
 
 await page.goto(`${base}/mobile.html`,{waitUntil:'networkidle',timeout:30000});
 await assert(await page.locator('#nextMobileCheck').isVisible(),'mobile next-incomplete control missing');
@@ -27,6 +32,7 @@ await assert((await page.locator('#nextMobileCheck').getAttribute('data-target')
 await assert((await page.locator('[data-device-experience="mobile"] [data-x="ok"]').textContent())==='1','mobile result summary did not sync');
 await page.locator('[data-device-experience="mobile"] summary').click();
 await assert((await page.locator('[data-device-experience="mobile"] [data-manual]').count())===6,'mobile manual checklist count mismatch');
+await page.screenshot({path:fileURLToPath(new URL('mobile-results.png',proofDir)),fullPage:true});
 
 await browser.close();
 console.log('DEVICE CHECKUP experience production QA PASS: next incomplete, summary sync, copy/share controls, manual checklist.');

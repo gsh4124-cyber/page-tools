@@ -1,4 +1,8 @@
 import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+const proofDir = new URL('../qa_evidence/live/', import.meta.url);
+await mkdir(proofDir, { recursive: true });
 
 const base = 'https://bible-reader-1iz.pages.dev';
 const browser = await chromium.launch({ headless: true });
@@ -164,6 +168,7 @@ async function assertMultiVerseSelection(page, label) {
   const title = (await page.locator('#chapterTitle').innerText()).trim();
   assert(/[\u3400-\u9fff]/.test(title), `en: CUV should control chapter heading language, got ${title}`);
   assert(pageErrors.length === 0, `en: page errors: ${pageErrors.join(' | ')}`);
+  await page.screenshot({ path: fileURLToPath(new URL('english-reader.png', proofDir)), fullPage: true });
   await page.close();
 }
 

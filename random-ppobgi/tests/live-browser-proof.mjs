@@ -8,7 +8,7 @@ const report = {
   kind: 'public-production-browser-proof',
   target: origin,
   test_suite_commit: process.env.GITHUB_SHA || 'local-unverified',
-  production_revision: 'UNVERIFIED',
+  production_revision: process.env.DEPLOY_VERIFIED_SHA || 'UNVERIFIED',
   checked_at: new Date().toISOString(),
   run_id: process.env.GITHUB_RUN_ID || 'local-unverified',
   cases: [],
@@ -27,8 +27,10 @@ for (const test of cases) {
   try {
     page = await browser.newPage({ viewport: test.viewport });
     page.on('pageerror', error => runtimeErrors.push(String(error)));
-    const url = new URL(test.path, origin).toString();
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    const url = new URL(test.path, origin);
+    // Explicitly exclude automated QA from anonymous D1 usage metrics.
+    url.searchParams.set('qa', '1');
+    const response = await page.goto(url.toString(), { waitUntil: 'domcontentloaded', timeout: 20000 });
     if (!response || !response.ok()) throw new Error('HTTP ' + (response ? response.status() : 'no response') + ' at ' + url);
     result.http_status = response.status();
     if (test.path === '/en/') {
