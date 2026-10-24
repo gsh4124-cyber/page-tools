@@ -17,7 +17,7 @@ permissions:
   checks: read
 
 concurrency:
-  group: vibe-coding-product-health
+  group: vibe-coding-product-health-browser-v2
   cancel-in-progress: true
 
 jobs:
