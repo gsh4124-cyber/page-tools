@@ -53,6 +53,16 @@ jobs:
               '{url:$url,http_code:(try ($code|tonumber) catch 0),contains_expected_content:$ok,ok:$ok}'
           }
 
+          # Fail closed when production ads.txt is malformed, even if the file returns HTTP 200.
+          check_ads() {
+            local base="$1" body code ok=false
+            body=$(mktemp)
+            code=$(curl -L --retry 2 --max-time 20 -sS -o "$body" -w '%{http_code}' "${base}ads.txt" || echo 000)
+            if [ "$code" = 200 ] && [ "$(cat "$body")" = 'google.com, pub-4925434492393378, DIRECT, f08c47fec0942fa0' ]; then ok=true; fi
+            rm -f "$body"
+            jq -n --arg code "$code" --argjson ok "$ok" '{http_code:(try ($code|tonumber) catch 0),valid_authorized_seller_record:$ok,ok:$ok}'
+          }
+
           check_search() {
             local base="$1" rc sc count has=false ok=false
             rc=$(curl -L --retry 2 --max-time 20 -sS -o /tmp/robots -w '%{http_code}' "${base}robots.txt" || echo 000)
@@ -75,9 +85,9 @@ jobs:
           }
 
           PAGE_REPO='gsh4124-cyber/page-tools'
-          RANDOM_PRODUCT=$(jq -n --argjson url "$(check_url 'https://random-ppobgi.pages.dev/')" --argjson search "$(check_search 'https://random-ppobgi.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'random-ppobgi-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
-          BIBLE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://bible-reader-1iz.pages.dev/')" --argjson search "$(check_search 'https://bible-reader-1iz.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'bible-reader-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
-          DEVICE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://pc-checkup.pages.dev/')" --argjson search "$(check_search 'https://pc-checkup.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'pc-checkup-ci.yml')" '{url:$url,search_surface:$search,ci:$ci}')
+          RANDOM_PRODUCT=$(jq -n --argjson url "$(check_url 'https://random-ppobgi.pages.dev/')" --argjson search "$(check_search 'https://random-ppobgi.pages.dev/')" --argjson ads "$(check_ads 'https://random-ppobgi.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'random-ppobgi-ci.yml')" '{url:$url,search_surface:$search,ads_txt:$ads,ci:$ci}')
+          BIBLE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://bible-reader-1iz.pages.dev/')" --argjson search "$(check_search 'https://bible-reader-1iz.pages.dev/')" --argjson ads "$(check_ads 'https://bible-reader-1iz.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'bible-reader-ci.yml')" '{url:$url,search_surface:$search,ads_txt:$ads,ci:$ci}')
+          DEVICE_PRODUCT=$(jq -n --argjson url "$(check_url 'https://pc-checkup.pages.dev/')" --argjson search "$(check_search 'https://pc-checkup.pages.dev/')" --argjson ads "$(check_ads 'https://pc-checkup.pages.dev/')" --argjson ci "$(check_ci "$PAGE_REPO" 'pc-checkup-ci.yml')" '{url:$url,search_surface:$search,ads_txt:$ads,ci:$ci}')
 
           # These cover the localized entry routes and device flow, independently of root health.
           RANDOM_LOCALE=$(check_content 'https://random-ppobgi.pages.dev/en/' 'Random Picker')
@@ -98,7 +108,7 @@ jobs:
             echo "Operational state is stored in Supabase hwangje_ops; technical source is gsh4124-cyber/page-tools; this workflow does not write runtime snapshots to Vault."
           } >> "$GITHUB_STEP_SUMMARY"
 
-          jq -e '[.products[] | (.url.ok and .search_surface.ok and ((.localized_entry // .mobile_entry).ok))] | all' /tmp/health.json >/dev/null
+          jq -e '[.products[] | (.url.ok and .search_surface.ok and .ads_txt.ok and ((.localized_entry // .mobile_entry).ok))] | all' /tmp/health.json >/dev/null
 
   production-browser:
     name: Production Browser QA (live deployed sites)
