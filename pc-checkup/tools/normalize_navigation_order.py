@@ -85,3 +85,12 @@ if remaining:
     raise RuntimeError(f'Legacy GitHub Pages origin remains in deploy artifact: {remaining[:10]}')
 
 print(f'Normalized canonical PC navigation order on {full_nav_pages} pages; rewrote {changed} pages; production-origin rewrites {origin_rewrites}')
+
+
+# The historical global generator may emit a stale ads.txt. The source file is
+# the canonical publisher authorization, and dist is the actual Cloudflare output.
+ADS_LINE = 'google.com, pub-4925434492393378, DIRECT, f08c47fec0942fa0'
+source_ads = Path('ads.txt')
+if not source_ads.is_file() or source_ads.read_text(encoding='utf-8').strip() != ADS_LINE:
+    raise RuntimeError('Source ads.txt is missing or has an invalid seller record')
+(ROOT/'ads.txt').write_text(ADS_LINE + '\n', encoding='utf-8')

@@ -50,6 +50,12 @@ for loc in re.findall(r'<loc>([^<]+)</loc>', sitemap):
     if not loc.startswith(PROD_ORIGIN + '/'):
         err('sitemap.xml', 'non-production URL', loc)
 
+# Check the actual deployable artifact, not just the source-side ads.txt.
+ads = (ROOT/'ads.txt').read_text(encoding='utf-8') if (ROOT/'ads.txt').exists() else ''
+expected_ads = 'google.com, pub-4925434492393378, DIRECT, f08c47fec0942fa0\\n'
+if ads != expected_ads:
+    err('ads.txt', 'invalid publisher record in dist')
+
 robots = (ROOT/'robots.txt').read_text(encoding='utf-8') if (ROOT/'robots.txt').exists() else ''
 if f'Sitemap: {PROD_ORIGIN}/sitemap.xml' not in robots:
     err('robots.txt', 'production sitemap reference missing')
