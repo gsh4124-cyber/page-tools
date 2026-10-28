@@ -40,8 +40,9 @@
         <select id="chapterSelect" aria-label="장" hidden></select>
         <select id="verseSelect" aria-label="절" hidden><option value="1">1절</option></select>
         <form id="searchForm" class="top-search" role="search"><input id="searchInput" list="bookList" type="search" autocomplete="off" placeholder="검색" aria-label="성경 검색" /><datalist id="bookList"></datalist><button id="searchButton" type="submit">검색</button></form>
+        <button id="searchToggle" class="search-toggle" type="button" aria-label="검색 열기" title="검색" aria-expanded="false" aria-controls="searchForm"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></button>
       </div>
-      <div class="toolbar" aria-label="읽기 도구"><button id="compareToggle" class="text-button primary-tool" type="button" aria-pressed="false">비교</button><button id="fontDown" class="quick-tool">가−</button><button id="fontUp" class="quick-tool">가+</button><button id="widthToggle" class="quick-tool">↔</button><button id="pageViewToggle" class="quick-tool page-view-toggle" type="button" aria-label="양면 보기" title="양면 보기">▯</button><button id="themeToggle" class="quick-tool" aria-label="테마">◐</button></div>
+      <div class="toolbar" aria-label="읽기 도구"><button id="compareToggle" class="text-button primary-tool" type="button" aria-pressed="false">비교</button><button id="fontDown" class="quick-tool">가−</button><button id="fontUp" class="quick-tool">가+</button><button id="widthToggle" class="quick-tool">↔</button><button id="pageViewToggle" class="quick-tool page-view-toggle" type="button" aria-label="양면 보기" title="양면 보기">▯</button><button id="themeToggle" class="quick-tool" aria-label="테마">◐</button><div class="toolbar-more-wrap"><button id="toolbarMoreToggle" class="quick-tool" type="button" aria-label="더보기" title="더보기" aria-expanded="false" aria-controls="toolbarMoreMenu">···</button><div id="toolbarMoreMenu" class="toolbar-more-menu" hidden></div></div></div>
     </div>
   </header>
   <main><section class="reader-shell">
