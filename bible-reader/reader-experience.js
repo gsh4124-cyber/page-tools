@@ -220,7 +220,90 @@
   contentObserver.observe(versesRoot,{childList:true});
   const bodyObserver=new MutationObserver(()=>ensureMultiSelectEnhancements());bodyObserver.observe(document.body,{childList:true,subtree:true});
 
-  ensureReaderTools();restoreFocus();syncHighlightColors();ensureMultiSelectEnhancements();
+  // Keep frequent reading actions in reach; move the existing (already wired) secondary buttons
+  // into a single overflow menu rather than cloning them or hiding their functions.
+  function setupCompactTopbar(){
+    const topbar=document.querySelector('.topbar');
+    const searchToggle=document.querySelector('#searchToggle');
+    const searchForm=document.querySelector('#searchForm');
+    const searchInput=document.querySelector('#searchInput');
+    const moreToggle=document.querySelector('#toolbarMoreToggle');
+    const moreMenu=document.querySelector('#toolbarMoreMenu');
+    const moreWrap=document.querySelector('.toolbar-more-wrap');
+    if(!topbar||!searchToggle||!searchForm||!searchInput||!moreToggle||!moreMenu||!moreWrap)return;
+
+    const otherTools=[
+      ['#widthToggle','읽기 폭'],['#pageViewToggle','양면 보기'],
+      ['#themeToggle','테마'],['.reader-history-back','이전 위치'],
+      ['.reader-history-forward','다음 위치'],['.reader-focus-toggle','집중 읽기']
+    ];
+    otherTools.forEach(([selector,fallback])=>{
+      const button=toolbar.querySelector(selector);
+      if(!button)return;
+      if(!button.title)button.title=button.getAttribute('aria-label')||fallback;
+      moreMenu.append(button);
+    });
+    const notebook=toolbar.querySelector('.notebook-button');
+    if(notebook)toolbar.insertBefore(notebook,moreWrap);
+
+    const moreNames={ko:'더보기',en:'More',fr:'Plus',de:'Mehr',zh:'更多',ru:'Ещё',la:'Plura',pt:'Mais',ar:'المزيد'};
+    function refreshLabels(){
+      const language=String(document.documentElement.lang||'ko').split('-')[0].toLowerCase();
+      const searchName=searchInput.placeholder||'검색';
+      searchToggle.title=searchName;
+      searchToggle.setAttribute('aria-label',searchName);
+      const moreName=moreNames[language]||moreNames.en;
+      moreToggle.title=moreName;moreToggle.setAttribute('aria-label',moreName);
+    }
+    new MutationObserver(refreshLabels).observe(searchInput,{attributes:true,attributeFilter:['placeholder']});
+    refreshLabels();
+
+    function showSearch(open){
+      topbar.classList.toggle('search-open',open);
+      searchToggle.setAttribute('aria-expanded',String(open));
+      if(open)requestAnimationFrame(()=>searchInput.focus());
+      else if(document.activeElement===searchInput)searchToggle.focus();
+    }
+    function showMore(open){
+      moreMenu.hidden=!open;
+      moreToggle.setAttribute('aria-expanded',String(open));
+      if(!open&&moreMenu.contains(document.activeElement))moreToggle.focus();
+    }
+    searchToggle.addEventListener('click',()=>{
+      const open=!topbar.classList.contains('search-open');
+      showMore(false);showSearch(open);
+    });
+    moreToggle.addEventListener('click',()=>{
+      const open=moreMenu.hidden;
+      showSearch(false);showMore(open);
+    });
+    moreMenu.addEventListener('click',event=>{
+      if(event.target.closest('button'))showMore(false);
+    });
+    document.addEventListener('pointerdown',event=>{
+      if(!searchToggle.contains(event.target)&&!searchForm.contains(event.target))showSearch(false);
+      if(!moreWrap.contains(event.target))showMore(false);
+    });
+    document.addEventListener('keydown',event=>{
+      if(event.key!=='Escape')return;
+      if(!moreMenu.hidden){showMore(false);event.preventDefault();}
+      else if(topbar.classList.contains('search-open')){showSearch(false);event.preventDefault();}
+    });
+    // Preserve the existing / shortcut by exposing the same search field before focus.
+    searchInput.addEventListener('focus',()=>{if(!topbar.classList.contains('search-open'))showSearch(true)});
+    let scrollTick=false;
+    window.addEventListener('scroll',()=>{
+      if(scrollTick)return;
+      scrollTick=true;
+      requestAnimationFrame(()=>{
+        topbar.classList.toggle('topbar-scrolled',window.scrollY>80);
+        scrollTick=false;
+      });
+    },{passive:true});
+    topbar.classList.toggle('topbar-scrolled',window.scrollY>80);
+  }
+
+  ensureReaderTools();setupCompactTopbar();restoreFocus();syncHighlightColors();ensureMultiSelectEnhancements();
   if(historyState.index<0)recordLocation(1);else updateHistoryButtons();
   window.ReaderExperience={recordLocation,moveHistory,setFocus,toggleFocus,shareSelection,buildShareUrl,applyHighlightColor};
   window.addEventListener('load',()=>setTimeout(applyDeepLink,120));

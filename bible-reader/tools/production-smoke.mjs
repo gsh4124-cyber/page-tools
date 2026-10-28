@@ -23,14 +23,38 @@ async function open(path, viewport={ width: 390, height: 844 }) {
 async function assertCompactTopbar(page, label) {
   const translation = await page.locator('#translationSelect').boundingBox();
   const language = await page.locator('#languageSelect').boundingBox();
-  const search = await page.locator('#searchForm').boundingBox();
-  assert(Boolean(translation && language && search), `${label}: compact topbar controls missing`);
-  if (translation && language && search) {
-    const ys = [translation.y, language.y, search.y];
-    assert(Math.max(...ys)-Math.min(...ys) < 3, `${label}: translation/language/search must stay on one row`);
+  const search = await page.locator('#searchToggle').boundingBox();
+  const compare = await page.locator('#compareToggle').boundingBox();
+  const notebook = await page.locator('.notebook-button').boundingBox();
+  const more = await page.locator('#toolbarMoreToggle').boundingBox();
+  const viewportWidth = page.viewportSize().width;
+  assert(Boolean(translation && language && search && compare && notebook && more), `${label}: compact toolbar actions missing`);
+  if (translation && language && search && compare && notebook && more) {
+    const firstRow = [translation.y, language.y, search.y];
+    assert(Math.max(...firstRow)-Math.min(...firstRow) < 3, `${label}: translation/language/search icon must stay aligned`);
     assert(translation.x + translation.width <= language.x + 2, `${label}: translation overlaps language`);
-    assert(language.x + language.width <= search.x + 2, `${label}: language overlaps search`);
+    assert(language.x + language.width <= search.x + 2, `${label}: language overlaps search icon`);
+    if (viewportWidth >= 700) {
+      assert(Math.abs(compare.y - search.y) < 3, `${label}: tablet toolbar must use one row`);
+      assert(search.x + search.width <= compare.x + 3, `${label}: search icon overlaps reading actions`);
+    } else {
+      assert(compare.y >= search.y + search.height - 3, `${label}: phone toolbar must use a second row`);
+    }
+    assert(more.x + more.width <= viewportWidth + 2, `${label}: overflow button clipped`);
+    assert(notebook.width >= 44 && more.width >= 44, `${label}: touch targets too small`);
   }
+  assert(await page.locator('#searchForm').isHidden(), `${label}: search should be collapsed initially`);
+  await page.locator('#searchToggle').click();
+  assert(await page.locator('#searchInput').isVisible(), `${label}: search button did not open input`);
+  assert(await page.locator('#searchToggle').getAttribute('aria-expanded') === 'true', `${label}: search accessibility state wrong`);
+  await page.locator('#searchToggle').click();
+  assert(await page.locator('#searchForm').isHidden(), `${label}: search did not close`);
+  await page.locator('#toolbarMoreToggle').click();
+  assert(await page.locator('#toolbarMoreMenu #themeToggle').isVisible(), `${label}: theme action missing from overflow`);
+  assert(await page.locator('#toolbarMoreMenu #widthToggle').isVisible(), `${label}: reading width action missing from overflow`);
+  await page.locator('#toolbarMoreToggle').click();
+  assert(await page.locator('#toolbarMoreMenu').isHidden(), `${label}: overflow did not close`);
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2), `${label}: toolbar causes horizontal page overflow`);
 }
 
 async function assertTitleNavigator(page, label) {
@@ -153,6 +177,13 @@ async function assertMultiVerseSelection(page, label) {
   const { page, pageErrors } = await open('/', { width: 720, height: 900 });
   await assertCompactTopbar(page, 'root narrow tablet');
   assert(pageErrors.length === 0, `root narrow tablet: page errors: ${pageErrors.join(' | ')}`);
+  await page.close();
+}
+
+{
+  const { page, pageErrors } = await open('/', { width: 1024, height: 768 });
+  await assertCompactTopbar(page, 'root landscape tablet');
+  assert(pageErrors.length === 0, `root landscape tablet: page errors: ${pageErrors.join(' | ')}`);
   await page.close();
 }
 

@@ -4,6 +4,10 @@ const base='https://bible-reader-1iz.pages.dev';
 const browser=await chromium.launch({headless:true});
 const problems=[];
 const assert=(ok,message)=>{if(!ok)problems.push(message)};
+async function clickMoreTool(page,selector){
+  await page.locator('#toolbarMoreToggle').click();
+  await page.locator('#toolbarMoreMenu '+selector).click();
+}
 
 async function freshPage(path='/'){
   const context=await browser.newContext({viewport:{width:720,height:900}});
@@ -19,13 +23,14 @@ async function freshPage(path='/'){
   const errors=[];page.on('pageerror',error=>errors.push(String(error)));
   await page.goto(`${base}${path}`,{waitUntil:'networkidle',timeout:30000});
   await page.locator('#verses .verse').first().waitFor({state:'visible',timeout:15000});
-  await page.locator('.reader-history-back').waitFor({state:'visible',timeout:5000});
+  await page.locator('.reader-history-back').waitFor({state:'attached',timeout:5000});
   return {context,page,errors};
 }
 
 {
   const {context,page,errors}=await freshPage('/');
 
+  await page.locator('#searchToggle').click();
   await page.locator('#searchInput').fill('요14:10-12');
   await page.locator('#searchForm').evaluate(form=>form.requestSubmit());
   await page.waitForFunction(()=>document.querySelector('#bookSelect')?.value==='42'&&document.querySelector('#chapterSelect')?.value==='14',{timeout:15000});
@@ -35,15 +40,15 @@ async function freshPage(path='/'){
   const back=page.locator('.reader-history-back');
   const forward=page.locator('.reader-history-forward');
   assert(!(await back.isDisabled()),'history: back button did not enable after reference navigation');
-  await back.click();await page.waitForTimeout(350);
-  if(!(await back.isDisabled())){await back.click();await page.waitForTimeout(500)}
+  await clickMoreTool(page,'.reader-history-back');await page.waitForTimeout(350);
+  if(!(await back.isDisabled())){await clickMoreTool(page,'.reader-history-back');await page.waitForTimeout(500)}
   assert((await page.locator('#chapterSelect').inputValue())==='3','history: repeated back did not return to the previous chapter');
   assert(!(await forward.isDisabled()),'history: forward button did not enable after going back');
-  await forward.click();await page.waitForTimeout(350);
-  if(!(await forward.isDisabled())){await forward.click();await page.waitForTimeout(600)}
+  await clickMoreTool(page,'.reader-history-forward');await page.waitForTimeout(350);
+  if(!(await forward.isDisabled())){await clickMoreTool(page,'.reader-history-forward');await page.waitForTimeout(600)}
   assert((await page.locator('#chapterSelect').inputValue())==='14','history: forward did not restore the reference destination');
 
-  await page.locator('.reader-focus-toggle').click();
+  await clickMoreTool(page,'.reader-focus-toggle');
   assert(await page.locator('body').evaluate(el=>el.classList.contains('reader-focus')),'focus: focus mode did not activate');
   assert(await page.locator('.reader-focus-exit').isVisible(),'focus: mobile/visible exit control missing');
   assert(await page.locator('#verses .verse-number').first().isHidden(),'focus: verse numbers should be hidden');
