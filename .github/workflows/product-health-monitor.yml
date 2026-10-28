@@ -177,10 +177,34 @@ jobs:
         run: |
           set -euo pipefail
           read -ra products <<< "$PROJECTS"
+          bible_live_matches() {
+            local asset tmp
+            for asset in index.html reader-experience.js topbar-polish.css; do
+              tmp=$(mktemp)
+              if ! curl -fsSL --retry 1 --max-time 20 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?deploy_probe=$GITHUB_SHA" -o "$tmp"; then
+                rm -f "$tmp"
+                return 1
+              fi
+              if ! cmp -s "bible-reader/$asset" "$tmp"; then
+                rm -f "$tmp"
+                return 1
+              fi
+              rm -f "$tmp"
+            done
+            return 0
+          }
           for attempt in $(seq 1 42); do
             checks=$(curl -fsSL --retry 2 -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100")
             pending=()
             for project in "${products[@]}"; do
+              if [ "$project" = bible-reader ]; then
+                if bible_live_matches; then
+                  echo "Verified Bible Reader production HTML, JavaScript and CSS bytes against $GITHUB_SHA"
+                else
+                  pending+=("$project=live_source_mismatch")
+                fi
+                continue
+              fi
               result=$(jq -r --arg name "Cloudflare Pages: $project" '([.check_runs[] | select(.name == $name) | .conclusion] | first) // "missing"' <<< "$checks")
               if [ "$result" = failure ] || [ "$result" = cancelled ] || [ "$result" = timed_out ]; then
                 echo "::error::Cloudflare deployment for $project failed ($result) at $GITHUB_SHA"
@@ -197,6 +221,22 @@ jobs:
           done
           echo "::error::Cloudflare deployment identity not confirmed for $GITHUB_SHA"
           exit 1
+      - name: Read back served Bible Reader code before browser QA
+        if: contains(steps.changed.outputs.projects, 'bible-reader')
+        shell: bash
+        run: |
+          set -euo pipefail
+          for asset in index.html reader-experience.js topbar-polish.css; do
+            tmp=$(mktemp)
+            curl -fsSL --retry 2 --max-time 25 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?verify=$GITHUB_SHA" -o "$tmp"
+            if ! cmp -s "bible-reader/$asset" "$tmp"; then
+              echo "::error::Bible Reader live $asset does not match repository main at $GITHUB_SHA"
+              rm -f "$tmp"
+              exit 1
+            fi
+            rm -f "$tmp"
+          done
+          echo "Bible Reader production source readback matched: HTML, JS and CSS."
       - uses: actions/setup-node@v4
         if: steps.changed.outputs.projects != ''
         with:
