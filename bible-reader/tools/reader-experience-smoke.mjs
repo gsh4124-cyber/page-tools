@@ -30,6 +30,7 @@ async function freshPage(path='/'){
 {
   const {context,page,errors}=await freshPage('/');
 
+  await page.locator('#searchToggle').click();
   await page.locator('#searchInput').fill('요14:10-12');
   await page.locator('#searchForm').evaluate(form=>form.requestSubmit());
   await page.waitForFunction(()=>document.querySelector('#bookSelect')?.value==='42'&&document.querySelector('#chapterSelect')?.value==='14',{timeout:15000});
