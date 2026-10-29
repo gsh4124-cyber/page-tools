@@ -55,3 +55,50 @@ body.reader-focus .chapter-heading{padding-top:8px}
 @media(max-width:760px){.toolbar{padding-bottom:4px}.toolbar button{height:38px;min-width:42px!important;border-radius:10px}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}.toolbar .quick-tool{padding-inline:8px}}
 @media(max-width:620px){.verse-multi-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}.reader-undo-toast{bottom:148px}.reader-extra-tool{min-width:42px!important}.reader-focus-exit{right:9px;top:9px}}
 @media(max-width:390px){.verse-multi-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.reader-undo-toast{bottom:190px;width:max-content;max-width:calc(100vw - 24px)}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}}
+
+
+/* Docked notebook / wide reader layout.
+ * Keep Scripture readable on widescreens and use the remaining space beside notes.
+ * Phones and narrow portrait layouts retain the existing overlay panel.
+ */
+@media(min-width:1000px){
+  .reader-shell{
+    width:min(calc(var(--reader-width) + 420px),1360px,100%);
+  }
+  .verses{padding-inline:18px}
+  body.notebook-open{--notebook-dock-width:clamp(330px,29vw,430px)}
+  body.notebook-open .topbar,
+  body.notebook-open main,
+  body.notebook-open footer{
+    margin-right:var(--notebook-dock-width);
+  }
+  body.notebook-open main{padding-inline:24px}
+  body.notebook-open .reader-shell{
+    width:min(calc(var(--reader-width) + 420px),100%);
+    max-width:100%;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  body.notebook-open .notebook-panel{
+    width:var(--notebook-dock-width);
+    max-width:none;
+    height:100dvh;
+    overflow:hidden;
+    box-shadow:-2px 0 12px rgba(0,0,0,.07);
+  }
+  body.notebook-open .notebook-backdrop{display:none!important}
+  body.notebook-open .compare-panel{
+    width:100%;
+    max-width:100%;
+    padding-inline:0;
+    margin-left:0;
+    transform:none;
+  }
+  body.notebook-open #singleReader.dual-page{
+    width:100%;
+    max-width:100%;
+    margin-left:0;
+    transform:none;
+  }
+  body.notebook-open #singleReader.dual-page .verses{column-gap:32px;padding-inline:10px}
+}
