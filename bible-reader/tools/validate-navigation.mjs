@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 const index=fs.readFileSync('index.html','utf8');
 const nav=fs.readFileSync('title-navigator.js','utf8');
+const picker=fs.readFileSync('verse-picker.js','utf8');
 const css=fs.readFileSync('title-navigator.css','utf8');
 const layout=fs.readFileSync('i18n-layout.css','utf8');
 
@@ -33,10 +34,27 @@ for(const fragment of [
 ]){
   if(!nav.includes(fragment)) throw new Error(`title navigator regression guard missing: ${fragment}`);
 }
+// Chapter and verse grids must update within the same selection turn.
+for(const fragment of [
+  'window.BibleVersePicker?.sync?.()',
+  'awaitingBookIndex = Number(option.value)',
+  'showLoading(chapters)',
+]){
+  if(!nav.includes(fragment)) throw new Error(`stale title navigation grid regression: ${fragment}`);
+}
+if(nav.includes('requestAnimationFrame(() => requestAnimationFrame(() => {')) throw new Error('delayed repaint of stale verse options returned');
+for(const fragment of [
+  'window.BibleVersePicker={sync:populateVerseSelect}',
+  'referenceChanged',
+  'verseSelect.value="1"',
+]){
+  if(!picker.includes(fragment)) throw new Error(`verse picker sync/reset regression: ${fragment}`);
+}
+
 if(!css.includes('.title-navigator-testament-switch')) throw new Error('Old/New testament switch styling missing');
 if(css.includes('.title-navigator-testaments{display:grid;grid-template-columns:minmax(0,1.45fr)')) throw new Error('old dual-column testament layout returned');
 
 if(!layout.includes('grid-template-rows:42px!important')) throw new Error('top translation/language/search row must remain single-row');
 if(!layout.includes('grid-column:3!important;grid-row:1!important')) throw new Error('search must stay in row 1');
 
-console.log('Navigation validation passed: title navigation is sequential book -> chapter -> verse with back navigation, Old/New switch buttons, and the compact topbar stays one row.');
+console.log('Navigation validation passed: title navigation updates chapter/verse choices synchronously without showing previous selection, with back navigation and the compact topbar.');
