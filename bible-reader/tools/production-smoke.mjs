@@ -97,6 +97,10 @@ async function assertTitleNavigator(page, label) {
   await page.locator('.title-navigator-chapters .title-navigator-choice').first().waitFor({ state: 'visible', timeout: 5000 });
   const chapterTwo = page.locator('.title-navigator-chapters').getByRole('button',{name:'2',exact:true});
   await chapterTwo.click();
+  // Genesis 2 has 25 verses; Genesis 1 has 31. The old list must never flash
+  // before the newly chosen chapter's verse grid becomes visible.
+  const immediateVerseCount = await page.locator('.title-navigator-verses .title-navigator-choice').count();
+  assert(immediateVerseCount === 25, `${label}: stale previous chapter verse numbers shown (${immediateVerseCount} instead of 25)`);
   await page.locator('.title-navigator-verses .title-navigator-choice').first().waitFor({ state: 'visible', timeout: 5000 });
   assert(await chapterStep.isHidden(), `${label}: chapter step must hide after chapter selection`);
   assert(await verseStep.isVisible(), `${label}: verse step must appear after chapter selection`);
@@ -184,6 +188,26 @@ async function assertMultiVerseSelection(page, label) {
   const { page, pageErrors } = await open('/', { width: 1024, height: 768 });
   await assertCompactTopbar(page, 'root landscape tablet');
   assert(pageErrors.length === 0, `root landscape tablet: page errors: ${pageErrors.join(' | ')}`);
+  await page.close();
+}
+
+{
+  const { page, pageErrors } = await open('/', { width: 1440, height: 900 });
+  const before=await page.locator('.reader-shell').boundingBox();
+  await page.locator('.notebook-button').click();
+  await page.locator('body.notebook-open .notebook-panel').waitFor({state:'visible',timeout:5000});
+  await page.waitForTimeout(240);
+  const reader=await page.locator('.reader-shell').boundingBox();
+  const notebook=await page.locator('.notebook-panel').boundingBox();
+  assert(Boolean(before&&reader&&notebook), 'desktop dock: bounding boxes missing');
+  if(before&&reader&&notebook){
+    assert(reader.x+reader.width<=notebook.x+1,'desktop dock: Scripture is obscured by notebook');
+    assert(reader.width>=600,'desktop dock: Scripture content area became too narrow');
+    assert(before.width>reader.width,'desktop dock: reader did not yield space to notes');
+  }
+  await page.locator('.notebook-close').click();
+  assert(!(await page.locator('body').evaluate(el=>el.classList.contains('notebook-open'))),'desktop dock: closing notes did not restore reader layout');
+  assert(pageErrors.length===0,`desktop dock: page errors: ${pageErrors.join(' | ')}`);
   await page.close();
 }
 
