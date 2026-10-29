@@ -124,7 +124,7 @@
 
   function selectPickerOpen(){return document.activeElement?.tagName==='SELECT';}
   function applyAll(){applyStatic();if(!selectPickerOpen()){applySelects();applyScriptureTitle();}applyReadingDirection();localizeDynamicTree();}
-  window.BibleI18n={lang:()=>uiLang,scriptureLang,text:()=>UI[uiLang]||UI.en,ui:text,bookName,bookNames:BOOK_NAMES,localizeReference,apply:applyAll,defaultTranslation:code=>DEFAULT_TRANSLATION[code]};
+  window.BibleI18n={lang:()=>uiLang,scriptureLang,text:()=>UI[uiLang]||UI.en,ui:text,bookName,bookNames:BOOK_NAMES,localizeReference,formatVerse:number=>scriptureText('verse')(Number(number)||1),apply:applyAll,defaultTranslation:code=>DEFAULT_TRANSLATION[code]};
 
   const nativeConfirm=window.confirm.bind(window),nativeAlert=window.alert.bind(window);
   window.confirm=(message)=>nativeConfirm(message==='현재 기록을 백업 파일의 기록으로 바꿀까요?'?text('backupConfirm'):message);
