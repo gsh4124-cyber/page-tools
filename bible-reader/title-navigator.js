@@ -21,6 +21,7 @@
 
   let activeTestament = Number(bookSelect.selectedIndex) > OT_END_INDEX ? 'new' : 'old';
   let currentStep = 'book';
+  let awaitingBookIndex = null;
 
   const overlay = document.createElement('div');
   overlay.className = 'title-navigator-overlay';
@@ -149,6 +150,7 @@
         const changed = bookSelect.value !== option.value;
         currentStep = 'chapter';
         if (changed) {
+          awaitingBookIndex = Number(option.value);
           showLoading(chapters);
           setStep('chapter',{focusChoice:false});
           bookSelect.value = option.value;
@@ -179,9 +181,10 @@
           setStep('verse',{focusChoice:false});
           select.value = value;
           select.dispatchEvent(new Event('change',{bubbles:true}));
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            if (!overlay.hidden && currentStep === 'verse') renderAll();
-          }));
+          // Same-book changes render the chapter synchronously. Rebuild the verse
+          // choices from that new chapter before the next paint, not a frame later.
+          window.BibleVersePicker?.sync?.();
+          if (!overlay.hidden && currentStep === 'verse') renderAll();
           return;
         }
         renderAll();
@@ -202,6 +205,17 @@
     if (!hint.hidden) hint.textContent = l.hint;
     renderSwitch();
     renderBooks();
+    // A new book may take time to fetch. Never paint the old book's chapters
+    // while that request is pending; reveal only the newly loaded options.
+    if (awaitingBookIndex !== null && (chapterSelect.disabled || !(
+      typeof currentBookData !== 'undefined' && currentBookData
+    ))) {
+      showLoading(chapters);
+      showLoading(verses);
+      setStep(currentStep,{focusChoice:false});
+      return;
+    }
+    awaitingBookIndex = null;
     renderNumberGrid(chapterSelect,chapters,'chapter');
     renderNumberGrid(verseSelect,verses,'verse');
     setStep(currentStep);
@@ -211,6 +225,7 @@
     markHintSeen();
     activeTestament = Number(bookSelect.selectedIndex) > OT_END_INDEX ? 'new' : 'old';
     currentStep = 'book';
+    awaitingBookIndex = null;
     overlay.hidden = false;
     document.body.classList.add('title-navigator-open');
     dialog.focus({preventScroll:true});
