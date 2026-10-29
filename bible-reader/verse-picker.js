@@ -22,11 +22,11 @@
       return;
     }
     verseSelect.innerHTML="";
-    verseElements.forEach(element=>{const verse=Number(element.dataset.verse);if(!verse)return;const option=document.createElement("option");option.value=String(verse);option.textContent=`${verse}절`;verseSelect.append(option)});
+    verseElements.forEach(element=>{const verse=Number(element.dataset.verse);if(!verse)return;const option=document.createElement("option");option.value=String(verse);option.textContent=window.BibleI18n?.formatVerse?.(verse)||`${verse}절`;verseSelect.append(option)});
     const stillExists=!referenceChanged&&previous&&verseElements.some(element=>element.dataset.verse===previous);
     verseSelect.value=stillExists?previous:"1";
     lastRenderedReference=reference;
-    window.BibleI18n?.apply?.();
+    // Labels are localized directly; avoid a full-document retranslation on each chapter tap.
   }
 
   function schedulePopulate(){
