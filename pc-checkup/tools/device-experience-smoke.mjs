@@ -8,7 +8,7 @@ const base=process.env.DEVICE_TEST_BASE||'https://pc-checkup.pages.dev';
 const browser=await chromium.launch({headless:true});
 const locales=['ko','en','ja','es','de','fr','pt','it','nl','id','vi','zh-CN','ru'];
 for(const locale of locales){
-  const context=await browser.newContext({viewport:{width:390,height:844},permissions:['clipboard-read','clipboard-write']});
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:locale==='ko'?'ko-KR':locale,permissions:['clipboard-read','clipboard-write']});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',error=>{
     const stack=error.stack||'';
