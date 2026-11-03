@@ -4,7 +4,7 @@ const supported=new Set(langs);
 const origin='https://random-ppobgi.pages.dev';
 
 const title={
-  ko:'랜덤뽑기 | 8가지 뽑기 게임',
+  ko:'랜덤뽑기 | 이름·번호 추첨, 사다리타기·룰렛',
   en:'Random Picker | 8 Picker Games & Game Tools',
   ja:'ランダム抽選 | 8種類の抽選ゲームとゲームツール',
   es:'Selector aleatorio | 8 juegos de sorteo y herramientas',
@@ -24,7 +24,7 @@ const title={
 };
 
 const desc={
-  ko:'번호·이름 뽑기 8종과 주사위, 윷놀이, 동전, 순서 정하기, 팀 나누기를 무료로 이용하세요.',
+  ko:'이름이나 번호를 입력하고 사다리타기·룰렛·제비뽑기 등 8가지 방식으로 랜덤뽑기를 시작하세요. 무료 추첨, 당첨자 제외 재추첨, 팀 나누기를 설치·가입 없이 이용할 수 있습니다.',
   en:'Free random picker with Ladder, Wheel, Draw, Pinball, Race, Capsule, Slot, Bomb, plus dice, coin flip, order and team tools.',
   ja:'あみだくじ、ルーレット、くじ引き、ピンボール、レース、カプセル、スロット、爆弾とゲーム用ツールを無料で使えます。',
   es:'Selector aleatorio gratuito con escalera, ruleta, sorteo, pinball, carrera, cápsula, tragamonedas, bomba y herramientas de juego.',

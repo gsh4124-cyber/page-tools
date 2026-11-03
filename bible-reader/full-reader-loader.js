@@ -41,6 +41,7 @@
       const canonical = `https://bible-reader-1iz.pages.dev/${lang === 'ko' ? '' : lang + '/'}`;
       const bootstrap = `<script>window.__BIBLE_LANG__=${JSON.stringify(lang)};window.__BIBLE_TRANSLATION__=${JSON.stringify(selected)};</`+`script>`;
       html = html
+        .replace(/<!-- ko-reader-guide:start -->[\s\S]*?<!-- ko-reader-guide:end -->/, '')
         .replace(/<html lang="[^"]*"(?: dir="[^"]*")?>/i, `<html lang="${lang}" dir="ltr">`)
         .replace('<head>', `<head><base href="${base}">${bootstrap}`)
         .replace(/<link rel="canonical"[^>]*>/i, `<link rel="canonical" href="${canonical}" />`);
@@ -49,6 +50,18 @@
           .replace(/<title>[^<]*<\/title>/i, `<title>${seo[lang].title}</title>`)
           .replace(/<meta name="description" content="[^"]*"\s*\/?>/i, `<meta name="description" content="${seo[lang].description}" />`);
       }
+      const summary = seo[lang] || {title:'Bible Reader',description:''};
+      const escapeAttribute = value => value.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+      const ogLocales = {en:'en_US',fr:'fr_FR',de:'de_DE',zh:'zh_CN',ru:'ru_RU',la:'la',pt:'pt_PT',ar:'ar_AR'};
+      for (const [key,value] of [['og:site_name',summary.title.split('·')[0].trim()],['og:title',summary.title],['og:description',summary.description],['og:url',canonical],['og:locale',ogLocales[lang] || lang]]) {
+        html = html.replace(new RegExp(`<meta property="${key}" content="[^"]*"\\s*\\/?>`,'i'), () => `<meta property="${key}" content="${escapeAttribute(value)}" />`);
+      }
+      html = html.replace(/<script id="reader-schema" type="application\/ld\+json">([\s\S]*?)<\/script>/, (_,json) => {
+        const data=JSON.parse(json);
+        const app=data['@graph'].find(item=>item['@type']==='WebApplication');
+        Object.assign(app,{name:summary.title.split('·')[0].trim(),url:canonical,description:summary.description,inLanguage:lang});
+        return '<script id="reader-schema" type="application/ld+json">'+JSON.stringify(data).replace(/</g,'\\u003c')+'<'+ '/script>';
+      });
       document.open(); document.write(html); document.close();
     })
     .catch(err => {

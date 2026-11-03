@@ -77,6 +77,19 @@ html[lang="ko"] .verse.copied::after { content:"복사됨"; }
 .chapter-nav button { padding:11px 16px; }
 footer { max-width:960px; margin:0 auto; padding:28px 24px 54px; color:var(--muted); text-align:center; font-size:12px; line-height:1.7; }
 .source-note { opacity:.8; }
+.reader-intro { margin:0 auto 22px; text-align:center; }
+.reader-intro h1 { font:700 clamp(21px,3vw,28px)/1.35 system-ui,sans-serif; letter-spacing:-.02em; }
+.reader-intro p { max-width:650px; margin:8px auto 0; color:var(--muted); font-size:14px; line-height:1.65; }
+.chapter-heading h2 { margin:0; font-family:Georgia,"Noto Serif KR","Batang",serif; font-size:clamp(30px,3vw,42px); font-weight:600; letter-spacing:-.04em; }
+.reader-guide { width:min(960px,100%); margin:36px auto 0; padding:24px; border-top:1px solid var(--line); font-size:15px; line-height:1.8; }
+.reader-guide h2 { font-size:23px; line-height:1.4; }
+.reader-guide h3 { font-size:17px; line-height:1.5; }
+.reader-guide p { color:var(--muted); }
+.reader-guide a { color:var(--text); text-underline-offset:3px; }
+.reader-guide-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:24px; }
+.reader-guide details { border-bottom:1px solid var(--line); padding:12px 0; }
+.reader-guide summary { cursor:pointer; font-weight:600; }
+body.reader-focus .reader-intro,body.reader-focus .reader-guide { display:none; }
 .reader-languages { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 16px; margin-top:18px; }
 .reader-languages a { display:inline-flex; align-items:center; min-height:32px; color:var(--muted); text-underline-offset:3px; }
 .reader-languages a:hover,.reader-languages a:focus-visible { color:var(--text); }
