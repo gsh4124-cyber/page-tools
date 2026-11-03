@@ -193,6 +193,24 @@ jobs:
             done
             return 0
           }
+          direct_upload_matches() {
+            local project="$1" base asset assets marker tmp
+            case "$project" in
+              random-ppobgi) base='https://random-ppobgi.pages.dev'; assets='experience.js i18n-v2.js' ;;
+              pc-checkup) base='https://pc-checkup.pages.dev'; assets='device-experience.js' ;;
+              *) return 1 ;;
+            esac
+            marker=$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$base/build-revision.txt?verify=$GITHUB_SHA") || return 1
+            [ "$marker" = "$GITHUB_SHA" ] || return 1
+            for asset in $assets; do
+              tmp=$(mktemp)
+              if ! curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$base/$asset?verify=$GITHUB_SHA" -o "$tmp" || ! cmp -s "$project/$asset" "$tmp"; then
+                rm -f "$tmp"
+                return 1
+              fi
+              rm -f "$tmp"
+            done
+          }
           for attempt in $(seq 1 42); do
             checks=$(curl -fsSL --retry 2 -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100")
             pending=()
@@ -203,6 +221,12 @@ jobs:
                 else
                   pending+=("$project=live_source_mismatch")
                 fi
+                continue
+              fi
+              # Authenticated Wrangler uploads do not create the GitHub App's
+              # Cloudflare check-run. Require both the release marker and code.
+              if direct_upload_matches "$project"; then
+                echo "Verified $project direct upload marker and runtime bytes at $GITHUB_SHA"
                 continue
               fi
               result=$(jq -r --arg name "Cloudflare Pages: $project" '([.check_runs[] | select(.name == $name) | .conclusion] | first) // "missing"' <<< "$checks")
@@ -252,6 +276,9 @@ jobs:
           # A workflow/test-only push does not attest a new Cloudflare deployment.
           DEPLOY_VERIFIED_SHA: ${{ contains(steps.changed.outputs.deploy_projects, 'random-ppobgi') && github.sha || '' }}
         run: node random-ppobgi/tests/live-browser-proof.mjs
+      - name: Random Picker saved results and reroll regression
+        if: contains(steps.changed.outputs.projects, 'random-ppobgi')
+        run: node random-ppobgi/tests/experience-browser-smoke.mjs
       - name: Bible Reader production navigation and multilingual interactions
         if: contains(steps.changed.outputs.projects, 'bible-reader')
         run: node bible-reader/tools/production-smoke.mjs
