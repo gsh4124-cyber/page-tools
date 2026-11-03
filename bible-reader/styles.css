@@ -77,6 +77,9 @@ html[lang="ko"] .verse.copied::after { content:"복사됨"; }
 .chapter-nav button { padding:11px 16px; }
 footer { max-width:960px; margin:0 auto; padding:28px 24px 54px; color:var(--muted); text-align:center; font-size:12px; line-height:1.7; }
 .source-note { opacity:.8; }
+.reader-languages { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 16px; margin-top:18px; }
+.reader-languages a { display:inline-flex; align-items:center; min-height:32px; color:var(--muted); text-underline-offset:3px; }
+.reader-languages a:hover,.reader-languages a:focus-visible { color:var(--text); }
 @media (max-width:1320px) {
   .topbar-inner { flex-wrap:wrap; }
   .location-controls { order:2; width:100%; flex-basis:100%; }
