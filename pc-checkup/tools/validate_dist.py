@@ -89,12 +89,34 @@ for path in html_files:
         err(str(rel), 'missing canonical')
     if 'hreflang="x-default"' not in text:
         err(str(rel), 'missing x-default hreflang')
+    locale = rel.parts[0] if len(rel.parts) > 1 else 'ko'
+    page_suffix = '' if path.name == 'index.html' else path.name
+    for other in [*LOCALES, 'x-default']:
+        target_locale = 'en' if other == 'x-default' else other
+        expected = PROD_ORIGIN + '/' + ('' if target_locale == 'ko' else target_locale + '/') + page_suffix
+        matches = re.findall(r'<link[^>]+hreflang="' + re.escape(other) + r'"[^>]+href="([^"]+)"', text)
+        if matches != [expected]:
+            err(str(rel), 'incorrect language alternate', f'{other}: {matches}')
+    structured_blocks = re.findall(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', text, re.S)
+    if len(structured_blocks) != 1:
+        err(str(rel), 'expected one WebApplication structured-data block')
+    for body in structured_blocks:
+        import json
+        try:
+            data = json.loads(body)
+            if data.get('inLanguage') != locale or data.get('@type') != 'WebApplication':
+                err(str(rel), 'incorrect structured-data language or type')
+        except ValueError:
+            err(str(rel), 'invalid structured-data JSON')
     if OLD_ORIGIN in text:
         err(str(rel), 'old GitHub Pages origin present')
 
     canon = re.search(r'<link[^>]+rel="canonical"[^>]+href="([^"]+)"', text, re.I)
     if canon and not canon.group(1).startswith(PROD_ORIGIN + '/'):
         err(str(rel), 'canonical not on production origin', canon.group(1))
+    expected_canonical = PROD_ORIGIN + '/' + ('' if locale == 'ko' else locale + '/') + page_suffix
+    if not canon or canon.group(1) != expected_canonical:
+        err(str(rel), 'incorrect locale canonical', expected_canonical)
 
     if rel.parts and rel.parts[0] in {x for x in LOCALES if x != 'ko'}:
         clean = text.replace('한국어','')

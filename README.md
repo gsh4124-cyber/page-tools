@@ -39,6 +39,13 @@ published release, use that product's previous successful production deployment 
 then revert the faulty source commit before the next push. A green source CI alone does not
 prove a new production release: confirm the health monitor and served commit marker.
 
+After a changed production release passes those checks, `tools/notify-indexnow.mjs`
+submits the product's sitemap URLs to IndexNow using its public ownership file.
+This notifies participating search engines about all existing locale routes; it does
+not claim that they have indexed or shown those URLs. Google Search Console sitemap
+submission and URL Inspection remain separate account operations. Naver ownership
+verification HTML files are preserved verbatim in each production package.
+
 ## Shared docs
 
 - `docs/AdSense_승인_운영기준.md`

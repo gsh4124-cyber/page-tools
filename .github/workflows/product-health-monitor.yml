@@ -233,6 +233,11 @@ jobs:
       - name: DEVICE CHECKUP production PC and mobile result interactions
         if: contains(steps.changed.outputs.projects, 'pc-checkup')
         run: node pc-checkup/tools/device-experience-smoke.mjs
+      - name: Notify participating search engines after verified production deployment
+        if: github.event_name == 'push' && steps.changed.outputs.deploy_projects != ''
+        env:
+          PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
+        run: node tools/notify-indexnow.mjs
       - name: Preserve production browser screenshots and results
         if: always() && steps.changed.outputs.projects != ''
         uses: actions/upload-artifact@v4
@@ -242,5 +247,6 @@ jobs:
             random-ppobgi/qa_evidence/live/
             bible-reader/qa_evidence/live/
             pc-checkup/qa_evidence/live/
+            qa_evidence/search-discovery/
           if-no-files-found: warn
           retention-days: 7
