@@ -5,11 +5,15 @@ on:
     branches: ["main"]
     paths:
       - 'pc-checkup/**'
+      - 'tools/build_static.py'
+      - 'tools/release_metadata.py'
       - '.github/workflows/pc-checkup-ci.yml'
   pull_request:
     branches: ["main"]
     paths:
       - 'pc-checkup/**'
+      - 'tools/build_static.py'
+      - 'tools/release_metadata.py'
       - '.github/workflows/pc-checkup-ci.yml'
   workflow_dispatch:
 
@@ -54,70 +58,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build localized site
-        run: |
-          gzip -dc tools/build_global.py.gz > tools/build_global_runtime.py
-          python tools/build_global_runtime.py
-          rm tools/build_global_runtime.py
-          python tools/expand_batch2.py
-          python tools/append_cn_ru.py
-          python tools/normalize_generated_structure.py
-          python tools/normalize_generated_keyboard.py
-          python tools/normalize_display_colors.py
-          python tools/inject_language_ux.py
-          python tools/localize_korean_ui.py
-          python tools/finalize_keyboard_help.py
-          python tools/normalize_navigation_order.py
-          python - <<'PY'
-          from pathlib import Path
-          import os
-          revision=os.environ['GITHUB_SHA']
-          for p in Path('dist').rglob('*.html'):
-              text=p.read_text(encoding='utf-8')
-              text=text.replace('device-experience.js"',f'device-experience.js?v={revision}"')
-              p.write_text(text,encoding='utf-8')
-          PY
-          printf '%s\n' "$GITHUB_SHA" > dist/build-revision.txt
-      - name: Validate localized artifact
-        run: python tools/validate_dist.py
-      - name: Validate language and UI coverage
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import os,re
-          pages=list(Path('dist').rglob('*.html'))
-          assert len(pages)==117, len(pages)
-          nav_order=['checkup.html','keyboard.html','mouse.html','display.html','speaker.html','mic.html','webcam.html']
-          revision=os.environ['GITHUB_SHA']
-          for p in pages:
-              t=p.read_text(encoding='utf-8')
-              assert 'id="languagePicker"' in t, p
-              assert 'language-ux-v6' in t, p
-              assert 'ui-polish-v5' in t, p
-              assert 'data-locale=' in t, p
-              if 'device-experience.js' in t:
-                  assert f'device-experience.js?v={revision}' in t,p
-              m=re.search(r'<nav class="navlinks">([\s\S]*?)</nav>',t)
-              if m:
-                  hrefs=re.findall(r'href="([^"]+)"',m.group(1))
-                  bases=[h.split('#',1)[0].split('?',1)[0].rstrip('/').split('/')[-1] for h in hrefs]
-                  if all(x in bases for x in nav_order):
-                      actual=[x for x in bases if x in nav_order]
-                      assert actual==nav_order,(p,actual)
-          keyboards=[Path('dist/keyboard.html'), *sorted(Path('dist').glob('*/keyboard.html'))]
-          assert len(keyboards)==13, len(keyboards)
-          displays=[Path('dist/display.html'), *sorted(Path('dist').glob('*/display.html'))]
-          assert len(displays)==13, len(displays)
-          PY
-      - name: Validate standalone demos remain packageable
-        run: |
-          mkdir -p dist/finalcheck dist/refundproof
-          cp finalcheck/index.html dist/finalcheck/index.html
-          cp refundproof/index.html dist/refundproof/index.html
-          cp refundproof/wanted-demo.html dist/refundproof/wanted-demo.html
-          test -s dist/finalcheck/index.html
-          test -s dist/refundproof/index.html
-          test -s dist/refundproof/wanted-demo.html
+      - name: Build and validate exact production artifact
+        run: python3 tools/build_site.py
 
   quality-gate:
     name: Combined Quality Gate

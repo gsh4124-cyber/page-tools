@@ -15,6 +15,30 @@ Current technical truth:
 
 Historical standalone repositories such as `random-ppobgi`, `bible-reader`, and `pc-checkup` are not current code owners.
 
+## Automatic production builds
+
+Cloudflare watches each product's directory and shared `tools/*` on `main`.
+The project root remains the product directory (including Random Picker's Pages Functions).
+All three projects publish `dist`, using these validated entry points:
+
+| Product | Command from product directory |
+| --- | --- |
+| Random Picker | `python3 ../tools/build_static.py random-ppobgi` |
+| Bible Reader | `python3 ../tools/build_static.py bible-reader` |
+| DEVICE CHECKUP | `python3 tools/build_site.py` |
+
+The same commands run in GitHub CI. They fail on source/security/behavior checks;
+the device build also validates all 117 localized pages before preserving legacy demo assets.
+Every artifact includes `build-revision.txt` and `build-manifest.json` with source commit and file digests.
+The Product Health Monitor waits for the pushed commit and verifies served runtime bytes
+before exercising the changed production sites in desktop/mobile Chromium. Existing six-hour
+HTTP health checks remain in place. Screenshot evidence is retained for seven days.
+
+A failed Cloudflare build keeps the previous successful release live. To roll back an already
+published release, use that product's previous successful production deployment in Cloudflare;
+then revert the faulty source commit before the next push. A green source CI alone does not
+prove a new production release: confirm the health monitor and served commit marker.
+
 ## Shared docs
 
 - `docs/AdSense_승인_운영기준.md`

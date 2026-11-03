@@ -11,6 +11,7 @@ on:
       - 'random-ppobgi/**'
       - 'bible-reader/**'
       - 'pc-checkup/**'
+      - 'tools/**'
 
 permissions:
   contents: read
@@ -122,7 +123,7 @@ jobs:
     name: Production Browser QA (live deployed sites)
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -145,13 +146,15 @@ jobs:
           fi
           files=$(git diff --name-only "$before" "$GITHUB_SHA")
           projects=()
+          shared=false
+          if grep -Eq '^tools/(build_static|release_metadata)\.py$' <<< "$files"; then shared=true; fi
           deploy_projects=()
           # A workflow-only change runs all three live tests; it does not force a site deployment.
-          if grep -Fqx '.github/workflows/product-health-monitor.yml' <<< "$files"; then
+          if grep -Eq '^(\.github/workflows/product-health-monitor\.yml|tools/verify-production\.mjs)$' <<< "$files"; then
             projects=(bible-reader random-ppobgi pc-checkup)
           fi
           for project in bible-reader random-ppobgi pc-checkup; do
-            if grep -q "^$project/" <<< "$files"; then
+            if [ "$shared" = true ] || grep -q "^$project/" <<< "$files"; then
               if [[ ! " ${projects[*]} " =~ " $project " ]]; then projects+=("$project"); fi
             fi
             # These files change QA behavior only; the deployed application is unchanged.
@@ -160,7 +163,7 @@ jobs:
               random-ppobgi) qa_script='random-ppobgi/tests/live-browser-proof.mjs' ;;
               pc-checkup) qa_script='pc-checkup/tools/device-experience-smoke.mjs' ;;
             esac
-            if grep -q "^$project/" <<< "$files" && grep "^$project/" <<< "$files" | grep -Fvx "$qa_script" | grep -q .; then
+            if [ "$shared" = true ] || { grep -q "^$project/" <<< "$files" && grep "^$project/" <<< "$files" | grep -Fvx "$qa_script" | grep -q .; }; then
               deploy_projects+=("$project")
             fi
           done
@@ -168,83 +171,28 @@ jobs:
           echo "Require new Cloudflare deployment: ${deploy_projects[*]:-none}"
           echo "projects=${projects[*]}" >> "$GITHUB_OUTPUT"
           echo "deploy_projects=${deploy_projects[*]}" >> "$GITHUB_OUTPUT"
-      - name: Verify Cloudflare deployment of changed application source matches commit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build expected production manifests with the same entry points
         if: steps.changed.outputs.deploy_projects != ''
         env:
-          GH_TOKEN: ${{ github.token }}
           PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
         shell: bash
         run: |
           set -euo pipefail
-          read -ra products <<< "$PROJECTS"
-          bible_live_matches() {
-            local asset tmp
-            for asset in index.html reader-experience.js topbar-polish.css; do
-              tmp=$(mktemp)
-              if ! curl -fsSL --retry 1 --max-time 20 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?deploy_probe=$GITHUB_SHA" -o "$tmp"; then
-                rm -f "$tmp"
-                return 1
-              fi
-              if ! cmp -s "bible-reader/$asset" "$tmp"; then
-                rm -f "$tmp"
-                return 1
-              fi
-              rm -f "$tmp"
-            done
-            return 0
-          }
-          direct_upload_matches() {
-            local project="$1" base asset assets marker tmp
-            case "$project" in
-              random-ppobgi) base='https://random-ppobgi.pages.dev'; assets='experience.js i18n-v2.js' ;;
-              pc-checkup) base='https://pc-checkup.pages.dev'; assets='device-experience.js' ;;
-              *) return 1 ;;
-            esac
-            marker=$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$base/build-revision.txt?verify=$GITHUB_SHA") || return 1
-            [ "$marker" = "$GITHUB_SHA" ] || return 1
-            for asset in $assets; do
-              tmp=$(mktemp)
-              if ! curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$base/$asset?verify=$GITHUB_SHA" -o "$tmp" || ! cmp -s "$project/$asset" "$tmp"; then
-                rm -f "$tmp"
-                return 1
-              fi
-              rm -f "$tmp"
-            done
-          }
-          for attempt in $(seq 1 42); do
-            checks=$(curl -fsSL --retry 2 -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100")
-            pending=()
-            for project in "${products[@]}"; do
-              if [ "$project" = bible-reader ]; then
-                if bible_live_matches; then
-                  echo "Verified Bible Reader production HTML, JavaScript and CSS bytes against $GITHUB_SHA"
-                else
-                  pending+=("$project=live_source_mismatch")
-                fi
-                continue
-              fi
-              # Authenticated Wrangler uploads do not create the GitHub App's
-              # Cloudflare check-run. Require both the release marker and code.
-              if direct_upload_matches "$project"; then
-                echo "Verified $project direct upload marker and runtime bytes at $GITHUB_SHA"
-                continue
-              fi
-              result=$(jq -r --arg name "Cloudflare Pages: $project" '([.check_runs[] | select(.name == $name) | .conclusion] | first) // "missing"' <<< "$checks")
-              if [ "$result" = failure ] || [ "$result" = cancelled ] || [ "$result" = timed_out ]; then
-                echo "::error::Cloudflare deployment for $project failed ($result) at $GITHUB_SHA"
-                exit 1
-              fi
-              if [ "$result" != success ]; then pending+=("$project=$result"); fi
-            done
-            if [ "${#pending[@]}" -eq 0 ]; then
-              echo "Changed products deployed at $GITHUB_SHA: ${products[*]}"
-              exit 0
+          for project in $PROJECTS; do
+            if [ "$project" = pc-checkup ]; then
+              python3 pc-checkup/tools/build_site.py
+            else
+              python3 tools/build_static.py "$project"
             fi
-            echo "Waiting for $GITHUB_SHA: ${pending[*]}"
-            sleep 10
           done
-          echo "::error::Cloudflare deployment identity not confirmed for $GITHUB_SHA"
-          exit 1
+      - name: Verify production commit, manifest and served runtime bytes
+        if: steps.changed.outputs.deploy_projects != ''
+        env:
+          PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
+        run: node tools/verify-production.mjs
       - name: Read back served Bible Reader code before browser QA
         if: contains(steps.changed.outputs.projects, 'bible-reader')
         shell: bash

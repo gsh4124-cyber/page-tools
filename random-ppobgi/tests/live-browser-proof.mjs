@@ -1,9 +1,10 @@
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 // Public production only: no credentials, account data, publishing, or mutations.
 const origin = process.env.LIVE_TEST_BASE || 'https://random-ppobgi.pages.dev';
-const output = 'qa_evidence/live';
+const output = fileURLToPath(new URL('../qa_evidence/live/', import.meta.url));
 const report = {
   kind: 'public-production-browser-proof',
   target: origin,

@@ -5,11 +5,15 @@ on:
     branches: ["main"]
     paths:
       - 'random-ppobgi/**'
+      - 'tools/build_static.py'
+      - 'tools/release_metadata.py'
       - '.github/workflows/random-ppobgi-ci.yml'
   pull_request:
     branches: ["main"]
     paths:
       - 'random-ppobgi/**'
+      - 'tools/build_static.py'
+      - 'tools/release_metadata.py'
       - '.github/workflows/random-ppobgi-ci.yml'
   workflow_dispatch:
 
@@ -30,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Build and validate production artifact
+        run: python3 ../tools/build_static.py random-ppobgi
       - name: Security guardrails
         run: python3 security_guardrails.py
       - name: JavaScript syntax
