@@ -1,5 +1,7 @@
 # QA recurring failures — bible-reader
 
+현재 UI는 `title-navigator.js`의 책 → 장 → 절 이동을 사용합니다. 아래 직접입력 기록은 과거 회귀 이력입니다. `validate-number-jump.mjs` 호환 명령도 현행 `validate-navigation.mjs`를 실행합니다.
+
 ## 2026-09-03 — 장·절 직접입력 회귀
 
 ### 증상

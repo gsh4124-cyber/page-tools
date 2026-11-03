@@ -130,9 +130,8 @@ for locale in BATCH2 + CN_RU:
     for filename in ['app.js', 'mobile.js']:
         rebuild_js_from_canonical(locale, filename)
 
-# The shared experience runtime is deliberately not machine-translated. It only
-# exposes its enhanced UI on the Korean canonical pages, while its host redirect
-# is safe for every locale. Copy the same verified runtime beside every localized
+# The shared experience runtime owns its thirteen locale dictionaries. Do not
+# machine-translate code identifiers. Copy the same runtime beside every localized
 # HTML file and inject the runtime reference into every generated page. The
 # generated site is the actual Cloudflare/GitHub Pages artifact, so source-only
 # script tags are not sufficient.

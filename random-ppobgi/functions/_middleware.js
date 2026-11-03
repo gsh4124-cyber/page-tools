@@ -78,6 +78,14 @@ export async function onRequest(context) {
   const rootPage=url.pathname==='/';
   const infoPage=/^\/(about|guide|privacy|terms|contact)\/$/.test(url.pathname);
   const languageMatch=url.pathname.match(new RegExp(`^/(${foreign.join('|')})/$`));
+  // Preserve previously published localized document links and their query flags.
+  const oldInfo=url.pathname.match(new RegExp(`^/(${foreign.join('|')})/(about|guide|privacy|terms|contact)/$`));
+  if(oldInfo){
+    const target=new URL(`/${oldInfo[2]}/`,url.origin);
+    target.search=url.search;
+    target.searchParams.set('lang',oldInfo[1]);
+    return Response.redirect(target.toString(),308);
+  }
 
   if(languageMatch && (context.request.method==='GET'||context.request.method==='HEAD')){
     const lang=languageMatch[1];

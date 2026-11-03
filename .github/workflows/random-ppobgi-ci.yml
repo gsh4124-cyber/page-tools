@@ -43,7 +43,7 @@ jobs:
           node --check functions/_middleware.js
           node --check functions/api/events.js
       - name: Validate anonymous Supabase telemetry proxy
-        run: node --test tests/analytics-endpoint.test.mjs tests/analytics-instrumentation.test.mjs
+        run: node --test tests/*.test.mjs
       - name: Locale catalog and routes
         run: |
           set -eu

@@ -50,9 +50,23 @@ document.head.append(s)}
 function toast(text){const el=byId('toast');if(!el)return;el.textContent=text;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1300)}
 async function copy(text){try{await navigator.clipboard.writeText(text);return true}catch{try{const x=document.createElement('textarea');x.value=text;x.style.position='fixed';x.style.opacity='0';document.body.append(x);x.select();const ok=document.execCommand('copy');x.remove();return ok}catch{return false}}}
 function currentResultText(){const kick=byId('resultKicker')?.textContent?.trim();const rows=[...(winners()?.querySelectorAll('li')||[])].map(x=>x.textContent.trim()).filter(Boolean);return [kick,...rows].filter(Boolean).join('\n')}
-function resultSignature(){return `${byId('stageTitle')?.textContent||''}|${currentResultText()}`}
-function renderHistory(container){const items=read(RESULTS_KEY);container.innerHTML='';items.forEach(item=>{const row=document.createElement('div');row.className='picker-history-item';row.textContent=`${item.title} · ${item.text.replace(/\n/g,' / ')}`;container.append(row)})}
-function saveResultIfNew(historyList){if(!resultBlock()?.classList.contains('show'))return;const text=currentResultText();if(!text)return;const sig=resultSignature();const items=read(RESULTS_KEY);if(items[0]?.sig===sig)return;items.unshift({sig,title:byId('stageTitle')?.textContent?.trim()||'Result',text,at:Date.now()});write(RESULTS_KEY,items.slice(0,MAX_RESULTS));renderHistory(historyList)}
+function historyText(item){
+ if(!Array.isArray(item.results))return `${item.title||'Result'} · ${String(item.text||'').replace(/\n/g,' / ')}`;
+ const pack=window.RandomPickerLocales?.[lang()];
+ const title=pack?.methods?.[item.method]||{ladder:'사다리',wheel:'룰렛',lot:'제비',pinball:'핀볼',race:'경주',capsule:'캡슐',slot:'슬롯',bomb:'폭탄'}[item.method]||'Result';
+ const rows=item.results.map(r=>{
+  const person=item.inputMode==='number'?(lang()==='ko'?`${r.label}번`:`#${r.label}`):r.label;
+  const outcome=!r.active?(pack?.dynamic?.lose||'꽝'):item.resultMode==='custom'?r.text:item.resultMode==='rank'?(lang()==='ko'?`${r.rank}등`:`#${r.rank}`):(pack?.winner||'당첨');
+  return item.showAll||item.resultMode!=='winner'?`${person} · ${outcome}`:person;
+ });
+ return `${title} · ${rows.join(' / ')}`;
+}
+function renderHistory(container){const items=read(RESULTS_KEY);container.innerHTML='';items.forEach(item=>{const row=document.createElement('div');row.className='picker-history-item';row.setAttribute('translate','no');row.textContent=historyText(item);container.append(row)})}
+function saveResultIfNew(historyList,detail){
+ if(!detail?.runId||!Array.isArray(detail.results)||!detail.results.length)return;
+ const items=read(RESULTS_KEY).filter(item=>item.runId!==detail.runId);
+ items.unshift({...detail,at:Date.now()});write(RESULTS_KEY,items.slice(0,MAX_RESULTS));renderHistory(historyList);
+}
 
 function enhanceNameSets(){const foot=document.querySelector('#nameMode .namefoot');if(!foot||byId('savedSetSelect'))return;const row=document.createElement('div');row.className='picker-experience-row';row.innerHTML=`<select id="savedSetSelect" aria-label="${t().sets}"></select><button class="picker-mini-btn" id="saveSetBtn" type="button">${t().save}</button><button class="picker-mini-btn" id="loadSetBtn" type="button">${t().load}</button><button class="picker-mini-btn" id="deleteSetBtn" type="button">${t().del}</button>`;foot.after(row);
  const select=byId('savedSetSelect');
@@ -66,7 +80,7 @@ function enhanceResults(){const block=resultBlock();if(!block||byId('pickerResul
  byId('copyPickerResult').addEventListener('click',async()=>{if(await copy(currentResultText()))toast(t().copied)});
  byId('sharePickerResult').addEventListener('click',async()=>{const text=currentResultText();if(!text)return;if(navigator.share){try{await navigator.share({title:document.title,text,url:location.href});return}catch(e){if(e?.name==='AbortError')return}}if(await copy(`${text}\n${location.href}`))toast(t().copied)});
  byId('clearPickerHistory').addEventListener('click',()=>{write(RESULTS_KEY,[]);renderHistory(list)});
- new MutationObserver(()=>saveResultIfNew(list)).observe(block,{attributes:true,attributeFilter:['class'],childList:true,subtree:true,characterData:true});
+ document.addEventListener('random-picker:result',event=>saveResultIfNew(list,event.detail));
 }
 
 let recorder=null,recordStream=null,chunks=[];

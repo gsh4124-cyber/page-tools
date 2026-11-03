@@ -37,6 +37,8 @@ jobs:
           node --check app.js
           node --check mobile.js
           node --check device-experience.js
+      - name: Summary locale and telemetry regression
+        run: node tools/validate-experience.mjs
       - name: Python tool syntax
         run: |
           python -m py_compile tools/expand_batch2.py tools/append_cn_ru.py tools/normalize_generated_structure.py tools/normalize_generated_keyboard.py tools/normalize_display_colors.py tools/normalize_navigation_order.py tools/inject_language_ux.py tools/localize_korean_ui.py tools/finalize_keyboard_help.py tools/validate_dist.py
