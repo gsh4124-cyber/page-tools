@@ -10,7 +10,10 @@ ORIGIN = 'https://pc-checkup.pages.dev'
 LOCALES = ['ko', 'en', 'ja', 'es', 'de', 'fr', 'pt', 'it', 'nl', 'id', 'vi', 'zh-CN', 'ru']
 
 def url(lang, page):
-    return ORIGIN + '/' + ('' if lang == 'ko' else lang + '/') + ('' if page == 'index.html' else page)
+    # Pages permanently redirects *.html to the extensionless route. Advertise
+    # the final HTTP-200 URL consistently in canonical, alternates and sitemap.
+    suffix = '' if page == 'index.html' else page.removesuffix('.html')
+    return ORIGIN + '/' + ('' if lang == 'ko' else lang + '/') + suffix
 
 class VisibleSummary(HTMLParser):
     def __init__(self):
@@ -29,7 +32,9 @@ class VisibleSummary(HTMLParser):
         if self.capture:
             self.parts[self.capture].append(data)
 
-for path in sorted(ROOT.rglob('*.html')):
+pages = sorted(ROOT.rglob('*.html'))
+canonical_urls = []
+for path in pages:
     rel = path.relative_to(ROOT)
     lang = rel.parts[0] if len(rel.parts) > 1 else 'ko'
     if lang not in LOCALES:
@@ -42,6 +47,7 @@ for path in sorted(ROOT.rglob('*.html')):
     if not title or not description:
         raise RuntimeError(f'Missing visible search summary: {rel}')
     canonical = url(lang, path.name)
+    canonical_urls.append(canonical)
     text = re.sub(r'<link\b[^>]*\brel=["\'](?:canonical|alternate)["\'][^>]*>', '', text, flags=re.I)
     links = f'<link rel="canonical" href="{canonical}">'
     links += ''.join(f'<link rel="alternate" hreflang="{other}" href="{url(other, path.name)}">' for other in LOCALES)
@@ -67,4 +73,8 @@ for path in sorted(ROOT.rglob('*.html')):
         return match.group(1) + body + match.group(3)
     text = re.sub(r'(<script\b[^>]*type="application/ld\+json"[^>]*>)([\s\S]*?)(</script>)', structured, text)
     path.write_text(text, encoding='utf-8', newline='\n')
+(ROOT / 'sitemap.xml').write_text(
+    '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + ''.join(f'  <url><loc>{escape(address)}</loc></url>\n' for address in canonical_urls)
+    + '</urlset>\n', encoding='utf-8', newline='\n')
 print('Normalized canonical, reciprocal hreflang, localized summaries and structured-data keys on 117 core pages')

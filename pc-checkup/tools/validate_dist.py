@@ -90,7 +90,7 @@ for path in html_files:
     if 'hreflang="x-default"' not in text:
         err(str(rel), 'missing x-default hreflang')
     locale = rel.parts[0] if len(rel.parts) > 1 else 'ko'
-    page_suffix = '' if path.name == 'index.html' else path.name
+    page_suffix = '' if path.name == 'index.html' else path.name.removesuffix('.html')
     for other in [*LOCALES, 'x-default']:
         target_locale = 'en' if other == 'x-default' else other
         expected = PROD_ORIGIN + '/' + ('' if target_locale == 'ko' else target_locale + '/') + page_suffix
@@ -117,6 +117,8 @@ for path in html_files:
     expected_canonical = PROD_ORIGIN + '/' + ('' if locale == 'ko' else locale + '/') + page_suffix
     if not canon or canon.group(1) != expected_canonical:
         err(str(rel), 'incorrect locale canonical', expected_canonical)
+    if f'<loc>{expected_canonical}</loc>' not in sitemap:
+        err(str(rel), 'canonical URL missing from sitemap', expected_canonical)
 
     if rel.parts and rel.parts[0] in {x for x in LOCALES if x != 'ko'}:
         clean = text.replace('한국어','')
