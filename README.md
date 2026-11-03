@@ -45,6 +45,9 @@ This notifies participating search engines about all existing locale routes; it 
 not claim that they have indexed or shown those URLs. Google Search Console sitemap
 submission and URL Inspection remain separate account operations. Naver ownership
 verification HTML files are preserved verbatim in each production package.
+DEVICE CHECKUP keeps each language URL stable for a first visit, including browsers
+with a different language. Its selector still saves explicit language choices;
+only that saved preference can redirect a later visit to the Korean root.
 
 ## Shared docs
 

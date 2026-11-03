@@ -6,6 +6,16 @@ const proofDir=new URL('../qa_evidence/live/',import.meta.url);
 await mkdir(proofDir,{recursive:true});
 const base=process.env.DEVICE_TEST_BASE||'https://pc-checkup.pages.dev';
 const browser=await chromium.launch({headless:true});
+// Googlebot's browser language must not turn the Korean URL into a redirect.
+const crawlerContext=await browser.newContext({locale:'en-US',viewport:{width:390,height:844}});
+const crawlerPage=await crawlerContext.newPage();
+await crawlerPage.goto(`${base}/?qa=1`,{waitUntil:'domcontentloaded',timeout:30000});
+await crawlerPage.locator('#languagePicker').waitFor({state:'visible'});
+assert.equal(new URL(crawlerPage.url()).pathname,'/','Fresh English-language browser retains the Korean URL');
+assert.equal(await crawlerPage.locator('html').getAttribute('lang'),'ko');
+assert.equal(await crawlerPage.locator('#languagePicker').inputValue(),'ko');
+await crawlerPage.screenshot({path:fileURLToPath(new URL('crawler-root-ko.png',proofDir)),fullPage:false});
+await crawlerContext.close();
 const locales=['ko','en','ja','es','de','fr','pt','it','nl','id','vi','zh-CN','ru'];
 for(const locale of locales){
   const context=await browser.newContext({viewport:{width:390,height:844},locale:locale==='ko'?'ko-KR':locale,permissions:['clipboard-read','clipboard-write']});

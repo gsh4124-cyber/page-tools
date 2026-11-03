@@ -18,6 +18,7 @@ subprocess.run([sys.executable, 'security_guardrails.py'], check=True)
 for name in ['app.js', 'mobile.js', 'device-experience.js']:
     subprocess.run(['node', '--check', name], check=True)
 subprocess.run(['node', 'tools/validate-experience.mjs'], check=True)
+subprocess.run(['node', 'tools/validate-language-routing.mjs'], check=True)
 dist = clean_dist(ROOT)
 # The historical generator resolves input paths from its own tools directory.
 with tempfile.NamedTemporaryFile(dir=TOOLS, suffix='.py', delete=False) as handle:
