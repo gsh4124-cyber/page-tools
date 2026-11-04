@@ -110,7 +110,7 @@ export async function onRequest(context) {
       .transform(response);
   }
 
-  if(!infoPage)return response;
+  if(!infoPage||url.pathname==='/privacy/')return response;
   let lang=url.searchParams.get('lang')||'ko';
   if(!supported.has(lang))lang='ko';
   if(lang==='ko')return response;

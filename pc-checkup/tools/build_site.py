@@ -68,5 +68,7 @@ for path in ROOT.glob('naver*.html'):
 for path in ROOT.glob('*.txt'):
     if re.fullmatch(r'[0-9a-f]{32}\.txt', path.name):
         shutil.copyfile(path, dist / path.name)
+# The bilingual privacy document is outside the 117-page translated app contract.
+shutil.copytree(ROOT / 'privacy', dist / 'privacy', dirs_exist_ok=True)
 write_metadata('pc-checkup', dist)
 print(f'Production package ready: {revision}; core 117 pages and legacy URL assets preserved')

@@ -83,6 +83,9 @@
   }
 
   function applyStatic(){
+    const privacyLabels={ko:'개인정보처리방침',en:'Privacy Policy',fr:'Confidentialité',de:'Datenschutz',zh:'隐私政策',ru:'Конфиденциальность',la:'De secreto',pt:'Privacidade',ar:'سياسة الخصوصية'};
+    const privacy=document.querySelector('#privacyPolicyLink');
+    if(privacy){const label=privacyLabels[uiLang]||privacyLabels.en;if(privacy.textContent!==label)privacy.textContent=label;privacy.href='/privacy/#'+(uiLang==='ko'?'ko':'en');}
     document.documentElement.lang=uiLang;
     const map={'#searchButton':'search','#compareToggle':'compare','#prevChapterTitle':'prev','#nextChapterTitle':'next','#prevChapterBottom':'prev','#nextChapterBottom':'next','#singlePageView':'single','#dualPageView':'dual','#fontDown':'fontDown','#fontUp':'fontUp','#widthToggle':null,'#notebookToggle':'notes','#closeSearch':'close'};
     Object.entries(map).forEach(([sel,key])=>{const el=document.querySelector(sel);if(el&&key)el.textContent=text(key)});

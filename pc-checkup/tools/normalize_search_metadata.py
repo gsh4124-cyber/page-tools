@@ -8,6 +8,10 @@ import re
 ROOT = Path('dist')
 ORIGIN = 'https://pc-checkup.pages.dev'
 LOCALES = ['ko', 'en', 'ja', 'es', 'de', 'fr', 'pt', 'it', 'nl', 'id', 'vi', 'zh-CN', 'ru']
+PRIVACY_LABELS = {'ko':'개인정보처리방침','en':'Privacy Policy','ja':'プライバシーポリシー',
+                  'es':'Privacidad','de':'Datenschutz','fr':'Confidentialité','pt':'Privacidade',
+                  'it':'Privacy','nl':'Privacybeleid','id':'Privasi','vi':'Quyền riêng tư',
+                  'zh-CN':'隐私政策','ru':'Конфиденциальность'}
 
 def url(lang, page):
     # Pages permanently redirects *.html to the extensionless route. Advertise
@@ -40,6 +44,11 @@ for path in pages:
     if lang not in LOCALES:
         raise RuntimeError(f'Unexpected core locale: {rel}')
     text = path.read_text(encoding='utf-8')
+    privacy = (f'<p class="privacy-policy-link"><a href="/privacy/#{"ko" if lang == "ko" else "en"}" '
+               f'style="display:inline-block;min-height:44px;padding:10px 0;color:inherit">{PRIVACY_LABELS[lang]}</a></p>')
+    if text.count('</footer>') != 1:
+        raise RuntimeError(f'Missing or duplicated footer: {rel}')
+    text = text.replace('</footer>', privacy + '</footer>', 1)
     if lang == 'ko' and path.name == 'index.html':
         text = re.sub(r'<title>[\s\S]*?</title>', '<title>기기 점검 | PC·노트북·휴대폰 5분 검사 - DEVICE CHECKUP</title>', text, count=1)
         text = re.sub(r'<h1>[\s\S]*?</h1>', '<h1>기기 점검<br>PC·휴대폰 5분 검사</h1>', text, count=1)
