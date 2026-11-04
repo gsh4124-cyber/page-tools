@@ -47,6 +47,13 @@ for path in pages:
         guide = Path(__file__).with_name('search_home_ko.html').read_text(encoding='utf-8')
         if 'id="device-guide"' not in text:
             text = text.replace('</main>', guide + '</main>', 1)
+    if lang == 'ko' and path.name in {'checkup.html', 'mobile.html'}:
+        heading = {'checkup.html': 'PC·노트북 기기 점검', 'mobile.html': '휴대폰 기기 점검'}[path.name]
+        text = re.sub(r'<title>[\s\S]*?</title>', f'<title>{heading} | 기본 기능 검사 - DEVICE CHECKUP</title>', text, count=1)
+        text = re.sub(r'<h1>[\s\S]*?</h1>', f'<h1>{heading}</h1>', text, count=1)
+        guide = Path(__file__).with_name('search_' + path.stem + '_ko.html').read_text(encoding='utf-8')
+        if 'id="device-flow-guide"' not in text:
+            text = text.replace('</main>', guide + '</main>', 1)
     summary = VisibleSummary()
     summary.feed(text)
     title = ' '.join(''.join(summary.parts['title']).split())
@@ -80,8 +87,9 @@ for path in pages:
         return match.group(1) + body + match.group(3)
     text = re.sub(r'(<script\b[^>]*type="application/ld\+json"[^>]*>)([\s\S]*?)(</script>)', structured, text)
     path.write_text(text, encoding='utf-8', newline='\n')
+# These dates identify the changed Korean documents, not the current build time.
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + ''.join(f'  <url><loc>{escape(address)}</loc></url>\n' for address in canonical_urls)
+    + ''.join(f'  <url><loc>{escape(address)}</loc>' + ('<lastmod>2026-11-04</lastmod>' if address in {ORIGIN+'/', ORIGIN+'/checkup', ORIGIN+'/mobile'} else '') + '</url>\n' for address in canonical_urls)
     + '</urlset>\n', encoding='utf-8', newline='\n')
 print('Normalized canonical, reciprocal hreflang, localized summaries and structured-data keys on 117 core pages')

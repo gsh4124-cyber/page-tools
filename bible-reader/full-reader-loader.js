@@ -41,6 +41,7 @@
       const canonical = `https://bible-reader-1iz.pages.dev/${lang === 'ko' ? '' : lang + '/'}`;
       const bootstrap = `<script>window.__BIBLE_LANG__=${JSON.stringify(lang)};window.__BIBLE_TRANSLATION__=${JSON.stringify(selected)};</`+`script>`;
       html = html
+        .replace(/<!-- initial-scripture:start -->[\s\S]*?<!-- initial-scripture:end -->/, '<div id="singleReader"><div id="status" class="status">Loading Scripture…</div><article id="verses" class="verses"></article></div>')
         .replace(/<!-- ko-reader-guide:start -->[\s\S]*?<!-- ko-reader-guide:end -->/, '')
         .replace(/<html lang="[^"]*"(?: dir="[^"]*")?>/i, `<html lang="${lang}" dir="ltr">`)
         .replace('<head>', `<head><base href="${base}">${bootstrap}`)

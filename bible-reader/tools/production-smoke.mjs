@@ -160,6 +160,26 @@ async function assertMultiVerseSelection(page, label) {
 }
 
 {
+  const context = await browser.newContext({ javaScriptEnabled:false });
+  const page = await context.newPage();
+  await page.goto(`${base}/?qa=1`, { waitUntil:'domcontentloaded', timeout:30000 });
+  assert(await page.locator('#verses .verse').count() === 36, 'static reader: John 3 must be readable before JavaScript');
+  assert((await page.locator('#translationAttribution').textContent()).includes('대한성서공회'), 'static reader: attribution missing');
+  await context.close();
+}
+{
+  const context = await browser.newContext();
+  await context.route('https://raw.githubusercontent.com/**', route => route.abort());
+  const page = await context.newPage();
+  await page.goto(`${base}/?qa=1`, { waitUntil:'domcontentloaded', timeout:30000 });
+  await page.waitForFunction(() => document.querySelectorAll('#chapterSelect option').length === 21);
+  assert(await page.locator('#verses .verse').count() === 36, 'seeded reader: default chapter failed without external data host');
+  await page.locator('#nextChapterTitle').click();
+  await page.waitForFunction(() => document.querySelector('#chapterSelect').value === '4');
+  assert(await page.locator('#verses .verse').count() === 54, 'seeded reader: next chapter failed without external data host');
+  await context.close();
+}
+{
   const { page, pageErrors } = await open('/');
   const initialPlaceholder = await page.locator('#searchInput').getAttribute('placeholder');
   assert((await page.locator('html').getAttribute('lang')) === 'ko', 'root: html lang must remain ko');
@@ -213,6 +233,7 @@ async function assertMultiVerseSelection(page, label) {
 
 {
   const { page, pageErrors } = await open('/en/');
+  assert(await page.locator('#initial-scripture-data').count() === 0, 'en: Korean initial data leaked into localized reader');
   const initialPlaceholder = await page.locator('#searchInput').getAttribute('placeholder');
   assert((await page.locator('html').getAttribute('lang')) === 'en', 'en: html lang must be en');
   await page.locator('#translationSelect').selectOption('cuv');
