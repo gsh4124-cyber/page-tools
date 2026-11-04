@@ -8,6 +8,8 @@ and static chapter before initializing the localized reader.
 
 Source: `bluesaurel/Korean-Bible-1961-KRV`, `data/John.json`, commit
 `65cdce887b141581b45097163b4b224de4a332fa`.
+Downloaded source SHA-256:
+`9cc7fc131e55195ca0faf02d007a6e462e7a77bf0cd5c264188a7c3c3c056d1d`.
 
 Attribution remains visible: 개역한글 · 대한성서공회.
 The Korean Bible Society states that the KRV economic-rights protection period
