@@ -32,6 +32,10 @@
 }
 
 @media(max-width:760px){
+  /* Keep Scripture first in narrow phone and floating-window layouts. */
+  .reader-shell{display:flex;flex-direction:column}
+  .reader-intro{order:1;width:100%;margin:28px auto 0;padding-top:20px;border-top:1px solid var(--line)}
+  .chapter-heading{height:86px;margin:6px auto 14px}
   .topbar{padding:8px}
   .topbar-inner.centered-nav{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important}
   .centered-nav .location-controls{grid-template-columns:minmax(0,1.02fr) minmax(0,.62fr) minmax(0,1.48fr)!important;gap:6px!important}
