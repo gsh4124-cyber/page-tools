@@ -2,6 +2,7 @@ const langs=['ko','en','ja','es','zh','fr','de','pt','id','hi','pl','it','nl','t
 const foreign=langs.filter(l=>l!=='ko');
 const supported=new Set(langs);
 const origin='https://random-ppobgi.pages.dev';
+const languageNames={ko:'한국어',en:'English',ja:'日本語',es:'Español',zh:'中文',fr:'Français',de:'Deutsch',pt:'Português',id:'Bahasa Indonesia',hi:'हिन्दी',pl:'Polski',it:'Italiano',nl:'Nederlands',tr:'Türkçe',vi:'Tiếng Việt',th:'ไทย',ar:'العربية'};
 
 const title={
   ko:'랜덤뽑기 | 이름·번호 추첨, 사다리타기·룰렛',
@@ -58,6 +59,9 @@ function localizedApp(response,lang){
   const init=`<script>window.__RANDOM_PICKER_LANG__=${JSON.stringify(lang)};<\/script><script src="/locales.js"><\/script>`;
   const runtime='<script src="/i18n-v2.js"><\/script><script src="/language-switch.js"><\/script><script src="/experience.js"><\/script>';
   return new HTMLRewriter()
+    .on('#languageDirectory summary',{element(el){el.setInnerContent('🌐 '+languageNames[lang]);}})
+    .on('#languageDirectory nav',{element(el){el.setAttribute('aria-label',languageNames[lang]);}})
+    .on('#languageDirectory a',{element(el){if(el.getAttribute('hreflang')===lang)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');}})
     .on('html',{element(el){el.setAttribute('lang',lang);if(lang==='ar')el.setAttribute('dir','rtl');else el.removeAttribute('dir');}})
     .on('title',{element(el){el.setInnerContent(title[lang]);}})
     .on('meta[name="description"]',{element(el){el.setAttribute('content',desc[lang]);}})

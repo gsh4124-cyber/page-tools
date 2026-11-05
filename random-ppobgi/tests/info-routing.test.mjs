@@ -3,6 +3,17 @@ import assert from 'node:assert/strict';
 import { onRequest } from '../functions/_middleware.js';
 import { readFile } from 'node:fs/promises';
 
+test('all language destinations are ordinary HTML links without running scripts',async()=>{
+  const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+  const directory=html.match(/<details id="languageDirectory"[\s\S]*?<\/details>/)?.[0];
+  assert.ok(directory,'language directory must be in the initial document');
+  for(const lang of ['ko','en','ja','es','zh','fr','de','pt','id','hi','pl','it','nl','tr','vi','th','ar']){
+    const href=lang==='ko'?'/':`/${lang}/`;
+    assert.ok(directory.includes(`<a href="${href}" hreflang="${lang}"`),lang);
+  }
+  assert.doesNotMatch(directory,/<details[^>]*\bopen\b/,'keep mobile footer compact initially');
+});
+
 test('all previously published foreign information links reach their localized document',async()=>{
   const languages=['en','ja','es','zh','fr','de','pt','id','hi','pl','it','nl','tr','vi','th','ar'];
   for(const lang of languages)for(const document of ['about','guide','privacy','terms','contact']){

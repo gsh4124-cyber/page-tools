@@ -8,6 +8,12 @@ import re
 ROOT = Path('dist')
 ORIGIN = 'https://pc-checkup.pages.dev'
 LOCALES = ['ko', 'en', 'ja', 'es', 'de', 'fr', 'pt', 'it', 'nl', 'id', 'vi', 'zh-CN', 'ru']
+LANGUAGE_NAMES = {'ko':'한국어','en':'English','ja':'日本語','es':'Español','de':'Deutsch','fr':'Français',
+                  'pt':'Português','it':'Italiano','nl':'Nederlands','id':'Bahasa Indonesia','vi':'Tiếng Việt',
+                  'zh-CN':'简体中文','ru':'Русский'}
+DIRECTORY_STYLE = '''<style id="language-directory-style">
+.language-directory{margin-top:12px;text-align:start}.language-directory summary{width:fit-content;min-height:44px;padding:12px 0;cursor:pointer;font-size:13px}.language-directory nav{display:flex;flex-wrap:wrap;gap:4px}.language-directory a{display:inline-flex;align-items:center;min-height:44px;padding:8px 10px;border-radius:10px;color:inherit;font-size:12px;text-decoration:none}.language-directory a:hover,.language-directory a:focus-visible{background:var(--line)}.language-directory a[aria-current]{font-weight:800;text-decoration:underline}
+</style>'''
 PRIVACY_LABELS = {'ko':'개인정보처리방침','en':'Privacy Policy','ja':'プライバシーポリシー',
                   'es':'Privacidad','de':'Datenschutz','fr':'Confidentialité','pt':'Privacidade',
                   'it':'Privacy','nl':'Privacybeleid','id':'Privasi','vi':'Quyền riêng tư',
@@ -48,7 +54,17 @@ for path in pages:
                f'style="display:inline-block;min-height:44px;padding:10px 0;color:inherit">{PRIVACY_LABELS[lang]}</a></p>')
     if text.count('</footer>') != 1:
         raise RuntimeError(f'Missing or duplicated footer: {rel}')
-    text = text.replace('</footer>', privacy + '</footer>', 1)
+    # Select options are not crawlable links. Keep ordinary same-page locale
+    # links in the initial HTML so discovery does not depend on sitemap processing.
+    directory = '<details class="language-directory"><summary>🌐 ' + LANGUAGE_NAMES[lang] + '</summary>'
+    directory += '<nav aria-label="' + LANGUAGE_NAMES[lang] + '">'
+    for other in LOCALES:
+        current = ' aria-current="page"' if other == lang else ''
+        directory += (f'<a href="{url(other, path.name)}" hreflang="{other}" lang="{other}" dir="auto"{current}>'
+                      f'{LANGUAGE_NAMES[other]}</a>')
+    directory += '</nav></details>'
+    text = text.replace('</footer>', privacy + directory + '</footer>', 1)
+    text = text.replace('</head>', DIRECTORY_STYLE + '</head>', 1)
     if lang == 'ko' and path.name == 'index.html':
         text = re.sub(r'<title>[\s\S]*?</title>', '<title>기기 점검 | PC·노트북·휴대폰 5분 검사 - DEVICE CHECKUP</title>', text, count=1)
         text = re.sub(r'<h1>[\s\S]*?</h1>', '<h1>기기 점검<br>PC·휴대폰 5분 검사</h1>', text, count=1)

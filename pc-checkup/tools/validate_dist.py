@@ -91,12 +91,19 @@ for path in html_files:
         err(str(rel), 'missing x-default hreflang')
     locale = rel.parts[0] if len(rel.parts) > 1 else 'ko'
     page_suffix = '' if path.name == 'index.html' else path.name.removesuffix('.html')
+    directory = re.search(r'<details class="language-directory">([\s\S]*?)</details>', text)
+    if not directory:
+        err(str(rel), 'missing initial-HTML language links')
     for other in [*LOCALES, 'x-default']:
         target_locale = 'en' if other == 'x-default' else other
         expected = PROD_ORIGIN + '/' + ('' if target_locale == 'ko' else target_locale + '/') + page_suffix
         matches = re.findall(r'<link[^>]+hreflang="' + re.escape(other) + r'"[^>]+href="([^"]+)"', text)
         if matches != [expected]:
             err(str(rel), 'incorrect language alternate', f'{other}: {matches}')
+        if other != 'x-default' and directory:
+            anchors = re.findall(r'<a href="([^"]+)" hreflang="' + re.escape(other) + '"', directory.group(1))
+            if anchors != [expected]:
+                err(str(rel), 'incorrect crawlable language link', f'{other}: {anchors}')
     structured_blocks = re.findall(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', text, re.S)
     if len(structured_blocks) != 1:
         err(str(rel), 'expected one WebApplication structured-data block')
