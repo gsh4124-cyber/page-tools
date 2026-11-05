@@ -223,7 +223,8 @@ async function assertMultiVerseSelection(page, label) {
   if(before&&reader&&notebook){
     assert(reader.x+reader.width<=notebook.x+1,'desktop dock: Scripture is obscured by notebook');
     assert(reader.width>=600,'desktop dock: Scripture content area became too narrow');
-    assert(before.width>reader.width,'desktop dock: reader did not yield space to notes');
+    // A compact reading column can yield by shifting left without needing to shrink.
+    assert(reader.x<before.x||before.width>reader.width,'desktop dock: reader did not yield space to notes');
   }
   await page.locator('.notebook-close').click();
   assert(!(await page.locator('body').evaluate(el=>el.classList.contains('notebook-open'))),'desktop dock: closing notes did not restore reader layout');

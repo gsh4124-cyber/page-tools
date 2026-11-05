@@ -1,6 +1,6 @@
 :root {
   --bg: #f7f5f0; --panel: rgba(255,255,255,.88); --text: #24231f; --muted: #777268; --line: #ddd8ce;
-  --hover: #eee9df; --verse-number: #9a8e7d; --reader-width: 960px; --font-size: 21px; --line-height: 1.9;
+  --hover: #eee9df; --verse-number: #9a8e7d; --reader-width: 860px; --font-size: 21px; --line-height: 1.9;
 }
 :root[data-theme="dark"] { --bg:#151617; --panel:rgba(28,29,30,.92); --text:#eeeae2; --muted:#a9a49a; --line:#393a3b; --hover:#27292a; --verse-number:#8e887e; }
 * { box-sizing:border-box; }

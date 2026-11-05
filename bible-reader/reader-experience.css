@@ -57,13 +57,13 @@ body.reader-focus .chapter-heading{padding-top:8px}
 @media(max-width:390px){.verse-multi-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.reader-undo-toast{bottom:190px;width:max-content;max-width:calc(100vw - 24px)}.toolbar .primary-tool,.toolbar .notebook-button{padding-inline:10px}}
 
 
-/* Docked notebook / wide reader layout.
- * Keep Scripture readable on widescreens and use the remaining space beside notes.
+/* Docked notebook / preferred reader width.
+ * Respect the chosen reading measure and yield space beside notes.
  * Phones and narrow portrait layouts retain the existing overlay panel.
  */
 @media(min-width:1000px){
   .reader-shell{
-    width:min(calc(var(--reader-width) + 420px),1360px,100%);
+    width:min(var(--reader-width),100%);
   }
   .verses{padding-inline:18px}
   body.notebook-open{--notebook-dock-width:clamp(330px,29vw,430px)}
@@ -74,7 +74,7 @@ body.reader-focus .chapter-heading{padding-top:8px}
   }
   body.notebook-open main{padding-inline:24px}
   body.notebook-open .reader-shell{
-    width:min(calc(var(--reader-width) + 420px),100%);
+    width:min(var(--reader-width),100%);
     max-width:100%;
     margin-left:auto;
     margin-right:auto;
