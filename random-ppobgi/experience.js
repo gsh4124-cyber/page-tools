@@ -89,7 +89,15 @@ function preferredMime(){for(const x of ['video/webm;codecs=vp9','video/webm;cod
 function finishRecording(button){if(!chunks.length){cleanupRecording(button);return}const type=recorder?.mimeType||'video/webm';const blob=new Blob(chunks,{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');const d=new Date(),stamp=d.toISOString().replace(/[:T]/g,'-').slice(0,19);a.href=url;a.download=`random-picker-${stamp}.webm`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);cleanupRecording(button)}
 function cleanupRecording(button){recordStream?.getTracks().forEach(x=>x.stop());recordStream=null;recorder=null;chunks=[];button.classList.remove('recording');button.innerHTML=t().record}
 async function startRecording(button){if(!recordingSupported()){toast(t().unsupported);return}try{recordStream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30,max:60}},audio:false});chunks=[];const mime=preferredMime();recorder=new MediaRecorder(recordStream,mime?{mimeType:mime}:undefined);recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};recorder.onstop=()=>finishRecording(button);recordStream.getVideoTracks()[0]?.addEventListener('ended',()=>{if(recorder?.state==='recording')recorder.stop()});recorder.start(500);button.classList.add('recording');button.innerHTML=`<span class="picker-record-dot"></span>${t().stop}`}catch(e){cleanupRecording(button);if(e?.name!=='NotAllowedError'&&e?.name!=='AbortError')toast(t().unsupported)}}
-function enhanceRecording(){const actions=document.querySelector('.header-actions');if(!actions||byId('recordPickerBtn'))return;const button=document.createElement('button');button.id='recordPickerBtn';button.type='button';button.className='reset picker-record-btn';button.textContent=t().record;button.title=recordingSupported()?t().choose:t().unsupported;button.disabled=!recordingSupported();button.addEventListener('click',()=>{if(recorder?.state==='recording')recorder.stop();else startRecording(button)});actions.insertBefore(button,byId('resetBtn'));}
+function enhanceRecording(){
+ const card=byId('mainCard');
+ if(!card||byId('recordPickerBtn')||!recordingSupported())return;
+ const row=document.createElement('div');row.className='picker-record-tools';
+ const button=document.createElement('button');button.id='recordPickerBtn';button.type='button';
+ button.className='picker-mini-btn picker-record-btn';button.textContent=t().record;button.title=t().choose;
+ button.addEventListener('click',()=>{if(recorder?.state==='recording')recorder.stop();else startRecording(button)});
+ row.append(button);card.after(row);
+}
 function init(){css();enhanceNameSets();enhanceResults();enhanceRecording()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

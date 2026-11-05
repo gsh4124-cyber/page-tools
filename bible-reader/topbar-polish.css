@@ -236,3 +236,24 @@
   .topbar .toolbar .quick-tool{min-width:44px!important}
   #prevChapterTitle,#nextChapterTitle{min-width:44px;min-height:44px}
 }
+
+/* Distinguish paired text sizing from comparison, notes, and extra settings. */
+.toolbar .reader-font-controls{display:inline-flex;flex:0 0 auto;align-items:center;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--panel) 86%,var(--bg));overflow:hidden}
+.toolbar .reader-font-controls .quick-tool{border:0!important;border-radius:0!important;background:transparent!important;color:var(--text);font-weight:600;margin:0!important}
+.toolbar .reader-font-controls .quick-tool+button{border-inline-start:1px solid var(--line)!important}
+.topbar .toolbar #compareToggle,.topbar .toolbar .notebook-button{background:transparent;border-color:transparent}
+.topbar .toolbar #compareToggle:hover,.topbar .toolbar .notebook-button:hover{background:var(--hover);border-color:var(--line)}
+.topbar .toolbar #compareToggle[aria-pressed="true"]{background:var(--hover);border-color:var(--line)}
+@media(max-width:699px){
+  .topbar-inner.centered-nav > .toolbar{justify-content:space-between!important;gap:6px!important;padding-top:3px!important}
+  .toolbar .reader-font-controls{height:46px}
+  .toolbar .reader-font-controls .quick-tool{height:44px!important;min-height:44px!important;min-width:44px!important}
+  .topbar .toolbar .notebook-button{padding-inline:6px!important}
+}
+
+@media(max-width:699px){
+  .topbar-inner.centered-nav > .toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) 44px!important;align-items:center!important}
+  .topbar .toolbar #compareToggle,.topbar .toolbar .notebook-button{min-width:0!important;max-width:100%;font-size:13px!important;padding-inline:6px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar .toolbar-more-wrap{width:44px!important;min-width:44px!important}
+  .topbar .toolbar-more-wrap #toolbarMoreToggle{width:44px!important;max-width:44px!important;padding-inline:0!important;letter-spacing:0}
+}

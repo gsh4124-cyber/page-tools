@@ -68,7 +68,7 @@ for path in pages:
     if lang == 'ko' and path.name == 'index.html':
         text = re.sub(r'<title>[\s\S]*?</title>', '<title>기기 점검 | PC·노트북·휴대폰 5분 검사 - DEVICE CHECKUP</title>', text, count=1)
         text = re.sub(r'<h1>[\s\S]*?</h1>', '<h1>기기 점검<br>PC·휴대폰 5분 검사</h1>', text, count=1)
-        text = re.sub(r'(<section class="hero">[\s\S]*?<p>)[\s\S]*?(</p>)', r'\1기기 점검을 설치·가입 없이 시작하세요. PC와 휴대폰의 키보드, 마우스, 화면, 스피커, 마이크, 카메라를 현재 기기의 브라우저에서 확인할 수 있습니다.\2', text, count=1)
+        text = re.sub(r'(<section class="hero">[\s\S]*?<p>)[\s\S]*?(</p>)', r'\1설치·가입 없이 PC·휴대폰의 화면, 터치, 소리, 카메라 등 기본 기능을 확인하세요.\2', text, count=1)
         guide = Path(__file__).with_name('search_home_ko.html').read_text(encoding='utf-8')
         if 'id="device-guide"' not in text:
             text = text.replace('</main>', guide + '</main>', 1)

@@ -232,6 +232,14 @@
     const moreWrap=document.querySelector('.toolbar-more-wrap');
     if(!topbar||!searchToggle||!searchForm||!searchInput||!moreToggle||!moreMenu||!moreWrap)return;
 
+    const fontDown=toolbar.querySelector('#fontDown');
+    const fontUp=toolbar.querySelector('#fontUp');
+    if(fontDown&&fontUp&&!toolbar.querySelector('.reader-font-controls')){
+      const group=document.createElement('div');group.className='reader-font-controls';group.setAttribute('role','group');
+      toolbar.insertBefore(group,fontDown);group.append(fontDown,fontUp);
+    }
+    const sizeNames={ko:'글자 크기',en:'Text size',fr:'Taille du texte',de:'Schriftgröße',zh:'字号',ru:'Размер текста',la:'Magnitudo litterarum',pt:'Tamanho do texto',ar:'حجم النص'};
+
     const otherTools=[
       ['#widthToggle','읽기 폭'],['#pageViewToggle','양면 보기'],
       ['#themeToggle','테마'],['.reader-history-back','이전 위치'],
@@ -249,6 +257,7 @@
     const moreNames={ko:'더보기',en:'More',fr:'Plus',de:'Mehr',zh:'更多',ru:'Ещё',la:'Plura',pt:'Mais',ar:'المزيد'};
     function refreshLabels(){
       const language=String(document.documentElement.lang||'ko').split('-')[0].toLowerCase();
+      toolbar.querySelector('.reader-font-controls')?.setAttribute('aria-label',sizeNames[language]||sizeNames.en);
       const searchName=searchInput.placeholder||'검색';
       searchToggle.title=searchName;
       searchToggle.setAttribute('aria-label',searchName);

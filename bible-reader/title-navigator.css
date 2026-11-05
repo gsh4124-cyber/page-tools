@@ -6,3 +6,7 @@ body.title-navigator-open{overflow:hidden}.chapter-title-navigator-trigger{curso
   .title-navigator-testament-switch button{min-height:44px}
   .title-navigator{max-height:92dvh}
 }
+
+/* A persistent chevron makes the book/chapter picker discoverable. */
+.chapter-heading .chapter-title-navigator-trigger{max-width:calc(100% - 112px)!important;padding-block:6px!important;padding-inline:10px 28px!important;overflow:hidden!important;text-overflow:ellipsis;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 80%,var(--bg))}
+.chapter-title-navigator-trigger::after{content:"";position:absolute;inset-inline-end:11px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}

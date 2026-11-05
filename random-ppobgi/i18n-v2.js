@@ -11,7 +11,7 @@
   const textAfterIcon=(el,text)=>{if(!el)return;const icon=el.querySelector('span');if(icon){[...el.childNodes].filter(n=>n!==icon).forEach(n=>n.remove());el.append(document.createTextNode(text));}else el.textContent=text};
 
   function localizeStatic(){
-    set('.logo',pack.brand);set('#resetBtn',pack.reset);set('.hero h1',pack.hero);set('.hero p',pack.tagline);
+    set('.logo',pack.hero||pack.brand);set('#resetBtn',pack.reset);set('.hero p',pack.tagline);
     set('#showPicker',pack.pickerGames);set('#showTools',pack.gameTools);set('.method-label',pack.pickMethod);
     qa('.method').forEach(b=>{const e=q('.name',b);if(e)e.textContent=pack.methods[b.dataset.method]||b.dataset.method;});
     set('#numberTab',pack.number);set('#nameTab',pack.name);

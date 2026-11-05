@@ -27,7 +27,7 @@
   overlay.className = 'title-navigator-overlay';
   overlay.hidden = true;
   overlay.innerHTML = `
-    <section class="title-navigator" role="dialog" aria-modal="true" aria-labelledby="titleNavigatorHeading" tabindex="-1">
+    <section id="titleNavigatorDialog" class="title-navigator" role="dialog" aria-modal="true" aria-labelledby="titleNavigatorHeading" tabindex="-1">
       <div class="title-navigator-head">
         <button type="button" class="title-navigator-close title-navigator-back" aria-label="이전" hidden>←</button>
         <strong id="titleNavigatorHeading"></strong>
@@ -227,6 +227,7 @@
     currentStep = 'book';
     awaitingBookIndex = null;
     overlay.hidden = false;
+    title.setAttribute('aria-expanded','true');
     document.body.classList.add('title-navigator-open');
     dialog.focus({preventScroll:true});
     renderAll();
@@ -234,6 +235,7 @@
 
   function close({restoreFocus=true}={}){
     overlay.hidden = true;
+    title.setAttribute('aria-expanded','false');
     document.body.classList.remove('title-navigator-open');
     if (restoreFocus) title.focus?.({preventScroll:true});
   }
@@ -258,6 +260,8 @@
   title.setAttribute('role','button');
   title.setAttribute('tabindex','0');
   title.setAttribute('aria-haspopup','dialog');
+  title.setAttribute('aria-expanded','false');
+  title.setAttribute('aria-controls','titleNavigatorDialog');
   title.classList.add('chapter-title-navigator-trigger');
   title.addEventListener('click',open);
   title.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});

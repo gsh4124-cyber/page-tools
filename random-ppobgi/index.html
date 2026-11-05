@@ -986,11 +986,46 @@
 <style>
 .language-directory{margin:12px 0 0;text-align:start}.language-directory summary{width:fit-content;min-height:44px;padding:12px 10px;cursor:pointer;font-size:12px;font-weight:800}.language-directory nav{display:flex;flex-wrap:wrap;gap:4px}.language-directory a{display:inline-flex;align-items:center;min-height:44px;padding:8px 10px;border-radius:10px;color:inherit;font-size:12px;text-decoration:none}.language-directory a:hover,.language-directory a:focus-visible{background:var(--soft)}.language-directory a[aria-current]{font-weight:850;text-decoration:underline}
 </style>
+
+<style id="picker-ui-polish">
+/* One title, quiet surfaces, and clearly named secondary actions. */
+header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
+.hero{margin:0 0 20px}.hero p{font-size:13px;line-height:1.5;color:var(--muted)}
+.section-switch{border:0;background:#eae6de;box-shadow:none;border-radius:16px;padding:4px}
+.section-switch button{border-radius:12px;box-shadow:none}
+#mainCard{border:1px solid rgba(95,76,52,.1);box-shadow:0 8px 28px rgba(65,48,26,.04);padding:0;overflow:hidden}
+#mainCard .method-top{padding:18px 18px 0}
+#mainCard .methods{gap:6px;margin-bottom:16px}
+#mainCard .method{background:transparent;border-color:transparent;box-shadow:none}
+#mainCard .method:hover{background:var(--soft2)}
+#mainCard .method.active{background:#eee6d8;border-color:#c8ae89}
+#inputTabs{margin:0 18px;border-radius:12px;background:#f0ede7;padding:3px}
+#inputTabs .tab{box-shadow:none;border-radius:9px}
+#mainCard .content{padding:18px}
+#mainCard .stepper{border:0;background:#f5f3ef;box-shadow:none}
+#mainCard .stepper button{box-shadow:none}
+.picker-record-tools{display:flex;justify-content:flex-end;margin:10px 0 0}
+.picker-record-tools .picker-record-btn{min-height:44px;padding:0 14px;font-size:13px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:10px}
+.picker-record-tools .picker-record-btn.recording{color:#fff}
+.service-info{padding:24px 4px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.service-info a{color:var(--text);text-decoration-color:#a09280;text-underline-offset:4px}
+.service-shortcuts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.service-shortcuts a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:12px;text-decoration:none;background:rgba(255,255,255,.5)}
+.service-shortcuts a:hover{background:var(--soft2)}
+@media(max-width:500px){
+  header{margin-bottom:4px}.hero{margin-bottom:16px}.hero p{font-size:12px;max-width:none}
+  .section-switch{margin-bottom:14px}
+  #mainCard .method-top{padding:14px 12px 0}#mainCard .methods{gap:4px;margin-bottom:12px}
+  #mainCard .method{min-height:58px;border-radius:10px}.method .name{font-size:11px}
+  #inputTabs{margin-inline:12px}#mainCard .content{padding:14px 12px}
+  .service-info{margin-top:24px;padding-inline:2px}.service-info h2{font-size:20px}
+}
+</style>
 </head>
 <body>
 <main class="wrap">
-<header><div class="logo">랜덤 <span>뽑기</span></div><div class="header-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-label="효과음 켜기" title="효과음 켜기">🔇</button><button class="reset" id="resetBtn" type="button">초기화</button></div></header>
-<div class="hero"><h1>랜덤뽑기</h1><p>결과는 랜덤, 방식은 마음대로.</p></div>
+<header><h1 class="logo">랜덤뽑기</h1><div class="header-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-label="효과음 켜기" title="효과음 켜기">🔇</button><button class="reset" id="resetBtn" type="button">초기화</button></div></header>
+<div class="hero"><p>결과는 랜덤, 방식은 마음대로.</p></div>
 
 <nav class="section-switch" aria-label="서비스 종류">
   <button id="showPicker" class="active" type="button" aria-pressed="true">🎯 뽑기 게임</button>
@@ -1031,7 +1066,7 @@
 <section class="service-info" aria-label="서비스 안내">
   <div class="service-copy" data-copy="picker">
     <h2>이름·번호 랜덤뽑기 사용법</h2>
-    <p><a href="/guide/#names">이름 추첨 입력 예시</a> · <a href="/guide/#numbers">번호로 뽑는 방법</a> · <a href="/guide/#reroll">당첨자 제외 재추첨 안내</a></p>
+    <p class="service-shortcuts"><a href="/guide/#names">이름 입력 예시</a><a href="/guide/#numbers">번호로 뽑기</a><a href="/guide/#reroll">재추첨 안내</a></p>
     <p>모임, 수업, 회식처럼 무작위 선택이 필요한 순간에 번호나 이름을 입력하고 원하는 뽑기 방식을 선택하세요. 사다리·룰렛·제비·핀볼·경주·캡슐·슬롯·폭탄을 회원가입 없이 바로 사용할 수 있습니다.</p>
     <div class="game-tool-note"><strong>당첨 결과를 이어서 활용할 수 있어요</strong><p>전체 참가자에서 다시 뽑거나 이미 뽑힌 당첨자를 제외하고 재추첨할 수 있습니다. 지원하는 게임은 애니메이션을 기다리지 않고 바로 결과를 확인할 수도 있습니다.</p></div>
   </div>
