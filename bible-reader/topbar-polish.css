@@ -280,3 +280,6 @@
   .topbar.search-open .location-controls .top-search{left:0!important;right:auto!important}
   .title-navigator-hint{display:none!important}
 }
+
+/* Use the UI typeface for a naturally proportioned chapter label in every language. */
+.chapter-heading #chapterTitle{font-family:inherit;font-weight:600;font-stretch:normal;letter-spacing:normal!important;line-height:1.35!important}
