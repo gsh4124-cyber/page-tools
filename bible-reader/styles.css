@@ -54,7 +54,10 @@ html[lang="en"] .verses,html[lang="fr"] .verses,html[lang="de"] .verses,html[lan
 .verse:hover,.verse.searched { background:var(--hover); }
 .verse.searched { box-shadow:inset 3px 0 0 var(--verse-number); }
 .verse-number { position:absolute; left:8px; top:7px; min-width:22px; color:var(--verse-number); font-family:system-ui,sans-serif; font-size:12px; line-height:1.5; text-align:right; user-select:none; }
-.verse-text { cursor:copy; }
+/* Long unspaced passages must fit when any translation is read in any UI language. */
+.verse-text { cursor:copy; overflow-wrap:anywhere; }
+.compare-cell { overflow-wrap:anywhere; }
+html[lang="zh"] .verses { word-break:normal; line-break:auto; }
 .verse.copied::after { content:"Copied"; position:absolute; right:10px; top:9px; color:var(--muted); font:12px/1.4 system-ui,sans-serif; }
 html[lang="ko"] .verse.copied::after { content:"복사됨"; }
 .compare-panel { width:min(1480px,calc(100vw - 48px)); margin-left:50%; transform:translateX(-50%); padding-inline:30px; }
