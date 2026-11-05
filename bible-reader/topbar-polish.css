@@ -228,3 +228,11 @@
   .topbar .toolbar > button{min-height:44px!important;height:44px!important}
   .topbar .toolbar-more-wrap #toolbarMoreToggle{min-width:44px!important}
 }
+
+/* Phone input text stays readable without shrinking the reading controls. */
+@media(max-width:760px){
+  .topbar.search-open .location-controls .top-search input,
+  .topbar.search-open .location-controls .top-search input:focus{font-size:16px!important}
+  .topbar .toolbar .quick-tool{min-width:44px!important}
+  #prevChapterTitle,#nextChapterTitle{min-width:44px;min-height:44px}
+}
