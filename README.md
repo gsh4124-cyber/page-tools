@@ -34,6 +34,12 @@ The Product Health Monitor waits for the pushed commit and verifies served runti
 before exercising the changed production sites in desktop/mobile Chromium. Existing six-hour
 HTTP health checks remain in place. Screenshot evidence is retained for seven days.
 
+Each product publishes a top-level `404.html` so missing paths return HTTP 404
+instead of Cloudflare Pages' implicit SPA home-page fallback. The error page has
+no ads and links back to the Korean and English homes. It is not included in a
+sitemap; DEVICE CHECKUP copies it after validating its 117 translated app pages.
+Production verification checks both missing document and nested asset paths.
+
 A failed Cloudflare build keeps the previous successful release live. To roll back an already
 published release, use that product's previous successful production deployment in Cloudflare;
 then revert the faulty source commit before the next push. A green source CI alone does not

@@ -41,6 +41,18 @@ async function verify(project) {
       throw new Error(`${project}/${asset}: served bytes differ from source/manifest`);
     }
   }
+  // A missing route must not silently return the home page (Pages SPA fallback).
+  // Check both document and nested asset misses; neither may request ads.
+  for (const path of ['__not-found-check__/page', 'en/__not-found-check__/missing.js']) {
+    const response = await fetch(`${origins[project]}/${path}`, {
+      headers: { 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(20000),
+    });
+    const body = Buffer.from(await response.arrayBuffer());
+    if (response.status !== 404 || hash(body) !== manifest.files?.['404.html'] ||
+        !body.toString().includes('id="not-found-page"') || body.toString().includes('adsbygoogle')) {
+      throw new Error(`${project}/${path}: expected exact, ad-free HTTP 404 page; got ${response.status}`);
+    }
+  }
   console.log(`Verified ${project}: production revision ${revision}, manifest and runtime bytes`);
 }
 const pending = new Set(projects);
