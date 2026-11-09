@@ -1,5 +1,7 @@
 # page-tools
 
+> 현재 프로젝트: 페이지 작업 — Random Ppobgi·Bible Reader·DEVICE CHECKUP을 유지한다. 넥스트레벨·쇼핑 콘텐츠·해결소·보험과 함께 현재 운영하는 다섯 프로젝트 중 하나다. 공통 빌드·배포·운영 검증 경로는 그대로 유지한다.
+
 Integrated repository for Hwangje Vibecoding page-type products.
 
 ## Products
