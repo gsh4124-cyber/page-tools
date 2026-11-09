@@ -118,10 +118,22 @@
     pt:['Dica inicial','Ver texto','Passagem','Prática com dica ou texto'],
     ar:['تلميح البداية','عرض النص','النطاق','تدريب مع تلميح أو نص']
   };
+  const COMPACT_COPY={
+    ko:['정답','연습','도움말','시작','본문 미리 보기','힌트','다시 입력해 주세요.'],
+    en:['Correct','Practice','Help','Start','Preview text','Hint','Edit and check again.'],
+    fr:['Correct','Entraînement','Aide','Commencer','Aperçu du texte','Indice','Corrigez puis vérifiez.'],
+    de:['Richtig','Übung','Hilfe','Starten','Textvorschau','Hinweis','Korrigieren und prüfen.'],
+    zh:['正确','练习','帮助','开始','预览原文','提示','修改后再核对。'],
+    ru:['Верно','Тренировка','Помощь','Начать','Просмотр текста','Подсказка','Исправьте и проверьте.'],
+    la:['Recte','Exercitatio','Auxilium','Incipe','Textum praevide','Indicium','Corrige et examina.'],
+    pt:['Correto','Prática','Ajuda','Começar','Prévia do texto','Dica','Corrija e confira.'],
+    ar:['صحيح','تدريب','مساعدة','ابدأ','معاينة النص','تلميح','صحح وتحقق مجدداً.']
+  };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
-    ...Object.fromEntries(['hint','shortPeek','shortChange','practice'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]]))});
+    ...Object.fromEntries(['hint','shortPeek','shortChange','practice'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
+    ...Object.fromEntries(['correct','practice','help','start','preview','hint','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]]))});
   window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession, startHint};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
@@ -147,7 +159,7 @@
     const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
     const header=el('header','memory-header'),title=el('h2','',l.title);title.id='memoryQuizTitle';header.append(title,button(l.close,close,'memory-close'));
-    const content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,el('p','memory-context',`${book} · ${version}`),content,dock);document.body.append(dialog);
+    const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
     function fitAnswer(input){if(config.view==='chapter'){input.style.height='auto';input.style.height=`${Math.max(78,input.scrollHeight+2)}px`;}}
     const resizeAnswers=()=>content.querySelectorAll('textarea').forEach(fitAnswer);window.addEventListener('resize',resizeAnswers);
     dialog.addEventListener('close',()=>{window.removeEventListener('resize',resizeAnswers);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
@@ -168,7 +180,7 @@
       card.append(el('p','memory-counts',['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`).join(' · ')));return card;
     }
     function setup(){
-      dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
+      context.textContent=`${book} · ${version}`;dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
       const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
@@ -195,31 +207,32 @@
         config.selected=!!selected.length&&useSelected.checked;config.fromChapter=Number(fromChapter.value);config.toChapter=Number(toChapter.value);config.fromVerse=Number(fromVerse.value);config.toVerse=Number(toVerse.value);
         for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected;
         rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
-        summary.textContent=`${reference(rows)} · ${rows.length} ${l.count}`;rangeTitle.textContent=`${l.range} · ${reference(rows)}`;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
+        summary.textContent=`${reference(rows)} · ${rows.length} ${l.count}`;rangeTitle.textContent=l.range;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
       }
       const startButton=button(l.start,begin,'memory-primary');
       fromChapter.addEventListener('change',()=>{fillVerses(fromChapter,fromVerse,1);if(Number(toChapter.value)<Number(fromChapter.value)){toChapter.value=fromChapter.value;fillVerses(toChapter,toVerse,null,true);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toChapter.addEventListener('change',()=>{fillVerses(toChapter,toVerse,null,true);if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse,1);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
-      content.append(views,summary,range,study,el('p','memory-rule',l.rule),startButton,el('p','memory-privacy',l.privacy));refresh();content.scrollTop=0;
+      const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
+      content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;
     }
     function begin(){practice=false;started=performance.now();session=createSession(rows,config.view);showUnit();}
     function showUnit(){
-      dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
-      const items=session.current;content.replaceChildren(el('p','memory-reference',reference(items.map(item=>item.row))));
-      content.append(el('p','memory-progress',`${config.view==='verse'?l.verseView:l.chapterView} · ${session.index+1} / ${session.unitCount}`),el('p','memory-key-help',config.view==='verse'?l.enterHelp:l.chapterHelp));
+      context.textContent=version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
+      const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',reference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
       const practiceLabel=el('p','memory-practice',l.practice);practiceLabel.hidden=!practice;
       const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
       const revealed=el('div','memory-preview');revealed.hidden=true;
       const primary=button(l.checkAnswer,act,'memory-primary');
+      if(config.view==='verse'){primary.dataset.shortcut='↵';primary.setAttribute('aria-keyshortcuts','Enter');primary.title=l.enterHelp;}
       const entered=el('span','memory-filled'),meter=el('progress','memory-meter');meter.max=items.length;meter.value=0;meter.setAttribute('aria-label',l.progress);
-      const status=el('div','memory-dock-status');status.append(entered,meter);
+      const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
       let activeIndex=0;
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
       const inputs=items.map(({row},index)=>{
-        const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',config.view==='verse'?`${rowReference(row)} · ${l.answer}`:rowReference(row));
+        const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);form.append(label);
         input.addEventListener('focus',()=>{activeIndex=index;});
@@ -235,7 +248,7 @@
         feedback.replaceChildren();feedback.dataset.correct=String(checked.correct);checked.grades.forEach((g,i)=>inputs[i].setAttribute('aria-invalid',String(!g.exact)));
         if(checked.correct){
           const next=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;
-          primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',`${l.correct} ${next}${config.view==='verse'?' · Enter':''}`));
+          primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',l.correct));
         }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
       }
       const hint=button(l.hint,()=>{
@@ -245,7 +258,7 @@
       },'memory-hint');
       const peek=button(l.shortPeek,()=>{practice=true;practiceLabel.hidden=false;revealed.hidden=!revealed.hidden;revealed.replaceChildren();if(!revealed.hidden){preview(revealed,items.map(item=>item.row));revealed.scrollIntoView({block:'nearest'});}peek.textContent=revealed.hidden?l.shortPeek:l.hide;},'memory-peek');
       const aids=el('div','memory-aids');aids.append(hint,peek,button(l.shortChange,setup));dock.append(error,status,primary,aids);
-      content.append(practiceLabel,form,feedback,revealed,el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
+      content.append(practiceLabel,form,feedback,revealed);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
