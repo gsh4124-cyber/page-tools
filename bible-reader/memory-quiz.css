@@ -1,0 +1,45 @@
+.memory-quiz{width:min(720px,calc(100% - 24px));max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--bg);color:var(--text);overflow-y:auto;overscroll-behavior:contain;font:inherit;box-shadow:0 18px 70px #0003}
+.memory-quiz::backdrop{background:color-mix(in srgb,var(--bg) 97%,transparent)}
+.memory-quiz [hidden]{display:none!important}
+.memory-header{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:18px 22px;background:var(--bg);border-bottom:1px solid var(--line)}
+.memory-header h2{margin:0;font-size:21px;line-height:1.35;letter-spacing:-.025em}
+.memory-quiz button,.memory-quiz select{min-height:44px;padding:10px 14px;cursor:pointer}
+.memory-quiz button:disabled{opacity:.5;cursor:default}
+.memory-quiz :focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.memory-context{margin:16px 22px 0;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.memory-content{padding:0 22px 24px;line-height:1.65}
+.memory-intro{margin:12px 0 20px}
+.memory-fields{display:flex;gap:12px;flex-wrap:wrap}
+.memory-fields label{display:grid;gap:6px;flex:1 1 105px;font-size:14px;font-weight:650}
+.memory-fields label:first-child{flex-basis:100%}
+.memory-fields select{width:100%;background:var(--panel)}
+.memory-content h3{font-size:17px;line-height:1.5;margin:24px 0 12px}
+.memory-preview{padding:4px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);max-height:30dvh;overflow:auto;font-size:19px;line-height:1.9}
+.memory-preview p{margin:12px 0;overflow-wrap:anywhere}
+.memory-verse-number{display:inline-block;font:500 12px system-ui;color:var(--verse-number);margin-inline-end:10px;vertical-align:super}
+.memory-rule,.memory-privacy,.memory-counts{font-size:13px;color:var(--muted);line-height:1.7}
+.memory-privacy{margin-bottom:0}
+.memory-primary{background:var(--text);border-color:var(--text);color:var(--bg);font-weight:700}
+.memory-reference{font-weight:650;font-size:15px;overflow-wrap:anywhere}
+.memory-progress{font-size:14px;color:var(--muted)}
+.memory-answer-label{display:block;margin:18px 0;font-size:14px;font-weight:650}
+.memory-answer{display:block;box-sizing:border-box;width:100%;min-height:118px;resize:vertical;margin-top:8px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);font-family:inherit;font-weight:400;font-size:19px;line-height:1.8;overflow-wrap:anywhere}
+.memory-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.memory-actions button{flex:1 1 140px;white-space:normal}
+.memory-practice{padding:8px 12px;border-inline-start:3px solid #a57622;background:var(--hover);font-size:14px}
+.memory-error{color:#a43535;font-weight:650;font-size:14px}
+.memory-score{font:700 48px/1.15 system-ui;margin:20px 0 8px;letter-spacing:-.04em}
+.memory-verdict{margin:8px 0 20px}
+.memory-result{border-top:1px solid var(--line);padding:18px 0}
+.memory-result h4{margin:0 0 14px;font-size:16px}
+.memory-comparison-label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+.memory-diff{font-size:19px;line-height:1.85;margin:0 0 12px;overflow-wrap:anywhere;white-space:pre-wrap}
+.memory-wrong,.memory-missing,.memory-extra{background:#a435351c;color:#a43535;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.memory-missing{text-decoration-style:dotted}
+.memory-extra{text-decoration:line-through}
+:root[data-theme=dark] .memory-wrong,:root[data-theme=dark] .memory-missing,:root[data-theme=dark] .memory-extra,:root[data-theme=dark] .memory-error{color:#ffaaaa}
+.verse-multi-actions .verse-multi-memory{white-space:normal;overflow-wrap:anywhere;line-height:1.35;min-height:44px}
+.topbar .toolbar-more-menu .memory-menu-button{font-size:14px;white-space:normal;line-height:1.4}
+.topbar .toolbar-more-menu .memory-menu-button::after{content:none}
+body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(--memory-actionbar-space,92px))}
+@media(max-width:480px){.memory-header{padding:14px}.memory-header h2{font-size:19px}.memory-context{margin:14px 14px 0}.memory-content{padding:0 14px 18px}.memory-preview{padding-inline:12px}.memory-actions button{flex-basis:100%}.memory-quiz{max-height:calc(100dvh - 16px);width:calc(100% - 16px);border-radius:14px}.memory-answer{font-size:18px}}

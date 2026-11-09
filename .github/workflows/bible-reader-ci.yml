@@ -78,6 +78,8 @@ jobs:
         run: node tools/validate-navigation.mjs
       - name: Validate progressive Bible search and cancellation
         run: node tools/validate-search-progress.mjs
+      - name: Validate typing memory quiz grading and translations
+        run: node tools/validate-memory-quiz.mjs
 
   quality-gate:
     name: Combined Quality Gate
