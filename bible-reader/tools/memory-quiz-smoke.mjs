@@ -22,7 +22,7 @@ if(local){
 }
 const browser=await chromium.launch({headless:true,...(process.env.MEMORY_QUIZ_CHANNEL?{channel:process.env.MEMORY_QUIZ_CHANNEL}:{})});
 const observations=[];
-async function openPage(width=390,route='/'){
+async function openPage(width=390,route='/',expectedChapter=null){
   const context=await browser.newContext({viewport:{width,height:844},locale:'ko-KR'});
   // Functional checks do not generate ad impressions or click ads.
   await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
@@ -30,6 +30,7 @@ async function openPage(width=390,route='/'){
   page.on('pageerror',e=>errors.push(String(e)));
   await page.goto(base+route+(route.includes('?')?'&':'?')+'qa=1',{waitUntil:'domcontentloaded'});
   await page.locator('#verses .verse').first().waitFor({timeout:40000});
+  if(expectedChapter)await page.waitForFunction(chapter=>document.querySelector('#chapterSelect')?.value===String(chapter)&&document.querySelector('#verses .verse[data-verse="176"]'),expectedChapter,{timeout:40000});
   await page.locator('.memory-menu-button').waitFor({state:'attached'});
   await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
   await page.locator('#memoryQuizDialog').waitFor({state:'visible'});
@@ -94,6 +95,31 @@ try{
     assert(await page.locator('.memory-score').isVisible());assert.deepEqual(errors,[]);
     assert(await page.locator('#memoryQuizDialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1));
     observations.push({language,flow:'localized entry, real translation text, input, scoring',pass:true});await context.close();
+  }
+  for(const [language,route] of [['ko','/?v=krv1961&ref=Ps.119.1'],['en','/en/?v=kjv&ref=Ps.119.1']]){
+    const {context,page,errors}=await openPage(390,route,119);
+    const dialog=page.locator('#memoryQuizDialog');
+    const answers=await page.locator('#verses .verse-text').allTextContents();assert.equal(answers.length,176,'Psalm 119 must have all 176 verses');
+    if(language==='en')assert(answers.join('').length>8000,'KJV Psalm 119 must exercise the removed total-character cap');
+    await page.locator('#memoryFrom').selectOption('121');await page.locator('#memoryTo').selectOption('176');
+    assert.equal(await dialog.locator('.memory-preview p').count(),56);assert.equal(await dialog.locator('.memory-primary').isDisabled(),false);
+    await page.locator('#memoryMode').selectOption('whole');
+    assert.equal(await dialog.locator('.memory-preview p').count(),176);
+    await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('textarea').count(),176);
+    assert((await dialog.locator('.memory-reference').textContent()).length<120,'Whole-chapter reference must be compact');
+    const inputs=await dialog.locator('textarea').all();for(let i=0;i<inputs.length;i++)await inputs[i].fill(answers[i]);
+    await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('.memory-result').count(),176);assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
+    assert.equal(await dialog.locator('.memory-result').last().locator('h4').textContent(),'176 · 100%');
+    const retryBounds=await dialog.locator('.memory-primary').boundingBox(),dialogBounds=await dialog.boundingBox();
+    assert(retryBounds.y+retryBounds.height<=dialogBounds.y+dialogBounds.height,'Retry must be reachable at the top of long results');
+    assert(await dialog.evaluate(d=>d.scrollWidth<=d.clientWidth+1),'Long chapter must fit phone width');
+    await page.screenshot({path:path.join(output,`${local?'local':'live'}-psalm119-${language}.png`)});
+    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('textarea').count(),176);
+    assert.equal(await dialog.locator('textarea').last().inputValue(),'','Retry must clear even the last of 176 answers');
+    assert.deepEqual(errors,[]);observations.push({language,chapter:'Psalm 119',verses:176,characters:answers.join('').length,flow:'range 121–176, whole chapter, full exact grading, compact reference, phone overflow, clean retry',pass:true});
+    await context.close();
   }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);

@@ -14,6 +14,7 @@ assert.equal(grade('abc','ac').parts.filter(p=>p.kind==='missing').length,1);
 assert.equal(grade('abc','abxc').parts.filter(p=>p.kind==='extra').length,1);
 assert.equal(grade('abc','').score,0);
 assert.equal(grade('abc','...').score,0);
+assert.equal(grade('말씀'.repeat(6000),'말씀'.repeat(6000)).score,100,'Long exact passages must not allocate a quadratic diff matrix');
 assert.equal(grade('a'.repeat(1000),'a'.repeat(999)+'b').score,99,'An error must never round to 100%');
 for(const [expected,entered] of [['😀ab','😀b'],['성경을 읽습니다','성경은 읽는다'],['abc','xyzabc'],['a+1','a1']]){
   const result=grade(expected,entered);
@@ -26,4 +27,5 @@ for(const code of ['ko','en','fr','de','zh','ru','la','pt','ar'])for(const key o
   assert.equal(typeof labels(code)[key],'string',`${code}.${key} missing`);
   assert.ok(labels(code)[key].length,`${code}.${key} empty`);
 }
+for(const code of ['ko','en','fr','de','zh','ru','la','pt','ar'])assert.ok(labels(code).whole,'Whole-chapter label missing');
 console.log('Memory quiz grading PASS: Korean IME normalization, punctuation/case, insertions/deletions, blank input, exact scores, Unicode and 9 UI languages.');
