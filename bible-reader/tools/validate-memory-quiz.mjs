@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
-const {grade,normalize,labels,passageRows,passageReference,createSession}=context.window.BibleMemory;
+const {grade,normalize,labels,passageRows,passageReference,createSession,startHint}=context.window.BibleMemory;
 assert.equal(grade('하나님이 세상을 이처럼 사랑하사','하나님이세상을\n이처럼 사랑하사.').score,100);
 assert.equal(grade('Love, one another!','LOVE ONE ANOTHER').exact,true);
 assert.equal(grade('가나다','가나다').exact,true,'NFC equivalent Korean must match');
@@ -60,4 +60,9 @@ assert.equal(chapterSession.current.map(item=>item.row.verse).join(','),'1,2');
 assert.equal(chapterSession.check(['next first','']).correct,false);assert.equal(chapterSession.advance(),false);
 assert.equal(chapterSession.check(['next first','next second']).correct,true);
 assert.equal(chapterSession.check(['','']).empty,true);assert.equal(chapterSession.advance(),false,'Empty check clears stale correctness');
+assert.equal(startHint('하나님이 세상을 이처럼 사랑하사'),'하나님이…');
+assert.equal(startHint('  For God so loved the world'),'For…');
+assert.equal(startHint('神愛世人甚至將他的獨生子賜給他們'),'神愛世人甚至…','A no-space passage must not be revealed in full');
+assert.equal(startHint(''),'');
+assert.equal(startHint('하나님이 사랑하사').normalize('NFC'),'하나님이…','Hint must preserve grapheme clusters');
 console.log('Memory quiz PASS: grading, Unicode/9 languages, chapter ranges, separate check/advance, wrong-answer blocking, edit invalidation, first checks and final stop.');

@@ -153,6 +153,50 @@ try{
     await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
     assert.deepEqual(errors,[]);observations.push({passage:'Psalm 119:176–120:1',flow:'verse mode crosses chapter boundary and finishes entire scope',pass:true});await context.close();
   }
+  for(const width of (local?[320,390,1280]:[390])){
+    const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');
+    await page.locator('#memoryViewChapter').check();await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('textarea').count(),36);
+    const first=dialog.locator('textarea').nth(0),second=dialog.locator('textarea').nth(1),primary=dialog.locator('.memory-primary');
+    const small=await first.boundingBox();assert(small.height<=100,'Empty chapter input should be compact');
+    const firstAnswer=await answerFor(page,3,1);await first.fill((firstAnswer+' ').repeat(3));
+    assert((await first.boundingBox()).height>small.height,'Chapter input must grow to fit typed text');
+    await first.fill(firstAnswer);await first.press('Tab');assert(await second.evaluate(n=>document.activeElement===n),'Tab should move directly to the next verse');
+    await second.fill(await answerFor(page,3,2));assert.equal(await dialog.locator('.memory-meter').getAttribute('value'),'2');
+    await dialog.locator('.memory-hint').click();
+    assert.equal(await dialog.locator('.memory-inline-hint').count(),1,'Hint should only reveal the active verse');
+    assert.equal(await second.locator('..').locator('.memory-inline-hint').count(),1);
+    assert(await dialog.locator('.memory-practice').isVisible());assert(await second.evaluate(n=>document.activeElement===n));
+    const dockBefore=await dialog.locator('.memory-dock').boundingBox();assert(dockBefore.width>=(await dialog.boundingBox()).width-4,'Controls must span the dialog width');
+    await dialog.locator('.memory-content').evaluate(n=>{n.scrollTop=n.scrollHeight;});
+    const dockAfter=await dialog.locator('.memory-dock').boundingBox();assert.equal(dockBefore.y,dockAfter.y,'Dock must remain visible during chapter scrolling');
+    assert(dockAfter.y+dockAfter.height<=844,'Dock must fit viewport');
+    await primary.hover();const colors=await primary.evaluate(n=>({background:getComputedStyle(n).backgroundColor,foreground:getComputedStyle(n).color,expectedBackground:getComputedStyle(n.closest('dialog')).color,expectedForeground:getComputedStyle(n.closest('dialog')).backgroundColor}));
+    assert.equal(colors.background,colors.expectedBackground,'Hovered primary button must retain its contrast');assert.equal(colors.foreground,colors.expectedForeground);
+    await page.mouse.move(0,0);await dialog.locator('.memory-content').evaluate(n=>{n.scrollTop=0;});
+    await fit(page,dialog);await page.screenshot({path:path.join(output,`chapter-compact-${width}.png`)});
+    if(width<500){
+      await page.setViewportSize({width,height:460});
+      const dock=await dialog.locator('.memory-dock').boundingBox(),body=await dialog.locator('.memory-content').boundingBox();
+      assert(dock.y+dock.height<=460&&body.height>=64,'Dock must fit a reduced viewport without covering the input scroller');assert(body.y+body.height<=dock.y+1);
+      await dialog.locator('textarea').last().focus();await page.keyboard.press('a');assert(await primary.isVisible());
+      await page.screenshot({path:path.join(output,`chapter-reduced-height-${width}.png`)});
+    }
+    assert.deepEqual(errors,[]);observations.push({width,flow:'compact/growing chapter inputs, Tab focus, filled progress, active verse hint/practice, pinned controls, hover contrast, reduced viewport',pass:true});await context.close();
+  }
+  {
+    const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
+    await setRange(page,3,1,3,2);await dialog.locator('.memory-primary').click();
+    await dialog.locator('.memory-hint').click();assert(await dialog.locator('.memory-practice').isVisible());
+    for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');if(i===0)assert.equal(await dialog.locator('.memory-inline-hint').count(),0,'Hint must not leak into next verse');}
+    assert((await dialog.locator('h3').textContent()).includes('연습'),'Hint-assisted attempt must stay marked practice at the end');
+    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-inline-hint').count(),0);assert(await dialog.locator('.memory-practice').isHidden());
+    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.keyboard.press('f');
+    assert(await page.locator('body').evaluate(n=>n.classList.contains('reader-focus')));
+    await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
+    await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock').isVisible(),'Reader focus mode must not hide quiz controls');assert(await dialog.locator('.memory-primary').isVisible());
+    assert.deepEqual(errors,[]);observations.push({flow:'hint-assisted verse flow, next-verse privacy, practice result, clean retry',pass:true});await context.close();
+  }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);
 }finally{await browser.close();if(server)await new Promise(resolve=>server.close(resolve));}

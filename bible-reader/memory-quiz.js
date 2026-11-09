@@ -68,6 +68,11 @@
       advance(){if(!correct||index>=units.length)return false;index++;correct=false;return true;}
     };
   }
+  function startHint(value) {
+    const text=String(value||'').trim(),word=text.split(/\s+/u)[0]||'';
+    const segments=typeof Intl.Segmenter==='function'?[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(word)].map(part=>part.segment):Array.from(word);
+    const prefix=segments.slice(0,6).join('');return prefix+(prefix.length<text.length?'…':'');
+  }
   const KEYS = 'title close intro range selected from to preview start answer check peek hide practice result retry change rule reference expected entered perfect tryAgain progress empty whole unavailable count time wrong missing extra score privacy'.split(' ');
   const COPY = {
     ko:['타이핑 암기 시험','닫기','구절을 읽고 기억한 뒤, 본문을 가리고 직접 써 보세요.','시험 범위','선택한 구절','시작 절','마지막 절','먼저 읽고 기억하세요','본문 가리고 시험 시작','기억나는 본문을 입력하세요','채점하기','본문 보기 · 연습으로 전환','본문 가리기','본문을 확인한 연습','시험 결과','다시 시험','범위 바꾸기','띄어쓰기·줄바꿈·문장부호·대소문자는 채점에서 제외합니다.','시험 구절','정답','내 답','모두 정확합니다!','틀린 부분을 확인하고 다시 도전해 보세요.','입력한 절','한 절 이상 입력한 뒤 채점해 주세요.','현재 장·편 전체','본문을 불러온 뒤 다시 열어 주세요.','절','초','다른 글자','빠진 글자','추가한 글자','정확도','입력한 답은 저장하거나 서버로 전송하지 않습니다.'],
@@ -102,10 +107,22 @@
     pt:['Visualização','Um versículo por vez','Um capítulo por vez','Conferir resposta','Próximo versículo','Próximo capítulo','Ver resultado','Correto.','Corrija e confira novamente.','Enter confere; após acertar, Enter avança. Shift+Enter insere uma nova linha.','Digite os versículos e confira. Avance ao próximo capítulo quando tudo estiver correto.','Baseado nas primeiras respostas'],
     ar:['طريقة العرض','آية واحدة في كل مرة','أصحاح كامل في كل مرة','تحقق من الإجابة','الآية التالية','الأصحاح التالي','عرض النتيجة','صحيح.','صحح الإجابة وتحقق مجدداً.','Enter للتحقق؛ وبعد الإجابة الصحيحة اضغط Enter للمتابعة. Shift+Enter لسطر جديد.','اكتب الآيات وتحقق منها. انتقل إلى الأصحاح التالي عندما تكون جميع الإجابات صحيحة.','بحسب أول تحقق']
   };
+  const AID_COPY={
+    ko:['시작 힌트','본문 보기','범위 변경','힌트·본문을 확인한 연습'],
+    en:['Start hint','Show text','Passage','Practice with hints or text'],
+    fr:['Indice','Voir le texte','Passage','Entraînement avec indice ou texte'],
+    de:['Starthilfe','Text zeigen','Bereich','Übung mit Hinweis oder Text'],
+    zh:['开头提示','查看原文','更改范围','使用提示或原文的练习'],
+    ru:['Подсказка','Текст','Отрывок','Тренировка с подсказкой или текстом'],
+    la:['Initii auxilium','Textum vide','Locus','Exercitatio cum auxilio vel textu'],
+    pt:['Dica inicial','Ver texto','Passagem','Prática com dica ou texto'],
+    ar:['تلميح البداية','عرض النص','النطاق','تدريب مع تلميح أو نص']
+  };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
-    ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]]))});
-  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession};
+    ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
+    ...Object.fromEntries(['hint','shortPeek','shortChange','practice'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]]))});
+  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession, startHint};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -130,8 +147,10 @@
     const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
     const header=el('header','memory-header'),title=el('h2','',l.title);title.id='memoryQuizTitle';header.append(title,button(l.close,close,'memory-close'));
-    const content=el('div','memory-content');dialog.append(header,el('p','memory-context',`${book} · ${version}`),content);document.body.append(dialog);
-    dialog.addEventListener('close',()=>{const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
+    const content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,el('p','memory-context',`${book} · ${version}`),content,dock);document.body.append(dialog);
+    function fitAnswer(input){if(config.view==='chapter'){input.style.height='auto';input.style.height=`${Math.max(78,input.scrollHeight+2)}px`;}}
+    const resizeAnswers=()=>content.querySelectorAll('textarea').forEach(fitAnswer);window.addEventListener('resize',resizeAnswers);
+    dialog.addEventListener('close',()=>{window.removeEventListener('resize',resizeAnswers);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
     dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
     function preview(target,items){for(const row of items){const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p);}}
     function gradeCard(row,answer,g){
@@ -149,7 +168,7 @@
       card.append(el('p','memory-counts',['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`).join(' · ')));return card;
     }
     function setup(){
-      content.replaceChildren();
+      dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
       const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
@@ -183,22 +202,29 @@
       toChapter.addEventListener('change',()=>{fillVerses(toChapter,toVerse,null,true);if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse,1);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
-      content.append(views,summary,range,study,el('p','memory-rule',l.rule),startButton,el('p','memory-privacy',l.privacy));refresh();dialog.scrollTop=0;
+      content.append(views,summary,range,study,el('p','memory-rule',l.rule),startButton,el('p','memory-privacy',l.privacy));refresh();content.scrollTop=0;
     }
     function begin(){practice=false;started=performance.now();session=createSession(rows,config.view);showUnit();}
     function showUnit(){
+      dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const items=session.current;content.replaceChildren(el('p','memory-reference',reference(items.map(item=>item.row))));
-      content.append(el('p','memory-progress',`${session.index+1} / ${session.unitCount}`),el('p','memory-key-help',config.view==='verse'?l.enterHelp:l.chapterHelp));
+      content.append(el('p','memory-progress',`${config.view==='verse'?l.verseView:l.chapterView} · ${session.index+1} / ${session.unitCount}`),el('p','memory-key-help',config.view==='verse'?l.enterHelp:l.chapterHelp));
       const practiceLabel=el('p','memory-practice',l.practice);practiceLabel.hidden=!practice;
       const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
       const revealed=el('div','memory-preview');revealed.hidden=true;
       const primary=button(l.checkAnswer,act,'memory-primary');
-      const inputs=items.map(({row})=>{
-        const label=el('label','memory-answer-label',`${rowReference(row)} · ${l.answer}`),input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:3;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
-        input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(input);form.append(label);
+      const entered=el('span','memory-filled'),meter=el('progress','memory-meter');meter.max=items.length;meter.value=0;meter.setAttribute('aria-label',l.progress);
+      const status=el('div','memory-dock-status');status.append(entered,meter);
+      let activeIndex=0;
+      function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
+      const inputs=items.map(({row},index)=>{
+        const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',config.view==='verse'?`${rowReference(row)} · ${l.answer}`:rowReference(row));
+        const input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
+        input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);form.append(label);
+        input.addEventListener('focus',()=>{activeIndex=index;});
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{session.invalidate();feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';});
+        input.addEventListener('input',()=>{session.invalidate();feedback.replaceChildren();feedback.removeAttribute('data-correct');input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
@@ -206,22 +232,28 @@
         if(session.canAdvance){session.advance();if(session.done)results(session.firstAnswers);else showUnit();return;}
         const values=inputs.map(input=>input.value),checked=session.check(values);
         if(checked.empty){error.textContent=l.empty;error.hidden=false;inputs[0]?.focus();return;}
-        feedback.replaceChildren();feedback.dataset.correct=String(checked.correct);
+        feedback.replaceChildren();feedback.dataset.correct=String(checked.correct);checked.grades.forEach((g,i)=>inputs[i].setAttribute('aria-invalid',String(!g.exact)));
         if(checked.correct){
           const next=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;
           primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',`${l.correct} ${next}${config.view==='verse'?' · Enter':''}`));
-        }else{feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
+        }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
       }
-      const peek=button(l.peek,()=>{practice=true;practiceLabel.hidden=false;revealed.hidden=!revealed.hidden;revealed.replaceChildren();if(!revealed.hidden)preview(revealed,items.map(item=>item.row));peek.textContent=revealed.hidden?l.peek:l.hide;},'memory-peek');
-      const actions=el('div','memory-actions');actions.append(primary,peek,button(l.change,setup));
-      content.append(practiceLabel,form,error,feedback,actions,revealed,el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));dialog.scrollTop=0;inputs[0]?.focus({preventScroll:true});
+      const hint=button(l.hint,()=>{
+        practice=true;practiceLabel.hidden=false;const input=inputs[activeIndex],label=input.parentElement;
+        let text=label.querySelector('.memory-inline-hint');if(!text){text=el('span','memory-inline-hint');text.setAttribute('aria-live','polite');label.append(text);}
+        text.textContent=`${l.hint} · ${startHint(items[activeIndex].row.text)}`;input.focus();
+      },'memory-hint');
+      const peek=button(l.shortPeek,()=>{practice=true;practiceLabel.hidden=false;revealed.hidden=!revealed.hidden;revealed.replaceChildren();if(!revealed.hidden){preview(revealed,items.map(item=>item.row));revealed.scrollIntoView({block:'nearest'});}peek.textContent=revealed.hidden?l.shortPeek:l.hide;},'memory-peek');
+      const aids=el('div','memory-aids');aids.append(hint,peek,button(l.shortChange,setup));dock.append(error,status,primary,aids);
+      content.append(practiceLabel,form,feedback,revealed,el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){
+      dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
       const grades=rows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
       content.replaceChildren(el('h3','',practice?l.practice:l.result),el('p','memory-reference',reference(rows)));
       const result=el('p','memory-score',`${score}%`);result.setAttribute('aria-label',`${l.score} ${score}%`);content.append(result,el('p','memory-rule',l.firstCheck),el('p','memory-verdict',exact?l.perfect:l.tryAgain),el('p','memory-rule',`${Math.round((performance.now()-started)/1000)} ${l.time}`));
       const actions=el('div','memory-actions'),retry=button(l.retry,begin,'memory-primary');actions.append(retry,button(l.change,setup));content.append(actions);
-      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(rows[i],answers[i],g)));content.append(list);dialog.scrollTop=0;retry.focus({preventScroll:true});
+      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(rows[i],answers[i],g)));content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
     }
     setup();dialog.showModal();
   }
