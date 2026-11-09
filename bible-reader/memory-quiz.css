@@ -13,6 +13,7 @@
 .memory-fields label{display:grid;gap:6px;flex:1 1 105px;font-size:14px;font-weight:650}
 .memory-fields label:first-child{flex-basis:100%}
 .memory-fields select{width:100%;background:var(--panel)}
+.memory-chapter-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0}
 .memory-content h3{font-size:17px;line-height:1.5;margin:24px 0 12px}
 .memory-preview{padding:4px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);max-height:30dvh;overflow:auto;font-size:19px;line-height:1.9}
 .memory-preview p{margin:12px 0;overflow-wrap:anywhere}
