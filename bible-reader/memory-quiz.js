@@ -100,7 +100,7 @@
     const header = el('header','memory-header');
     const title = el('h2','',l.title); title.id = 'memoryQuizTitle';
     const closeButton = button(l.close,close,'memory-close'); header.append(title,closeButton);
-    const context = el('p','memory-context',`${book} ${chapter} · ${version}`);
+    const context = el('p','memory-context',`${book} · ${version}`);
     const content = el('div','memory-content');
     dialog.append(header,context,content);
     document.body.append(dialog);
