@@ -36,138 +36,123 @@ async function openPage(width=390,route='/',expectedChapter=null){
   await page.locator('#memoryQuizDialog').waitFor({state:'visible'});
   return {context,page,errors};
 }
+async function setRange(page,fromChapter,fromVerse,toChapter,toVerse){
+  await page.locator('.memory-range summary').click();
+  await page.locator('#memoryFromChapter').selectOption(String(fromChapter));
+  await page.locator('#memoryToChapter').selectOption(String(toChapter));
+  await page.locator('#memoryFromVerse').selectOption(String(fromVerse));
+  await page.locator('#memoryToVerse').selectOption(String(toVerse));
+}
+async function answerFor(page,chapter,verse){return page.evaluate(({chapter,verse})=>currentBookData.chapters.find(c=>Number(c.chapter)===chapter).verses.find(v=>Number(v.verse)===verse).text,{chapter,verse});}
+async function identity(dialog){return dialog.locator('textarea').evaluateAll(nodes=>nodes.map(n=>`${n.dataset.chapter}:${n.dataset.verse}`).join(','));}
+async function fillUnit(page,dialog){
+  for(const input of await dialog.locator('textarea').all()){
+    const chapter=Number(await input.getAttribute('data-chapter')),verse=Number(await input.getAttribute('data-verse'));
+    await input.fill(await answerFor(page,chapter,verse));
+  }
+}
+async function fit(page,dialog){
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Page horizontal overflow');
+  assert(await dialog.evaluate(d=>d.scrollWidth<=d.clientWidth+1),'Dialog horizontal overflow');
+  const sizes=await dialog.locator('button,textarea,.memory-views label,summary').evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length).map(n=>n.getBoundingClientRect().height));
+  assert(sizes.every(height=>height>=44),'Small touch target');
+}
 try{
   for(const width of (local?[320,360,390,430,1280]:[390,1280])){
-    const {context,page,errors}=await openPage(width);
-    const dialog=page.locator('#memoryQuizDialog');
-    await page.locator('#memoryFrom').selectOption('16');await page.locator('#memoryTo').selectOption('17');
-    const originals=await dialog.locator('.memory-preview p').allTextContents();
-    const answers=await page.locator('#verses .verse').evaluateAll(rows=>rows.filter(r=>['16','17'].includes(r.dataset.verse)).map(r=>r.querySelector('.verse-text').textContent));
-    assert.equal(originals.length,2);
+    const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');
+    assert.equal(await dialog.locator('input[name=memoryView]').count(),2,'Exactly two view modes');
+    assert(await page.locator('#memoryViewVerse').isChecked());
+    assert.equal(await page.locator('.memory-range').getAttribute('open'),null,'Scope controls start collapsed');
     const chapter=await page.locator('#chapterSelect').inputValue();
     await dialog.locator('.memory-close').focus();await page.keyboard.press('ArrowRight');await page.keyboard.press('f');
-    assert.equal(await page.locator('#chapterSelect').inputValue(),chapter,'Quiz keyboard input changed the reader chapter');
+    assert.equal(await page.locator('#chapterSelect').inputValue(),chapter,'Reader shortcuts must be isolated');
     assert.equal(await page.locator('body').evaluate(b=>b.classList.contains('reader-focus')),false);
-    await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('.memory-preview:visible').count(),0,'Answer must be hidden during test');
-    assert.equal(await dialog.locator('textarea').count(),2);
-    await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-error').isVisible(),'Empty answers must not produce a score');
-    await dialog.locator('textarea').nth(0).fill(answers[0].replace(/\s/g,'')+'!');
-    await dialog.locator('textarea').nth(1).fill('오답');
-    await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('.memory-result').count(),2);
-    assert.equal(await dialog.locator('.memory-result').first().locator('h4').textContent(),'16 · 100%');
-    assert.equal(await dialog.locator('.memory-result').first().locator('.memory-diff').first().textContent(),answers[0],'Results must preserve original readable spacing');
-    assert.notEqual(await dialog.locator('.memory-score').textContent(),'100%');
-    assert(await dialog.locator('.memory-wrong,.memory-missing').count()>0);
-    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('textarea').first().inputValue(),'');
+    await fit(page,dialog);await page.screenshot({path:path.join(output,`setup-${width}.png`)});
+    await setRange(page,3,16,3,17);await dialog.locator('.memory-primary').click();
+    assert.equal(await identity(dialog),'3:16');assert.equal(await dialog.locator('.memory-preview:visible').count(),0);
+    const input=dialog.locator('textarea'),answer=await answerFor(page,3,16);
+    await input.press('Enter');assert(await dialog.locator('.memory-error[role=alert]').isVisible());
+    assert.equal(await identity(dialog),'3:16');
+    await input.fill('오답');await input.press('Enter');
+    assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');
+    assert.equal(await dialog.locator('.memory-result .memory-diff').first().textContent(),answer,'Show readable expected answer');
+    await input.press('Enter');assert.equal(await identity(dialog),'3:16','Wrong answer cannot skip');
+    await input.fill(answer.replace(/\s/g,'')+'!');
+    await input.evaluate(n=>{n.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));});
+    assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'check','IME composition Enter must not grade');
+    await input.evaluate(n=>{n.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',keyCode:229,bubbles:true,cancelable:true}));n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true,cancelable:true}));});
+    assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'check');
+    await input.press('Shift+Enter');assert((await input.inputValue()).includes('\n'));
+    assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'check','Shift+Enter is a newline');
+    await page.keyboard.down('Enter');
+    assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'true');
+    assert.equal(await identity(dialog),'3:16','One Enter checks only');
+    await page.keyboard.down('Enter');assert.equal(await identity(dialog),'3:16','Held Enter cannot skip');await page.keyboard.up('Enter');
+    await input.fill(answer+' ');assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'check','Editing invalidates correctness');
+    await input.press('Enter');assert.equal(await identity(dialog),'3:16');
+    await input.press('Enter');assert.equal(await identity(dialog),'3:17');assert.equal(await input.inputValue(),'');
+    assert(await input.evaluate(n=>document.activeElement===n),'Next verse receives typing focus');
+    await fillUnit(page,dialog);await input.press('Enter');assert.equal(await identity(dialog),'3:17');
+    await fit(page,dialog);await page.screenshot({path:path.join(output,`correct-${width}.png`)});
+    await input.press('Enter');assert.equal(await dialog.locator('.memory-result').count(),2);
+    assert.notEqual(await dialog.locator('.memory-score').textContent(),'100%','First wrong check remains reflected in results');
+    assert((await dialog.locator('.memory-content').textContent()).includes('첫 답 확인 기준'));
+    await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:16');assert.equal(await input.inputValue(),'');
     await dialog.locator('.memory-peek').click();assert(await dialog.locator('.memory-preview').isVisible());
     await dialog.locator('.memory-peek').click();assert(await dialog.locator('.memory-preview').isHidden());
-    for(let i=0;i<2;i++)await dialog.locator('textarea').nth(i).fill(answers[i]);
-    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
-    assert((await dialog.locator('h3').textContent()).includes('연습'),'Revealed answer must stay labeled practice');
-    await page.screenshot({path:path.join(output,`${local?'local':'live'}-result-${width}.png`)});
-    await dialog.locator('.memory-primary').click();
-    for(let i=0;i<2;i++)await dialog.locator('textarea').nth(i).fill(answers[i]);
-    await dialog.locator('.memory-primary').click();assert(!(await dialog.locator('h3').textContent()).includes('연습'));
-    await page.keyboard.press('Escape');await page.locator('#memoryQuizDialog').waitFor({state:'detached'});
-    await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();
-    await page.locator('.verse-multi-memory').click();
-    assert.equal(await page.locator('#memoryMode').inputValue(),'selected');
-    assert.equal(await dialog.locator('.memory-preview p').count(),2,'Non-contiguous selection must not add unselected verses');
-    await dialog.locator('.memory-primary').click();
-    assert.deepEqual(await dialog.locator('textarea').evaluateAll(inputs=>inputs.map(n=>n.dataset.verse)),['1','3']);
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Page horizontal overflow');
-    assert(await dialog.evaluate(d=>d.scrollWidth<=d.clientWidth+1),'Dialog horizontal overflow');
-    const sizes=await dialog.locator('button,textarea').evaluateAll(nodes=>nodes.map(n=>({height:n.getBoundingClientRect().height})));assert(sizes.every(s=>s.height>=44),'Small touch target');
-    await page.screenshot({path:path.join(output,`${local?'local':'live'}-test-${width}.png`)});
-    assert.deepEqual(errors,[],'Runtime errors');observations.push({width,flow:'range, blank, wrong, normalized exact, reveal/practice, clean retry, keyboard isolation, selected 1+3, overflow, touch targets',pass:true});
-    await context.close();
+    for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');await dialog.locator('.memory-primary').click();}
+    assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert((await dialog.locator('h3').textContent()).includes('연습'));
+    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});assert.equal(await page.locator('#chapterSelect').inputValue(),chapter);
+    await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
+    assert(await page.locator('#memoryUseSelected').isChecked());
+    await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:1');
+    await fillUnit(page,dialog);await input.press('Enter');await input.press('Enter');assert.equal(await identity(dialog),'3:3','Non-contiguous selected verses stay selected');
+    assert.deepEqual(errors,[]);observations.push({width,flow:'two modes, sequential Enter check/next, wrong/blank blocking, IME/repeat, edit invalidation, final score, practice/retry, selected 1+3, fit/touch targets',pass:true});await context.close();
   }
   for(const language of (local?['en','fr','de','zh','ru','la','pt','ar']:['en','ar'])){
-    const {context,page,errors}=await openPage(390,`/${language}/`);
-    const expected=await page.evaluate(code=>window.BibleMemory.labels(code).title,language);
-    assert.equal(await page.locator('#memoryQuizTitle').textContent(),expected);
-    assert.equal(await page.locator('html').getAttribute('lang'),language);
-    await page.locator('#memoryMode').selectOption('chapters');
-    assert(await page.locator('#memoryFromChapter').isVisible());
-    assert(await page.locator('#memoryToChapter').isVisible());
-    await page.locator('#memoryQuizDialog .memory-primary').click();
-    await page.locator('#memoryQuizDialog textarea').first().fill('test');
-    await page.locator('#memoryQuizDialog .memory-primary').click();
-    assert(await page.locator('.memory-score').isVisible());assert.deepEqual(errors,[]);
-    assert(await page.locator('#memoryQuizDialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1));
-    observations.push({language,flow:'localized entry, real translation text, input, scoring',pass:true});await context.close();
+    const {context,page,errors}=await openPage(390,`/${language}/`),dialog=page.locator('#memoryQuizDialog');
+    const labels=await page.evaluate(code=>window.BibleMemory.labels(code),language);
+    assert.equal(await page.locator('#memoryQuizTitle').textContent(),labels.title);assert.equal(await page.locator('html').getAttribute('lang'),language);
+    assert.equal(await dialog.locator('.memory-views label').first().textContent(),labels.verseView);
+    assert.equal(await dialog.locator('.memory-views label').last().textContent(),labels.chapterView);
+    const chapter=Number(await page.locator('#chapterSelect').inputValue());
+    await setRange(page,chapter,1,chapter,1);await dialog.locator('.memory-primary').click();await fillUnit(page,dialog);
+    await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-primary').textContent(),labels.finish);
+    await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
+    await fit(page,dialog);assert.deepEqual(errors,[]);observations.push({language,flow:'localized two modes and sequential grading/results',pass:true});await context.close();
   }
   for(const [language,route] of [['ko','/?v=krv1961&ref=Ps.119.1'],['en','/en/?v=kjv&ref=Ps.119.1']]){
-    const {context,page,errors}=await openPage(390,route,119);
-    const dialog=page.locator('#memoryQuizDialog');
-    const answers=await page.locator('#verses .verse-text').allTextContents();assert.equal(answers.length,176,'Psalm 119 must have all 176 verses');
-    if(language==='en')assert(answers.join('').length>8000,'KJV Psalm 119 must exercise the removed total-character cap');
-    await page.locator('#memoryFrom').selectOption('121');await page.locator('#memoryTo').selectOption('176');
-    assert.equal(await dialog.locator('.memory-preview p').count(),56);assert.equal(await dialog.locator('.memory-primary').isDisabled(),false);
-    await page.locator('#memoryMode').selectOption('whole');
-    assert.equal(await dialog.locator('.memory-preview p').count(),176);
-    await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('textarea').count(),176);
-    assert((await dialog.locator('.memory-reference').textContent()).length<120,'Whole-chapter reference must be compact');
-    const inputs=await dialog.locator('textarea').all();for(let i=0;i<inputs.length;i++)await inputs[i].fill(answers[i]);
-    await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('.memory-result').count(),176);assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
-    assert.equal(await dialog.locator('.memory-result').last().locator('h4').textContent(),'176 · 100%');
-    const retryBounds=await dialog.locator('.memory-primary').boundingBox(),dialogBounds=await dialog.boundingBox();
-    assert(retryBounds.y+retryBounds.height<=dialogBounds.y+dialogBounds.height,'Retry must be reachable at the top of long results');
-    assert(await dialog.evaluate(d=>d.scrollWidth<=d.clientWidth+1),'Long chapter must fit phone width');
-    await page.screenshot({path:path.join(output,`${local?'local':'live'}-psalm119-${language}.png`)});
-    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('textarea').count(),176);
-    assert.equal(await dialog.locator('textarea').last().inputValue(),'','Retry must clear even the last of 176 answers');
-    assert.deepEqual(errors,[]);observations.push({language,chapter:'Psalm 119',verses:176,characters:answers.join('').length,flow:'range 121–176, whole chapter, full exact grading, compact reference, phone overflow, clean retry',pass:true});
-    await context.close();
-  }
-  for(const width of (local?[320,1280]:[390])){
-    const {context,page,errors}=await openPage(width);
-    const dialog=page.locator('#memoryQuizDialog');
-    const readingChapter=await page.locator('#chapterSelect').inputValue(),readingVersion=await page.locator('#translationSelect').inputValue();
-    await page.locator('#memoryMode').selectOption('chapters');
-    await page.locator('#memoryFromChapter').selectOption('3');await page.locator('#memoryFromVerse').selectOption('1');
-    await page.locator('#memoryToChapter').selectOption('4');await page.locator('#memoryToVerse').selectOption('3');
-    assert.equal(await dialog.locator('.memory-preview p').count(),39);
-    assert((await dialog.locator('.memory-reference').textContent()).includes('3:1–4:3'));
-    await page.screenshot({path:path.join(output,`${local?'local':'live'}-chapters-setup-${width}.png`)});
-    await dialog.locator('.memory-primary').click();
-    const identities=await dialog.locator('textarea').evaluateAll(nodes=>nodes.map(n=>`${n.dataset.chapter}:${n.dataset.verse}`));
-    assert.equal(identities.length,39);assert.equal(new Set(identities).size,39);
-    assert(identities.includes('3:1')&&identities.includes('4:1'),'Same verse number in separate chapters must remain distinct');
-    assert.equal(identities[0],'3:1');assert.equal(identities.at(-1),'4:3');
-    const answers=await page.evaluate(()=>currentBookData.chapters.filter(c=>[3,4].includes(Number(c.chapter))).flatMap(c=>c.verses.filter(v=>Number(c.chapter)===3||Number(v.verse)<=3).map(v=>v.text)));
-    const inputs=await dialog.locator('textarea').all();for(let i=0;i<inputs.length;i++)await inputs[i].fill(answers[i]);
-    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
-    assert.equal(await dialog.locator('.memory-result').first().locator('h4').textContent(),'3:1 · 100%');
-    assert.equal(await dialog.locator('.memory-result').last().locator('h4').textContent(),'4:3 · 100%');
-    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('textarea').last().inputValue(),'');
-    await dialog.locator('textarea[data-chapter="4"][data-verse="1"]').fill('잘못된 답');
-    await dialog.locator('.memory-primary').click();assert.notEqual(await dialog.locator('.memory-score').textContent(),'100%');
-    assert.equal(await dialog.locator('.memory-result').count(),39);
-    assert(await dialog.evaluate(d=>d.scrollWidth<=d.clientWidth+1));
-    await page.keyboard.press('Escape');await page.locator('#memoryQuizDialog').waitFor({state:'detached'});
-    assert.equal(await page.locator('#chapterSelect').inputValue(),readingChapter);assert.equal(await page.locator('#translationSelect').inputValue(),readingVersion);
-    assert.deepEqual(errors,[]);observations.push({width,passage:'John 3:1–4:3',verses:39,flow:'multi-chapter setup, repeated verse identities, exact/partial grading, retry, reading location preserved',pass:true});await context.close();
+    const {context,page,errors}=await openPage(390,route,119),dialog=page.locator('#memoryQuizDialog');
+    const answers=await page.locator('#verses .verse-text').allTextContents();assert.equal(answers.length,176);
+    if(language==='en')assert(answers.join('').length>8000);
+    await page.locator('#memoryViewChapter').check();await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('textarea').count(),176);
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('textarea').count(),176,'Checking must not also finish');
+    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-result').count(),176);
+    assert.equal(await dialog.locator('.memory-result').last().locator('h4').textContent(),'119:176 · 100%');
+    await page.screenshot({path:path.join(output,`psalm119-${language}.png`)});await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('textarea').count(),176);assert.equal(await dialog.locator('textarea').last().inputValue(),'');await fit(page,dialog);
+    assert.deepEqual(errors,[]);observations.push({language,chapter:'Psalm 119',verses:176,flow:'whole chapter view, no verse/total-character cap, check/finish, clear retry',pass:true});await context.close();
   }
   {
-    const {context,page,errors}=await openPage(390,'/?v=krv1961&ref=Ps.119.1',119);
-    const dialog=page.locator('#memoryQuizDialog');await page.locator('#memoryMode').selectOption('chapters');
-    await page.locator('#memoryToChapter').selectOption('119');await page.locator('#memoryToVerse').selectOption('176');
-    await page.locator('#memoryToChapter').selectOption('120');
-    assert.equal(await page.locator('#memoryToVerse').inputValue(),'7','Changing chapter must discard stale verse 176');
-    await page.locator('#memoryFromVerse').selectOption('175');
-    assert.equal(await dialog.locator('.memory-preview p').count(),9);
-    await dialog.locator('.memory-primary').click();
-    const identities=await dialog.locator('textarea').evaluateAll(nodes=>nodes.map(n=>`${n.dataset.chapter}:${n.dataset.verse}`));
-    assert.equal(identities.join(','),'119:175,119:176,120:1,120:2,120:3,120:4,120:5,120:6,120:7');
-    await dialog.locator('textarea').first().fill('test');await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('.memory-result').count(),9);
-    assert.deepEqual(errors,[]);observations.push({width:390,passage:'Psalm 119:175–120:7',verses:9,flow:'chapter-specific verse bounds, long-to-short chapter change, cross-chapter grading',pass:true});await context.close();
+    const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
+    await page.locator('#memoryViewChapter').check();await setRange(page,3,35,4,2);
+    await page.screenshot({path:path.join(output,'multi-chapter-setup.png')});await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:35,3:36');
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:35,3:36');assert.equal(await dialog.locator('.memory-primary').textContent(),'다음 장');
+    await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'4:1,4:2');
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-result').count(),4);
+    assert.equal(await dialog.locator('.memory-result').last().locator('h4').textContent(),'4:2 · 100%');
+    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});assert.equal(await page.locator('#chapterSelect').inputValue(),'3');
+    assert.deepEqual(errors,[]);observations.push({passage:'John 3:35–4:2',flow:'chapter mode shows one chapter at a time, separate check/next, whole scope completion, reading preserved',pass:true});await context.close();
   }
-  await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,observations},null,2));
+  {
+    const {context,page,errors}=await openPage(390,'/?v=krv1961&ref=Ps.119.1',119),dialog=page.locator('#memoryQuizDialog');
+    await setRange(page,119,176,120,1);assert.equal(await page.locator('#memoryToVerse option').count(),7,'Verse bounds follow chapter');
+    await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'119:176');
+    await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');assert.equal(await identity(dialog),'120:1');
+    await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
+    assert.deepEqual(errors,[]);observations.push({passage:'Psalm 119:176–120:1',flow:'verse mode crosses chapter boundary and finishes entire scope',pass:true});await context.close();
+  }
+  await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);
 }finally{await browser.close();if(server)await new Promise(resolve=>server.close(resolve));}

@@ -49,6 +49,25 @@
     }
     return `${book} ${first.chapter}:${ranges.map(([a,b])=>a===b?String(a):`${a}–${b}`).join(', ')}`;
   }
+  function createSession(rows,view='verse') {
+    const units=[];rows.forEach((row,index)=>{
+      const last=units[units.length-1];
+      if(view==='chapter'&&last&&last[0].row.chapter===row.chapter)last.push({row,index});else units.push([{row,index}]);
+    });
+    let index=0,correct=false;const firstAnswers=Array(rows.length);
+    return {
+      get current(){return units[index]||[];},get index(){return index;},get unitCount(){return units.length;},
+      get done(){return index>=units.length;},get canAdvance(){return correct;},get firstAnswers(){return firstAnswers.slice();},
+      invalidate(){correct=false;},
+      check(values){
+        const current=units[index]||[];
+        if(!current.length||!values.some(value=>normalize(value))){correct=false;return {empty:true,correct:false,grades:[]};}
+        const grades=current.map((item,i)=>{if(firstAnswers[item.index]===undefined)firstAnswers[item.index]=String(values[i]||'');return grade(item.row.text,values[i]||'');});
+        correct=grades.every(g=>g.exact);return {empty:false,correct,grades};
+      },
+      advance(){if(!correct||index>=units.length)return false;index++;correct=false;return true;}
+    };
+  }
   const KEYS = 'title close intro range selected from to preview start answer check peek hide practice result retry change rule reference expected entered perfect tryAgain progress empty whole unavailable count time wrong missing extra score privacy'.split(' ');
   const COPY = {
     ko:['타이핑 암기 시험','닫기','구절을 읽고 기억한 뒤, 본문을 가리고 직접 써 보세요.','시험 범위','선택한 구절','시작 절','마지막 절','먼저 읽고 기억하세요','본문 가리고 시험 시작','기억나는 본문을 입력하세요','채점하기','본문 보기 · 연습으로 전환','본문 가리기','본문을 확인한 연습','시험 결과','다시 시험','범위 바꾸기','띄어쓰기·줄바꿈·문장부호·대소문자는 채점에서 제외합니다.','시험 구절','정답','내 답','모두 정확합니다!','틀린 부분을 확인하고 다시 도전해 보세요.','입력한 절','한 절 이상 입력한 뒤 채점해 주세요.','현재 장·편 전체','본문을 불러온 뒤 다시 열어 주세요.','절','초','다른 글자','빠진 글자','추가한 글자','정확도','입력한 답은 저장하거나 서버로 전송하지 않습니다.'],
@@ -72,9 +91,21 @@
     pt:['Vários capítulos','Primeiro capítulo','Último capítulo','Escolha o capítulo e versículo inicial e final no livro atual.'],
     ar:['عدة أصحاحات','الأصحاح الأول','الأصحاح الأخير','اختر الأصحاح والآية الأولى والأخيرة ضمن السفر الحالي.']
   };
+  const VIEW_COPY={
+    ko:['보기 방식','절 하나씩 보기','장 한 번에 보기','답 확인','다음 절','다음 장','결과 보기','정답입니다.','고친 뒤 다시 답을 확인해 주세요.','Enter: 답 확인 → 정답이면 Enter: 다음 절. Shift+Enter: 줄바꿈.','각 절을 입력하고 답을 확인하세요. 모두 맞으면 다음 장으로 넘어갑니다.','첫 답 확인 기준'],
+    en:['View','One verse at a time','One chapter at a time','Check answer','Next verse','Next chapter','View results','Correct.','Edit your answer and check again.','Enter checks; after a correct answer, Enter moves on. Shift+Enter adds a line break.','Enter the verses and check. Continue to the next chapter when all answers are correct.','Based on first checks'],
+    fr:['Affichage','Un verset à la fois','Un chapitre à la fois','Vérifier','Verset suivant','Chapitre suivant','Voir les résultats','Correct.','Corrigez puis vérifiez à nouveau.','Entrée vérifie ; après une réponse correcte, Entrée continue. Maj+Entrée insère une ligne.','Saisissez les versets et vérifiez. Passez au chapitre suivant quand tout est correct.','Selon les premières vérifications'],
+    de:['Ansicht','Ein Vers nach dem anderen','Ein Kapitel auf einmal','Antwort prüfen','Nächster Vers','Nächstes Kapitel','Ergebnis ansehen','Richtig.','Korrigiere und prüfe erneut.','Enter prüft; bei richtiger Antwort geht Enter weiter. Umschalt+Enter fügt eine neue Zeile ein.','Gib die Verse ein und prüfe sie. Wenn alles richtig ist, geht es zum nächsten Kapitel.','Erste Antworten gewertet'],
+    zh:['显示方式','逐节显示','整章显示','核对答案','下一节','下一章','查看结果','回答正确。','修改后再次核对。','按 Enter 核对；答对后再按 Enter 进入下一节。Shift+Enter 换行。','输入各节后核对，全部正确即可进入下一章。','按首次核对计分'],
+    ru:['Вид','По одному стиху','По одной главе','Проверить ответ','Следующий стих','Следующая глава','Результаты','Верно.','Исправьте ответ и проверьте снова.','Enter проверяет; после верного ответа Enter продолжает. Shift+Enter — новая строка.','Введите стихи и проверьте. Когда всё верно, переходите к следующей главе.','По первым проверкам'],
+    la:['Modus','Singuli versus','Singula capitula','Responsum examina','Versus sequens','Capitulum sequens','Eventus vide','Recte.','Corrige et iterum examina.','Enter examinat; responso recto, Enter pergit. Shift+Enter novam lineam addit.','Versus scribe et examina. Omnibus rectis ad capitulum sequens procede.','Prima responsa numerantur'],
+    pt:['Visualização','Um versículo por vez','Um capítulo por vez','Conferir resposta','Próximo versículo','Próximo capítulo','Ver resultado','Correto.','Corrija e confira novamente.','Enter confere; após acertar, Enter avança. Shift+Enter insere uma nova linha.','Digite os versículos e confira. Avance ao próximo capítulo quando tudo estiver correto.','Baseado nas primeiras respostas'],
+    ar:['طريقة العرض','آية واحدة في كل مرة','أصحاح كامل في كل مرة','تحقق من الإجابة','الآية التالية','الأصحاح التالي','عرض النتيجة','صحيح.','صحح الإجابة وتحقق مجدداً.','Enter للتحقق؛ وبعد الإجابة الصحيحة اضغط Enter للمتابعة. Shift+Enter لسطر جديد.','اكتب الآيات وتحقق منها. انتقل إلى الأصحاح التالي عندما تكون جميع الإجابات صحيحة.','بحسب أول تحقق']
+  };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
-    ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]]))});
-  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference};
+    ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
+    ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]]))});
+  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -83,154 +114,118 @@
   let dialog = null, opener = null;
   function close() { if (dialog?.open) dialog.close(); }
   function open(event) {
-    if (dialog?.open) return;
-    opener = event?.currentTarget || document.activeElement;
-    const l = labels(lang());
-    const source = [...root.querySelectorAll('.verse[data-verse]')].map(row => ({
-      chapter:Number(state.chapter), verse:Number(row.dataset.verse), text:row.querySelector('.verse-text')?.textContent?.trim() || '', selected:row.classList.contains('multi-selected')
-    })).filter(row => row.verse && row.text);
-    if (!source.length || !document.querySelector('#status')?.hidden) return;
-    const selected = source.filter(row => row.selected);
-    const book = window.BibleI18n?.bookName?.(Number(state.bookIndex)) || BOOKS[state.bookIndex]?.ko || '';
-    const chapter = state.chapter, version = document.querySelector('#translationSelect')?.selectedOptions[0]?.textContent || '';
+    if(dialog?.open)return;
+    opener=event?.currentTarget||document.activeElement;
+    const l=labels(lang()),chapter=Number(state.chapter);
+    const source=[...root.querySelectorAll('.verse[data-verse]')].map(row=>({chapter,verse:Number(row.dataset.verse),text:row.querySelector('.verse-text')?.textContent?.trim()||'',selected:row.classList.contains('multi-selected')})).filter(row=>row.verse&&row.text);
+    if(!source.length||!document.querySelector('#status')?.hidden)return;
+    const selected=source.filter(row=>row.selected),book=window.BibleI18n?.bookName?.(Number(state.bookIndex))||BOOKS[state.bookIndex]?.ko||'';
+    const version=document.querySelector('#translationSelect')?.selectedOptions[0]?.textContent||'';
     const chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
     const chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b);
-    const reference = rows => passageReference(book,rows);
-    dialog = el('dialog', 'memory-quiz'); dialog.id = 'memoryQuizDialog'; dialog.setAttribute('aria-labelledby','memoryQuizTitle');
-    const header = el('header','memory-header');
-    const title = el('h2','',l.title); title.id = 'memoryQuizTitle';
-    const closeButton = button(l.close,close,'memory-close'); header.append(title,closeButton);
-    const context = el('p','memory-context',`${book} · ${version}`);
-    const content = el('div','memory-content');
-    dialog.append(header,context,content);
-    document.body.append(dialog);
-    dialog.addEventListener('close',() => { const old = dialog; dialog = null; old.remove(); if (opener?.isConnected && opener.getClientRects().length) opener.focus(); else document.querySelector('#toolbarMoreToggle')?.focus(); });
-    dialog.addEventListener('click',e => { if(e.target === dialog) { const box=dialog.getBoundingClientRect(); if(e.clientX<box.left||e.clientX>box.right||e.clientY<box.top||e.clientY>box.bottom)close(); } });
-    let rows = [], practice = false, started = 0, multiChapter = false;
-    const rowReference = row => multiChapter?`${row.chapter}:${row.verse}`:String(row.verse);
-    function button(text,handler,className='') { const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b; }
-    function preview(target, items) { for(const row of items) { const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p); } }
-    function setup() {
-      content.replaceChildren(el('p','memory-intro',l.intro));
-      const fields=el('div','memory-fields');
-      const mode=el('select');mode.id='memoryMode';mode.setAttribute('aria-label',l.range);
-      if(selected.length) { const option=el('option','',`${l.selected} (${selected.length})`);option.value='selected';mode.append(option); }
-      const range=el('option','',l.range);range.value='range';mode.append(range);
-      const whole=el('option','',`${l.whole} (${source.length})`);whole.value='whole';mode.append(whole);
-      const multi=el('option','',l.multi);multi.value='chapters';mode.append(multi);
-      const modeLabel=el('label','',l.range);modeLabel.append(mode);fields.append(modeLabel);
-      const start=el('select'),end=el('select');start.id='memoryFrom';end.id='memoryTo';
-      for(const row of source)for(const select of [start,end]){const option=el('option','',String(row.verse));option.value=String(row.verse);select.append(option);}
-      end.value=String(source[0].verse);
-      const firstLabel=el('label','',l.from),lastLabel=el('label','',l.to);firstLabel.append(start);lastLabel.append(end);fields.append(firstLabel,lastLabel);
-      const chapterFields=el('div','memory-fields memory-chapter-fields');
+    const config={view:'verse',selected:!!selected.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
+    let rows=[],practice=false,started=0,session=null;
+    const reference=items=>passageReference(book,items);
+    const rowReference=row=>`${row.chapter}:${row.verse}`;
+    const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
+    dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
+    const header=el('header','memory-header'),title=el('h2','',l.title);title.id='memoryQuizTitle';header.append(title,button(l.close,close,'memory-close'));
+    const content=el('div','memory-content');dialog.append(header,el('p','memory-context',`${book} · ${version}`),content);document.body.append(dialog);
+    dialog.addEventListener('close',()=>{const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
+    dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
+    function preview(target,items){for(const row of items){const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p);}}
+    function gradeCard(row,answer,g){
+      const card=el('section','memory-result');card.append(el('h4','',`${rowReference(row)} · ${g.score}%`));
+      for(const [side,caption] of [['expected',l.expected],['entered',l.entered]]){
+        card.append(el('strong','memory-comparison-label',caption));const line=el('p','memory-diff');line.setAttribute('dir','auto');
+        const kinds=g.parts.flatMap(part=>Array.from(part[side]).map(()=>part.kind));let cursor=0;const runs=[];
+        for(const character of Array.from(String(side==='expected'?row.text:answer).normalize('NFC'))){
+          const length=Array.from(normalize(character)).length,kind=length?(kinds.slice(cursor,cursor+length).find(k=>k!=='correct')||'correct'):'correct';cursor+=length;
+          const last=runs.at(-1);if(last?.kind===kind)last.text+=character;else runs.push({kind,text:character});
+        }
+        for(const run of runs){const span=el('span',`memory-${run.kind}`,run.text);if(run.kind!=='correct')span.title=l[run.kind];line.append(span);}
+        if(!line.childNodes.length)line.textContent='—';card.append(line);
+      }
+      card.append(el('p','memory-counts',['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`).join(' · ')));return card;
+    }
+    function setup(){
+      content.replaceChildren();
+      const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
+      for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
+        const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
+        input.addEventListener('change',()=>{config.view=value;});label.append(input,document.createTextNode(text));views.append(label);
+      }
+      const range=el('details','memory-range'),rangeTitle=el('summary'),fields=el('div','memory-fields memory-chapter-fields');range.append(rangeTitle);
       const fromChapter=el('select'),toChapter=el('select'),fromVerse=el('select'),toVerse=el('select');
       fromChapter.id='memoryFromChapter';toChapter.id='memoryToChapter';fromVerse.id='memoryFromVerse';toVerse.id='memoryToVerse';
       for(const n of chapterNumbers)for(const select of [fromChapter,toChapter]){const option=el('option','',String(n));option.value=String(n);select.append(option);}
-      fromChapter.value=String(chapter);toChapter.value=String(chapterNumbers[Math.min(chapterNumbers.indexOf(Number(chapter))+1,chapterNumbers.length-1)]);
-      function fillVerses(chapterSelect,verseSelect,last=false){
-        const verses=passageRows(chapters,Number(chapterSelect.value),1,Number(chapterSelect.value),Number.MAX_SAFE_INTEGER);
-        verseSelect.replaceChildren();
-        for(const row of verses){const option=el('option','',String(row.verse));option.value=String(row.verse);verseSelect.append(option);}
-        if(last&&verses.length)verseSelect.value=String(verses[verses.length-1].verse);
+      fromChapter.value=String(config.fromChapter);toChapter.value=String(config.toChapter);
+      function fillVerses(chapterSelect,verseSelect,value,last=false){
+        const items=passageRows(chapters,Number(chapterSelect.value),1,Number(chapterSelect.value),Number.MAX_SAFE_INTEGER);verseSelect.replaceChildren();
+        for(const row of items){const option=el('option','',String(row.verse));option.value=String(row.verse);verseSelect.append(option);}
+        if(items.some(r=>r.verse===Number(value)))verseSelect.value=String(value);else if(last&&items.length)verseSelect.value=String(items.at(-1).verse);
       }
-      fillVerses(fromChapter,fromVerse);fillVerses(toChapter,toVerse,true);
-      for(const [text,select] of [[l.firstChapter,fromChapter],[l.from,fromVerse],[l.lastChapter,toChapter],[l.to,toVerse]]){const label=el('label','',text);label.append(select);chapterFields.append(label);}
-      const chapterScope=el('p','memory-rule',l.chapterScope);fields.append(chapterFields);
-      const previewTitle=el('h3','',l.preview), passage=el('div','memory-preview');
+      fillVerses(fromChapter,fromVerse,config.fromVerse);fillVerses(toChapter,toVerse,config.toVerse,true);
+      const useSelected=el('input');useSelected.type='checkbox';useSelected.checked=config.selected;useSelected.id='memoryUseSelected';
+      if(selected.length){const label=el('label','memory-use-selected');label.append(useSelected,document.createTextNode(`${l.selected} (${selected.length})`));range.append(label);}
+      for(const [text,select] of [[l.firstChapter,fromChapter],[l.from,fromVerse],[l.lastChapter,toChapter],[l.to,toVerse]]){const label=el('label','',text);label.append(select);fields.append(label);}
+      range.append(fields,el('p','memory-rule',l.chapterScope));
+      const study=el('details','memory-study'),studyTitle=el('summary','',l.preview),passage=el('div','memory-preview');study.append(studyTitle,passage);
       const summary=el('p','memory-reference');
-      const startButton=button(l.start,begin,'memory-primary');
-      function refresh() {
-        const useSelected=mode.value==='selected',useWhole=mode.value==='whole',useChapters=mode.value==='chapters';
-        firstLabel.hidden=lastLabel.hidden=useSelected||useWhole||useChapters;chapterFields.hidden=chapterScope.hidden=!useChapters;
-        rows=useSelected?selected:useWhole?source:useChapters?
-          passageRows(chapters,Number(fromChapter.value),Number(fromVerse.value),Number(toChapter.value),Number(toVerse.value)):
-          source.filter(row=>row.verse>=Number(start.value)&&row.verse<=Number(end.value));
-        multiChapter=rows.length>0&&rows[0].chapter!==rows[rows.length-1].chapter;
-        startButton.disabled=!rows.length;
-        summary.textContent=`${reference(rows)} · ${rows.length} ${l.count}`;
-        passage.replaceChildren();preview(passage,rows);
+      function refresh(){
+        config.selected=!!selected.length&&useSelected.checked;config.fromChapter=Number(fromChapter.value);config.toChapter=Number(toChapter.value);config.fromVerse=Number(fromVerse.value);config.toVerse=Number(toVerse.value);
+        for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected;
+        rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
+        summary.textContent=`${reference(rows)} · ${rows.length} ${l.count}`;rangeTitle.textContent=`${l.range} · ${reference(rows)}`;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
       }
-      start.addEventListener('change',()=>{if(Number(end.value)<Number(start.value))end.value=start.value;refresh();});
-      end.addEventListener('change',()=>{if(Number(start.value)>Number(end.value))start.value=end.value;refresh();});
-      fromChapter.addEventListener('change',()=>{
-        fillVerses(fromChapter,fromVerse);
-        if(Number(toChapter.value)<Number(fromChapter.value)){toChapter.value=fromChapter.value;fillVerses(toChapter,toVerse,true);}
-        if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;
-        refresh();
-      });
-      toChapter.addEventListener('change',()=>{
-        fillVerses(toChapter,toVerse,true);
-        if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse);}
-        if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;
-        refresh();
-      });
+      const startButton=button(l.start,begin,'memory-primary');
+      fromChapter.addEventListener('change',()=>{fillVerses(fromChapter,fromVerse,1);if(Number(toChapter.value)<Number(fromChapter.value)){toChapter.value=fromChapter.value;fillVerses(toChapter,toVerse,null,true);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
+      toChapter.addEventListener('change',()=>{fillVerses(toChapter,toVerse,null,true);if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse,1);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
-      toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
-      mode.addEventListener('change',refresh);
-      content.append(fields,chapterScope,previewTitle,summary,passage,el('p','memory-rule',l.rule),startButton,el('p','memory-privacy',l.privacy));refresh();
+      toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
+      content.append(views,summary,range,study,el('p','memory-rule',l.rule),startButton,el('p','memory-privacy',l.privacy));refresh();dialog.scrollTop=0;
     }
-    function begin() {
-      practice=false;started=performance.now();
-      content.replaceChildren(el('p','memory-reference',`${l.reference} · ${reference(rows)}`),el('p','memory-rule',l.rule));
-      const progress=el('p','memory-progress',`${l.progress} 0 / ${rows.length}`);
-      const form=el('div','memory-answers');
-      const answered=new Set();
-      const inputs=rows.map((row,index)=>{
-        const label=el('label','memory-answer-label',`${rowReference(row)} · ${l.answer}`),input=el('textarea','memory-answer');
-        input.rows=3;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
-        input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');
-        input.dataset.verse=String(row.verse);input.dataset.chapter=String(row.chapter);label.append(input);form.append(label);
-        input.addEventListener('input',()=>{if(normalize(input.value))answered.add(index);else answered.delete(index);progress.textContent=`${l.progress} ${answered.size} / ${rows.length}`;error.hidden=true;});
-        return input;
-      });
+    function begin(){practice=false;started=performance.now();session=createSession(rows,config.view);showUnit();}
+    function showUnit(){
+      const items=session.current;content.replaceChildren(el('p','memory-reference',reference(items.map(item=>item.row))));
+      content.append(el('p','memory-progress',`${session.index+1} / ${session.unitCount}`),el('p','memory-key-help',config.view==='verse'?l.enterHelp:l.chapterHelp));
+      const practiceLabel=el('p','memory-practice',l.practice);practiceLabel.hidden=!practice;
+      const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
       const revealed=el('div','memory-preview');revealed.hidden=true;
-      const practiceLabel=el('p','memory-practice');practiceLabel.hidden=true;
-      const peek=button(l.peek,()=>{
-        practice=true;practiceLabel.hidden=false;practiceLabel.textContent=l.practice;
-        revealed.hidden=!revealed.hidden;revealed.replaceChildren();
-        if(!revealed.hidden)preview(revealed,rows);peek.textContent=revealed.hidden?l.peek:l.hide;
-      },'memory-peek');
-      const actions=el('div','memory-actions');
-      actions.append(button(l.check,()=>{
-        if(!inputs.some(input=>normalize(input.value))){error.textContent=l.empty;error.hidden=false;inputs[0]?.focus();return;}
-        results(inputs.map(input=>input.value));
-      },'memory-primary'),peek,button(l.change,setup));
-      content.append(progress,practiceLabel,form,error,actions,revealed,el('p','memory-privacy',l.privacy));
-      dialog.scrollTop=0;inputs[0]?.focus({preventScroll:true});
-    }
-    function results(answers) {
-      const grades=rows.map((row,i)=>grade(row.text,answers[i]));
-      const units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0);
-      const exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
-      content.replaceChildren(el('h3','',practice?l.practice:l.result),el('p','memory-reference',reference(rows)));
-      const result=el('p','memory-score',`${score}%`);result.setAttribute('aria-label',`${l.score} ${score}%`);content.append(result);
-      content.append(el('p','memory-verdict',exact?l.perfect:l.tryAgain),el('p','memory-rule',`${Math.round((performance.now()-started)/1000)} ${l.time} · ${l.rule}`));
-      const list=el('div','memory-results');
-      grades.forEach((g,i)=>{
-        const card=el('section','memory-result');card.append(el('h4','',`${rowReference(rows[i])} · ${g.score}%`));
-        for(const [side,caption] of [['expected',l.expected],['entered',l.entered]]){
-          card.append(el('strong','memory-comparison-label',caption));
-          const line=el('p','memory-diff');line.setAttribute('dir','auto');
-          // Grade normalized characters but show the original readable spacing/punctuation.
-          const kinds=g.parts.flatMap(part=>Array.from(part[side]).map(()=>part.kind));
-          let cursor=0;const runs=[];
-          for(const character of Array.from(String(side==='expected'?rows[i].text:answers[i]).normalize('NFC'))){
-            const length=Array.from(normalize(character)).length;
-            const kind=length?(kinds.slice(cursor,cursor+length).find(value=>value!=='correct')||'correct'):'correct';cursor+=length;
-            const last=runs[runs.length-1];if(last?.kind===kind)last.text+=character;else runs.push({kind,text:character});
-          }
-          for(const run of runs){const span=el('span',`memory-${run.kind}`,run.text);if(run.kind!=='correct')span.title=l[run.kind];line.append(span);}
-          if(!line.childNodes.length)line.textContent='—';card.append(line);
-        }
-        const counts=['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`);
-        card.append(el('p','memory-counts',counts.join(' · ')));list.append(card);
+      const primary=button(l.checkAnswer,act,'memory-primary');
+      const inputs=items.map(({row})=>{
+        const label=el('label','memory-answer-label',`${rowReference(row)} · ${l.answer}`),input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:3;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
+        input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(input);form.append(label);
+        let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
+        input.addEventListener('input',()=>{session.invalidate();feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';});
+        input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
-      const actions=el('div','memory-actions');const retry=button(l.retry,begin,'memory-primary');actions.append(retry,button(l.change,setup));content.append(actions,list);dialog.scrollTop=0;retry.focus({preventScroll:true});
+      primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
+      function act(){
+        if(session.canAdvance){session.advance();if(session.done)results(session.firstAnswers);else showUnit();return;}
+        const values=inputs.map(input=>input.value),checked=session.check(values);
+        if(checked.empty){error.textContent=l.empty;error.hidden=false;inputs[0]?.focus();return;}
+        feedback.replaceChildren();feedback.dataset.correct=String(checked.correct);
+        if(checked.correct){
+          const next=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;
+          primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',`${l.correct} ${next}${config.view==='verse'?' · Enter':''}`));
+        }else{feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
+      }
+      const peek=button(l.peek,()=>{practice=true;practiceLabel.hidden=false;revealed.hidden=!revealed.hidden;revealed.replaceChildren();if(!revealed.hidden)preview(revealed,items.map(item=>item.row));peek.textContent=revealed.hidden?l.peek:l.hide;},'memory-peek');
+      const actions=el('div','memory-actions');actions.append(primary,peek,button(l.change,setup));
+      content.append(practiceLabel,form,error,feedback,actions,revealed,el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));dialog.scrollTop=0;inputs[0]?.focus({preventScroll:true});
+    }
+    function results(answers){
+      const grades=rows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
+      content.replaceChildren(el('h3','',practice?l.practice:l.result),el('p','memory-reference',reference(rows)));
+      const result=el('p','memory-score',`${score}%`);result.setAttribute('aria-label',`${l.score} ${score}%`);content.append(result,el('p','memory-rule',l.firstCheck),el('p','memory-verdict',exact?l.perfect:l.tryAgain),el('p','memory-rule',`${Math.round((performance.now()-started)/1000)} ${l.time}`));
+      const actions=el('div','memory-actions'),retry=button(l.retry,begin,'memory-primary');actions.append(retry,button(l.change,setup));content.append(actions);
+      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(rows[i],answers[i],g)));content.append(list);dialog.scrollTop=0;retry.focus({preventScroll:true});
     }
     setup();dialog.showModal();
   }
+
   function entry(className) {const b=el('button',className,labels(lang()).title);b.type='button';b.addEventListener('click',open);return b;}
   const menuButton=entry('memory-menu-button');menu.append(menuButton);
   const bar=document.querySelector('.verse-multi-actions');if(bar)bar.insertBefore(entry('verse-multi-memory'),bar.querySelector('.verse-multi-done'));

@@ -9,6 +9,18 @@
 .memory-context{margin:16px 22px 0;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
 .memory-content{padding:0 22px 24px;line-height:1.65}
 .memory-intro{margin:12px 0 20px}
+.memory-views{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;margin:18px 0;padding:0;border:0}
+.memory-views legend{margin-bottom:8px;font-size:14px;font-weight:650}
+.memory-views label{box-sizing:border-box;display:flex;align-items:center;gap:8px;min-height:52px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:14px;line-height:1.5;cursor:pointer;overflow-wrap:anywhere}
+.memory-views label:has(input:checked){border-color:var(--text);background:var(--hover);font-weight:700}
+.memory-views input{flex:none;margin:0;accent-color:var(--text)}
+.memory-range,.memory-study{margin:12px 0;border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.memory-range summary,.memory-study summary{box-sizing:border-box;min-height:44px;padding:10px 0;font-size:14px;cursor:pointer;overflow-wrap:anywhere}
+.memory-range[open],.memory-study[open]{padding-bottom:12px}
+.memory-use-selected{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}
+.memory-key-help{font-size:14px;line-height:1.7;color:var(--muted)}
+.memory-correct{padding:10px 12px;border-inline-start:3px solid var(--text);background:var(--hover);font-weight:650}
+.memory-feedback{margin-top:16px}
 .memory-fields{display:flex;gap:12px;flex-wrap:wrap}
 .memory-fields label{display:grid;gap:6px;flex:1 1 105px;font-size:14px;font-weight:650}
 .memory-fields label:first-child{flex-basis:100%}
