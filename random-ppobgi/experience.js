@@ -3,6 +3,7 @@
 const PROD='https://random-ppobgi.pages.dev';
 const LEGACY='gsh4124-cyber.github.io';
 const SETS_KEY='random-picker-saved-sets-v1';
+const CONFIGS_KEY='random-picker-config-sets-v1';
 const RESULTS_KEY='random-picker-recent-results-v1';
 const MAX_SETS=12,MAX_RESULTS=12;
 const LANGS=['ko','en','ja','es','zh','fr','de','pt','id','hi','pl','it','nl','tr','vi','th','ar'];
@@ -28,7 +29,7 @@ ar:{save:'حفظ القائمة',sets:'القوائم المحفوظة',load:'ت
 const lang=()=>{const raw=String(window.__RANDOM_PICKER_LANG__||document.documentElement.lang||'ko').toLowerCase().split('-')[0];return LANGS.includes(raw)?raw:'en'};
 const t=()=>TEXT[lang()]||TEXT.en;
 const read=(key,fallback=[])=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return Array.isArray(v)?v:fallback}catch{return fallback}};
-const write=(key,v)=>{try{localStorage.setItem(key,JSON.stringify(v))}catch{}};
+const write=(key,v)=>{try{localStorage.setItem(key,JSON.stringify(v));return true}catch{return false}};
 const byId=id=>document.getElementById(id);
 const names=()=>byId('names');
 const resultBlock=()=>byId('resultBlock');
@@ -75,6 +76,46 @@ function enhanceNameSets(){const foot=document.querySelector('#nameMode .namefoo
  byId('loadSetBtn').addEventListener('click',()=>{const i=Number(select.value);if(!Number.isInteger(i)||select.value==='')return;const set=read(SETS_KEY)[i];if(!set)return;names().value=set.value;names().dispatchEvent(new Event('input',{bubbles:true}))});
  byId('deleteSetBtn').addEventListener('click',()=>{const i=Number(select.value);if(!Number.isInteger(i)||select.value==='')return;const sets=read(SETS_KEY);sets.splice(i,1);write(SETS_KEY,sets);refresh()});refresh();
 }
+const CONFIG_KEYS=['title','save','name','loaded','error','hint','empty'];
+const CONFIG_TEXT={
+ko:['설정 세트','설정 저장','설정 이름','불러옴','설정을 저장하거나 불러오지 못했습니다.','이 브라우저에 최대 12개 저장됩니다.','저장된 설정 없음'],
+en:['Saved setups','Save setup','Setup name','Loaded','Could not save or load this setup.','Up to 12 setups are saved in this browser.','No saved setups'],
+ja:['設定セット','設定を保存','設定名','読み込み済み','設定を保存または読み込めませんでした。','このブラウザーに最大12件保存します。','保存した設定なし'],
+es:['Configuraciones','Guardar','Nombre de configuración','Cargada','No se pudo guardar o cargar la configuración.','Se guardan hasta 12 configuraciones en este navegador.','Sin configuraciones guardadas'],
+zh:['设置组合','保存设置','设置名称','已载入','无法保存或载入此设置。','最多在此浏览器保存12组设置。','暂无已保存设置'],
+fr:['Configurations','Enregistrer','Nom de la configuration','Chargée','Impossible d’enregistrer ou de charger cette configuration.','Jusqu’à 12 configurations sont conservées dans ce navigateur.','Aucune configuration enregistrée'],
+de:['Gespeicherte Einstellungen','Speichern','Name der Einstellung','Geladen','Diese Einstellung konnte nicht gespeichert oder geladen werden.','Bis zu 12 Einstellungen werden in diesem Browser gespeichert.','Keine gespeicherten Einstellungen'],
+pt:['Configurações','Salvar configuração','Nome da configuração','Carregada','Não foi possível salvar ou carregar esta configuração.','Até 12 configurações são salvas neste navegador.','Nenhuma configuração salva'],
+id:['Setelan tersimpan','Simpan setelan','Nama setelan','Dimuat','Setelan tidak dapat disimpan atau dimuat.','Hingga 12 setelan disimpan di browser ini.','Belum ada setelan tersimpan'],
+hi:['सहेजी गई सेटिंग','सेटिंग सहेजें','सेटिंग का नाम','लोड हो गई','सेटिंग सहेजी या लोड नहीं हो सकी।','इस ब्राउज़र में अधिकतम 12 सेटिंग सहेजी जाती हैं।','कोई सहेजी गई सेटिंग नहीं'],
+pl:['Zapisane ustawienia','Zapisz ustawienia','Nazwa ustawień','Wczytano','Nie udało się zapisać lub wczytać ustawień.','W tej przeglądarce zapisuje się do 12 zestawów.','Brak zapisanych ustawień'],
+it:['Configurazioni','Salva','Nome configurazione','Caricata','Impossibile salvare o caricare questa configurazione.','Fino a 12 configurazioni vengono salvate in questo browser.','Nessuna configurazione salvata'],
+nl:['Opgeslagen instellingen','Opslaan','Naam van instellingen','Geladen','Deze instellingen konden niet worden opgeslagen of geladen.','Maximaal 12 instellingen worden in deze browser opgeslagen.','Geen opgeslagen instellingen'],
+tr:['Kayıtlı ayarlar','Ayarları kaydet','Ayar adı','Yüklendi','Bu ayarlar kaydedilemedi veya yüklenemedi.','Bu tarayıcıda en fazla 12 ayar saklanır.','Kayıtlı ayar yok'],
+vi:['Bộ cài đặt','Lưu cài đặt','Tên bộ cài đặt','Đã tải','Không thể lưu hoặc tải bộ cài đặt này.','Lưu tối đa 12 bộ cài đặt trong trình duyệt này.','Chưa có bộ cài đặt'],
+th:['ชุดการตั้งค่า','บันทึกการตั้งค่า','ชื่อชุดการตั้งค่า','โหลดแล้ว','ไม่สามารถบันทึกหรือโหลดการตั้งค่านี้ได้','บันทึกได้สูงสุด 12 ชุดในเบราว์เซอร์นี้','ยังไม่มีชุดการตั้งค่าที่บันทึกไว้'],
+ar:['الإعدادات المحفوظة','حفظ الإعدادات','اسم الإعدادات','تم التحميل','تعذر حفظ هذه الإعدادات أو تحميلها.','تُحفظ حتى 12 مجموعة إعدادات في هذا المتصفح.','لا توجد إعدادات محفوظة']
+};
+function enhanceConfigSets(){
+ const api=window.RandomPickerSettings,anchor=byId('pickBtn')?.parentElement;if(!api||!anchor||byId('pickerConfigSets'))return;
+ const c=Object.fromEntries(CONFIG_KEYS.map((key,i)=>[key,(CONFIG_TEXT[lang()]||CONFIG_TEXT.en)[i]]));
+ const panel=document.createElement('details');panel.id='pickerConfigSets';panel.className='picker-config-sets';
+ const summary=document.createElement('summary');summary.textContent=c.title;
+ const row=document.createElement('div');row.className='picker-config-row';
+ const select=document.createElement('select');select.id='pickerConfigSelect';select.setAttribute('aria-label',c.title);select.setAttribute('translate','no');
+ const makeButton=(id,text)=>{const b=document.createElement('button');b.id=id;b.type='button';b.textContent=text;return b;};
+ const save=makeButton('savePickerConfig',c.save),load=makeButton('loadPickerConfig',t().load),remove=makeButton('deletePickerConfig',t().del);
+ const hint=document.createElement('p');hint.textContent=c.hint;const status=document.createElement('p');status.id='pickerConfigStatus';status.setAttribute('role','status');
+ row.append(select,save,load,remove);panel.append(summary,row,hint,status);anchor.prepend(panel);
+ const sets=()=>read(CONFIGS_KEY).filter(x=>x&&typeof x.name==='string'&&x.name&&x.settings&&typeof x.settings==='object');
+ function refresh(selected=select.value){select.replaceChildren();const items=sets(),empty=document.createElement('option');empty.value='';empty.textContent=items.length?c.title:c.empty;select.append(empty);for(const item of items){const option=document.createElement('option');option.value=item.name;option.textContent=item.name;select.append(option);}select.value=items.some(x=>x.name===selected)?selected:'';load.disabled=remove.disabled=!select.value;}
+ select.addEventListener('change',()=>{load.disabled=remove.disabled=!select.value;status.textContent='';});
+ save.addEventListener('click',()=>{const name=(prompt(c.name,select.value||`${c.title} ${sets().length+1}`)||'').trim();if(!name)return;const settings=api.capture();if(!api.validate(settings)){status.textContent=c.error;return;}const items=sets().filter(x=>x.name!==name);items.unshift({name,settings,at:Date.now()});if(!write(CONFIGS_KEY,items.slice(0,MAX_SETS))){status.textContent=c.error;return;}refresh(name);status.textContent=t().saved;});
+ load.addEventListener('click',()=>{const item=sets().find(x=>x.name===select.value);status.textContent=item&&api.apply(item.settings)?c.loaded:c.error;});
+ remove.addEventListener('click',()=>{if(!select.value)return;if(!write(CONFIGS_KEY,sets().filter(x=>x.name!==select.value))){status.textContent=c.error;return;}refresh('');status.textContent='';});
+ window.addEventListener('storage',event=>{if(event.key===CONFIGS_KEY)refresh();});refresh();
+ const style=document.createElement('style');style.textContent='.picker-config-sets{margin:14px 0;border:1px solid var(--line);border-radius:12px;padding:0 12px}.picker-config-sets summary{cursor:pointer;min-height:44px;box-sizing:border-box;padding:12px 0;font-size:14px;font-weight:800}.picker-config-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}.picker-config-row select{grid-column:1/-1;width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--soft2);font:inherit;font-size:16px;padding:8px}.picker-config-row button{min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);font:inherit;font-size:13px;font-weight:800;white-space:normal;overflow-wrap:anywhere;padding:8px}.picker-config-row button:disabled{opacity:.5;cursor:default}.picker-config-sets p{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 0}.picker-config-sets p:empty{display:none}';panel.append(style);
+}
 function enhanceResults(){const block=resultBlock();if(!block||byId('pickerResultTools'))return;const tools=document.createElement('div');tools.id='pickerResultTools';tools.className='picker-result-tools';tools.innerHTML=`<button class="again" id="copyPickerResult" type="button">${t().copy}</button><button class="again" id="sharePickerResult" type="button">${t().share}</button>`;block.append(tools);
  const history=document.createElement('section');history.className='picker-history';history.innerHTML=`<div class="picker-history-head"><h3>${t().recent}</h3><button class="picker-mini-btn" id="clearPickerHistory" type="button">${t().clear}</button></div><div class="picker-history-list" id="pickerHistoryList"></div>`;block.after(history);const list=byId('pickerHistoryList');renderHistory(list);
  byId('copyPickerResult').addEventListener('click',async()=>{if(await copy(currentResultText()))toast(t().copied)});
@@ -98,6 +139,6 @@ function enhanceRecording(){
  button.addEventListener('click',()=>{if(recorder?.state==='recording')recorder.stop();else startRecording(button)});
  row.append(button);card.after(row);
 }
-function init(){css();enhanceNameSets();enhanceResults();enhanceRecording()}
+function init(){css();enhanceNameSets();enhanceConfigSets();enhanceResults();enhanceRecording()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

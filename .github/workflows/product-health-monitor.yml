@@ -213,6 +213,18 @@ jobs:
         if: steps.changed.outputs.projects != ''
         with:
           node-version: 22
+      - name: Prefer canonical HTTPS Ubuntu archive
+        if: steps.changed.outputs.projects != ''
+        run: |
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          mirrors = Path('/etc/apt/apt-mirrors.txt')
+          if mirrors.exists():
+              text = mirrors.read_text()
+              for scheme in ('http', 'https'):
+                  text = text.replace(f'{scheme}://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+              mirrors.write_text(text)
+          PY
       - name: Install supported Playwright Chromium
         if: steps.changed.outputs.projects != ''
         run: |
@@ -227,6 +239,11 @@ jobs:
       - name: Random Picker saved results and reroll regression
         if: contains(steps.changed.outputs.projects, 'random-ppobgi')
         run: node random-ppobgi/tests/experience-browser-smoke.mjs
+      - name: Random Picker saved setup restoration and legacy data preservation
+        if: contains(steps.changed.outputs.projects, 'random-ppobgi')
+        env:
+          SETTINGS_TEST_EVIDENCE: random-ppobgi/qa_evidence/live/settings
+        run: node random-ppobgi/tests/settings-browser-smoke.mjs
       - name: Bible Reader production navigation and multilingual interactions
         if: contains(steps.changed.outputs.projects, 'bible-reader')
         run: node bible-reader/tools/production-smoke.mjs

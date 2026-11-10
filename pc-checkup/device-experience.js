@@ -82,10 +82,17 @@ function statusGuidance(stats){
   if(stats.unknown)hints.push(t.unknownHint);
   return hints.join(' ')||t.doneHint;
 }
-function summaryText(kind,stats,manual){
+function summaryText(kind,state,manual){
+  const tests=kind==='pc'?PC_TESTS:MOBILE_TESTS,stats=count(state,tests);
   const title=`DEVICE CHECKUP · ${kind==='pc'?t.pcTitle:t.mobileTitle}`;
   const checked=Object.values(manual).filter(Boolean).length;
-  return `${title}\n${t.ok} ${stats.ok} · ${t.bad} ${stats.bad} · ${t.unknown} ${stats.unknown}\n${statusGuidance(stats)}\n${t.manual} ${checked}/${manualLabels[kind].length}\n${new Date().toLocaleString(language)}`;
+  const details=tests.map(id=>{
+    const row=document.querySelector(kind==='pc'?`[data-id="${id}"]`:`[data-test-card="${id}"]`);
+    const label=(row?.querySelector('h3')?.textContent||id).replace(/^\s*\d+[.)、]\s*/,'').trim();
+    const status=state[id]==='ok'?t.ok:state[id]==='bad'?t.bad:t.unknown;
+    return `${label}: ${status}`;
+  });
+  return [title,`${t.ok} ${stats.ok} · ${t.bad} ${stats.bad} · ${t.unknown} ${stats.unknown}`,'',...details,'',statusGuidance(stats),`${t.manual} ${checked}/${manualLabels[kind].length}`,new Date().toLocaleString(language)].join('\n');
 }
 function buildCard(kind,getState,tests,anchor){
   if(document.querySelector(`[data-device-experience="${kind}"]`))return ()=>{};
@@ -101,8 +108,8 @@ function buildCard(kind,getState,tests,anchor){
     try{const ok=await copyText(text);card.querySelector('[data-copy-status]').textContent=ok?t.copied:t.copyFailed;}
     finally{copyButton.disabled=false;}
   }
-  copyButton.addEventListener('click',()=>copyWithFeedback(summaryText(kind,render(),manual)));
-  card.querySelector('[data-share]').addEventListener('click',async()=>{const text=summaryText(kind,render(),manual);if(navigator.share){try{await navigator.share({title:t.resultTitle,text,url:location.href});return;}catch(e){if(e?.name==='AbortError')return;}}await copyWithFeedback(`${text}\n${location.href}`);});
+  copyButton.addEventListener('click',()=>{render();return copyWithFeedback(summaryText(kind,getState(),manual));});
+  card.querySelector('[data-share]').addEventListener('click',async()=>{render();const text=summaryText(kind,getState(),manual);if(navigator.share){try{await navigator.share({title:t.resultTitle,text,url:location.href});return;}catch(e){if(e?.name==='AbortError')return;}}await copyWithFeedback(`${text}\n${location.href}`);});
   anchor.parentNode.insertBefore(card,anchor);
   document.addEventListener('click',e=>{if(e.target.closest('.pill,[data-result]'))setTimeout(render,0);});
   render();

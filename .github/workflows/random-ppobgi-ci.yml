@@ -80,6 +80,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Prefer canonical HTTPS Ubuntu archive
+        run: |
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          mirrors = Path('/etc/apt/apt-mirrors.txt')
+          if mirrors.exists():
+              text = mirrors.read_text()
+              for scheme in ('http', 'https'):
+                  text = text.replace(f'{scheme}://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+              mirrors.write_text(text)
+          PY
       - name: Install Playwright Chromium
         run: |
           npm install --no-save playwright@1.55.0
@@ -103,6 +114,10 @@ jobs:
           echo 'Supabase telemetry public boundary verified without storing QA events'
       - name: Run multilingual browser smoke
         run: node tests/i18n-browser-smoke.mjs
+      - name: Verify saved setups and legacy lists
+        env:
+          SETTINGS_TEST_BASE: http://127.0.0.1:4173
+        run: node tests/settings-browser-smoke.mjs
       - name: Check public production in desktop and mobile Chrome
         if: ${{ !cancelled() }}
         timeout-minutes: 3

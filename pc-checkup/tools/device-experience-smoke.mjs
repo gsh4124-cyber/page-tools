@@ -1,8 +1,8 @@
 import { chromium } from 'playwright';
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
-const proofDir=new URL('../qa_evidence/live/',import.meta.url);
+const proofDir=process.env.DEVICE_TEST_EVIDENCE?pathToFileURL(process.env.DEVICE_TEST_EVIDENCE.replace(/\\/g,'/')+'/'):new URL('../qa_evidence/live/',import.meta.url);
 await mkdir(proofDir,{recursive:true});
 const base=process.env.DEVICE_TEST_BASE||'https://pc-checkup.pages.dev';
 const browser=await chromium.launch({headless:true});
@@ -19,6 +19,8 @@ await crawlerContext.close();
 const locales=['ko','en','ja','es','de','fr','pt','it','nl','id','vi','zh-CN','ru'];
 for(const locale of locales){
   const context=await browser.newContext({viewport:{width:390,height:844},locale:locale==='ko'?'ko-KR':locale,permissions:['clipboard-read','clipboard-write']});
+  await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
+  await context.addInitScript(()=>{Object.defineProperty(navigator,'share',{configurable:true,value:async data=>{window.__sharedDeviceReport=data;}});});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',error=>{
     const stack=error.stack||'';
@@ -32,6 +34,16 @@ for(const locale of locales){
   assert.equal(await card.locator('[data-manual]').count(),6,locale+' PC manual items');
   await page.locator('[data-id="keyboard"] .pill.ok').click();
   await page.waitForFunction(()=>document.querySelector('[data-device-experience="pc"] [data-x="ok"]').textContent==='1');
+  await page.locator('[data-id="mouse"] .pill.bad').click();
+  const pcLabels=await page.locator('#checklist [data-id] h3').allTextContents();
+  const pcStates=await Promise.all(['ok','bad','unknown'].map(key=>card.locator(`[data-x="${key}"] + span`).textContent()));
+  await card.locator('[data-copy]').click();
+  await page.waitForFunction(()=>Boolean(document.querySelector('[data-copy-status]')?.textContent));
+  const pcReport=(await page.evaluate(()=>navigator.clipboard.readText())).replace(/\r\n/g,'\n');
+  pcLabels.forEach((label,i)=>assert(pcReport.includes(`${label.replace(/^\s*\d+[.)、]\s*/,'').trim()}: ${pcStates[i===0?0:i===1?1:2]}`),locale+' PC per-item report'));
+  await card.locator('[data-share]').click();
+  const pcShared=await page.evaluate(()=>window.__sharedDeviceReport);
+  assert(pcShared?.text.includes(pcReport.split('\n').slice(0,-1).join('\n')),locale+' native share gets detailed report '+JSON.stringify({copy:pcReport,share:pcShared?.text}));
   if(locale==='ko'||locale==='en'){
     await card.locator('[data-copy]').click();
     await page.waitForFunction(()=>Boolean(document.querySelector('[data-copy-status]').textContent));
@@ -49,6 +61,15 @@ for(const locale of locales){
   await page.waitForFunction(()=>document.querySelector('#nextMobileCheck').dataset.target==='display');
   assert.equal(await page.locator('[data-device-experience="mobile"] [data-x="ok"]').textContent(),'1');
   assert.equal(await page.locator('[data-device-experience="mobile"] [data-manual]').count(),6);
+  await page.locator('[data-test="display"] [data-result="bad"]').click();
+  const mobileCard=page.locator('[data-device-experience="mobile"]'),mobileLabels=await page.locator('[data-test-card] h3').allTextContents();
+  const mobileStates=await Promise.all(['ok','bad','unknown'].map(key=>mobileCard.locator(`[data-x="${key}"] + span`).textContent()));
+  await mobileCard.locator('[data-copy]').click();
+  await page.waitForFunction(()=>Boolean(document.querySelector('[data-device-experience="mobile"] [data-copy-status]')?.textContent));
+  const mobileReport=(await page.evaluate(()=>navigator.clipboard.readText())).replace(/\r\n/g,'\n');
+  mobileLabels.forEach((label,i)=>assert(mobileReport.includes(`${label.replace(/^\s*\d+[.)、]\s*/,'').trim()}: ${mobileStates[i===0?0:i===1?1:2]}`),locale+' mobile per-item report'));
+  await mobileCard.locator('[data-share]').click();assert((await page.evaluate(()=>window.__sharedDeviceReport?.text)).includes(mobileReport.split('\n').slice(0,-1).join('\n')),locale+' mobile detailed native share');
+  await writeFile(new URL(`${locale}-shared-reports.json`,proofDir),JSON.stringify({locale,pc:pcReport,mobile:mobileReport,native_share_simulated:true,physical_device_tested:false},null,2));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),true,locale+' overflow');
   assert.deepEqual(errors,[],locale+' runtime errors');
   await context.close();

@@ -17,4 +17,16 @@ for(const qa of [true,false]){
   vm.runInNewContext(tracking+`;track('pc_start');track('pc_complete');track('pc_complete');`,sandbox);
   assert.deepEqual(calls,qa?[]:[{event:'pc_start'},{event:'pc_complete'}]);
 }
-console.log('Experience regression PASS: 13 locale catalogs, 6+6 manual checks, explicit QA exclusion and deduplicated anonymous events.');
+const pcTests=['keyboard','mouse','display','speaker','mic','webcam'],mobileTests=['touch','display','camera','mic','speaker','motion'];
+const summaryCode=source.slice(source.indexOf('const count='),source.indexOf('function track('))+source.slice(source.indexOf('function statusGuidance('),source.indexOf('function buildCard('));
+for(const language of languages)for(const kind of ['pc','mobile']){
+  const tests=kind==='pc'?pcTests:mobileTests,state={[tests[0]]:'ok',[tests[1]]:'bad',[tests[2]]:'blocked'};
+  const t=Object.fromEntries(catalog.TEXT_KEYS.map((key,i)=>[key,catalog.TEXT[language][i]]));
+  const api=vm.runInNewContext(summaryCode+';({summaryText})',{PC_TESTS:pcTests,MOBILE_TESTS:mobileTests,t,manualLabels:catalog.MANUAL_TEXT[language],language,document:{querySelector:selector=>({querySelector:()=>({textContent:`1. label-${selector.match(/="([^\"]+)/)[1]}`})})}});
+  const text=api.summaryText(kind,state,{0:true});
+  tests.forEach((id,i)=>assert(text.includes(`label-${id}: ${i===0?t.ok:i===1?t.bad:t.unknown}`),`${language} ${kind} ${id} status`));
+  assert.equal(text.split('\n').filter(line=>line.startsWith('label-')).length,6);
+  assert(text.indexOf(`label-${tests[0]}`)<text.indexOf(`label-${tests[5]}`));
+  assert.equal(state[tests[2]],'blocked','Unknown input must not be changed or promoted to OK');
+}
+console.log('Experience regression PASS: 13 locale catalogs, PC/mobile six-item shared reports, unknown handling, manual checks and anonymous QA-safe events.');
