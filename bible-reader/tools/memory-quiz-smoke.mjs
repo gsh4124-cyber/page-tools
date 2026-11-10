@@ -163,10 +163,8 @@ try{
     assert((await first.boundingBox()).height>small.height,'Chapter input must grow to fit typed text');
     await first.fill(firstAnswer);await first.press('Tab');assert(await second.evaluate(n=>document.activeElement===n),'Tab should move directly to the next verse');
     await second.fill(await answerFor(page,3,2));assert.equal(await dialog.locator('.memory-meter').getAttribute('value'),'2');
-    await dialog.locator('.memory-hint').click();
-    assert.equal(await dialog.locator('.memory-inline-hint').count(),1,'Hint should only reveal the active verse');
-    assert.equal(await second.locator('..').locator('.memory-inline-hint').count(),1);
-    assert(await dialog.locator('.memory-practice').isVisible());assert(await second.evaluate(n=>document.activeElement===n));
+    assert.equal(await dialog.locator('.memory-hint,.memory-inline-hint').count(),0,'Hints are not part of the test');
+    assert(await dialog.locator('.memory-practice').isHidden());assert(await second.evaluate(n=>document.activeElement===n));
     const dockBefore=await dialog.locator('.memory-dock').boundingBox();assert(dockBefore.width>=(await dialog.boundingBox()).width-4,'Controls must span the dialog width');
     await dialog.locator('.memory-content').evaluate(n=>{n.scrollTop=n.scrollHeight;});
     const dockAfter=await dialog.locator('.memory-dock').boundingBox();assert.equal(dockBefore.y,dockAfter.y,'Dock must remain visible during chapter scrolling');
@@ -182,20 +180,20 @@ try{
       await dialog.locator('textarea').last().focus();await page.keyboard.press('a');assert(await primary.isVisible());
       await page.screenshot({path:path.join(output,`chapter-reduced-height-${width}.png`)});
     }
-    assert.deepEqual(errors,[]);observations.push({width,flow:'compact/growing chapter inputs, Tab focus, filled progress, active verse hint/practice, pinned controls, hover contrast, reduced viewport',pass:true});await context.close();
+    assert.deepEqual(errors,[]);observations.push({width,flow:'compact/growing chapter inputs, Tab focus, filled progress, no hints, pinned controls, hover contrast, reduced viewport',pass:true});await context.close();
   }
   {
     const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
     await setRange(page,3,1,3,2);await dialog.locator('.memory-primary').click();
-    await dialog.locator('.memory-hint').click();assert(await dialog.locator('.memory-practice').isVisible());
-    for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');if(i===0)assert.equal(await dialog.locator('.memory-inline-hint').count(),0,'Hint must not leak into next verse');}
-    assert((await dialog.locator('h3').textContent()).includes('연습'),'Hint-assisted attempt must stay marked practice at the end');
+    assert.equal(await dialog.locator('.memory-hint,.memory-inline-hint').count(),0);
+    for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');}
+    assert(!(await dialog.locator('h3').textContent()).includes('연습'),'Unaided attempt remains a test');
     await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-inline-hint').count(),0);assert(await dialog.locator('.memory-practice').isHidden());
     await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.keyboard.press('f');
     assert(await page.locator('body').evaluate(n=>n.classList.contains('reader-focus')));
     await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
     await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock').isVisible(),'Reader focus mode must not hide quiz controls');assert(await dialog.locator('.memory-primary').isVisible());
-    assert.deepEqual(errors,[]);observations.push({flow:'hint-assisted verse flow, next-verse privacy, practice result, clean retry',pass:true});await context.close();
+    assert.deepEqual(errors,[]);observations.push({flow:'unaided verse flow, test result, clean retry, reader focus mode',pass:true});await context.close();
   }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);

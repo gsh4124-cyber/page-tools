@@ -68,11 +68,6 @@
       advance(){if(!correct||index>=units.length)return false;index++;correct=false;return true;}
     };
   }
-  function startHint(value) {
-    const text=String(value||'').trim(),word=text.split(/\s+/u)[0]||'';
-    const segments=typeof Intl.Segmenter==='function'?[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(word)].map(part=>part.segment):Array.from(word);
-    const prefix=segments.slice(0,6).join('');return prefix+(prefix.length<text.length?'…':'');
-  }
   const KEYS = 'title close intro range selected from to preview start answer check peek hide practice result retry change rule reference expected entered perfect tryAgain progress empty whole unavailable count time wrong missing extra score privacy'.split(' ');
   const COPY = {
     ko:['타이핑 암기 시험','닫기','구절을 읽고 기억한 뒤, 본문을 가리고 직접 써 보세요.','시험 범위','선택한 구절','시작 절','마지막 절','먼저 읽고 기억하세요','본문 가리고 시험 시작','기억나는 본문을 입력하세요','채점하기','본문 보기 · 연습으로 전환','본문 가리기','본문을 확인한 연습','시험 결과','다시 시험','범위 바꾸기','띄어쓰기·줄바꿈·문장부호·대소문자는 채점에서 제외합니다.','시험 구절','정답','내 답','모두 정확합니다!','틀린 부분을 확인하고 다시 도전해 보세요.','입력한 절','한 절 이상 입력한 뒤 채점해 주세요.','현재 장·편 전체','본문을 불러온 뒤 다시 열어 주세요.','절','초','다른 글자','빠진 글자','추가한 글자','정확도','입력한 답은 저장하거나 서버로 전송하지 않습니다.'],
@@ -108,33 +103,33 @@
     ar:['طريقة العرض','آية واحدة في كل مرة','أصحاح كامل في كل مرة','تحقق من الإجابة','الآية التالية','الأصحاح التالي','عرض النتيجة','صحيح.','صحح الإجابة وتحقق مجدداً.','Enter للتحقق؛ وبعد الإجابة الصحيحة اضغط Enter للمتابعة. Shift+Enter لسطر جديد.','اكتب الآيات وتحقق منها. انتقل إلى الأصحاح التالي عندما تكون جميع الإجابات صحيحة.','بحسب أول تحقق']
   };
   const AID_COPY={
-    ko:['시작 힌트','본문 보기','범위 변경','힌트·본문을 확인한 연습'],
-    en:['Start hint','Show text','Passage','Practice with hints or text'],
-    fr:['Indice','Voir le texte','Passage','Entraînement avec indice ou texte'],
-    de:['Starthilfe','Text zeigen','Bereich','Übung mit Hinweis oder Text'],
-    zh:['开头提示','查看原文','更改范围','使用提示或原文的练习'],
-    ru:['Подсказка','Текст','Отрывок','Тренировка с подсказкой или текстом'],
-    la:['Initii auxilium','Textum vide','Locus','Exercitatio cum auxilio vel textu'],
-    pt:['Dica inicial','Ver texto','Passagem','Prática com dica ou texto'],
-    ar:['تلميح البداية','عرض النص','النطاق','تدريب مع تلميح أو نص']
+    ko:['본문 보기','범위 변경'],
+    en:['Show text','Passage'],
+    fr:['Voir le texte','Passage'],
+    de:['Text zeigen','Bereich'],
+    zh:['查看原文','更改范围'],
+    ru:['Текст','Отрывок'],
+    la:['Textum vide','Locus'],
+    pt:['Ver texto','Passagem'],
+    ar:['عرض النص','النطاق']
   };
   const COMPACT_COPY={
-    ko:['정답','연습','도움말','시작','본문 미리 보기','힌트','다시 입력해 주세요.'],
-    en:['Correct','Practice','Help','Start','Preview text','Hint','Edit and check again.'],
-    fr:['Correct','Entraînement','Aide','Commencer','Aperçu du texte','Indice','Corrigez puis vérifiez.'],
-    de:['Richtig','Übung','Hilfe','Starten','Textvorschau','Hinweis','Korrigieren und prüfen.'],
-    zh:['正确','练习','帮助','开始','预览原文','提示','修改后再核对。'],
-    ru:['Верно','Тренировка','Помощь','Начать','Просмотр текста','Подсказка','Исправьте и проверьте.'],
-    la:['Recte','Exercitatio','Auxilium','Incipe','Textum praevide','Indicium','Corrige et examina.'],
-    pt:['Correto','Prática','Ajuda','Começar','Prévia do texto','Dica','Corrija e confira.'],
-    ar:['صحيح','تدريب','مساعدة','ابدأ','معاينة النص','تلميح','صحح وتحقق مجدداً.']
+    ko:['정답','연습','도움말','시작','본문 미리 보기','다시 입력해 주세요.'],
+    en:['Correct','Practice','Help','Start','Preview text','Edit and check again.'],
+    fr:['Correct','Entraînement','Aide','Commencer','Aperçu du texte','Corrigez puis vérifiez.'],
+    de:['Richtig','Übung','Hilfe','Starten','Textvorschau','Korrigieren und prüfen.'],
+    zh:['正确','练习','帮助','开始','预览原文','修改后再核对。'],
+    ru:['Верно','Тренировка','Помощь','Начать','Просмотр текста','Исправьте и проверьте.'],
+    la:['Recte','Exercitatio','Auxilium','Incipe','Textum praevide','Corrige et examina.'],
+    pt:['Correto','Prática','Ajuda','Começar','Prévia do texto','Corrija e confira.'],
+    ar:['صحيح','تدريب','مساعدة','ابدأ','معاينة النص','صحح وتحقق مجدداً.']
   };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
-    ...Object.fromEntries(['hint','shortPeek','shortChange','practice'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
-    ...Object.fromEntries(['correct','practice','help','start','preview','hint','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]]))});
-  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession, startHint};
+    ...Object.fromEntries(['shortPeek','shortChange'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
+    ...Object.fromEntries(['correct','practice','help','start','preview','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]]))});
+  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -229,13 +224,11 @@
       if(config.view==='verse'){primary.dataset.shortcut='↵';primary.setAttribute('aria-keyshortcuts','Enter');primary.title=l.enterHelp;}
       const entered=el('span','memory-filled'),meter=el('progress','memory-meter');meter.max=items.length;meter.value=0;meter.setAttribute('aria-label',l.progress);
       const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
-      let activeIndex=0;
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
-      const inputs=items.map(({row},index)=>{
+      const inputs=items.map(({row})=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);form.append(label);
-        input.addEventListener('focus',()=>{activeIndex=index;});
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
         input.addEventListener('input',()=>{session.invalidate();feedback.replaceChildren();feedback.removeAttribute('data-correct');input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
@@ -251,13 +244,8 @@
           primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',l.correct));
         }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
       }
-      const hint=button(l.hint,()=>{
-        practice=true;practiceLabel.hidden=false;const input=inputs[activeIndex],label=input.parentElement;
-        let text=label.querySelector('.memory-inline-hint');if(!text){text=el('span','memory-inline-hint');text.setAttribute('aria-live','polite');label.append(text);}
-        text.textContent=`${l.hint} · ${startHint(items[activeIndex].row.text)}`;input.focus();
-      },'memory-hint');
       const peek=button(l.shortPeek,()=>{practice=true;practiceLabel.hidden=false;revealed.hidden=!revealed.hidden;revealed.replaceChildren();if(!revealed.hidden){preview(revealed,items.map(item=>item.row));revealed.scrollIntoView({block:'nearest'});}peek.textContent=revealed.hidden?l.shortPeek:l.hide;},'memory-peek');
-      const aids=el('div','memory-aids');aids.append(hint,peek,button(l.shortChange,setup));dock.append(error,status,primary,aids);
+      const aids=el('div','memory-aids');aids.append(peek,button(l.shortChange,setup));dock.append(error,status,primary,aids);
       content.append(practiceLabel,form,feedback,revealed);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){

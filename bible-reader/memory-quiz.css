@@ -46,14 +46,12 @@
 .memory-chapter-view .memory-answer-reference{padding-top:12px;font:650 13px/1.5 system-ui;color:var(--muted);overflow-wrap:anywhere}
 .memory-chapter-view .memory-answer{min-height:78px;resize:none;margin:0;padding:10px 12px;line-height:1.7;overflow-y:hidden}
 .memory-answer[aria-invalid=true]{border-color:#a43535}
-.memory-inline-hint{display:block;margin-top:6px;font-size:14px;font-weight:400;color:var(--muted);overflow-wrap:anywhere}
-.memory-chapter-view .memory-inline-hint{grid-column:2}
 .memory-dock{flex:none;display:grid;gap:8px;padding:10px 22px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
 .memory-dock .memory-error{margin:0}
 .memory-dock-status{display:flex;align-items:center;gap:14px;min-width:0;font-size:12px;color:var(--muted)}
 .memory-filled{flex:none}
 .memory-meter{width:100%;min-width:0;height:5px;accent-color:var(--text)}
-.memory-aids{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.memory-aids{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .memory-aids button{min-width:0;padding:8px;font-size:13px;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
 .memory-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
 .memory-actions button{flex:1 1 140px;white-space:normal}
