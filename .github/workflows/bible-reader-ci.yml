@@ -83,7 +83,9 @@ jobs:
 
   mobile-browser-qa:
     name: Mobile layout (${{ matrix.engine }})
-    runs-on: ubuntu-latest
+    # Keep the three engines on a reproducible, Playwright-supported dependency set.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
