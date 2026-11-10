@@ -218,6 +218,42 @@ try{
     await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'4:1,4:2');
     assert.equal(await dialog.locator('.memory-peek,.memory-preview,.memory-hint').count(),0);assert.deepEqual(errors,[]);observations.push({flow:'chapter retry across repeated verse numbers, successive narrowing 2→1→0 mistakes, exact review references, clean answers, original full-scope restoration',pass:true});await context.close();
   }
+  {
+    const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
+    const answer=await answerFor(page,11,35),characters=Array.from(answer.normalize('NFC'));
+    const missing=characters.findIndex((character,index)=>index>3&&/[\p{L}\p{N}]/u.test(character));assert(missing>3);
+    characters[0]='애';characters.splice(missing,1);characters.push('요');const entered=characters.join('');
+    const kinds=['wrong','missing','extra'],palettes={};
+    for(const theme of ['light','dark']){
+      if(await page.locator('html').getAttribute('data-theme')!==theme){
+        await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
+        if(!await page.locator('#themeToggle').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('#themeToggle').click();
+        if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
+      }
+      assert.equal(await page.locator('html').getAttribute('data-theme'),theme);await setRange(page,11,35,11,35);await dialog.locator('.memory-primary').click();
+      await dialog.locator('textarea').fill(entered);await dialog.locator('textarea').press('Enter');
+      assert.deepEqual(await dialog.locator('.memory-legend-item').allTextContents(),['오자','탈자','추가']);
+      const palette=[];
+      for(const kind of kinds){
+        const run=dialog.locator(`.memory-feedback .memory-diff .memory-${kind}`).first();assert(await run.isVisible());
+        const styles=await run.evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor,line:getComputedStyle(n).textDecorationLine,style:getComputedStyle(n).textDecorationStyle,size:getComputedStyle(n).fontSize}));
+        const legend=await dialog.locator(`.memory-legend-${kind}`).evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor}));
+        assert.equal(styles.color,legend.color);assert.equal(styles.background,legend.background);
+        const luminance=rgb=>rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+        const a=luminance(styles.color),b=luminance(styles.background);assert((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'Colored comparison text must remain readable');
+        if(kind==='extra')assert(styles.line.includes('line-through'));else assert(styles.line.includes('underline'));
+        if(kind==='missing')assert.equal(styles.style,'dotted');palette.push({kind,...styles});
+      }
+      assert.equal(new Set(palette.map(p=>p.background)).size,3);assert.equal(new Set(palette.map(p=>p.color)).size,3);
+      const correctSize=await dialog.locator('.memory-feedback .memory-diff .memory-correct').first().evaluate(n=>getComputedStyle(n).fontSize);assert(palette.every(p=>p.size===correctSize),'Correct and error characters must use the same text size');
+      palettes[theme]=palette;await dialog.locator('.memory-feedback').scrollIntoViewIfNeeded();await fit(page,dialog);await page.screenshot({path:path.join(output,`grading-colors-${theme}.png`)});
+      await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');
+      assert.equal(await dialog.locator('.memory-retry-wrong').count(),1);assert.equal(await dialog.locator('.memory-legend').count(),1,'Result must also explain the colors');
+      for(const kind of kinds)assert(await dialog.locator(`.memory-results .memory-${kind}`).count()>0);
+      if(theme==='light'){await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();}
+    }
+    assert.notDeepEqual(palettes.light,palettes.dark);assert.deepEqual(errors,[]);observations.push({flow:'real verse with substitution/deletion/insertion, matching legend, distinct readable colors, underline/dots/strike, equal text size, light/dark feedback and results',palettes,pass:true});await context.close();
+  }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);
 }finally{await browser.close();if(server)await new Promise(resolve=>server.close(resolve));}

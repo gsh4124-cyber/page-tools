@@ -133,7 +133,8 @@
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
     ...Object.fromEntries(['shortChange','retryWrong','retryAll','review'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
-    ...Object.fromEntries(['correct','practice','help','start','preview','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]]))});
+    ...Object.fromEntries(['correct','practice','help','start','preview','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]])),
+    ...(code==='ko'?{wrong:'오자',missing:'탈자',extra:'추가'}:{})});
   window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, subsetReference, createSession};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
@@ -166,6 +167,11 @@
     dialog.addEventListener('close',()=>{window.removeEventListener('resize',resizeAnswers);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
     dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
     function preview(target,items){for(const row of items){const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p);}}
+    function errorLegend(){
+      const legend=el('div','memory-legend');legend.setAttribute('role','list');
+      for(const kind of ['wrong','missing','extra']){const item=el('span',`memory-legend-item memory-legend-${kind}`,l[kind]);item.setAttribute('role','listitem');legend.append(item);}
+      return legend;
+    }
     function gradeCard(row,answer,g){
       const card=el('section','memory-result');card.append(el('h4','',`${rowReference(row)} · ${g.score}%`));
       for(const [side,caption] of [['expected',l.expected],['entered',l.entered]]){
@@ -246,7 +252,7 @@
         if(checked.correct){
           const next=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;
           primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',l.correct));
-        }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
+        }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry),errorLegend());checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
       }
       const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,status,primary,aids);
       content.append(form,feedback);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
@@ -260,7 +266,7 @@
       const actions=el('div','memory-actions'),retryAll=button(l.retryAll,()=>begin(),'memory-retry-all');
       const retry=mistakes.length?button(`${l.retryWrong} (${mistakes.length})`,()=>begin(mistakes,true),'memory-primary memory-retry-wrong'):retryAll;
       if(mistakes.length)actions.append(retry);else retryAll.classList.add('memory-primary');actions.append(retryAll,button(l.change,setup));content.append(actions);
-      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
+      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));if(mistakes.length)content.append(errorLegend());content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
     }
     setup();dialog.showModal();
   }
