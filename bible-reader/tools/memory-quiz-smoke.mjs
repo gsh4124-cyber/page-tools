@@ -235,7 +235,7 @@ try{
       assert.deepEqual(await dialog.locator('.memory-legend-item').allTextContents(),['오자','탈자','추가']);
       const palette=[];
       for(const kind of kinds){
-        const run=dialog.locator(`.memory-feedback .memory-diff .memory-${kind}`).first();assert(await run.isVisible());
+        const run=dialog.locator(`.memory-row-feedback .memory-diff .memory-${kind}`).first();assert(await run.isVisible());
         const styles=await run.evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor,line:getComputedStyle(n).textDecorationLine,style:getComputedStyle(n).textDecorationStyle,size:getComputedStyle(n).fontSize}));
         const legend=await dialog.locator(`.memory-legend-${kind}`).evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor}));
         assert.equal(styles.color,legend.color);assert.equal(styles.background,legend.background);
@@ -245,14 +245,38 @@ try{
         if(kind==='missing')assert.equal(styles.style,'dotted');palette.push({kind,...styles});
       }
       assert.equal(new Set(palette.map(p=>p.background)).size,3);assert.equal(new Set(palette.map(p=>p.color)).size,3);
-      const correctSize=await dialog.locator('.memory-feedback .memory-diff .memory-correct').first().evaluate(n=>getComputedStyle(n).fontSize);assert(palette.every(p=>p.size===correctSize),'Correct and error characters must use the same text size');
-      palettes[theme]=palette;await dialog.locator('.memory-feedback').scrollIntoViewIfNeeded();await fit(page,dialog);await page.screenshot({path:path.join(output,`grading-colors-${theme}.png`)});
+      const correctSize=await dialog.locator('.memory-row-feedback .memory-diff .memory-correct').first().evaluate(n=>getComputedStyle(n).fontSize);assert(palette.every(p=>p.size===correctSize),'Correct and error characters must use the same text size');
+      palettes[theme]=palette;await dialog.locator('.memory-row-feedback .memory-result').first().scrollIntoViewIfNeeded();await fit(page,dialog);await page.screenshot({path:path.join(output,`grading-colors-${theme}.png`)});
       await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');
       assert.equal(await dialog.locator('.memory-retry-wrong').count(),1);assert.equal(await dialog.locator('.memory-legend').count(),1,'Result must also explain the colors');
       for(const kind of kinds)assert(await dialog.locator(`.memory-results .memory-${kind}`).count()>0);
       if(theme==='light'){await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();}
     }
     assert.notDeepEqual(palettes.light,palettes.dark);assert.deepEqual(errors,[]);observations.push({flow:'real verse with substitution/deletion/insertion, matching legend, distinct readable colors, underline/dots/strike, equal text size, light/dark feedback and results',palettes,pass:true});await context.close();
+  }
+  for(const width of (local?[320,390,1280]:[390])){
+    const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');
+    await page.locator('#memoryViewChapter').check();await dialog.locator('.memory-primary').click();await fillUnit(page,dialog);
+    const first=dialog.locator('textarea[data-verse="16"]'),second=dialog.locator('textarea[data-verse="29"]'),last=dialog.locator('textarea').last();
+    await first.fill('오답');await second.fill('오답');await last.focus();await dialog.locator('.memory-primary').click();
+    assert(await first.evaluate(n=>document.activeElement===n),'Grading must focus the earliest incorrect verse, not the last edited field');
+    assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1,'Correction guidance must appear only once');
+    assert.equal(await dialog.locator('.memory-dock .memory-error').textContent(),'다시 입력해 주세요.');
+    assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),2,'Each incorrect verse gets one inline comparison');
+    assert.equal(await first.evaluate(n=>document.getElementById(n.getAttribute('aria-describedby')).querySelector('h4').textContent),'3:16 · 0%');
+    let body=await dialog.locator('.memory-content').boundingBox(),bounds=await first.boundingBox();assert(bounds.y>=body.y&&bounds.y<body.y+body.height,'First error must be scrolled into the input area');
+    await page.mouse.move(0,0);await page.screenshot({path:path.join(output,`first-error-${width}.png`)});
+    if(width<500){
+      await page.setViewportSize({width,height:460});await last.focus();await dialog.locator('.memory-primary').click();
+      body=await dialog.locator('.memory-content').boundingBox();bounds=await first.boundingBox();const dock=await dialog.locator('.memory-dock').boundingBox();
+      assert(await first.evaluate(n=>document.activeElement===n));assert(bounds.y>=body.y&&bounds.y<dock.y,'First error must remain visible in reduced height');assert(dock.y+dock.height<=460);
+      await page.setViewportSize({width,height:844});
+    }
+    await first.fill(await answerFor(page,3,16));await last.focus();await dialog.locator('.memory-primary').click();
+    assert(await second.evaluate(n=>document.activeElement===n),'After correction, grading must move to the next remaining error');assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),1);
+    assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1);
+    await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),0);assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
+    assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, next remaining error after correction, reduced-height navigation, clean success',pass:true});await context.close();
   }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);

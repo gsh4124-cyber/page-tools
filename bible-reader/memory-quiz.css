@@ -48,6 +48,9 @@
 .memory-answer[aria-invalid=true]{border-color:#a43535}
 .memory-dock{flex:none;display:grid;gap:8px;padding:10px 22px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
 .memory-dock .memory-error{margin:0}
+.memory-dock .memory-feedback:empty{display:none}
+.memory-dock .memory-feedback,.memory-dock .memory-legend,.memory-dock .memory-correct{margin:0}
+.memory-row-feedback .memory-result{padding:12px 0;margin-bottom:16px}
 .memory-dock-status{display:flex;align-items:center;gap:14px;min-width:0;font-size:12px;color:var(--muted)}
 .memory-filled{flex:none}
 .memory-meter{width:100%;min-width:0;height:5px;accent-color:var(--text)}

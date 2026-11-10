@@ -235,27 +235,35 @@
       const entered=el('span','memory-filled'),meter=el('progress','memory-meter');meter.max=items.length;meter.value=0;meter.setAttribute('aria-label',l.progress);
       const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
+      const rowFeedbacks=[];
+      function clearFeedback(){feedback.replaceChildren();feedback.removeAttribute('data-correct');rowFeedbacks.forEach(row=>row.replaceChildren());}
+      function focusAnswer(index){const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:'start',behavior:'instant'});}
       const inputs=items.map(({row})=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
-        input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);form.append(label);
+        input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
+        const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{session.invalidate();feedback.replaceChildren();feedback.removeAttribute('data-correct');input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
+        input.addEventListener('input',()=>{session.invalidate();clearFeedback();input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
       function act(){
         if(session.canAdvance){session.advance();if(session.done)results(session.firstAnswers);else showUnit();return;}
         const values=inputs.map(input=>input.value),checked=session.check(values);
-        if(checked.empty){error.textContent=l.empty;error.hidden=false;inputs[0]?.focus();return;}
-        feedback.replaceChildren();feedback.dataset.correct=String(checked.correct);checked.grades.forEach((g,i)=>inputs[i].setAttribute('aria-invalid',String(!g.exact)));
+        if(checked.empty){error.textContent=l.empty;error.hidden=false;focusAnswer(0);return;}
+        clearFeedback();error.hidden=true;feedback.dataset.correct=String(checked.correct);checked.grades.forEach((g,i)=>inputs[i].setAttribute('aria-invalid',String(!g.exact)));
         if(checked.correct){
           const next=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;
           primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',l.correct));
-        }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry),errorLegend());checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
+        }else{
+          error.textContent=l.editRetry;error.hidden=false;feedback.append(errorLegend());
+          checked.grades.forEach((g,i)=>{if(!g.exact)rowFeedbacks[i].append(gradeCard(items[i].row,values[i],g));});
+          focusAnswer(checked.grades.findIndex(g=>!g.exact));
+        }
       }
-      const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,status,primary,aids);
-      content.append(form,feedback);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
+      const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,feedback,status,primary,aids);
+      content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
