@@ -162,9 +162,30 @@
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
     const header=el('header','memory-header'),title=el('h2','',l.title);title.id='memoryQuizTitle';header.append(title,button(l.close,close,'memory-close'));
     const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
-    function fitAnswer(input){if(config.view==='chapter'){input.style.height='auto';input.style.height=`${Math.max(78,input.scrollHeight+2)}px`;}}
-    const resizeAnswers=()=>content.querySelectorAll('textarea').forEach(fitAnswer);window.addEventListener('resize',resizeAnswers);
-    dialog.addEventListener('close',()=>{window.removeEventListener('resize',resizeAnswers);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
+    const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false;
+    function fitAnswer(input){input.style.height='auto';const minimum=parseFloat(getComputedStyle(input).minHeight)||0;input.style.height=`${Math.max(minimum,input.scrollHeight+2)}px`;}
+    function resizeAnswers(){
+      const inputs=[...content.querySelectorAll('textarea')];inputs.forEach(input=>{input.style.height='auto';});
+      const heights=inputs.map(input=>Math.max(parseFloat(getComputedStyle(input).minHeight)||0,input.scrollHeight+2));
+      inputs.forEach((input,index)=>{input.style.height=`${heights[index]}px`;});lastContentWidth=content.clientWidth;
+    }
+    function syncViewport(){
+      viewportFrame=0;if(!dialog?.open)return;
+      // Keep native pinch zoom/panning; only fit the keyboard-sized viewport at normal zoom.
+      if(Math.abs((viewport?.scale||1)-1)>.05){revealFocused=false;return;}
+      const height=viewport?.height||window.innerHeight,width=viewport?.width||window.innerWidth;
+      dialog.style.setProperty('--memory-view-height',`${height}px`);
+      dialog.style.setProperty('--memory-center-x',`${(viewport?.offsetLeft||0)+width/2}px`);
+      dialog.style.setProperty('--memory-center-y',`${(viewport?.offsetTop||0)+height/2}px`);
+      dialog.classList.toggle('memory-compact-height',height<500);
+      if(content.clientWidth!==lastContentWidth)resizeAnswers();
+      const focused=document.activeElement;
+      if(revealFocused&&content.contains(focused)&&focused.matches('.memory-answer'))focused.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+      revealFocused=false;
+    }
+    function queueViewport(event){if(event.type==='resize')revealFocused=true;if(!viewportFrame)viewportFrame=requestAnimationFrame(syncViewport);}
+    window.addEventListener('resize',queueViewport);viewport?.addEventListener('resize',queueViewport);viewport?.addEventListener('scroll',queueViewport);
+    dialog.addEventListener('close',()=>{window.removeEventListener('resize',queueViewport);viewport?.removeEventListener('resize',queueViewport);viewport?.removeEventListener('scroll',queueViewport);cancelAnimationFrame(viewportFrame);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
     dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
     function preview(target,items){for(const row of items){const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p);}}
     function errorLegend(){
@@ -240,7 +261,7 @@
       function focusAnswer(index){const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:'start',behavior:'instant'});}
       const inputs=items.map(({row})=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
-        const input=el('textarea','memory-answer');input.rows=config.view==='verse'?5:2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
+        const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
         const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
@@ -276,7 +297,7 @@
       if(mistakes.length)actions.append(retry);else retryAll.classList.add('memory-primary');actions.append(retryAll,button(l.change,setup));content.append(actions);
       const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));if(mistakes.length)content.append(errorLegend());content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
     }
-    setup();dialog.showModal();
+    setup();dialog.showModal();syncViewport();
   }
 
   function entry(className) {const b=el('button',className,labels(lang()).title);b.type='button';b.addEventListener('click',open);return b;}

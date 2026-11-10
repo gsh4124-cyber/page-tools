@@ -22,8 +22,13 @@ if(local){
 }
 const browser=await chromium.launch({headless:true,...(process.env.MEMORY_QUIZ_CHANNEL?{channel:process.env.MEMORY_QUIZ_CHANNEL}:{})});
 const observations=[];
-async function openPage(width=390,route='/',expectedChapter=null){
+async function openPage(width=390,route='/',expectedChapter=null,options={}){
   const context=await browser.newContext({viewport:{width,height:844},locale:'ko-KR'});
+  if(options.visualViewportMock)await context.addInitScript(()=>{
+    const viewport=new EventTarget();Object.assign(viewport,{height:innerHeight,width:innerWidth,offsetTop:0,offsetLeft:0,scale:1});
+    Object.defineProperty(window,'visualViewport',{configurable:true,value:viewport});window.__qaVisualViewport=viewport;
+  });
+  if(options.withoutVisualViewport)await context.addInitScript(()=>{Object.defineProperty(window,'visualViewport',{configurable:true,value:null});});
   // Functional checks do not generate ad impressions or click ads.
   await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
   const page=await context.newPage(),errors=[];
@@ -180,6 +185,7 @@ try{
     await fit(page,dialog);await page.screenshot({path:path.join(output,`chapter-compact-${width}.png`)});
     if(width<500){
       await page.setViewportSize({width,height:460});
+      await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===460);
       const dock=await dialog.locator('.memory-dock').boundingBox(),body=await dialog.locator('.memory-content').boundingBox();
       assert(dock.y+dock.height<=460&&body.height>=64,'Dock must fit a reduced viewport without covering the input scroller');assert(body.y+body.height<=dock.y+1);
       await dialog.locator('textarea').last().focus();await page.keyboard.press('a');assert(await primary.isVisible());
@@ -267,16 +273,63 @@ try{
     let body=await dialog.locator('.memory-content').boundingBox(),bounds=await first.boundingBox();assert(bounds.y>=body.y&&bounds.y<body.y+body.height,'First error must be scrolled into the input area');
     await page.mouse.move(0,0);await page.screenshot({path:path.join(output,`first-error-${width}.png`)});
     if(width<500){
-      await page.setViewportSize({width,height:460});await last.focus();await dialog.locator('.memory-primary').click();
+      await page.setViewportSize({width,height:460});await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===460);await last.focus();await dialog.locator('.memory-primary').click();
       body=await dialog.locator('.memory-content').boundingBox();bounds=await first.boundingBox();const dock=await dialog.locator('.memory-dock').boundingBox();
       assert(await first.evaluate(n=>document.activeElement===n));assert(bounds.y>=body.y&&bounds.y<dock.y,'First error must remain visible in reduced height');assert(dock.y+dock.height<=460);
       await page.setViewportSize({width,height:844});
+      await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===844);
     }
     await first.fill(await answerFor(page,3,16));await last.focus();await dialog.locator('.memory-primary').click();
     assert(await second.evaluate(n=>document.activeElement===n),'After correction, grading must move to the next remaining error');assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),1);
     assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1);
     await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),0);assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
     assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, next remaining error after correction, reduced-height navigation, clean success',pass:true});await context.close();
+  }
+  for(const width of (local?[320,390,430,1280]:[390,1280])){
+    const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');
+    await setRange(page,11,35,11,36);await dialog.locator('.memory-primary').click();const input=dialog.locator('textarea'),answer=await answerFor(page,11,35);
+    const emptyHeight=(await input.boundingBox()).height;assert(emptyHeight<=120,'Short verse input should start compact');
+    await input.fill(answer);const shortHeight=(await input.boundingBox()).height;assert(shortHeight<=120);
+    await page.mouse.move(0,0);await page.screenshot({path:path.join(output,`verse-autogrow-short-${width}.png`)});
+    await input.fill(answer.repeat(10));const longHeight=(await input.boundingBox()).height;assert(longHeight>shortHeight+50,'Verse input must grow with wrapping text');
+    assert(await input.evaluate(n=>n.scrollHeight<=n.clientHeight+1),'Growing input must not clip its text');
+    await page.screenshot({path:path.join(output,`verse-autogrow-long-${width}.png`)});
+    if(width===390){
+      await page.setViewportSize({width:1280,height:844});await page.waitForFunction(previous=>document.querySelector('.memory-answer').getBoundingClientRect().height<previous,longHeight);assert(await input.evaluate(n=>n.scrollHeight<=n.clientHeight+1));
+      await page.setViewportSize({width,height:844});
+    }
+    await input.fill('');assert((await input.boundingBox()).height<=120,'Clearing text must shrink the input');
+    await input.fill(answer);await input.press('Enter');assert.equal(await identity(dialog),'11:35');await input.press('Enter');assert.equal(await identity(dialog),'11:36');assert.equal(await input.inputValue(),'');assert((await input.boundingBox()).height<=120);
+    await fit(page,dialog);assert.deepEqual(errors,[]);observations.push({width,flow:'verse input compact start, grow/shrink, no text clipping, width reflow, separate Enter check/next and fresh next-verse size',pass:true});await context.close();
+  }
+  {
+    const {context,page,errors}=await openPage(390,'/',null,{visualViewportMock:true}),dialog=page.locator('#memoryQuizDialog'),input=dialog.locator('textarea');
+    await dialog.locator('.memory-primary').click();
+    await page.evaluate(()=>{Object.assign(window.__qaVisualViewport,{height:420,offsetTop:60});window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
+    await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===420);
+    assert.equal(await page.evaluate(()=>innerHeight),844,'Keyboard simulation must leave the layout viewport unchanged');
+    let box=await dialog.boundingBox(),dock=await dialog.locator('.memory-dock').boundingBox();assert(box.y>=60&&box.y+box.height<=480);assert(dock.y+dock.height<=480);
+    assert(await dialog.evaluate(n=>n.classList.contains('memory-compact-height')));
+    await input.fill('오답');await input.press('Enter');assert(await input.evaluate(n=>document.activeElement===n));
+    dock=await dialog.locator('.memory-dock').boundingBox();const body=await dialog.locator('.memory-content').boundingBox(),field=await input.boundingBox();assert(dock.y+dock.height<=480);assert(field.y>=body.y&&field.y<dock.y);
+    await page.screenshot({path:path.join(output,'visual-viewport-simulated-keyboard.png')});
+    await dialog.locator('.memory-content').evaluate(n=>{n.scrollTop=n.scrollHeight;});const previousScroll=await dialog.locator('.memory-content').evaluate(n=>n.scrollTop);
+    await page.evaluate(()=>{window.__qaVisualViewport.offsetTop=100;window.__qaVisualViewport.dispatchEvent(new Event('scroll'));});
+    await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-center-y'))===310);
+    assert.equal(await dialog.locator('.memory-content').evaluate(n=>n.scrollTop),previousScroll,'Viewport panning must not force the focused field back into view');
+    const beforeZoom=await dialog.evaluate(n=>n.style.getPropertyValue('--memory-view-height'));
+    await page.evaluate(()=>{Object.assign(window.__qaVisualViewport,{scale:2,height:210,width:195});window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));assert.equal(await dialog.evaluate(n=>n.style.getPropertyValue('--memory-view-height')),beforeZoom,'Pinch zoom must not trigger forced viewport fitting');
+    await page.evaluate(()=>{Object.assign(window.__qaVisualViewport,{scale:1,height:844,width:390,offsetTop:0});window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
+    await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===844);
+    box=await dialog.boundingBox();assert(box.y>=0&&box.y+box.height<=844);assert(!(await dialog.evaluate(n=>n.classList.contains('memory-compact-height'))));
+    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.evaluate(()=>{window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
+    assert.deepEqual(errors,[]);observations.push({flow:'simulated visual-only keyboard shrink, offset/pan, compact layout, first-error focus, native zoom guard, keyboard dismissal and close cleanup',physical_device:false,visual_viewport_simulated:true,pass:true});await context.close();
+  }
+  {
+    const {context,page,errors}=await openPage(390,'/',null,{withoutVisualViewport:true}),dialog=page.locator('#memoryQuizDialog');await dialog.locator('.memory-primary').click();
+    await page.setViewportSize({width:390,height:420});await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===420);
+    const box=await dialog.boundingBox(),dock=await dialog.locator('.memory-dock').boundingBox();assert(box.y>=0&&dock.y+dock.height<=420);assert.deepEqual(errors,[]);observations.push({flow:'normal window-resize fallback without VisualViewport API',pass:true});await context.close();
   }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);
