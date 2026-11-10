@@ -36,3 +36,5 @@ PC에서 성경 본문 자체를 가장 편하게 읽기 위한 웹도구입니�
 오답을 채점하면 첫 오답 입력칸으로 포커스와 스크롤을 이동합니다. 비교 결과는 해당 절 바로 아래에 표시하며, 다시 채점할 때는 남은 첫 오답으로 이동합니다. 수정 안내는 하단에 한 번만 표시합니다.
 
 절 보기 입력칸도 작은 높이로 시작해 입력에 따라 늘어나고, 지우면 다시 줄어듭니다. 키보드가 표시될 때의 창 높이·위치는 `VisualViewport`의 실제 보이는 영역에 맞춥니다. 이 API가 없으면 일반 창 크기 변경으로 대체하며, 핀치 확대 시 강제로 창을 다시 맞추지 않습니다. 실물 키보드 확인은 브라우저 화면·모의 검사와 구분해 운영 기록에 남깁니다([MDN](https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport), [Chrome 안내](https://developer.chrome.com/blog/viewport-resize-behavior/)).
+
+휴대폰 대응은 특정 기종 전용이 아닙니다. 보이는 폭과 높이, 가로 회전, 안전 영역을 함께 반영합니다. 키보드 등으로 높이가 400px 미만이면 안내·진행 표시는 입력 스크롤 영역으로 옮기고 두 조작 버튼은 나란히 남겨 입력 공간을 확보합니다. 높이가 복구되면 기존 배치로 돌아갑니다. `tools/memory-quiz-mobile.mjs --local`은 Chromium·WebKit·Firefox에서 두 보기, 280–844px 폭, 가로 화면·큰 글씨·키보드 축소/복구·API 대체 동작을 검증합니다. WebKit 엔진과 화면 모의 검사를 iPhone Safari나 삼성 인터넷의 실물 전 기종 검사로 기록하지 않습니다([Playwright 검사 범위](https://playwright.dev/docs/emulation)).

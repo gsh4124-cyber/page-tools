@@ -162,7 +162,13 @@
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
     const header=el('header','memory-header'),title=el('h2','',l.title);title.id='memoryQuizTitle';header.append(title,button(l.close,close,'memory-close'));
     const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
-    const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false;
+    const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false,shortNotices=null;
+    function placeNotices(){
+      if(dock.hidden||!shortNotices)return;
+      // On very short screens keep the two actions pinned; guidance stays in the scrollable input area.
+      if(dialog.classList.contains('memory-tight-height'))shortNotices.append(...[...dock.children].filter(n=>n.matches('.memory-error,.memory-feedback,.memory-dock-status')));
+      else dock.prepend(...shortNotices.children);
+    }
     function fitAnswer(input){input.style.height='auto';const minimum=parseFloat(getComputedStyle(input).minHeight)||0;input.style.height=`${Math.max(minimum,input.scrollHeight+2)}px`;}
     function resizeAnswers(){
       const inputs=[...content.querySelectorAll('textarea')];inputs.forEach(input=>{input.style.height='auto';});
@@ -175,9 +181,12 @@
       if(Math.abs((viewport?.scale||1)-1)>.05){revealFocused=false;return;}
       const height=viewport?.height||window.innerHeight,width=viewport?.width||window.innerWidth;
       dialog.style.setProperty('--memory-view-height',`${height}px`);
+      dialog.style.setProperty('--memory-view-width',`${width}px`);
       dialog.style.setProperty('--memory-center-x',`${(viewport?.offsetLeft||0)+width/2}px`);
       dialog.style.setProperty('--memory-center-y',`${(viewport?.offsetTop||0)+height/2}px`);
       dialog.classList.toggle('memory-compact-height',height<500);
+      dialog.classList.toggle('memory-tight-height',height<400);
+      placeNotices();
       if(content.clientWidth!==lastContentWidth)resizeAnswers();
       const focused=document.activeElement;
       if(revealFocused&&content.contains(focused)&&focused.matches('.memory-answer'))focused.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
@@ -249,6 +258,7 @@
     function showUnit(){
       context.textContent=reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
+      shortNotices=el('div','memory-short-notices');content.append(shortNotices);
       const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
       const primary=button(l.checkAnswer,act,'memory-primary');
@@ -284,6 +294,7 @@
         }
       }
       const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,feedback,status,primary,aids);
+      placeNotices();
       content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){

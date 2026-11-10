@@ -1,4 +1,4 @@
-.memory-quiz{--memory-wrong-fg:#b42318;--memory-wrong-bg:#fee4e2;--memory-missing-fg:#175cd3;--memory-missing-bg:#d1e9ff;--memory-extra-fg:#854d0e;--memory-extra-bg:#fef3c7;position:fixed;inset:auto;left:var(--memory-center-x,50%);top:var(--memory-center-y,50%);transform:translate(-50%,-50%);width:min(720px,calc(100% - 24px));max-height:calc(var(--memory-view-height,100dvh) - 32px);margin:0;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--bg);color:var(--text);overflow:hidden;font:inherit;box-shadow:0 18px 70px #0003}
+.memory-quiz{--memory-wrong-fg:#b42318;--memory-wrong-bg:#fee4e2;--memory-missing-fg:#175cd3;--memory-missing-bg:#d1e9ff;--memory-extra-fg:#854d0e;--memory-extra-bg:#fef3c7;--memory-edge-x:max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));--memory-gap-y:16px;--memory-safe-top:env(safe-area-inset-top,0px);--memory-safe-bottom:env(safe-area-inset-bottom,0px);--memory-inset-top:max(var(--memory-gap-y),var(--memory-safe-top));--memory-inset-bottom:max(var(--memory-gap-y),var(--memory-safe-bottom));box-sizing:border-box;position:fixed;inset:auto;left:var(--memory-center-x,50%);top:calc(var(--memory-center-y,50%) + (var(--memory-inset-top) - var(--memory-inset-bottom)) / 2);transform:translate(-50%,-50%);width:min(720px,calc(var(--memory-view-width,100vw) - 2 * var(--memory-edge-x)));max-height:calc(var(--memory-view-height,100vh) - var(--memory-inset-top) - var(--memory-inset-bottom));max-height:calc(var(--memory-view-height,100dvh) - var(--memory-inset-top) - var(--memory-inset-bottom));margin:0;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--bg);color:var(--text);overflow:hidden;font:inherit;box-shadow:0 18px 70px #0003}
 .memory-quiz[open]{display:flex;flex-direction:column}
 .memory-quiz::backdrop{background:color-mix(in srgb,var(--bg) 97%,transparent)}
 .memory-quiz [hidden]{display:none!important}
@@ -79,7 +79,17 @@
 .topbar .toolbar-more-menu .memory-menu-button{font-size:14px;white-space:normal;line-height:1.4}
 .topbar .toolbar-more-menu .memory-menu-button::after{content:none}
 body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(--memory-actionbar-space,92px))}
-@media(max-width:480px){.memory-header{padding:12px 14px}.memory-header h2{font-size:19px}.memory-context{margin:10px 14px 0}.memory-content{padding:0 14px 18px}.memory-preview{padding-inline:12px}.memory-actions button{flex-basis:100%}.memory-quiz{max-height:calc(var(--memory-view-height,100dvh) - 16px);width:calc(100% - 16px);border-radius:14px}.memory-answer{font-size:18px}.memory-dock{padding-inline:14px}.memory-chapter-view .memory-answer-label{grid-template-columns:40px minmax(0,1fr)}.memory-progress,.memory-key-help{margin-block:10px}}
+@media(max-width:480px){.memory-header{padding:12px 14px}.memory-header h2{font-size:19px}.memory-context{margin:10px 14px 0}.memory-content{padding:0 14px 18px}.memory-preview{padding-inline:12px}.memory-actions button{flex-basis:100%}.memory-quiz{--memory-edge-x:max(8px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));--memory-gap-y:8px;border-radius:14px}.memory-answer{font-size:18px}.memory-dock{padding-inline:14px}.memory-chapter-view .memory-answer-label{grid-template-columns:40px minmax(0,1fr)}.memory-progress,.memory-key-help{margin-block:10px}}
 .memory-compact-height .memory-header{padding:8px 14px}
 .memory-compact-height .memory-context{margin:6px 14px 0;font-size:13px}
 .memory-compact-height .memory-dock{gap:6px;padding:8px 14px max(8px,env(safe-area-inset-bottom))}
+.memory-short-notices:empty{display:none}
+.memory-tight-height .memory-header{padding:2px 10px}
+.memory-tight-height .memory-header h2{font-size:17px}
+.memory-tight-height .memory-context{display:none}
+.memory-tight-height .memory-content{padding:0 10px 8px}
+.memory-tight-height .memory-unit-heading p{margin-block:4px}
+.memory-tight-height .memory-answer-label{margin-block:6px}
+.memory-tight-height .memory-dock{grid-template-columns:minmax(0,1fr) minmax(0,.7fr);gap:6px;padding:4px 10px}
+.memory-tight-height .memory-dock .memory-primary{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.memory-short-notices .memory-error,.memory-short-notices .memory-feedback,.memory-short-notices .memory-legend{margin:4px 0}

@@ -81,17 +81,47 @@ jobs:
       - name: Validate typing memory quiz grading and translations
         run: node tools/validate-memory-quiz.mjs
 
+  mobile-browser-qa:
+    name: Mobile layout (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build local artifact
+        run: python3 ../tools/build_static.py bible-reader
+      - name: Install browser engine
+        run: |
+          npm install --no-save --package-lock=false playwright@1.64.1
+          npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Test both views across mobile layouts
+        env:
+          MEMORY_QUIZ_ENGINES: ${{ matrix.engine }}
+        run: node tools/memory-quiz-mobile.mjs --local
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: memory-mobile-${{ matrix.engine }}
+          path: bible-reader/qa_evidence/mobile/
+
   quality-gate:
     name: Combined Quality Gate
     if: always()
-    needs: [static-guardrails, behavior-qa]
+    needs: [static-guardrails, behavior-qa, mobile-browser-qa]
     runs-on: ubuntu-latest
     steps:
-      - name: Require both checks
+      - name: Require static, behavior and mobile checks
         working-directory: .
         env:
           STATIC_RESULT: ${{ needs.static-guardrails.result }}
           BEHAVIOR_RESULT: ${{ needs.behavior-qa.result }}
+          MOBILE_RESULT: ${{ needs.mobile-browser-qa.result }}
         run: |
           test "$STATIC_RESULT" = success
           test "$BEHAVIOR_RESULT" = success
+          test "$MOBILE_RESULT" = success
