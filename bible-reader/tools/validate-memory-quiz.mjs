@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
-const {grade,normalize,labels,passageRows,passageReference,createSession}=context.window.BibleMemory;
+const {grade,normalize,labels,passageRows,passageReference,subsetReference,createSession}=context.window.BibleMemory;
 assert.equal(grade('하나님이 세상을 이처럼 사랑하사','하나님이세상을\n이처럼 사랑하사.').score,100);
 assert.equal(grade('Love, one another!','LOVE ONE ANOTHER').exact,true);
 assert.equal(grade('가나다','가나다').exact,true,'NFC equivalent Korean must match');
@@ -41,6 +41,9 @@ assert.equal(passageRows(chapters,3,1,2,1).length,0,'Reversed chapter endpoints 
 assert.equal(passageRows(chapters,NaN,1,2,1).length,0);
 assert.equal(passageRows(chapters,2,2,2,2)[0].text,'next second');
 assert.equal(passageReference('John',combined),'John 1:3–3:1');
+assert.equal(subsetReference('John',combined),'John 1:3 · 2:1–2 · 3:1','Wrong-only scope must not imply intervening verses are included');
+assert.equal(subsetReference('John',[{chapter:3,verse:1},{chapter:3,verse:3},{chapter:4,verse:1}]),'John 3:1, 3 · 4:1');
+assert.equal(subsetReference('John',[]),'');
 assert.equal(passageReference('John',[{chapter:3,verse:1},{chapter:3,verse:2},{chapter:3,verse:4}]),'John 3:1–2, 4');
 assert.equal(JSON.stringify(chapters),original,'Selecting a passage must not mutate reading data');
 const session=createSession(combined);

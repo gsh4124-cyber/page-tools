@@ -69,7 +69,7 @@ try{
     assert.equal(await page.locator('body').evaluate(b=>b.classList.contains('reader-focus')),false);
     await fit(page,dialog);await page.screenshot({path:path.join(output,`setup-${width}.png`)});
     await setRange(page,3,16,3,17);await dialog.locator('.memory-primary').click();
-    assert.equal(await identity(dialog),'3:16');assert.equal(await dialog.locator('.memory-preview:visible').count(),0);
+    assert.equal(await identity(dialog),'3:16');assert.equal(await dialog.locator('.memory-preview,.memory-peek,.memory-hint').count(),0,'No text reveal or hints during a test');
     const input=dialog.locator('textarea'),answer=await answerFor(page,3,16);
     await input.press('Enter');assert(await dialog.locator('.memory-error[role=alert]').isVisible());
     assert.equal(await identity(dialog),'3:16');
@@ -97,17 +97,21 @@ try{
     await input.press('Enter');assert.equal(await dialog.locator('.memory-result').count(),2);
     assert.notEqual(await dialog.locator('.memory-score').textContent(),'100%','First wrong check remains reflected in results');
     assert((await dialog.locator('.memory-content').textContent()).includes('첫 답 확인 기준'));
-    await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:16');assert.equal(await input.inputValue(),'');
-    await dialog.locator('.memory-peek').click();assert(await dialog.locator('.memory-preview').isVisible());
-    await dialog.locator('.memory-peek').click();assert(await dialog.locator('.memory-preview').isHidden());
+    assert.equal(await dialog.locator('.memory-retry-wrong').textContent(),'틀린 절만 재시험 (1)');
+    await page.screenshot({path:path.join(output,`wrong-result-${width}.png`)});
+    await dialog.locator('.memory-retry-wrong').click();assert.equal(await identity(dialog),'3:16');assert.equal(await input.inputValue(),'');
+    assert((await dialog.locator('.memory-context').textContent()).includes('오답 재시험'));
+    await fillUnit(page,dialog);await input.press('Enter');await input.press('Enter');assert.equal(await dialog.locator('.memory-result').count(),1);assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-retry-wrong').count(),0);
+    await dialog.locator('.memory-retry-all').click();assert.equal(await identity(dialog),'3:16');assert.equal(await input.inputValue(),'');
+    assert(!(await dialog.locator('.memory-context').textContent()).includes('오답 재시험'));
     for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');await dialog.locator('.memory-primary').click();}
-    assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert((await dialog.locator('h3').textContent()).includes('연습'));
+    assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-result').count(),2);assert.equal(await dialog.locator('.memory-retry-wrong').count(),0);
     await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});assert.equal(await page.locator('#chapterSelect').inputValue(),chapter);
     await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
     assert(await page.locator('#memoryUseSelected').isChecked());
     await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:1');
     await fillUnit(page,dialog);await input.press('Enter');await input.press('Enter');assert.equal(await identity(dialog),'3:3','Non-contiguous selected verses stay selected');
-    assert.deepEqual(errors,[]);observations.push({width,flow:'two modes, sequential Enter check/next, wrong/blank blocking, IME/repeat, edit invalidation, final score, practice/retry, selected 1+3, fit/touch targets',pass:true});await context.close();
+    assert.deepEqual(errors,[]);observations.push({width,flow:'two modes, Enter check/next, wrong/blank blocking, IME/repeat, first-check score, wrong-only retry, full-scope reset, no reveal, selected 1+3, fit/touch targets',pass:true});await context.close();
   }
   for(const language of (local?['en','fr','de','zh','ru','la','pt','ar']:['en','ar'])){
     const {context,page,errors}=await openPage(390,`/${language}/`),dialog=page.locator('#memoryQuizDialog');
@@ -116,9 +120,10 @@ try{
     assert.equal(await dialog.locator('.memory-views label').first().textContent(),labels.verseView);
     assert.equal(await dialog.locator('.memory-views label').last().textContent(),labels.chapterView);
     const chapter=Number(await page.locator('#chapterSelect').inputValue());
-    await setRange(page,chapter,1,chapter,1);await dialog.locator('.memory-primary').click();await fillUnit(page,dialog);
+    await setRange(page,chapter,1,chapter,1);await dialog.locator('.memory-primary').click();await dialog.locator('textarea').fill('x');await dialog.locator('textarea').press('Enter');await fillUnit(page,dialog);
     await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-primary').textContent(),labels.finish);
-    await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-score').textContent(),'100%');
+    await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-retry-wrong').textContent(),`${labels.retryWrong} (1)`);assert.equal(await dialog.locator('.memory-retry-all').textContent(),labels.retryAll);
+    await dialog.locator('.memory-retry-wrong').click();assert((await dialog.locator('.memory-context').textContent()).includes(labels.review));await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-retry-wrong').count(),0);
     await fit(page,dialog);assert.deepEqual(errors,[]);observations.push({language,flow:'localized two modes and sequential grading/results',pass:true});await context.close();
   }
   for(const [language,route] of [['ko','/?v=krv1961&ref=Ps.119.1'],['en','/en/?v=kjv&ref=Ps.119.1']]){
@@ -164,7 +169,7 @@ try{
     await first.fill(firstAnswer);await first.press('Tab');assert(await second.evaluate(n=>document.activeElement===n),'Tab should move directly to the next verse');
     await second.fill(await answerFor(page,3,2));assert.equal(await dialog.locator('.memory-meter').getAttribute('value'),'2');
     assert.equal(await dialog.locator('.memory-hint,.memory-inline-hint').count(),0,'Hints are not part of the test');
-    assert(await dialog.locator('.memory-practice').isHidden());assert(await second.evaluate(n=>document.activeElement===n));
+    assert.equal(await dialog.locator('.memory-peek,.memory-preview').count(),0,'Chapter view must not provide text reveal');assert(await second.evaluate(n=>document.activeElement===n));
     const dockBefore=await dialog.locator('.memory-dock').boundingBox();assert(dockBefore.width>=(await dialog.boundingBox()).width-4,'Controls must span the dialog width');
     await dialog.locator('.memory-content').evaluate(n=>{n.scrollTop=n.scrollHeight;});
     const dockAfter=await dialog.locator('.memory-dock').boundingBox();assert.equal(dockBefore.y,dockAfter.y,'Dock must remain visible during chapter scrolling');
@@ -188,12 +193,30 @@ try{
     assert.equal(await dialog.locator('.memory-hint,.memory-inline-hint').count(),0);
     for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');}
     assert(!(await dialog.locator('h3').textContent()).includes('연습'),'Unaided attempt remains a test');
-    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-inline-hint').count(),0);assert(await dialog.locator('.memory-practice').isHidden());
+    await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-inline-hint,.memory-peek,.memory-preview').count(),0);
     await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.keyboard.press('f');
     assert(await page.locator('body').evaluate(n=>n.classList.contains('reader-focus')));
     await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
     await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock').isVisible(),'Reader focus mode must not hide quiz controls');assert(await dialog.locator('.memory-primary').isVisible());
     assert.deepEqual(errors,[]);observations.push({flow:'unaided verse flow, test result, clean retry, reader focus mode',pass:true});await context.close();
+  }
+  {
+    const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
+    await page.locator('#memoryViewChapter').check();await setRange(page,3,1,4,2);await dialog.locator('.memory-primary').click();
+    for(const chapter of [3,4]){
+      await fillUnit(page,dialog);await dialog.locator(`textarea[data-chapter="${chapter}"][data-verse="1"]`).fill('오답');await dialog.locator('.memory-primary').click();
+      await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
+    }
+    assert.equal(await dialog.locator('.memory-result').count(),38);assert.equal(await dialog.locator('.memory-retry-wrong').textContent(),'틀린 절만 재시험 (2)');
+    await dialog.locator('.memory-retry-wrong').click();assert.equal(await identity(dialog),'3:1');assert.equal(await dialog.locator('textarea').inputValue(),'');
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'4:1','Repeated verse numbers retain their chapter');
+    await dialog.locator('textarea').fill('오답');await dialog.locator('.memory-primary').click();await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('.memory-result').count(),2);assert.equal(await dialog.locator('.memory-reference').textContent(),'요한복음 3:1 · 4:1','Review reference must list only included verses');
+    assert.equal(await dialog.locator('.memory-retry-wrong').textContent(),'틀린 절만 재시험 (1)');await dialog.locator('.memory-retry-wrong').click();assert.equal(await identity(dialog),'4:1');assert.equal(await dialog.locator('textarea').inputValue(),'');
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-result').count(),1);assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-retry-wrong').count(),0);
+    await dialog.locator('.memory-retry-all').click();assert.equal(await dialog.locator('textarea').count(),36,'Full retry must restore original scope');assert((await dialog.locator('.memory-reference').textContent()).includes('3:1–36'));
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'4:1,4:2');
+    assert.equal(await dialog.locator('.memory-peek,.memory-preview,.memory-hint').count(),0);assert.deepEqual(errors,[]);observations.push({flow:'chapter retry across repeated verse numbers, successive narrowing 2→1→0 mistakes, exact review references, clean answers, original full-scope restoration',pass:true});await context.close();
   }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,ads_blocked_for_qa:true,physical_device_tested:false,ime_events_simulated:true,observations},null,2));
   console.log(`Memory quiz browser QA PASS: ${observations.length} viewport/language flows; ${output}`);

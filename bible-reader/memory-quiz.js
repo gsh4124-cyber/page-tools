@@ -49,6 +49,11 @@
     }
     return `${book} ${first.chapter}:${ranges.map(([a,b])=>a===b?String(a):`${a}–${b}`).join(', ')}`;
   }
+  function subsetReference(book,rows) {
+    const groups=[];
+    for(const row of rows){const last=groups[groups.length-1];if(last&&last[0].chapter===row.chapter)last.push(row);else groups.push([row]);}
+    return groups.map((group,index)=>passageReference(index?'':book,group).trim()).join(' · ');
+  }
   function createSession(rows,view='verse') {
     const units=[];rows.forEach((row,index)=>{
       const last=units[units.length-1];
@@ -103,15 +108,15 @@
     ar:['طريقة العرض','آية واحدة في كل مرة','أصحاح كامل في كل مرة','تحقق من الإجابة','الآية التالية','الأصحاح التالي','عرض النتيجة','صحيح.','صحح الإجابة وتحقق مجدداً.','Enter للتحقق؛ وبعد الإجابة الصحيحة اضغط Enter للمتابعة. Shift+Enter لسطر جديد.','اكتب الآيات وتحقق منها. انتقل إلى الأصحاح التالي عندما تكون جميع الإجابات صحيحة.','بحسب أول تحقق']
   };
   const AID_COPY={
-    ko:['본문 보기','범위 변경'],
-    en:['Show text','Passage'],
-    fr:['Voir le texte','Passage'],
-    de:['Text zeigen','Bereich'],
-    zh:['查看原文','更改范围'],
-    ru:['Текст','Отрывок'],
-    la:['Textum vide','Locus'],
-    pt:['Ver texto','Passagem'],
-    ar:['عرض النص','النطاق']
+    ko:['범위 변경','틀린 절만 재시험','전체 다시 시험','오답 재시험'],
+    en:['Passage','Retry incorrect verses','Retry full passage','Incorrect verses'],
+    fr:['Passage','Reprendre les erreurs','Reprendre tout','Versets incorrects'],
+    de:['Bereich','Falsche Verse wiederholen','Alle Verse wiederholen','Falsche Verse'],
+    zh:['更改范围','重测错节','全部重测','错节重测'],
+    ru:['Отрывок','Повторить ошибочные стихи','Повторить весь отрывок','Ошибочные стихи'],
+    la:['Locus','Versus erratos repete','Totum locum repete','Versus errati'],
+    pt:['Passagem','Repetir versículos errados','Repetir passagem inteira','Versículos errados'],
+    ar:['النطاق','أعد الآيات الخاطئة','أعد المقطع كاملاً','الآيات الخاطئة']
   };
   const COMPACT_COPY={
     ko:['정답','연습','도움말','시작','본문 미리 보기','다시 입력해 주세요.'],
@@ -127,9 +132,9 @@
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
-    ...Object.fromEntries(['shortPeek','shortChange'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
+    ...Object.fromEntries(['shortChange','retryWrong','retryAll','review'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
     ...Object.fromEntries(['correct','practice','help','start','preview','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]]))});
-  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, createSession};
+  window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, subsetReference, createSession};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -148,8 +153,9 @@
     const chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
     const chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b);
     const config={view:'verse',selected:!!selected.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
-    let rows=[],practice=false,started=0,session=null;
+    let rows=[],attemptRows=[],reviewOnly=false,started=0,session=null;
     const reference=items=>passageReference(book,items);
+    const attemptReference=items=>reviewOnly?subsetReference(book,items):reference(items);
     const rowReference=row=>`${row.chapter}:${row.verse}`;
     const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
@@ -204,7 +210,7 @@
         rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
         summary.textContent=`${reference(rows)} · ${rows.length} ${l.count}`;rangeTitle.textContent=l.range;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
       }
-      const startButton=button(l.start,begin,'memory-primary');
+      const startButton=button(l.start,()=>begin(),'memory-primary');
       fromChapter.addEventListener('change',()=>{fillVerses(fromChapter,fromVerse,1);if(Number(toChapter.value)<Number(fromChapter.value)){toChapter.value=fromChapter.value;fillVerses(toChapter,toVerse,null,true);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toChapter.addEventListener('change',()=>{fillVerses(toChapter,toVerse,null,true);if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse,1);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
@@ -212,14 +218,12 @@
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
       content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;
     }
-    function begin(){practice=false;started=performance.now();session=createSession(rows,config.view);showUnit();}
+    function begin(items=rows,isReview=false){attemptRows=items.slice();reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
-      context.textContent=version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
-      const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',reference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
-      const practiceLabel=el('p','memory-practice',l.practice);practiceLabel.hidden=!practice;
+      context.textContent=reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
+      const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
       const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
-      const revealed=el('div','memory-preview');revealed.hidden=true;
       const primary=button(l.checkAnswer,act,'memory-primary');
       if(config.view==='verse'){primary.dataset.shortcut='↵';primary.setAttribute('aria-keyshortcuts','Enter');primary.title=l.enterHelp;}
       const entered=el('span','memory-filled'),meter=el('progress','memory-meter');meter.max=items.length;meter.value=0;meter.setAttribute('aria-label',l.progress);
@@ -244,17 +248,19 @@
           primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',l.correct));
         }else{if(config.view==='chapter'){error.textContent=l.editRetry;error.hidden=false;}feedback.append(el('p','memory-error',l.editRetry));checked.grades.forEach((g,i)=>{if(!g.exact)feedback.append(gradeCard(items[i].row,values[i],g));});}
       }
-      const peek=button(l.shortPeek,()=>{practice=true;practiceLabel.hidden=false;revealed.hidden=!revealed.hidden;revealed.replaceChildren();if(!revealed.hidden){preview(revealed,items.map(item=>item.row));revealed.scrollIntoView({block:'nearest'});}peek.textContent=revealed.hidden?l.shortPeek:l.hide;},'memory-peek');
-      const aids=el('div','memory-aids');aids.append(peek,button(l.shortChange,setup));dock.append(error,status,primary,aids);
-      content.append(practiceLabel,form,feedback,revealed);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
+      const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,status,primary,aids);
+      content.append(form,feedback);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
-      const grades=rows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
-      content.replaceChildren(el('h3','',practice?l.practice:l.result),el('p','memory-reference',reference(rows)));
+      const grades=attemptRows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
+      const mistakes=attemptRows.filter((row,i)=>!grades[i].exact);
+      content.replaceChildren(el('h3','',l.result),el('p','memory-reference',attemptReference(attemptRows)));
       const result=el('p','memory-score',`${score}%`);result.setAttribute('aria-label',`${l.score} ${score}%`);content.append(result,el('p','memory-rule',l.firstCheck),el('p','memory-verdict',exact?l.perfect:l.tryAgain),el('p','memory-rule',`${Math.round((performance.now()-started)/1000)} ${l.time}`));
-      const actions=el('div','memory-actions'),retry=button(l.retry,begin,'memory-primary');actions.append(retry,button(l.change,setup));content.append(actions);
-      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(rows[i],answers[i],g)));content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
+      const actions=el('div','memory-actions'),retryAll=button(l.retryAll,()=>begin(),'memory-retry-all');
+      const retry=mistakes.length?button(`${l.retryWrong} (${mistakes.length})`,()=>begin(mistakes,true),'memory-primary memory-retry-wrong'):retryAll;
+      if(mistakes.length)actions.append(retry);else retryAll.classList.add('memory-primary');actions.append(retryAll,button(l.change,setup));content.append(actions);
+      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
     }
     setup();dialog.showModal();
   }
