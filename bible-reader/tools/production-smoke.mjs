@@ -189,6 +189,7 @@ async function assertMultiVerseSelection(page, label) {
 }
 {
   const { page, pageErrors } = await open('/');
+  await page.screenshot({ path: fileURLToPath(new URL('chapter-title-mobile-unboxed.png', proofDir)), fullPage: false });
   const initialPlaceholder = await page.locator('#searchInput').getAttribute('placeholder');
   assert((await page.locator('html').getAttribute('lang')) === 'ko', 'root: html lang must remain ko');
   await assertCompactTopbar(page, 'root mobile');
@@ -221,6 +222,7 @@ async function assertMultiVerseSelection(page, label) {
 
 {
   const { page, pageErrors } = await open('/', { width: 1440, height: 900 });
+  await page.screenshot({ path: fileURLToPath(new URL('chapter-title-desktop-unboxed.png', proofDir)), fullPage: false });
   const before=await page.locator('.reader-shell').boundingBox();
   await page.locator('.notebook-button').click();
   await page.locator('body.notebook-open .notebook-panel').waitFor({state:'visible',timeout:5000});
