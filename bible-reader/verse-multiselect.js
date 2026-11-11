@@ -46,6 +46,24 @@
 
   function selectedNumbers() { return selectedRows().map(row => Number(row.dataset.verse)).filter(Boolean); }
 
+  function updateSelectionEdges() {
+    const rows = [...versesRoot.querySelectorAll('.verse[data-verse]')];
+    const bounds = rows.map(row => row.getBoundingClientRect());
+    const joins = rows.map((row, index) => {
+      const next = rows[index + 1];
+      const here = bounds[index], there = bounds[index + 1];
+      // Close the outline at headings, unselected verses and column breaks.
+      return !!next && row.nextElementSibling === next &&
+        row.classList.contains('multi-selected') && next.classList.contains('multi-selected') &&
+        Number(next.dataset.verse) === Number(row.dataset.verse) + 1 &&
+        here.width > 0 && Math.abs(here.left - there.left) < 1 && there.top >= here.bottom - 1;
+    });
+    rows.forEach((row, index) => {
+      row.classList.toggle('selection-join-prev', !!joins[index - 1]);
+      row.classList.toggle('selection-join-next', joins[index]);
+    });
+  }
+
   function selectedReference(rows = selectedRows()) {
     const numbers = rows.map(row => Number(row.dataset.verse)).filter(Boolean);
     return window.BibleClipboard?.referenceForVerseNumbers?.(numbers) || `${currentBookName()} ${currentChapter()}:${numbers.join(',')}`;
@@ -114,6 +132,7 @@
     const count = selected.size;
     bar.hidden = count === 0;
     document.body.classList.toggle('verse-multi-selecting', count > 0);
+    updateSelectionEdges();
     if (!count) return;
     const l = labels();
     bar.querySelector('.verse-multi-count').textContent = `${count} ${l.selected}`;
@@ -328,6 +347,14 @@
     if (selected.size) clearSelection();
   });
   contentObserver.observe(versesRoot,{childList:true});
+
+  let selectionLayoutFrame = 0;
+  const scheduleSelectionEdges = () => {
+    cancelAnimationFrame(selectionLayoutFrame);
+    selectionLayoutFrame = requestAnimationFrame(updateSelectionEdges);
+  };
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(scheduleSelectionEdges).observe(versesRoot);
+  window.addEventListener('resize', scheduleSelectionEdges);
 
   const panelObserver = new MutationObserver(()=>setTimeout(()=>enhanceNotebook(document.querySelector('.notebook-panel')),0));
   panelObserver.observe(document.body,{childList:true,subtree:true});
