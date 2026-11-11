@@ -193,7 +193,7 @@
     requestAnimationFrame(()=>requestAnimationFrame(()=>{if(resolvedLoad!==loadRun)return;versesRoot.querySelectorAll('.deep-linked').forEach(row=>row.classList.remove('deep-linked'));parsed.verses.forEach(v=>versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(v))}"]`)?.classList.add('deep-linked'));const first=versesRoot.querySelector(`.verse[data-verse="${CSS.escape(String(parsed.verses[0]||1))}"]`);first?.scrollIntoView({behavior:'smooth',block:'center'});recordLocation(parsed.verses[0]||1)}));
   }
 
-  function noTypingTarget(event){const tag=event.target?.tagName;return !document.querySelector('#memoryQuizDialog[open]')&&!['INPUT','TEXTAREA','SELECT'].includes(tag)&&!event.target?.isContentEditable;}
+  function noTypingTarget(event){const tag=event.target?.tagName;return !document.querySelector('#memoryQuizDialog[open],.selection-note-backdrop')&&!['INPUT','TEXTAREA','SELECT'].includes(tag)&&!event.target?.isContentEditable;}
   document.addEventListener('keydown',event=>{
     if(!noTypingTarget(event)||event.metaKey||event.ctrlKey||event.altKey)return;
     const key=event.key.toLowerCase();

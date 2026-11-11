@@ -1021,6 +1021,13 @@ header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
   .service-info{margin-top:24px;padding-inline:2px}.service-info h2{font-size:20px}
 }
 </style>
+<style>
+/* Preserve full participant names and custom outcomes, including unbroken text. */
+.result-block .winner{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.result-block .result-person{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;flex:1 1 0}
+.result-block .result-outcome{min-width:0;max-width:55%;white-space:normal;overflow-wrap:anywhere;flex:0 1 auto;line-height:1.35;border-radius:12px}
+@media(max-width:520px){.result-block .result-list .winner{flex-wrap:wrap;gap:8px}.result-block .result-person{flex-basis:120px}.result-block .result-outcome{max-width:100%}}
+</style>
 </head>
 <body>
 <main class="wrap">

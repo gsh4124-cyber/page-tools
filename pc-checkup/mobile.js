@@ -16,7 +16,7 @@ const friendly=(e,k)=>{
 
 function saveResults(){try{localStorage.setItem(resultKey,JSON.stringify(results));}catch{}}
 function setResult(test,state){
-  if(state==='unknown') delete results[test]; else results[test]=state;
+  results[test]=state;
   saveResults();renderResults();
 }
 function renderResults(){
@@ -25,7 +25,11 @@ function renderResults(){
     const state=results[test];
     if(state==='ok'){ok++;done++;}
     if(state==='bad'){bad++;done++;}
-    document.querySelectorAll(`.mobile-result-actions[data-test="${test}"] .pill`).forEach(b=>b.classList.toggle('active',b.dataset.result===state));
+    document.querySelectorAll(`.mobile-result-actions[data-test="${test}"] .pill`).forEach(b=>{
+      const active=b.dataset.result===state;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-pressed',String(active));
+    });
     const card=document.querySelector(`[data-test-card="${test}"]`);
     if(card){card.classList.toggle('result-ok',state==='ok');card.classList.toggle('result-bad',state==='bad');}
   });

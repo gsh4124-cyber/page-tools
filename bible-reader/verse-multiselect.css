@@ -1,12 +1,12 @@
 body.verse-multi-selecting{padding-bottom:92px}
-.verse.multi-selected{--selection-edge:color-mix(in srgb,#9a7721 58%,var(--text) 14%);--selection-top:2px;--selection-bottom:2px;position:relative;background:color-mix(in srgb,var(--hover) 82%,transparent)!important;box-shadow:inset 2px 0 var(--selection-edge),inset -2px 0 var(--selection-edge),inset 0 var(--selection-top) var(--selection-edge),inset 0 calc(-1 * var(--selection-bottom)) var(--selection-edge);border-radius:10px}
+.verse.multi-selected{--selection-edge:color-mix(in srgb,#9a7721 58%,var(--text) 14%);--selection-top:2px;--selection-bottom:2px;position:relative;background:color-mix(in srgb,var(--hover) 82%,transparent)!important;box-shadow:inset 2px 0 var(--selection-edge),inset -2px 0 var(--selection-edge),inset 0 var(--selection-top) var(--selection-edge),inset 0 calc(-1 * var(--selection-bottom)) var(--selection-edge)!important;border-radius:10px}
 /* Move the existing gap inside the shared outline without shifting the text. */
 #singleReader.dual-page{--selection-gap:13px}
 #verses .verse.multi-selected.selection-join-next{--selection-bottom:0px;margin-bottom:0;padding-bottom:calc(3px + var(--selection-gap,11px));border-bottom-left-radius:0;border-bottom-right-radius:0}
 #verses .verse.multi-selected.selection-join-prev{--selection-top:0px;border-top-left-radius:0;border-top-right-radius:0}
-.verse.multi-selected::before{content:'✓';position:absolute;left:5px;top:7px;width:20px;height:20px;display:grid;place-items:center;border-radius:999px;background:#9a7721;color:white;font:800 12px/1 system-ui,sans-serif;z-index:1}
-.verse.multi-selected .verse-number{opacity:.45}
-.verse-multi-actionbar{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:520;width:min(760px,calc(100vw - 24px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--panel) 98%,var(--bg));box-shadow:0 14px 42px rgba(0,0,0,.24);transform:translateX(-50%)}
+.verse.multi-selected::before{content:none}
+.verse.multi-selected .verse-number{opacity:1;left:3px;top:7px!important;min-width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:#9a7721;color:white;font:800 11px/1 system-ui,sans-serif;z-index:1}
+.verse-multi-actionbar{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:520;width:min(760px,calc(100vw - 24px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:var(--bg);box-shadow:0 14px 42px rgba(0,0,0,.24);transform:translateX(-50%)}
 .verse-multi-actionbar[hidden]{display:none!important}
 .verse-multi-count{flex:0 0 auto;color:var(--text);font:800 13px/1.3 system-ui,sans-serif;white-space:nowrap}
 .verse-multi-actions{display:flex;justify-content:flex-end;gap:7px;min-width:0}
@@ -22,6 +22,8 @@ body.verse-multi-selecting{padding-bottom:92px}
 .selection-note-actions button{min-height:38px;padding:8px 13px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--text)}
 .selection-note-actions button:hover{background:var(--hover)}
 .selection-note-item .selection-note-scripture{white-space:pre-wrap}
+.selection-note-editor textarea:focus-visible{outline:2px solid var(--verse-number);outline-offset:2px}
 .notebook-tabs:has([data-tab="selections"]){grid-template-columns:repeat(4,minmax(0,1fr))!important}
 @media(max-width:620px){body.verse-multi-selecting{padding-bottom:132px}.verse-multi-actionbar{align-items:stretch;flex-direction:column;gap:8px;padding:10px}.verse-multi-count{text-align:center}.verse-multi-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.verse-multi-actions button{padding-inline:5px;font-size:12px}.verse.multi-selected::before{left:3px;top:5px}.selection-note-editor{padding:14px}.notebook-tabs:has([data-tab="selections"]){grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:390px){.verse-multi-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.verse-multi-actionbar{bottom:max(8px,env(safe-area-inset-bottom))}}
+@media(max-width:760px){.verse-multi-actions button,.selection-note-actions button{min-height:44px}.selection-note-editor textarea{font-size:16px}.verse.multi-selected .verse-number{top:5px!important}}

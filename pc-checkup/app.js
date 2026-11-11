@@ -203,10 +203,11 @@ function initCheckup(){
   $$(".checkitem",list).forEach(item=>{
     const id=item.dataset.id;
     $$(".pill",item).forEach(btn=>{
-      if(state[id]===btn.dataset.value) btn.classList.add("active");
+      btn.classList.toggle("active",state[id]===btn.dataset.value);
+      btn.setAttribute("aria-pressed",String(state[id]===btn.dataset.value));
       btn.addEventListener("click",()=>{
-        $$(".pill",item).forEach(x=>x.classList.remove("active"));
-        btn.classList.add("active");state[id]=btn.dataset.value;update();
+        $$(".pill",item).forEach(x=>{const active=x===btn;x.classList.toggle("active",active);x.setAttribute("aria-pressed",String(active));});
+        state[id]=btn.dataset.value;update();
       });
     });
   });

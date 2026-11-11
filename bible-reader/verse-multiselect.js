@@ -18,6 +18,7 @@
   let selected = new Set();
   let actionBar = null;
   let noteBackdrop = null;
+  let noteReturnFocus = null;
 
   const lang = () => String(window.BibleI18n?.lang?.() || document.documentElement.lang || 'ko').toLowerCase().split('-')[0];
   const labels = () => LABELS[lang()] || LABELS.en;
@@ -199,19 +200,25 @@
     rerenderSelectionNotebook();
   }
 
-  function closeNoteEditor() {
+  function closeNoteEditor(restoreFocus = true) {
     noteBackdrop?.remove();
     noteBackdrop = null;
+    const returnFocus = noteReturnFocus?.isConnected ? noteReturnFocus : document.querySelector('.notebook-panel [data-tab="selections"]');
+    if (restoreFocus) returnFocus?.focus({preventScroll:true});
+    noteReturnFocus = null;
   }
 
   function openNoteEditorForRecord({tr,book,chapter,verses,reference,savedText,currentNote,onSaved}) {
-    closeNoteEditor();
+    closeNoteEditor(false);
+    noteReturnFocus = document.activeElement;
     const l = labels();
     const backdrop = document.createElement('div'); backdrop.className = 'selection-note-backdrop';
     const editor = document.createElement('section'); editor.className = 'selection-note-editor'; editor.setAttribute('role','dialog'); editor.setAttribute('aria-modal','true');
     const title = document.createElement('strong'); title.textContent = `${l.noteTitle} · ${reference}`;
+    title.id = 'selection-note-title'; editor.setAttribute('aria-labelledby',title.id);
     const preview = document.createElement('p'); preview.className = 'selection-note-preview'; preview.textContent = savedText;
     const textarea = document.createElement('textarea'); textarea.value = currentNote || ''; textarea.placeholder = l.note;
+    textarea.setAttribute('aria-label',l.note);
     const actions = document.createElement('div'); actions.className = 'selection-note-actions';
     actions.append(
       actionButton('selection-note-save',l.save,()=>{saveSelectionNote({tr,book,chapter,verses,reference,note:textarea.value,savedText});closeNoteEditor();onSaved?.();}),
@@ -221,6 +228,14 @@
     editor.append(title,preview,textarea,actions);
     backdrop.append(editor);
     backdrop.addEventListener('pointerdown',event=>{if(event.target===backdrop)closeNoteEditor();});
+    backdrop.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeNoteEditor();return;}
+      if(event.key!=='Tab')return;
+      const controls=[...editor.querySelectorAll('textarea,button:not(:disabled)')].filter(node=>node.getClientRects().length);
+      const first=controls[0],last=controls[controls.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+    });
     editor.addEventListener('pointerdown',event=>event.stopPropagation());
     document.body.append(backdrop);
     noteBackdrop = backdrop;

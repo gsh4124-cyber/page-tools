@@ -70,6 +70,16 @@ for(const locale of locales){
   mobileLabels.forEach((label,i)=>assert(mobileReport.includes(`${label.replace(/^\s*\d+[.)、]\s*/,'').trim()}: ${mobileStates[i===0?0:i===1?1:2]}`),locale+' mobile per-item report'));
   await mobileCard.locator('[data-share]').click();assert((await page.evaluate(()=>window.__sharedDeviceReport?.text)).includes(mobileReport.split('\n').slice(0,-1).join('\n')),locale+' mobile detailed native share');
   await writeFile(new URL(`${locale}-shared-reports.json`,proofDir),JSON.stringify({locale,pc:pcReport,mobile:mobileReport,native_share_simulated:true,physical_device_tested:false},null,2));
+  if(locale==='ko'){
+    const unknown=page.locator('[data-test="touch"] [data-result="unknown"]');
+    await unknown.click();
+    assert.equal(await unknown.getAttribute('aria-pressed'),'true','Explicit unknown selection is announced');
+    assert.equal(await mobileCard.locator('[data-x="ok"]').textContent(),'0','Unknown is not a passing test');
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('[data-device-experience="mobile"]').waitFor();
+    assert.equal(await unknown.getAttribute('aria-pressed'),'true','Explicit unknown choice survives reload');
+    assert(await unknown.evaluate(el=>el.classList.contains('active')),'Explicit unknown choice remains visible');
+  }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),true,locale+' overflow');
   assert.deepEqual(errors,[],locale+' runtime errors');
   await context.close();

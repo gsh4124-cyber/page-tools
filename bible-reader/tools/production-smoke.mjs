@@ -132,6 +132,14 @@ async function assertMultiVerseSelection(page, label) {
   await page.locator('.verse-multi-note').click();
   const editor = page.locator('.selection-note-editor');
   await editor.waitFor({state:'visible',timeout:5000});
+  await editor.locator('.selection-note-cancel').press('Tab');
+  assert(await editor.evaluate(el=>el.contains(document.activeElement)), `${label}: note focus escaped behind dialog`);
+  await editor.locator('textarea').press('Escape');
+  await editor.waitFor({state:'hidden',timeout:5000});
+  assert(await page.locator('.verse-multi-note').evaluate(el=>document.activeElement===el), `${label}: closing note did not restore focus`);
+  assert(await first.evaluate(el=>el.classList.contains('multi-selected')), `${label}: Escape in note should preserve verse selection`);
+  await page.locator('.verse-multi-note').click();
+  await editor.waitFor({state:'visible',timeout:5000});
   await editor.locator('textarea').fill('QA multi-verse note');
   await editor.locator('.selection-note-save').click();
   await editor.waitFor({state:'hidden',timeout:5000});
