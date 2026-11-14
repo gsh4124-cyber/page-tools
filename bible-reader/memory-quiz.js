@@ -200,9 +200,12 @@
     const rowReference=row=>`${row.chapter}:${row.verse}`;
     const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
-    const header=el('header','memory-header'),title=el('h2','',l.title);title.id='memoryQuizTitle';header.append(title,button(l.close,close,'memory-close'));
+    const header=el('header','memory-header'),title=el('h2','',l.title),closeButton=button(l.close,close,'memory-close');
+    title.id='memoryQuizTitle';closeButton.setAttribute('aria-label',l.close);
+    const closeIcon=el('span','memory-close-icon','×');closeIcon.setAttribute('aria-hidden','true');closeButton.replaceChildren(el('span','memory-close-label',l.close),closeIcon);header.append(title,closeButton);
     const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
     const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false,shortNotices=null;
+    function moveClose(target){if(closeButton.parentElement===target)return;const focused=document.activeElement===closeButton;target.append(closeButton);if(focused)closeButton.focus({preventScroll:true});}
     function placeNotices(){
       if(dock.hidden||!shortNotices)return;
       // On very short screens keep the two actions pinned; guidance stays in the scrollable input area.
@@ -235,6 +238,8 @@
       dialog.style.setProperty('--memory-center-y',`${(viewport?.offsetTop||0)+height/2}px`);
       dialog.classList.toggle('memory-compact-height',height<500);
       dialog.classList.toggle('memory-tight-height',height<400);
+      dialog.classList.toggle('memory-minimal-header',height<320&&width<500);
+      const ultraShort=height<320&&!dock.hidden;dialog.classList.toggle('memory-ultra-short',ultraShort);moveClose(ultraShort?dock:header);
       placeNotices();
       if(content.clientWidth!==lastContentWidth)resizeAnswers();
       const focused=document.activeElement;
@@ -264,6 +269,7 @@
       if(!g.exact)card.append(el('p','memory-counts',['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`).join(' · ')));return card;
     }
     function setup(){
+      moveClose(header);
       ++bookLoadRun;const activeDialog=dialog;
       context.textContent=`${book} · ${version}`;dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
       const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
@@ -328,10 +334,11 @@
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
-      content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;
+      content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;syncViewport();
     }
     function begin(items=rows,isReview=false){attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
+      moveClose(header);
       context.textContent=reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
       shortNotices=el('div','memory-short-notices');content.append(shortNotices);
@@ -377,9 +384,10 @@
       }
       const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,feedback,status,primary,aids);
       placeNotices();
-      content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
+      content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
     }
     function results(answers){
+      moveClose(header);
       answers=attemptRows.map((row,index)=>answers[index]===undefined?(draftAnswers[index]||''):answers[index]);
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
       const grades=attemptRows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
@@ -389,7 +397,7 @@
       const actions=el('div','memory-actions'),retryAll=button(l.retryAll,()=>begin(),'memory-retry-all');
       const retry=mistakes.length?button(`${l.retryWrong} (${mistakes.length})`,()=>begin(mistakes,true),'memory-primary memory-retry-wrong'):retryAll;
       if(mistakes.length)actions.append(retry);else retryAll.classList.add('memory-primary');actions.append(retryAll,button(l.change,setup));content.append(actions);
-      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));if(mistakes.length)content.append(errorLegend());content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});
+      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));if(mistakes.length)content.append(errorLegend());content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});syncViewport();
     }
     setup();dialog.showModal();syncViewport();
   }

@@ -29,6 +29,8 @@ const profiles=[
   {name:'keyboard-short',width:390,height:844,keyboard:240},{name:'keyboard-landscape',width:844,height:390,keyboard:220},
   {name:'visible-width',width:844,height:844,keyboard:360,visibleWidth:360},{name:'no-visual-viewport',width:360,height:780,fallback:true},
   {name:'large-text-keyboard',width:390,height:844,keyboard:260,largeText:true},
+  {name:'narrow-large-text-keyboard',width:320,height:568,keyboard:240,largeText:true},
+  {name:'large-text-landscape-keyboard',width:568,height:320,keyboard:180,largeText:true},
   {name:'safe-area-keyboard',width:390,height:844,keyboard:240,safeArea:true}
 ];
 try{
