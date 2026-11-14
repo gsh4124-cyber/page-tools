@@ -205,7 +205,7 @@
     const closeIcon=el('span','memory-close-icon','×');closeIcon.setAttribute('aria-hidden','true');closeButton.replaceChildren(el('span','memory-close-label',l.close),closeIcon);header.append(title,closeButton);
     const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
     const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false,shortNotices=null;
-    function moveClose(target){if(closeButton.parentElement===target)return;const focused=document.activeElement===closeButton;target.append(closeButton);if(focused)closeButton.focus({preventScroll:true});}
+    function moveClose(target,before=null){if(closeButton.parentElement===target&&(before?closeButton.nextElementSibling===before:target.lastElementChild===closeButton))return;const focused=document.activeElement===closeButton;target.insertBefore(closeButton,before);if(focused)closeButton.focus({preventScroll:true});}
     function placeNotices(){
       if(dock.hidden||!shortNotices)return;
       // On very short screens keep the two actions pinned; guidance stays in the scrollable input area.
@@ -239,7 +239,8 @@
       dialog.classList.toggle('memory-compact-height',height<500);
       dialog.classList.toggle('memory-tight-height',height<400);
       dialog.classList.toggle('memory-minimal-header',height<320&&width<500);
-      const ultraShort=height<320&&!dock.hidden;dialog.classList.toggle('memory-ultra-short',ultraShort);moveClose(ultraShort?dock:header);
+      const ultraShort=height<320&&!dock.hidden,stacked=ultraShort&&width<500&&parseFloat(getComputedStyle(dock.querySelector('.memory-primary')).fontSize)>20;
+      dialog.classList.toggle('memory-ultra-short',ultraShort);dialog.classList.toggle('memory-stacked-controls',stacked);moveClose(ultraShort?dock:header,stacked?dock.querySelector('.memory-aids'):null);
       placeNotices();
       if(content.clientWidth!==lastContentWidth)resizeAnswers();
       const focused=document.activeElement;

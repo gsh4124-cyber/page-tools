@@ -113,4 +113,10 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-ultra-short .memory-close{display:grid;place-items:center;align-self:center;width:44px;min-width:44px;height:44px;padding:0}
 .memory-ultra-short .memory-close-label{display:none}
 .memory-ultra-short .memory-close-icon{display:block;font-size:24px;line-height:1}
+.memory-ultra-short .memory-primary::after{content:none}
+.memory-stacked-controls .memory-dock{grid-template-columns:minmax(0,1fr) 44px}
+.memory-stacked-controls .memory-dock .memory-primary{grid-column:1;grid-row:1;overflow-wrap:normal;word-break:normal}
+.memory-stacked-controls .memory-close{grid-column:2;grid-row:1}
+.memory-stacked-controls .memory-aids{grid-column:1 / -1;grid-row:2}
+.memory-stacked-controls .memory-aids button{overflow-wrap:normal;word-break:normal}
 .memory-unit-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 12px}.memory-unit-nav button{min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:14px}
