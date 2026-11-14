@@ -41,16 +41,29 @@
       return {items,tail:prefix};
     }
     const a=tokens(expected),b=tokens(entered),runs=[];let i=0,j=0,afterExtra=false;
-    const add=(kind,text)=>{if(!text)return;const last=runs.at(-1);if(last?.kind===kind)last.text+=text;else runs.push({kind,text});};
+    const add=(kind,text,expected='')=>{if(!text&&!expected)return;const last=runs.at(-1);if(last?.kind===kind){last.text+=text;if(kind==='wrong')last.expected+=expected;}else runs.push(kind==='wrong'?{kind,text,expected}:{kind,text});};
     for(const part of parts){
       const e=part.expected?a.items[i++]:null,u=part.entered?b.items[j++]:null;
       if(e){add('correct',e.prefix);if(afterExtra&&!e.prefix&&u?.prefix)add('extra',u.prefix);}
       if(part.kind==='extra'){add('extra',(u?.prefix||'')+(u?.text||''));afterExtra=true;continue;}
-      if(part.kind==='wrong'){add('wrong',u?.text||'');add('correct',e?.text||'');}
+      if(part.kind==='wrong')add('wrong',u?.text||'',e?.text||'');
       else add(part.kind,e?.text||'');
       afterExtra=false;
     }
     add('correct',a.tail);return runs;
+  }
+  function comparisonWords(runs){
+    const words=[];let current=[];
+    const flush=()=>{if(!current.length)return;words.push({runs:current,wrong:current.some(r=>r.kind==='wrong'),expected:current.map(r=>r.kind==='wrong'?r.expected:r.kind==='extra'?'':r.text).join('')});current=[];};
+    for(const run of runs){
+      if(run.kind!=='correct'){current.push(run);continue;}
+      for(const text of run.text.split(/(\s+)/u)){
+        if(!text)continue;
+        if(/^\s+$/u.test(text)){flush();words.push({runs:[{kind:'correct',text}],wrong:false,expected:text});}
+        else current.push({kind:'correct',text});
+      }
+    }
+    flush();return words;
   }
   function passageRows(chapters,fromChapter,fromVerse,toChapter,toVerse) {
     if (![fromChapter,fromVerse,toChapter,toVerse].every(n=>Number.isInteger(n)&&n>0) ||
@@ -160,7 +173,7 @@
     ...Object.fromEntries(['previousVerse','previousChapter'].map((key,i)=>[key,({ko:['이전 절','이전 장'],en:['Previous verse','Previous chapter'],fr:['Verset précédent','Chapitre précédent'],de:['Vorheriger Vers','Vorheriges Kapitel'],zh:['上一节','上一章'],ru:['Предыдущий стих','Предыдущая глава'],la:['Versus prior','Capitulum prius'],pt:['Versículo anterior','Capítulo anterior'],ar:['الآية السابقة','الأصحاح السابق']}[code]||['Previous verse','Previous chapter'])[i]])),
     ...Object.fromEntries(['book','loading','loadError','reload'].map((key,i)=>[key,({ko:['성경책','본문을 불러오는 중…','본문을 불러오지 못했습니다. 다시 시도해 주세요.','다시 불러오기'],en:['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'],fr:['Livre','Chargement…','Impossible de charger le passage. Réessayez.','Recharger'],de:['Buch','Text wird geladen…','Text konnte nicht geladen werden. Bitte erneut versuchen.','Erneut laden'],zh:['书卷','正在加载经文…','无法加载经文，请重试。','重新加载'],ru:['Книга','Загрузка текста…','Не удалось загрузить текст. Повторите попытку.','Загрузить снова'],la:['Liber','Textus oneratur…','Textus onerari non potuit. Iterum tenta.','Iterum onera'],pt:['Livro','Carregando passagem…','Não foi possível carregar a passagem. Tente novamente.','Recarregar'],ar:['السفر','جارٍ تحميل النص…','تعذر تحميل النص. حاول مجدداً.','إعادة التحميل']}[code]||['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'])[i]])),
     ...(code==='ko'?{wrong:'오자',missing:'빠진 글자',extra:'더 쓴 글자'}:{})});
-  window.BibleMemory = {normalize, grade, comparisonRuns, labels, passageRows, passageReference, subsetReference, createSession};
+  window.BibleMemory = {normalize, grade, comparisonRuns, comparisonWords, labels, passageRows, passageReference, subsetReference, createSession};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -241,11 +254,12 @@
     function gradeCard(row,answer,g){
       const card=el('section','memory-result');card.append(el('h4','',`${rowReference(row)} · ${g.score}%`));
       const line=el('p','memory-diff');line.setAttribute('dir','auto');
-      const runs=comparisonRuns(row.text,answer,g.parts);
-        for(const run of runs){
-          const segments=run.kind==='wrong'?(typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(run.text),part=>part.segment):Array.from(run.text)):[run.text];
-          for(const text of segments){const span=el('span',`memory-${run.kind}`,text);if(run.kind!=='correct')span.title=l[run.kind];line.append(span);}
-        }
+      const appendRuns=(target,runs)=>{for(const run of runs){const span=el('span',`memory-${run.kind}`,run.text);if(run.kind!=='correct')span.title=l[run.kind];target.append(span);}};
+      for(const word of comparisonWords(comparisonRuns(row.text,answer,g.parts))){
+        if(!word.wrong){appendRuns(line,word.runs);continue;}
+        const correction=el('span','memory-correction'),correct=el('span','memory-correction-text',word.expected),entered=el('span','memory-correction-base');
+        correct.title=l.expected;appendRuns(entered,word.runs);correction.append(correct,entered);line.append(correction);
+      }
       if(!line.childNodes.length)line.textContent='—';card.append(line);
       if(!g.exact)card.append(el('p','memory-counts',['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`).join(' · ')));return card;
     }

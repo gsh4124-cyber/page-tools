@@ -4,11 +4,15 @@ import assert from 'node:assert/strict';
 
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
-const {grade,normalize,comparisonRuns,labels,passageRows,passageReference,subsetReference,createSession}=context.window.BibleMemory;
+const {grade,normalize,comparisonRuns,comparisonWords,labels,passageRows,passageReference,subsetReference,createSession}=context.window.BibleMemory;
 for(const [expected,entered] of [['예수께서 눈물을 흘리시더라','애수께서 물을 흘리시더라요'],['내가 보매','또 내가보매'],['Love, one another!','loveoneanother'],['كلمة','كلمه'],['café','cafe'],['İstanbul','istanbul'],['a😀 b','a b'],['말씀','']]){
   const runs=comparisonRuns(expected,entered);
-  assert.equal(runs.filter(run=>!['wrong','extra'].includes(run.kind)).map(run=>run.text).join(''),expected.normalize('NFC'),'Merged feedback must preserve the exact canonical text');
+  assert.equal(runs.map(run=>run.kind==='wrong'?run.expected:run.kind==='extra'?'':run.text).join(''),expected.normalize('NFC'),'Merged feedback must preserve the exact canonical text');
+  assert.equal(comparisonWords(runs).map(word=>word.expected).join(''),expected.normalize('NFC'),'Word annotations preserve canonical whitespace and punctuation');
 }
+const adjacent=comparisonWords(comparisonRuns('세째 생물이','셋재 쌔물이'));
+assert.equal(adjacent[0].expected,'세째');assert.equal(adjacent[0].runs.length,1);assert.equal(adjacent[0].runs[0].text,'셋재','Adjacent mistakes form one marked run');
+assert.equal(adjacent[2].expected,'생물이','The annotation shows the complete corrected word');
 assert.equal(grade('하나님이 세상을 이처럼 사랑하사','하나님이세상을\n이처럼 사랑하사.').score,100);
 assert.equal(grade('Love, one another!','LOVE ONE ANOTHER').exact,true);
 assert.equal(grade('가나다','가나다').exact,true,'NFC equivalent Korean must match');

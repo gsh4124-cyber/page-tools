@@ -132,7 +132,7 @@ try{
     await input.fill('오답');await input.press('Enter');
     assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');
     assert.equal(await dialog.locator('.memory-result .memory-diff').count(),1,'Show one combined comparison');
-    assert.equal(await dialog.locator('.memory-result .memory-diff').first().evaluate(n=>[...n.children].filter(s=>!s.matches('.memory-wrong,.memory-extra')).map(s=>s.textContent).join('')),answer,'Combined comparison preserves the complete correct passage');
+    assert.equal(await dialog.locator('.memory-result .memory-diff').first().evaluate(n=>[...n.children].map(s=>s.matches('.memory-correction')?s.querySelector('.memory-correction-text').textContent:s.matches('.memory-wrong,.memory-extra')?'':s.textContent).join('')),answer,'Combined comparison preserves the complete correct passage');
     await input.press('Enter');assert.equal(await identity(dialog),'3:16','Wrong answer cannot skip');
     await input.fill(answer.replace(/\s/g,'')+'!');
     await input.evaluate(n=>{n.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));});
@@ -280,7 +280,7 @@ try{
     const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
     const answer=await answerFor(page,11,35),characters=Array.from(answer.normalize('NFC'));
     const missing=characters.findIndex((character,index)=>index>3&&/[\p{L}\p{N}]/u.test(character));assert(missing>3);
-    characters[0]='애';characters.splice(missing,1);characters.push('요');const entered=characters.join('');
+    characters[0]='애';characters[1]='무';characters.splice(missing,1);characters.push('요');const entered=characters.join('');
     const kinds=['wrong','missing','extra'],palettes={};
     for(const theme of ['light','dark']){
       if(await page.locator('html').getAttribute('data-theme')!==theme){
@@ -291,6 +291,8 @@ try{
       assert.equal(await page.locator('html').getAttribute('data-theme'),theme);await setRange(page,11,35,11,35);await dialog.locator('.memory-primary').click();
       await dialog.locator('textarea').fill(entered);await dialog.locator('textarea').press('Enter');
       assert.deepEqual(await dialog.locator('.memory-legend-item').allTextContents(),['오자','빠진 글자','더 쓴 글자']);
+      assert.equal(await dialog.locator('.memory-correction-text').first().textContent(),answer.split(/\s+/u)[0],'Corrected word appears once above its entered word');
+      assert((await dialog.locator('.memory-wrong').first().textContent()).length>=2,'Adjacent wrong letters share one diagonal span');
       const palette=[];
       for(const kind of kinds){
         const run=dialog.locator(`.memory-row-feedback .memory-diff .memory-${kind}`).first();assert(await run.isVisible());
