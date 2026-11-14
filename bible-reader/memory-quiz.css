@@ -100,3 +100,4 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-book-field{display:grid;gap:6px;margin:10px 0 14px;font-size:14px;font-weight:650}.memory-book-field select{width:100%;background:var(--panel)}
 .memory-load-status{font-size:14px;line-height:1.6;color:var(--muted)}.memory-load-status[role=alert]{color:var(--memory-wrong-fg)}
 .memory-wrong{text-decoration-color:var(--memory-wrong-fg)}
+.memory-unit-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 12px}.memory-unit-nav button{min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:14px}

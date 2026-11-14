@@ -64,6 +64,7 @@
       get current(){return units[index]||[];},get index(){return index;},get unitCount(){return units.length;},
       get done(){return index>=units.length;},get canAdvance(){return correct;},get firstAnswers(){return firstAnswers.slice();},
       invalidate(){correct=false;},
+      move(delta){const next=index+delta;if(!Number.isInteger(delta)||next<0||next>=units.length)return false;index=next;correct=false;return true;},
       check(values){
         const current=units[index]||[];
         if(!current.length||!values.some(value=>normalize(value))){correct=false;return {empty:true,correct:false,grades:[]};}
@@ -134,6 +135,7 @@
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
     ...Object.fromEntries(['shortChange','retryWrong','retryAll','review'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
     ...Object.fromEntries(['correct','practice','help','start','preview','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]])),
+    ...Object.fromEntries(['previousVerse','previousChapter'].map((key,i)=>[key,({ko:['이전 절','이전 장'],en:['Previous verse','Previous chapter'],fr:['Verset précédent','Chapitre précédent'],de:['Vorheriger Vers','Vorheriges Kapitel'],zh:['上一节','上一章'],ru:['Предыдущий стих','Предыдущая глава'],la:['Versus prior','Capitulum prius'],pt:['Versículo anterior','Capítulo anterior'],ar:['الآية السابقة','الأصحاح السابق']}[code]||['Previous verse','Previous chapter'])[i]])),
     ...Object.fromEntries(['book','loading','loadError','reload'].map((key,i)=>[key,({ko:['성경책','본문을 불러오는 중…','본문을 불러오지 못했습니다. 다시 시도해 주세요.','다시 불러오기'],en:['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'],fr:['Livre','Chargement…','Impossible de charger le passage. Réessayez.','Recharger'],de:['Buch','Text wird geladen…','Text konnte nicht geladen werden. Bitte erneut versuchen.','Erneut laden'],zh:['书卷','正在加载经文…','无法加载经文，请重试。','重新加载'],ru:['Книга','Загрузка текста…','Не удалось загрузить текст. Повторите попытку.','Загрузить снова'],la:['Liber','Textus oneratur…','Textus onerari non potuit. Iterum tenta.','Iterum onera'],pt:['Livro','Carregando passagem…','Não foi possível carregar a passagem. Tente novamente.','Recarregar'],ar:['السفر','جارٍ تحميل النص…','تعذر تحميل النص. حاول مجدداً.','إعادة التحميل']}[code]||['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'])[i]])),
     ...(code==='ko'?{wrong:'오자',missing:'빠진 글자',extra:'더 쓴 글자'}:{})});
   window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, subsetReference, createSession};
@@ -157,7 +159,7 @@
     let chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
     let chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b),bookLoadRun=0;
     const config={view:'verse',selected:!!selected.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
-    let rows=[],attemptRows=[],reviewOnly=false,started=0,session=null;
+    let rows=[],attemptRows=[],draftAnswers=[],reviewOnly=false,started=0,session=null;
     const reference=items=>passageReference(book,items);
     const attemptReference=items=>reviewOnly?subsetReference(book,items):reference(items);
     const rowReference=row=>`${row.chapter}:${row.verse}`;
@@ -210,7 +212,7 @@
       for(const [side,caption] of [['expected',l.expected],['entered',l.entered]]){
         card.append(el('strong','memory-comparison-label',caption));const line=el('p','memory-diff');line.setAttribute('dir','auto');
         const kinds=g.parts.flatMap(part=>Array.from(part[side]).map(()=>part.kind));let cursor=0;const runs=[];
-        for(const character of Array.from(String(side==='expected'?row.text:answer).normalize('NFC'))){
+        for(const character of Array.from(String(side==='expected'?row.text:(answer||'')).normalize('NFC'))){
           const length=Array.from(normalize(character)).length,kind=length?(kinds.slice(cursor,cursor+length).find(k=>k!=='correct')||'correct'):'correct';cursor+=length;
           const last=runs.at(-1);if(last?.kind===kind)last.text+=character;else runs.push({kind,text:character});
         }
@@ -286,11 +288,15 @@
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
       content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;
     }
-    function begin(items=rows,isReview=false){attemptRows=items.slice();reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
+    function begin(items=rows,isReview=false){attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
       context.textContent=reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
       shortNotices=el('div','memory-short-notices');content.append(shortNotices);
+      const navigation=el('nav','memory-unit-nav');navigation.setAttribute('aria-label',l.view);
+      const previous=button(config.view==='verse'?l.previousVerse:l.previousChapter,()=>{if(session.move(-1))showUnit();});
+      const next=button(config.view==='verse'?l.nextVerse:l.nextChapter,()=>{if(session.move(1))showUnit();});
+      previous.classList.add('memory-previous');next.classList.add('memory-next');previous.disabled=session.index===0;next.disabled=session.index===session.unitCount-1;navigation.append(previous,next);content.append(navigation);
       const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
       const primary=button(l.checkAnswer,act,'memory-primary');
@@ -301,13 +307,14 @@
       const rowFeedbacks=[];
       function clearFeedback(){feedback.replaceChildren();feedback.removeAttribute('data-correct');rowFeedbacks.forEach(row=>row.replaceChildren());}
       function focusAnswer(index){const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:'start',behavior:'instant'});}
-      const inputs=items.map(({row})=>{
+      const inputs=items.map(({row,index})=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
+        input.value=draftAnswers[index]||'';
         input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
         const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{session.invalidate();clearFeedback();input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
+        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();clearFeedback();input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
@@ -330,6 +337,7 @@
       content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});
     }
     function results(answers){
+      answers=attemptRows.map((row,index)=>answers[index]===undefined?(draftAnswers[index]||''):answers[index]);
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
       const grades=attemptRows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
       const mistakes=attemptRows.filter((row,i)=>!grades[i].exact);

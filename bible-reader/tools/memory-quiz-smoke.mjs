@@ -63,6 +63,23 @@ async function fit(page,dialog){
   assert(sizes.every(height=>height>=44),'Small touch target');
 }
 try{
+  for(const view of ['Verse','Chapter']){
+    const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
+    await page.locator('#memoryView'+view).check();await setRange(page,3,36,4,1);await dialog.locator('.memory-primary').click();
+    const first=await identity(dialog);assert(await dialog.locator('.memory-previous').isDisabled());
+    await dialog.locator('textarea').first().fill('임시 답');await dialog.locator('.memory-primary').click();
+    await dialog.locator('.memory-next').click();assert.notEqual(await identity(dialog),first,'Manual next is independent of correctness');
+    assert(await dialog.locator('.memory-next').isDisabled());await dialog.locator('textarea').first().fill('다음 절 답');
+    await dialog.locator('.memory-previous').click();assert.equal(await identity(dialog),first);assert.equal(await dialog.locator('textarea').first().inputValue(),'임시 답','Draft survives moving away and back');
+    await dialog.locator('.memory-next').click();assert.equal(await dialog.locator('textarea').first().inputValue(),'다음 절 답');
+    await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
+    assert.notEqual(await dialog.locator('.memory-score').textContent(),'100%','Moving between units must preserve the first checked wrong answer');
+    await dialog.locator('.memory-retry-all').click();await dialog.locator('.memory-next').click();await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('.memory-result').first().locator('.memory-diff').last().textContent(),'—','Skipped blank answers render as blank, never undefined');
+    await dialog.locator('.memory-retry-all').click();await fillUnit(page,dialog);await dialog.locator('.memory-next').click();await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('.memory-score').textContent(),'100%','An unchecked saved draft is graded when the full result is shown');
+    assert.deepEqual(errors,[]);observations.push({view,flow:'manual previous/next, first/last boundaries, wrong and unchecked navigation, in-memory drafts and first-check score preserved',pass:true});await context.close();
+  }
   {
     const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
     const readerBefore=await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent}));
