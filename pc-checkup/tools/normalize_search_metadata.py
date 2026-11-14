@@ -4,6 +4,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 import json
 import re
+from mic_guide import add_mic_guide
 
 ROOT = Path('dist')
 ORIGIN = 'https://pc-checkup.pages.dev'
@@ -50,6 +51,8 @@ for path in pages:
     if lang not in LOCALES:
         raise RuntimeError(f'Unexpected core locale: {rel}')
     text = path.read_text(encoding='utf-8')
+    if path.name == 'mic.html':
+        text = add_mic_guide(text, lang)
     privacy = (f'<p class="privacy-policy-link"><a href="/privacy/#{"ko" if lang == "ko" else "en"}" '
                f'style="display:inline-block;min-height:44px;padding:10px 0;color:inherit">{PRIVACY_LABELS[lang]}</a></p>')
     if text.count('</footer>') != 1:
@@ -115,6 +118,7 @@ for path in pages:
 # These dates identify the changed Korean documents, not the current build time.
 # The home gained static language links and clearer entry content on November 5.
 last_modified = {ORIGIN+'/': '2026-11-05', ORIGIN+'/checkup': '2026-11-04', ORIGIN+'/mobile': '2026-11-04'}
+last_modified.update({url(lang, 'mic.html'): '2026-11-14' for lang in LOCALES})
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>{escape(address)}</loc>' + (f'<lastmod>{last_modified[address]}</lastmod>' if address in last_modified else '') + '</url>\n' for address in canonical_urls)
