@@ -302,7 +302,8 @@ try{
         else {const diagonal=await run.evaluate(n=>({transform:getComputedStyle(n,'::after').transform,color:getComputedStyle(n,'::after').backgroundColor}));assert.notEqual(diagonal.transform,'none');assert.equal(diagonal.color,styles.color,'The diagonal stroke is the same red as the wrong character');assert.equal(styles.line,'none');}
         if(kind==='missing')assert.equal(styles.style,'dotted');palette.push({kind,...styles});
       }
-      assert.equal(palette[1].color,palette[2].color,'Missing and extra characters use the same neutral gray');
+      assert.notEqual(palette[1].color,palette[2].color,'Missing characters use blue; extra characters remain gray');
+      assert.equal(await dialog.locator('.memory-missing').first().evaluate(n=>getComputedStyle(n).textDecorationColor),palette[1].color,'Missing underline uses the same blue as its label');
       const correctSize=await dialog.locator('.memory-row-feedback .memory-diff .memory-correct').first().evaluate(n=>getComputedStyle(n).fontSize);assert(palette.every(p=>p.size===correctSize),'Correct and error characters must use the same text size');
       palettes[theme]=palette;await dialog.locator('.memory-row-feedback .memory-result').first().scrollIntoViewIfNeeded();await fit(page,dialog);await page.screenshot({path:path.join(output,`grading-colors-${theme}.png`)});
       await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');
