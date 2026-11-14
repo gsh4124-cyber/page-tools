@@ -63,6 +63,17 @@ async function fit(page,dialog){
   assert(sizes.every(height=>height>=44),'Small touch target');
 }
 try{
+  for(const width of [390,1280]){
+    const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');await dialog.locator('.memory-primary').click();
+    const input=dialog.locator('textarea').first();await input.focus();const initialDialog=await dialog.boundingBox(),initialInput=await input.boundingBox();
+    for(let n=0;n<160;n++){
+      await page.keyboard.insertText('말씀 '.charAt(n%3));const box=await dialog.boundingBox(),field=await input.boundingBox();
+      assert(Math.abs(box.y-initialDialog.y)<1&&Math.abs(box.height-initialDialog.height)<1,'Typing must not recenter or resize the dialog');
+      assert(Math.abs(field.y-initialInput.y)<1,'Wrapping text must not move the input top');
+    }
+    assert(await input.evaluate(n=>n.scrollHeight<=n.clientHeight+1),'Measured growth must not clip typed text');
+    assert.deepEqual(errors,[]);observations.push({width,flow:'160 sequential input events: stable dialog and input top, un-clipped growing text',pass:true});await context.close();
+  }
   for(const view of ['Verse','Chapter']){
     const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
     await page.locator('#memoryView'+view).check();await setRange(page,3,36,4,1);await dialog.locator('.memory-primary').click();
@@ -75,7 +86,7 @@ try{
     await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
     assert.notEqual(await dialog.locator('.memory-score').textContent(),'100%','Moving between units must preserve the first checked wrong answer');
     await dialog.locator('.memory-retry-all').click();await dialog.locator('.memory-next').click();await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('.memory-result').first().locator('.memory-diff').last().textContent(),'—','Skipped blank answers render as blank, never undefined');
+    assert(await dialog.locator('.memory-result').first().locator('.memory-missing').count()>0,'Skipped blank answers show the missing canonical passage');
     await dialog.locator('.memory-retry-all').click();await fillUnit(page,dialog);await dialog.locator('.memory-next').click();await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
     assert.equal(await dialog.locator('.memory-score').textContent(),'100%','An unchecked saved draft is graded when the full result is shown');
     assert.deepEqual(errors,[]);observations.push({view,flow:'manual previous/next, first/last boundaries, wrong and unchecked navigation, in-memory drafts and first-check score preserved',pass:true});await context.close();
@@ -92,10 +103,10 @@ try{
     await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
     assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent})),readerBefore,'Quiz selection must not change the reading location');
     if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
-    await page.route('**/data/Genesis.json',route=>route.abort());
+    await page.route('**/scripture/krv1961/Genesis.json',route=>route.abort());
     await dialog.locator('#memoryBook').selectOption('0');await dialog.locator('.memory-load-status[role=alert]').waitFor({state:'visible'});
     assert(await dialog.locator('.memory-primary').isDisabled(),'Failed book load cannot start a stale passage');
-    await page.unroute('**/data/Genesis.json');await dialog.getByRole('button',{name:'다시 불러오기',exact:true}).click();
+    await page.unroute('**/scripture/krv1961/Genesis.json');await dialog.getByRole('button',{name:'다시 불러오기',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===50&&!document.querySelector('#memoryFromChapter')?.disabled);
     assert(await dialog.locator('.memory-primary').isEnabled());
     assert.deepEqual(errors,[]);observations.push({flow:'independent book selection, Psalm119 verses175–176, reading location preserved, load failure blocks stale start, reload recovery',pass:true});await context.close();
@@ -118,7 +129,8 @@ try{
     assert.equal(await identity(dialog),'3:16');
     await input.fill('오답');await input.press('Enter');
     assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');
-    assert.equal(await dialog.locator('.memory-result .memory-diff').first().textContent(),answer,'Show readable expected answer');
+    assert.equal(await dialog.locator('.memory-result .memory-diff').count(),1,'Show one combined comparison');
+    assert.equal(await dialog.locator('.memory-result .memory-diff').first().evaluate(n=>[...n.children].filter(s=>!s.matches('.memory-wrong,.memory-extra')).map(s=>s.textContent).join('')),answer,'Combined comparison preserves the complete correct passage');
     await input.press('Enter');assert.equal(await identity(dialog),'3:16','Wrong answer cannot skip');
     await input.fill(answer.replace(/\s/g,'')+'!');
     await input.evaluate(n=>{n.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));});
@@ -285,7 +297,9 @@ try{
         if(kind!=='wrong')assert.equal(styles.color,legend.color);
         const luminance=rgb=>rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
         const background=await dialog.evaluate(n=>getComputedStyle(n).backgroundColor);const a=luminance(styles.color),b=luminance(background);assert((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'Colored comparison text must remain readable');
-        if(kind==='extra')assert(styles.line.includes('line-through'));else assert(styles.line.includes('underline'));
+        if(kind==='extra')assert(styles.line.includes('line-through'));
+        else if(kind==='missing')assert(styles.line.includes('underline'));
+        else {const diagonal=await run.evaluate(n=>({transform:getComputedStyle(n,'::after').transform,color:getComputedStyle(n,'::after').backgroundColor}));assert.notEqual(diagonal.transform,'none');assert.equal(diagonal.color,styles.color,'The diagonal stroke is the same red as the wrong character');assert.equal(styles.line,'none');}
         if(kind==='missing')assert.equal(styles.style,'dotted');palette.push({kind,...styles});
       }
       assert.equal(palette[1].color,palette[2].color,'Missing and extra characters use the same neutral gray');
@@ -320,7 +334,7 @@ try{
     await first.fill(await answerFor(page,3,16));await last.focus();await dialog.locator('.memory-primary').click();
     assert(await second.evaluate(n=>document.activeElement===n),'After correction, grading must move to the next remaining error');assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),1);
     assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1);
-    await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),0);assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
+    await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),await dialog.locator('textarea').count(),'All-correct checks also display every correct passage');assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
     assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, next remaining error after correction, reduced-height navigation, clean success',pass:true});await context.close();
   }
   for(const width of (local?[320,390,430,1280]:[390,1280])){

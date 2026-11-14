@@ -33,7 +33,7 @@ if product == 'random-ppobgi':
     require('locales.js', 'window.RandomPickerLocales=P')
     require('functions/_middleware.js', 'hreflang', 'x-default', 'canonical')
 else:
-    for name in ['validate-i18n', 'validate-navigation', 'validate-search-progress']:
+    for name in ['validate-i18n', 'validate-navigation', 'validate-search-progress', 'validate-scripture']:
         run('node', f'tools/{name}.mjs')
     for lang in 'en fr de zh ru la pt ar'.split():
         require(f'{lang}/index.html', f'hreflang="{lang}"',
@@ -48,7 +48,8 @@ for path in root.rglob('*'):
     rel = path.relative_to(root)
     if any(p.startswith('.') or p in {'dist', 'tests', 'tools', 'functions', 'migrations', 'node_modules', 'qa_evidence'} for p in rel.parts):
         continue
-    if path.is_file() and path.suffix in {'.html', '.js', '.css', '.svg', '.png', '.txt', '.xml'}:
+    if path.is_file() and (path.suffix in {'.html', '.js', '.css', '.svg', '.png', '.txt', '.xml'} or
+                          (product == 'bible-reader' and rel.parts[0] == 'scripture' and path.suffix == '.json')):
         target = dist / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)

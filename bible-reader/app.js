@@ -33,7 +33,8 @@ const prevButtons=[$("#prevChapterBottom")].filter(Boolean),nextButtons=[$("#nex
 const searchForm=$("#searchForm"),searchInput=$("#searchInput"),searchButton=$("#searchButton"),searchPanel=$("#searchPanel"),searchSummary=$("#searchSummary"),searchResults=$("#searchResults");
 const cache=new Map(), pendingBooks=new Map(); const SEARCH_LIMIT=100,SEARCH_BATCH_SIZE=6;
 // The default book is also shipped in the HTML, so the first read does not
-// depend on a second host. Other books and translations keep the normal fetch.
+// depend on another request. All default-translation books are shipped on this
+// origin; other translations retain their existing provider.
 try {
   const initial=document.querySelector('#initial-scripture-data');
   if(initial){const data=JSON.parse(initial.textContent);if(data.chapters?.length===21)cache.set('krv1961:John',data);}
@@ -56,7 +57,7 @@ async function fetchBook(book,translationId=activeTranslationId){
   const request=(async()=>{
     let data;
     if(tr.type==="krv"){
-      const url=`https://raw.githubusercontent.com/bluesaurel/Korean-Bible-1961-KRV/main/data/${book.file}.json`;
+      const url=`/scripture/krv1961/${book.file}.json`;
       const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=await r.json();
     }else{
       const url=`https://raw.githubusercontent.com/midvash/bible-data/main/versions/${tr.lang}/${tr.slug}/books/${book.osis}.json`;

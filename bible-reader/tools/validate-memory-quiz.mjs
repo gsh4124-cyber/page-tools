@@ -4,7 +4,11 @@ import assert from 'node:assert/strict';
 
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
-const {grade,normalize,labels,passageRows,passageReference,subsetReference,createSession}=context.window.BibleMemory;
+const {grade,normalize,comparisonRuns,labels,passageRows,passageReference,subsetReference,createSession}=context.window.BibleMemory;
+for(const [expected,entered] of [['예수께서 눈물을 흘리시더라','애수께서 물을 흘리시더라요'],['내가 보매','또 내가보매'],['Love, one another!','loveoneanother'],['كلمة','كلمه'],['café','cafe'],['İstanbul','istanbul'],['a😀 b','a b'],['말씀','']]){
+  const runs=comparisonRuns(expected,entered);
+  assert.equal(runs.filter(run=>!['wrong','extra'].includes(run.kind)).map(run=>run.text).join(''),expected.normalize('NFC'),'Merged feedback must preserve the exact canonical text');
+}
 assert.equal(grade('하나님이 세상을 이처럼 사랑하사','하나님이세상을\n이처럼 사랑하사.').score,100);
 assert.equal(grade('Love, one another!','LOVE ONE ANOTHER').exact,true);
 assert.equal(grade('가나다','가나다').exact,true,'NFC equivalent Korean must match');
