@@ -37,6 +37,8 @@ async function openPage(width=390,route='/',expectedChapter=null,options={}){
   await page.locator('#verses .verse').first().waitFor({timeout:40000});
   if(expectedChapter)await page.waitForFunction(chapter=>document.querySelector('#chapterSelect')?.value===String(chapter)&&document.querySelector('#verses .verse[data-verse="176"]'),expectedChapter,{timeout:40000});
   await page.locator('.memory-menu-button').waitFor({state:'attached'});
+  await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
+  await page.evaluate(()=>document.fonts.ready.then(()=>true));
   await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
   await page.locator('#memoryQuizDialog').waitFor({state:'visible'});
   return {context,page,errors};

@@ -45,6 +45,10 @@ try{
     await page.goto(base+'/?qa=mobile',{waitUntil:'domcontentloaded'});
     await page.locator('#verses .verse').first().waitFor({timeout:40000});
     await page.locator('.memory-menu-button').waitFor({state:'attached'});
+    // A late webfont changes the menu's hit coordinates on WebKit. Click only
+    // after the initial reader and font layout have settled, without retries.
+    await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
+    await page.evaluate(()=>document.fonts.ready.then(()=>true));
     if(profile.keyboard)await page.evaluate(()=>Object.assign(window.__qaViewport,{width:innerWidth,height:innerHeight}));
     await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
     const dialog=page.locator('#memoryQuizDialog');await dialog.waitFor({state:'visible'});
