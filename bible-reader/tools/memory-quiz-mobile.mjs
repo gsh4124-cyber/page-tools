@@ -45,12 +45,11 @@ try{
     await page.goto(base+'/?qa=mobile',{waitUntil:'domcontentloaded'});
     await page.locator('#verses .verse').first().waitFor({timeout:40000});
     await page.locator('.memory-menu-button').waitFor({state:'attached'});
-    // A late webfont changes the menu's hit coordinates on WebKit. Click only
-    // after the initial reader and font layout have settled, without retries.
+    // Settle the initial reader/font layout before exercising mobile touch.
     await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
     await page.evaluate(()=>document.fonts.ready.then(()=>true));
     if(profile.keyboard)await page.evaluate(()=>Object.assign(window.__qaViewport,{width:innerWidth,height:innerHeight}));
-    await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
+    await page.locator('#toolbarMoreToggle').tap();await page.locator('.memory-menu-button').tap();
     const dialog=page.locator('#memoryQuizDialog');await dialog.waitFor({state:'visible'});
     if(profile.largeText)await page.addStyleTag({content:'.memory-quiz{font-size:24px!important}.memory-quiz textarea{font-size:28px!important}.memory-quiz button{font-size:24px!important}.memory-header h2{font-size:28px!important}'});
     if(profile.safeArea)await dialog.evaluate(d=>{d.style.setProperty('--memory-safe-top','47px');d.style.setProperty('--memory-safe-bottom','34px');});
