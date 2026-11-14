@@ -134,7 +134,8 @@
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
     ...Object.fromEntries(['shortChange','retryWrong','retryAll','review'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
     ...Object.fromEntries(['correct','practice','help','start','preview','editRetry'].map((key,i)=>[key,(COMPACT_COPY[code]||COMPACT_COPY.en)[i]])),
-    ...(code==='ko'?{wrong:'오자',missing:'탈자',extra:'추가'}:{})});
+    ...Object.fromEntries(['book','loading','loadError','reload'].map((key,i)=>[key,({ko:['성경책','본문을 불러오는 중…','본문을 불러오지 못했습니다. 다시 시도해 주세요.','다시 불러오기'],en:['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'],fr:['Livre','Chargement…','Impossible de charger le passage. Réessayez.','Recharger'],de:['Buch','Text wird geladen…','Text konnte nicht geladen werden. Bitte erneut versuchen.','Erneut laden'],zh:['书卷','正在加载经文…','无法加载经文，请重试。','重新加载'],ru:['Книга','Загрузка текста…','Не удалось загрузить текст. Повторите попытку.','Загрузить снова'],la:['Liber','Textus oneratur…','Textus onerari non potuit. Iterum tenta.','Iterum onera'],pt:['Livro','Carregando passagem…','Não foi possível carregar a passagem. Tente novamente.','Recarregar'],ar:['السفر','جارٍ تحميل النص…','تعذر تحميل النص. حاول مجدداً.','إعادة التحميل']}[code]||['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'])[i]])),
+    ...(code==='ko'?{wrong:'오자',missing:'빠진 글자',extra:'더 쓴 글자'}:{})});
   window.BibleMemory = {normalize, grade, labels, passageRows, passageReference, subsetReference, createSession};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
@@ -149,10 +150,12 @@
     const l=labels(lang()),chapter=Number(state.chapter);
     const source=[...root.querySelectorAll('.verse[data-verse]')].map(row=>({chapter,verse:Number(row.dataset.verse),text:row.querySelector('.verse-text')?.textContent?.trim()||'',selected:row.classList.contains('multi-selected')})).filter(row=>row.verse&&row.text);
     if(!source.length||!document.querySelector('#status')?.hidden)return;
-    const selected=source.filter(row=>row.selected),book=window.BibleI18n?.bookName?.(Number(state.bookIndex))||BOOKS[state.bookIndex]?.ko||'';
+    const readerBookIndex=Number(state.bookIndex),selected=source.filter(row=>row.selected);
+    let quizBookIndex=readerBookIndex,book=window.BibleI18n?.bookName?.(quizBookIndex)||BOOKS[quizBookIndex]?.ko||'';
+    const quizTranslationId=activeTranslationId;
     const version=document.querySelector('#translationSelect')?.selectedOptions[0]?.textContent||'';
-    const chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
-    const chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b);
+    let chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
+    let chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b),bookLoadRun=0;
     const config={view:'verse',selected:!!selected.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
     let rows=[],attemptRows=[],reviewOnly=false,started=0,session=null;
     const reference=items=>passageReference(book,items);
@@ -217,16 +220,21 @@
       card.append(el('p','memory-counts',['wrong','missing','extra'].map(kind=>`${l[kind]} ${g.parts.filter(p=>p.kind===kind).length}`).join(' · ')));return card;
     }
     function setup(){
+      ++bookLoadRun;const activeDialog=dialog;
       context.textContent=`${book} · ${version}`;dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
       const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
         input.addEventListener('change',()=>{config.view=value;});label.append(input,document.createTextNode(text));views.append(label);
       }
-      const range=el('details','memory-range'),rangeTitle=el('summary'),fields=el('div','memory-fields memory-chapter-fields');range.append(rangeTitle);
+      const range=el('details','memory-range'),rangeTitle=el('summary'),fields=el('div','memory-fields memory-chapter-fields');range.open=true;range.append(rangeTitle);
+      const bookField=el('label','memory-book-field',l.book),bookSelect=el('select');bookSelect.id='memoryBook';
+      for(const item of BOOKS){const option=el('option','',window.BibleI18n?.bookName?.(item.index)||item.ko);option.value=String(item.index);bookSelect.append(option);}
+      bookSelect.value=String(quizBookIndex);bookField.append(bookSelect);range.append(bookField);
       const fromChapter=el('select'),toChapter=el('select'),fromVerse=el('select'),toVerse=el('select');
       fromChapter.id='memoryFromChapter';toChapter.id='memoryToChapter';fromVerse.id='memoryFromVerse';toVerse.id='memoryToVerse';
-      for(const n of chapterNumbers)for(const select of [fromChapter,toChapter]){const option=el('option','',String(n));option.value=String(n);select.append(option);}
+      function fillChapters(){for(const select of [fromChapter,toChapter]){select.replaceChildren();for(const n of chapterNumbers){const option=el('option','',String(n));option.value=String(n);select.append(option);}}}
+      fillChapters();
       fromChapter.value=String(config.fromChapter);toChapter.value=String(config.toChapter);
       function fillVerses(chapterSelect,verseSelect,value,last=false){
         const items=passageRows(chapters,Number(chapterSelect.value),1,Number(chapterSelect.value),Number.MAX_SAFE_INTEGER);verseSelect.replaceChildren();
@@ -235,18 +243,42 @@
       }
       fillVerses(fromChapter,fromVerse,config.fromVerse);fillVerses(toChapter,toVerse,config.toVerse,true);
       const useSelected=el('input');useSelected.type='checkbox';useSelected.checked=config.selected;useSelected.id='memoryUseSelected';
-      if(selected.length){const label=el('label','memory-use-selected');label.append(useSelected,document.createTextNode(`${l.selected} (${selected.length})`));range.append(label);}
+      const selectedLabel=el('label','memory-use-selected');selectedLabel.append(useSelected,document.createTextNode(`${l.selected} (${selected.length})`));selectedLabel.hidden=!selected.length||quizBookIndex!==readerBookIndex;range.append(selectedLabel);
       for(const [text,select] of [[l.firstChapter,fromChapter],[l.from,fromVerse],[l.lastChapter,toChapter],[l.to,toVerse]]){const label=el('label','',text);label.append(select);fields.append(label);}
-      range.append(fields,el('p','memory-rule',l.chapterScope));
+      const loadStatus=el('p','memory-load-status');loadStatus.hidden=true;loadStatus.setAttribute('role','status');
+      const reloadButton=button(l.reload,()=>loadQuizBook());reloadButton.hidden=true;
+      range.append(fields,loadStatus,reloadButton);
       const study=el('details','memory-study'),studyTitle=el('summary','',l.preview),passage=el('div','memory-preview');study.append(studyTitle,passage);
       const summary=el('p','memory-reference');
+      let loading=false,loadFailed=false;
       function refresh(){
-        config.selected=!!selected.length&&useSelected.checked;config.fromChapter=Number(fromChapter.value);config.toChapter=Number(toChapter.value);config.fromVerse=Number(fromVerse.value);config.toVerse=Number(toVerse.value);
-        for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected;
+        config.selected=quizBookIndex===readerBookIndex&&!!selected.length&&useSelected.checked;config.fromChapter=Number(fromChapter.value);config.toChapter=Number(toChapter.value);config.fromVerse=Number(fromVerse.value);config.toVerse=Number(toVerse.value);
+        selectedLabel.hidden=!selected.length||quizBookIndex!==readerBookIndex;useSelected.disabled=loading||loadFailed;
+        for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected||loading||loadFailed;
         rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
-        summary.textContent=`${reference(rows)} · ${rows.length} ${l.count}`;rangeTitle.textContent=l.range;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
+        if(loading||loadFailed)rows=[];
+        summary.textContent=rows.length?`${reference(rows)} · ${rows.length} ${l.count}`:'';rangeTitle.textContent=l.range;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
       }
       const startButton=button(l.start,()=>begin(),'memory-primary');
+      async function loadQuizBook(){
+        const run=++bookLoadRun,index=Number(bookSelect.value);quizBookIndex=index;loading=true;loadFailed=false;useSelected.checked=false;
+        book=window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||'';context.textContent=`${book} · ${version}`;
+        loadStatus.textContent=l.loading;loadStatus.hidden=false;loadStatus.setAttribute('role','status');reloadButton.hidden=true;refresh();
+        try{
+          const data=await fetchBook(BOOKS[index],quizTranslationId);
+          if(run!==bookLoadRun||dialog!==activeDialog||!dialog?.open)return;
+          if(!data?.chapters?.length)throw new Error('Empty passage');
+          chapters=data.chapters;chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b);
+          book=window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||'';context.textContent=`${book} · ${version}`;
+          fillChapters();fromChapter.value=toChapter.value=String(chapterNumbers[0]);
+          fillVerses(fromChapter,fromVerse,1);fillVerses(toChapter,toVerse,null,true);loadStatus.hidden=true;
+        }catch(_){
+          if(run!==bookLoadRun||dialog!==activeDialog||!dialog?.open)return;
+          loadFailed=true;loadStatus.textContent=l.loadError;loadStatus.setAttribute('role','alert');reloadButton.hidden=false;
+        }
+        loading=false;refresh();
+      }
+      bookSelect.addEventListener('change',loadQuizBook);
       fromChapter.addEventListener('change',()=>{fillVerses(fromChapter,fromVerse,1);if(Number(toChapter.value)<Number(fromChapter.value)){toChapter.value=fromChapter.value;fillVerses(toChapter,toVerse,null,true);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toChapter.addEventListener('change',()=>{fillVerses(toChapter,toVerse,null,true);if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse,1);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});

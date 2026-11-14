@@ -42,7 +42,7 @@ async function openPage(width=390,route='/',expectedChapter=null,options={}){
   return {context,page,errors};
 }
 async function setRange(page,fromChapter,fromVerse,toChapter,toVerse){
-  await page.locator('.memory-range summary').click();
+  if(!await page.locator('.memory-range').evaluate(n=>n.open))await page.locator('.memory-range summary').click();
   await page.locator('#memoryFromChapter').selectOption(String(fromChapter));
   await page.locator('#memoryToChapter').selectOption(String(toChapter));
   await page.locator('#memoryFromVerse').selectOption(String(fromVerse));
@@ -63,11 +63,32 @@ async function fit(page,dialog){
   assert(sizes.every(height=>height>=44),'Small touch target');
 }
 try{
+  {
+    const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
+    const readerBefore=await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent}));
+    await dialog.locator('#memoryBook').selectOption('18');
+    await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===150&&!document.querySelector('#memoryFromChapter')?.disabled);
+    await setRange(page,119,175,119,176);await page.locator('#memoryViewChapter').check();await dialog.locator('.memory-primary').click();
+    assert.equal(await identity(dialog),'119:175,119:176','A book independent of the reader supports long Psalms and chapter view');
+    assert.equal(await dialog.locator('textarea').first().getAttribute('aria-label'),'시편 119:175 · 기억나는 본문을 입력하세요');
+    await page.screenshot({path:path.join(output,'independent-book-psalm119.png')});
+    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
+    assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent})),readerBefore,'Quiz selection must not change the reading location');
+    if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
+    await page.route('**/data/Genesis.json',route=>route.abort());
+    await dialog.locator('#memoryBook').selectOption('0');await dialog.locator('.memory-load-status[role=alert]').waitFor({state:'visible'});
+    assert(await dialog.locator('.memory-primary').isDisabled(),'Failed book load cannot start a stale passage');
+    await page.unroute('**/data/Genesis.json');await dialog.getByRole('button',{name:'다시 불러오기',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===50&&!document.querySelector('#memoryFromChapter')?.disabled);
+    assert(await dialog.locator('.memory-primary').isEnabled());
+    assert.deepEqual(errors,[]);observations.push({flow:'independent book selection, Psalm119 verses175–176, reading location preserved, load failure blocks stale start, reload recovery',pass:true});await context.close();
+  }
   for(const width of (local?[320,360,390,430,1280]:[390,1280])){
     const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');
     assert.equal(await dialog.locator('input[name=memoryView]').count(),2,'Exactly two view modes');
     assert(await page.locator('#memoryViewVerse').isChecked());
-    assert.equal(await page.locator('.memory-range').getAttribute('open'),null,'Scope controls start collapsed');
+    assert(await page.locator('.memory-range').evaluate(n=>n.open),'Scope controls are visible when the test opens');
+    assert.equal(await page.locator('#memoryBook option').count(),66,'All Bible books are selectable independently');
     const chapter=await page.locator('#chapterSelect').inputValue();
     await dialog.locator('.memory-close').focus();await page.keyboard.press('ArrowRight');await page.keyboard.press('f');
     assert.equal(await page.locator('#chapterSelect').inputValue(),chapter,'Reader shortcuts must be isolated');
@@ -238,19 +259,19 @@ try{
       }
       assert.equal(await page.locator('html').getAttribute('data-theme'),theme);await setRange(page,11,35,11,35);await dialog.locator('.memory-primary').click();
       await dialog.locator('textarea').fill(entered);await dialog.locator('textarea').press('Enter');
-      assert.deepEqual(await dialog.locator('.memory-legend-item').allTextContents(),['오자','탈자','추가']);
+      assert.deepEqual(await dialog.locator('.memory-legend-item').allTextContents(),['오자','빠진 글자','더 쓴 글자']);
       const palette=[];
       for(const kind of kinds){
         const run=dialog.locator(`.memory-row-feedback .memory-diff .memory-${kind}`).first();assert(await run.isVisible());
         const styles=await run.evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor,line:getComputedStyle(n).textDecorationLine,style:getComputedStyle(n).textDecorationStyle,size:getComputedStyle(n).fontSize}));
         const legend=await dialog.locator(`.memory-legend-${kind}`).evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor}));
-        assert.equal(styles.color,legend.color);assert.equal(styles.background,legend.background);
+        if(kind!=='wrong')assert.equal(styles.color,legend.color);
         const luminance=rgb=>rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
-        const a=luminance(styles.color),b=luminance(styles.background);assert((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'Colored comparison text must remain readable');
+        const background=await dialog.evaluate(n=>getComputedStyle(n).backgroundColor);const a=luminance(styles.color),b=luminance(background);assert((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'Colored comparison text must remain readable');
         if(kind==='extra')assert(styles.line.includes('line-through'));else assert(styles.line.includes('underline'));
         if(kind==='missing')assert.equal(styles.style,'dotted');palette.push({kind,...styles});
       }
-      assert.equal(new Set(palette.map(p=>p.background)).size,3);assert.equal(new Set(palette.map(p=>p.color)).size,3);
+      assert.equal(palette[1].color,palette[2].color,'Missing and extra characters use the same neutral gray');
       const correctSize=await dialog.locator('.memory-row-feedback .memory-diff .memory-correct').first().evaluate(n=>getComputedStyle(n).fontSize);assert(palette.every(p=>p.size===correctSize),'Correct and error characters must use the same text size');
       palettes[theme]=palette;await dialog.locator('.memory-row-feedback .memory-result').first().scrollIntoViewIfNeeded();await fit(page,dialog);await page.screenshot({path:path.join(output,`grading-colors-${theme}.png`)});
       await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');

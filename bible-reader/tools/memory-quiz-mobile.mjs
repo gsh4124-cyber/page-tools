@@ -51,7 +51,7 @@ try{
     if(profile.largeText)await page.addStyleTag({content:'.memory-quiz{font-size:24px!important}.memory-quiz textarea{font-size:28px!important}.memory-quiz button{font-size:24px!important}.memory-header h2{font-size:28px!important}'});
     if(profile.safeArea)await dialog.evaluate(d=>{d.style.setProperty('--memory-safe-top','47px');d.style.setProperty('--memory-safe-bottom','34px');});
     await page.locator('#memoryView'+(view==='verse'?'Verse':'Chapter')).check();
-    await dialog.locator('.memory-range summary').click();
+    if(!await dialog.locator('.memory-range').evaluate(n=>n.open))await dialog.locator('.memory-range summary').click();
     await page.locator('#memoryFromVerse').selectOption('1');await page.locator('#memoryToVerse').selectOption('2');
     await dialog.locator('.memory-primary').click();
     if(profile.keyboard){await page.evaluate(({height,width})=>{Object.assign(window.__qaViewport,{height,width:width||innerWidth,offsetTop:25});window.__qaViewport.dispatchEvent(new Event('resize'));},{height:profile.keyboard,width:profile.visibleWidth});await page.waitForFunction(h=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===h,profile.keyboard);}
