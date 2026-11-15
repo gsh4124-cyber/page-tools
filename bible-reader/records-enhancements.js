@@ -50,22 +50,34 @@
     if(typeof loadCurrent==='function') await loadCurrent({scrollTop:true});
   }
 
+  function modalKeys(container,event,close){
+    if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close();return;}
+    if(event.key!=='Tab')return;
+    const controls=[...container.querySelectorAll('button:not(:disabled),textarea,input:not(:disabled),select:not(:disabled),[tabindex="0"]')].filter(n=>n.getClientRects().length);
+    const first=controls[0],last=controls.at(-1);
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+  }
+
   function openRecordNoteEditor({id,title,onSaved}){
+    const opener=document.activeElement;
     document.querySelector('.record-note-backdrop')?.remove();
     document.querySelector('.record-note-editor')?.remove();
     const backdrop=document.createElement('div'); backdrop.className='record-note-backdrop';
-    const editor=document.createElement('div'); editor.className='verse-note-editor record-note-editor';
+    const editor=document.createElement('div'); editor.className='verse-note-editor record-note-editor';editor.setAttribute('role','dialog');editor.setAttribute('aria-modal','true');editor.setAttribute('aria-labelledby','record-note-title');
     const heading=document.createElement('strong'); heading.textContent=`메모 · ${title}`;
-    const textarea=document.createElement('textarea'); textarea.value=recordNote(id); textarea.placeholder='메모를 입력하세요';
+    heading.id='record-note-title';
+    const textarea=document.createElement('textarea'); textarea.value=recordNote(id); textarea.placeholder='메모를 입력하세요';textarea.setAttribute('aria-label',heading.textContent);
     const actions=document.createElement('div'); actions.className='verse-note-actions';
-    const close=()=>{editor.remove();backdrop.remove();};
+    const close=(refresh=false)=>{editor.remove();backdrop.remove();if(refresh)onSaved?.();const target=opener?.isConnected?opener:document.querySelector('.notebook-tabs button.active:not([hidden])');target?.focus({preventScroll:true});};
     actions.append(
-      button('저장',()=>{saveRecordNote(id,textarea.value);close();onSaved?.();}),
-      button('메모 삭제',()=>{saveRecordNote(id,'');close();onSaved?.();}),
-      button('취소',close)
+      button('저장',()=>{saveRecordNote(id,textarea.value);close(true);}),
+      button('메모 삭제',()=>{saveRecordNote(id,'');close(true);}),
+      button('취소',()=>close())
     );
     backdrop.addEventListener('pointerdown',event=>{ if(event.target===backdrop) close(); });
     editor.addEventListener('pointerdown',event=>event.stopPropagation());
+    backdrop.addEventListener('keydown',event=>modalKeys(editor,event,()=>close()));
     editor.append(heading,textarea,actions); backdrop.append(editor); document.body.append(backdrop); requestAnimationFrame(()=>textarea.focus());
   }
 
@@ -194,6 +206,11 @@
   }
 
   function ensureNotebookBackdrop(panel){
+    const opener=document.activeElement;
+    const overlay=()=>!window.matchMedia('(min-width:1000px)').matches;
+    const syncMode=()=>panel.setAttribute('aria-modal',String(overlay()));
+    panel.setAttribute('role','dialog');syncMode();window.addEventListener('resize',syncMode);
+    panel.addEventListener('keydown',event=>{if(event.key==='Escape'||overlay())modalKeys(panel,event,()=>panel.querySelector('.notebook-close')?.click());});
     let backdrop=document.querySelector('.notebook-backdrop');
     if(!backdrop){
       backdrop=document.createElement('div'); backdrop.className='notebook-backdrop';
@@ -208,8 +225,9 @@
     const close=panel.querySelector('.notebook-close');
     if(close&&!close.dataset.backdropCleanup){
       close.dataset.backdropCleanup='true';
-      close.addEventListener('click',()=>document.querySelector('.notebook-backdrop')?.remove());
+      panel.addEventListener('bible-reader-notebook-close',()=>{window.removeEventListener('resize',syncMode);document.querySelector('.notebook-backdrop')?.remove();if(opener?.isConnected)opener.focus({preventScroll:true});},{once:true});
     }
+    close?.focus({preventScroll:true});
   }
 
   function enhance(panel){

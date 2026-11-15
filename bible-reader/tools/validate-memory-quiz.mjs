@@ -62,7 +62,9 @@ assert.equal(session.move(100),false,'Manual next stops at the last unit');
 assert.equal(session.move(0.5),false,'Manual movement requires a whole unit');
 assert.equal(session.unitCount,4);
 assert.equal(session.advance(),false,'Cannot skip an unchecked verse');
-assert.equal(session.check([' ']).empty,true);assert.equal(session.advance(),false);
+const blankSession=createSession(combined);const blankCheck=blankSession.check([' ']);
+assert.equal(blankCheck.correct,false);assert.equal(blankCheck.grades[0].score,0);assert(blankCheck.grades[0].parts.every(p=>p.kind==='missing'));assert.equal(blankSession.advance(),false);
+blankSession.check(['third']);assert.equal(blankSession.firstAnswers[0],' ','Viewing a blank answer preserves its first-check score');
 assert.equal(session.check(['wrong']).correct,false);assert.equal(session.advance(),false);
 assert.equal(session.check(['third']).correct,true);assert.equal(session.index,0,'Checking must not also advance');
 session.invalidate();assert.equal(session.advance(),false,'Editing a correct answer must require another check');
@@ -75,5 +77,5 @@ assert.equal(chapterSession.unitCount,3);chapterSession.check(['third']);chapter
 assert.equal(chapterSession.current.map(item=>item.row.verse).join(','),'1,2');
 assert.equal(chapterSession.check(['next first','']).correct,false);assert.equal(chapterSession.advance(),false);
 assert.equal(chapterSession.check(['next first','next second']).correct,true);
-assert.equal(chapterSession.check(['','']).empty,true);assert.equal(chapterSession.advance(),false,'Empty check clears stale correctness');
+assert.equal(chapterSession.check(['','']).correct,false);assert.equal(chapterSession.advance(),false,'Empty check clears stale correctness');
 console.log('Memory quiz PASS: grading, Unicode/9 languages, chapter ranges, separate check/advance, wrong-answer blocking, edit invalidation, first checks and final stop.');

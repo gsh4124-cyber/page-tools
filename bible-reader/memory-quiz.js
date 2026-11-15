@@ -102,7 +102,7 @@
       move(delta){const next=index+delta;if(!Number.isInteger(delta)||next<0||next>=units.length)return false;index=next;correct=false;return true;},
       check(values){
         const current=units[index]||[];
-        if(!current.length||!values.some(value=>normalize(value))){correct=false;return {empty:true,correct:false,grades:[]};}
+        if(!current.length){correct=false;return {empty:true,correct:false,grades:[]};}
         const grades=current.map((item,i)=>{if(firstAnswers[item.index]===undefined)firstAnswers[item.index]=String(values[i]||'');return grade(item.row.text,values[i]||'');});
         correct=grades.every(g=>g.exact);return {empty:false,correct,grades};
       },
@@ -382,6 +382,7 @@
           error.textContent=l.editRetry;error.hidden=false;feedback.append(errorLegend());
           checked.grades.forEach((g,i)=>{if(!g.exact)rowFeedbacks[i].append(gradeCard(items[i].row,values[i],g));});
           focusAnswer(checked.grades.findIndex(g=>!g.exact));
+          if(!values.some(value=>normalize(value)))rowFeedbacks[0]?.scrollIntoView({block:'nearest',behavior:'instant'});
         }
       }
       const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,feedback,status,primary,aids);

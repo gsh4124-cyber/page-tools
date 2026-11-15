@@ -128,6 +128,9 @@ try{
     assert.equal(await identity(dialog),'3:16');assert.equal(await dialog.locator('.memory-preview,.memory-peek,.memory-hint').count(),0,'No text reveal or hints during a test');
     const input=dialog.locator('textarea'),answer=await answerFor(page,3,16);
     await input.press('Enter');assert(await dialog.locator('.memory-error[role=alert]').isVisible());
+    assert.equal(await dialog.locator('.memory-row-feedback .memory-diff').textContent(),answer,'Blank Enter reveals the complete canonical passage');
+    assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');
+    assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'check','A revealed blank answer cannot advance as correct');
     assert.equal(await identity(dialog),'3:16');
     await input.fill('오답');await input.press('Enter');
     assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');

@@ -9,4 +9,12 @@
 .notebook-backdrop{position:fixed;inset:0;z-index:129;background:rgba(0,0,0,.04)}
 .record-note-backdrop{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18);backdrop-filter:blur(1px)}
 .record-note-backdrop .record-note-editor{position:relative;left:auto;top:auto;transform:none;z-index:141}
+.record-note-editor{max-height:calc(100dvh - 24px);overflow:auto;box-sizing:border-box}
+.record-note-editor textarea{font-size:16px}
+.record-note-editor .verse-note-actions{flex-wrap:wrap}
+.record-note-editor .verse-note-actions button,.notebook-close,.notebook-item-actions button{min-height:44px}
+.notebook-panel{z-index:530}
+.notebook-backdrop{z-index:529}
+.record-note-backdrop{z-index:550}
+.record-note-backdrop .record-note-editor{z-index:551}
 @media(max-width:430px){.notebook-tabs button{font-size:12px;padding-inline:3px}.notebook-data-tools{justify-content:stretch}.notebook-data-tools button{flex:1}}
