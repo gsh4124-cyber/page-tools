@@ -336,6 +336,7 @@
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
       content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;syncViewport();
+      if(dialog.open){bookSelect.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
     }
     function begin(items=rows,isReview=false){attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
@@ -355,7 +356,7 @@
       const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
       const rowFeedbacks=[];
-      function clearFeedback(){feedback.replaceChildren();feedback.removeAttribute('data-correct');rowFeedbacks.forEach(row=>row.replaceChildren());}
+      function clearFeedback(){feedback.replaceChildren();feedback.removeAttribute('data-correct');rowFeedbacks.forEach(row=>row.replaceChildren());inputs.forEach(input=>input.removeAttribute('aria-invalid'));}
       function focusAnswer(index){const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:'start',behavior:'instant'});}
       const inputs=items.map(({row,index})=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
@@ -364,7 +365,7 @@
         input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
         const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();clearFeedback();input.removeAttribute('aria-invalid');error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
+        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();clearFeedback();error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});

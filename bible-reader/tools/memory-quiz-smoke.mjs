@@ -336,11 +336,15 @@ try{
       await page.setViewportSize({width,height:844});
       await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===844);
     }
-    await first.fill(await answerFor(page,3,16));await last.focus();await dialog.locator('.memory-primary').click();
+    await first.fill(await answerFor(page,3,16));
+    assert.equal(await dialog.locator('textarea[aria-invalid]').count(),0,'Editing clears stale grading attributes alongside all inline comparisons');
+    await last.focus();await dialog.locator('.memory-primary').click();
     assert(await second.evaluate(n=>document.activeElement===n),'After correction, grading must move to the next remaining error');assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),1);
     assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1);
     await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),await dialog.locator('textarea').count(),'All-correct checks also display every correct passage');assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
-    assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, next remaining error after correction, reduced-height navigation, clean success',pass:true});await context.close();
+    await dialog.locator('.memory-aids button').click();
+    assert(await page.locator('#memoryBook').evaluate(n=>document.activeElement===n),'Change passage returns focus to the book selector');
+    assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, cleared stale grading, next remaining error after correction, reduced-height navigation, clean success and passage focus',pass:true});await context.close();
   }
   for(const width of (local?[320,390,430,1280]:[390,1280])){
     const {context,page,errors}=await openPage(width),dialog=page.locator('#memoryQuizDialog');
