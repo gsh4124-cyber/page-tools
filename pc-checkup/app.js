@@ -40,7 +40,7 @@ function initMouse(){
   refresh();
 }
 
-let media = {micStream:null,micCtx:null,micRaf:null,camStream:null};
+let media = {micStream:null,micCtx:null,micRaf:null,camStream:null,micRun:0,camRun:0};
 
 function mediaErrorMessage(err, kind){
   const label=kind==="camera" ? "카메라" : "마이크";
@@ -57,6 +57,7 @@ async function initMic(){
   const stop=$("#stopMic"), canvas=$("#wave"), ctx2=canvas.getContext("2d");
   let analyser, data;
   function stopMic(status="정지됨"){
+    media.micRun++;
     if(media.micRaf) cancelAnimationFrame(media.micRaf);
     media.micStream?.getTracks().forEach(t=>t.stop());
     media.micCtx?.close().catch?.(()=>{});
@@ -65,9 +66,12 @@ async function initMic(){
   }
   stop.addEventListener("click",()=>stopMic());
   start.addEventListener("click", async()=>{
+    let run;
     try{
       stopMic("마이크 시작 중");
+      run=media.micRun;
       const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      if(run!==media.micRun){stream.getTracks().forEach(t=>t.stop());return;}
       media.micStream=stream;
       const AC=window.AudioContext||window.webkitAudioContext;
       if(!AC) throw new Error("AudioContext unsupported");
@@ -78,11 +82,14 @@ async function initMic(){
       setText("micStatus","입력 감지 중");
       try{
         const devices=await navigator.mediaDevices.enumerateDevices();
+        if(run!==media.micRun)return;
         setText("micDevice", devices.find(d=>d.kind==="audioinput" && d.deviceId===stream.getAudioTracks()[0].getSettings().deviceId)?.label || stream.getAudioTracks()[0].label || "기본 마이크");
       }catch{
+        if(run!==media.micRun)return;
         setText("micDevice",stream.getAudioTracks()[0].label || "기본 마이크");
       }
       const draw=()=>{
+        if(run!==media.micRun)return;
         analyser.getByteTimeDomainData(data);
         let sum=0; for(const v of data){ const n=(v-128)/128; sum+=n*n; }
         const rms=Math.sqrt(sum/data.length);
@@ -94,33 +101,39 @@ async function initMic(){
         ctx2.stroke();
         media.micRaf=requestAnimationFrame(draw);
       }; draw();
-    }catch(err){ const msg=mediaErrorMessage(err,"mic"); stopMic(msg); }
+    }catch(err){ if(run!==media.micRun)return;const msg=mediaErrorMessage(err,"mic"); stopMic(msg); }
   });
 }
 
 async function initCam(){
   const start=$("#startCam"); if(!start) return;
   const video=$("#camVideo"), sel=$("#camSelect");
-  async function stopCam(status="정지됨"){
+  function stopCam(status="정지됨"){
+    media.camRun++;
     media.camStream?.getTracks().forEach(t=>t.stop()); media.camStream=null; video.srcObject=null; setText("camStatus",status);
   }
   async function startCam(deviceId){
+    let run;
     try{
-      await stopCam("카메라 시작 중");
+      stopCam("카메라 시작 중");run=media.camRun;
       const constraints={video:deviceId?{deviceId:{exact:deviceId}}:true,audio:false};
-      const stream=await navigator.mediaDevices.getUserMedia(constraints); media.camStream=stream; video.srcObject=stream;
+      const stream=await navigator.mediaDevices.getUserMedia(constraints);
+      if(run!==media.camRun){stream.getTracks().forEach(t=>t.stop());return;}
+      media.camStream=stream; video.srcObject=stream;
       await video.play();
+      if(run!==media.camRun)return;
       const track=stream.getVideoTracks()[0], s=track.getSettings();
       setText("camStatus","카메라 정상 입력");
       setText("camResolution",`${s.width||video.videoWidth} × ${s.height||video.videoHeight}`);
       try{
         const devices=await navigator.mediaDevices.enumerateDevices();
+        if(run!==media.camRun)return;
         const cams=devices.filter(d=>d.kind==="videoinput");
         const current=track.getSettings().deviceId;
         sel.innerHTML="";
         cams.forEach((d,i)=>{ const o=document.createElement("option");o.value=d.deviceId;o.textContent=d.label||`카메라 ${i+1}`;if(d.deviceId===current)o.selected=true;sel.appendChild(o);});
       }catch{}
-    }catch(err){ const msg=mediaErrorMessage(err,"camera"); await stopCam(msg); }
+    }catch(err){ if(run!==media.camRun)return;const msg=mediaErrorMessage(err,"camera"); stopCam(msg); }
   }
   start.addEventListener("click",()=>startCam(sel.value||undefined));
   $("#stopCam").addEventListener("click",()=>stopCam());
@@ -221,6 +234,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   initMouse();initMic();initCam();initSpeaker();initDisplay();initCheckup();
 });
 window.addEventListener("beforeunload",()=>{
+  media.micRun++;media.camRun++;
   media.micStream?.getTracks().forEach(t=>t.stop());
   media.camStream?.getTracks().forEach(t=>t.stop());
 });
