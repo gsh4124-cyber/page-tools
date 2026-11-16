@@ -8,6 +8,11 @@
       parts:a.map(character=>({kind:'correct',expected:character,entered:character}))};
     if (!b.length) return {distance:a.length, units:a.length, exact:false, score:0,
       parts:a.map(character=>({kind:'missing',expected:character,entered:''}))};
+    let prefix=0;while(prefix<Math.min(a.length,b.length)&&a[prefix]===b[prefix])prefix++;
+    if(prefix===Math.min(a.length,b.length)){
+      const distance=Math.abs(a.length-b.length),units=Math.max(a.length,b.length);
+      return {distance,units,exact:false,score:Math.min(99,Math.round(100*(1-distance/units))),parts:[...a.slice(0,prefix).map(character=>({kind:'correct',expected:character,entered:character})),...a.slice(prefix).map(character=>({kind:'missing',expected:character,entered:''})),...b.slice(prefix).map(character=>({kind:'extra',expected:'',entered:character}))]};
+    }
     const width = b.length + 1, table = new Uint16Array((a.length + 1) * width);
     for (let i = 0; i <= a.length; i++) table[i * width] = i;
     for (let j = 0; j <= b.length; j++) table[j] = j;
@@ -92,7 +97,7 @@
   function createSession(rows,view='verse') {
     const units=[];rows.forEach((row,index)=>{
       const last=units[units.length-1];
-      if(view==='chapter'&&last&&last[0].row.chapter===row.chapter)last.push({row,index});else units.push([{row,index}]);
+      if(view==='chapter'&&last&&last[0].row.chapter===row.chapter&&last[0].row.bookIndex===row.bookIndex)last.push({row,index});else units.push([{row,index}]);
     });
     let index=0,correct=false;const firstAnswers=Array(rows.length);
     return {
@@ -109,6 +114,22 @@
       advance(){if(!correct||index>=units.length)return false;index++;correct=false;return true;}
     };
   }
+  const passageKey=row=>`${row.bookIndex}:${row.chapter}:${row.verse}`;
+  function bookPassageReference(rows,nameFor,sparse=false){
+    const groups=[];for(const row of rows){const last=groups.at(-1);if(last&&last[0].bookIndex===row.bookIndex)last.push(row);else groups.push([row]);}
+    return groups.map(group=>(sparse?subsetReference:passageReference)(nameFor(group[0].bookIndex),group)).join(' · ');
+  }
+  const COLLECTION_COPY={
+    ko:['성구 모음','선택 범위를 모음에 추가','모은 성구만 시험','모음 비우기','제거','성구 주소만 이 브라우저에 저장됩니다. 답안은 저장하지 않습니다.','모음의 본문을 불러오지 못했습니다. 다시 불러와 주세요.'],
+    en:['Passage collection','Add selected range to collection','Test only collected verses','Clear collection','Remove','Only verse references are saved in this browser. Answers are not saved.','Could not load the collected passages. Please reload.'],
+    fr:['Collection de versets','Ajouter la sélection','Tester les versets collectés','Vider la collection','Retirer','Seules les références sont conservées dans ce navigateur, pas les réponses.','Impossible de charger la collection. Réessayez.'],
+    de:['Verssammlung','Auswahl hinzufügen','Nur gesammelte Verse testen','Sammlung leeren','Entfernen','Nur Versangaben werden in diesem Browser gespeichert, keine Antworten.','Die Sammlung konnte nicht geladen werden. Bitte erneut laden.'],
+    zh:['经文集合','将所选范围加入集合','仅测试集合中的经节','清空集合','移除','仅在此浏览器保存经文位置，不保存答案。','无法加载集合中的经文，请重试。'],
+    ru:['Сборник стихов','Добавить выбранный отрывок','Проверить только собранные стихи','Очистить сборник','Убрать','В браузере сохраняются только ссылки на стихи, не ответы.','Не удалось загрузить сборник. Повторите попытку.'],
+    la:['Collectio versuum','Adde locum electum','Versus collectos tantum proba','Collectionem dele','Remove','Loci tantum in hoc navigatro servantur, non responsa.','Collectio onerari non potuit. Iterum onera.'],
+    pt:['Coleção de versículos','Adicionar trecho à coleção','Testar apenas os versículos reunidos','Limpar coleção','Remover','Somente referências são salvas neste navegador, não as respostas.','Não foi possível carregar a coleção. Tente novamente.'],
+    ar:['مجموعة الآيات','إضافة النطاق إلى المجموعة','اختبار الآيات المجمعة فقط','مسح المجموعة','إزالة','تُحفظ مراجع الآيات فقط في هذا المتصفح، ولا تُحفظ الإجابات.','تعذر تحميل المجموعة. أعد المحاولة.']
+  };
   const KEYS = 'title close intro range selected from to preview start answer check peek hide practice result retry change rule reference expected entered perfect tryAgain progress empty whole unavailable count time wrong missing extra score privacy'.split(' ');
   const COPY = {
     ko:['타이핑 암기 시험','닫기','구절을 읽고 기억한 뒤, 본문을 가리고 직접 써 보세요.','시험 범위','선택한 구절','시작 절','마지막 절','먼저 읽고 기억하세요','본문 가리고 시험 시작','기억나는 본문을 입력하세요','채점하기','본문 보기 · 연습으로 전환','본문 가리기','본문을 확인한 연습','시험 결과','다시 시험','범위 바꾸기','띄어쓰기·줄바꿈·문장부호·대소문자는 채점에서 제외합니다.','시험 구절','정답','내 답','모두 정확합니다!','틀린 부분을 확인하고 다시 도전해 보세요.','입력한 절','한 절 이상 입력한 뒤 채점해 주세요.','현재 장·편 전체','본문을 불러온 뒤 다시 열어 주세요.','절','초','다른 글자','빠진 글자','추가한 글자','정확도','입력한 답은 저장하거나 서버로 전송하지 않습니다.'],
@@ -166,6 +187,7 @@
     ar:['صحيح','تدريب','مساعدة','ابدأ','معاينة النص','صحح وتحقق مجدداً.']
   };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
+    ...Object.fromEntries(['collection','addCollection','useCollection','clearCollection','removeCollection','savedCollection','collectionError'].map((key,i)=>[key,(COLLECTION_COPY[code]||COLLECTION_COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
     ...Object.fromEntries(['shortChange','retryWrong','retryAll','review'].map((key,i)=>[key,(AID_COPY[code]||AID_COPY.en)[i]])),
@@ -173,7 +195,7 @@
     ...Object.fromEntries(['previousVerse','previousChapter'].map((key,i)=>[key,({ko:['이전 절','이전 장'],en:['Previous verse','Previous chapter'],fr:['Verset précédent','Chapitre précédent'],de:['Vorheriger Vers','Vorheriges Kapitel'],zh:['上一节','上一章'],ru:['Предыдущий стих','Предыдущая глава'],la:['Versus prior','Capitulum prius'],pt:['Versículo anterior','Capítulo anterior'],ar:['الآية السابقة','الأصحاح السابق']}[code]||['Previous verse','Previous chapter'])[i]])),
     ...Object.fromEntries(['book','loading','loadError','reload'].map((key,i)=>[key,({ko:['성경책','본문을 불러오는 중…','본문을 불러오지 못했습니다. 다시 시도해 주세요.','다시 불러오기'],en:['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'],fr:['Livre','Chargement…','Impossible de charger le passage. Réessayez.','Recharger'],de:['Buch','Text wird geladen…','Text konnte nicht geladen werden. Bitte erneut versuchen.','Erneut laden'],zh:['书卷','正在加载经文…','无法加载经文，请重试。','重新加载'],ru:['Книга','Загрузка текста…','Не удалось загрузить текст. Повторите попытку.','Загрузить снова'],la:['Liber','Textus oneratur…','Textus onerari non potuit. Iterum tenta.','Iterum onera'],pt:['Livro','Carregando passagem…','Não foi possível carregar a passagem. Tente novamente.','Recarregar'],ar:['السفر','جارٍ تحميل النص…','تعذر تحميل النص. حاول مجدداً.','إعادة التحميل']}[code]||['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'])[i]])),
     ...(code==='ko'?{wrong:'오자',missing:'빠진 글자',extra:'더 쓴 글자'}:{})});
-  window.BibleMemory = {normalize, grade, comparisonRuns, comparisonWords, labels, passageRows, passageReference, subsetReference, createSession};
+  window.BibleMemory = {normalize, grade, comparisonRuns, comparisonWords, labels, passageRows, passageReference, subsetReference, createSession,passageKey,bookPassageReference};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -185,7 +207,7 @@
     if(dialog?.open)return;
     opener=event?.currentTarget||document.activeElement;
     const l=labels(lang()),chapter=Number(state.chapter);
-    const source=[...root.querySelectorAll('.verse[data-verse]')].map(row=>({chapter,verse:Number(row.dataset.verse),text:row.querySelector('.verse-text')?.textContent?.trim()||'',selected:row.classList.contains('multi-selected')})).filter(row=>row.verse&&row.text);
+    const source=[...root.querySelectorAll('.verse[data-verse]')].map(row=>({bookIndex:Number(state.bookIndex),chapter,verse:Number(row.dataset.verse),text:row.querySelector('.verse-text')?.textContent?.trim()||'',selected:row.classList.contains('multi-selected')})).filter(row=>row.verse&&row.text);
     if(!source.length||!document.querySelector('#status')?.hidden)return;
     const readerBookIndex=Number(state.bookIndex),selected=source.filter(row=>row.selected);
     let quizBookIndex=readerBookIndex,book=window.BibleI18n?.bookName?.(quizBookIndex)||BOOKS[quizBookIndex]?.ko||'';
@@ -193,11 +215,16 @@
     const version=document.querySelector('#translationSelect')?.selectedOptions[0]?.textContent||'';
     let chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
     let chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b),bookLoadRun=0;
-    const config={view:'verse',selected:!!selected.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
+    const collectionKey='bible-reader-memory-passages-v1';
+    let collectionRefs=[];try{const saved=JSON.parse(localStorage.getItem(collectionKey)||'[]');if(Array.isArray(saved))collectionRefs=[...new Map(saved.filter(r=>r&&Number.isInteger(r.bookIndex)&&r.bookIndex>=0&&r.bookIndex<BOOKS.length&&Number.isInteger(r.chapter)&&r.chapter>0&&Number.isInteger(r.verse)&&r.verse>0).map(r=>[passageKey(r),{bookIndex:r.bookIndex,chapter:r.chapter,verse:r.verse}])).values()];}catch{}
+    let collectionRows=[],collectionRun=0,collectionLoading=false,collectionFailed=false,setupRun=0;
+    const collectionTexts=new Map(),nameFor=index=>window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||book;
+    const config={view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
     let rows=[],attemptRows=[],draftAnswers=[],reviewOnly=false,started=0,session=null;
-    const reference=items=>passageReference(book,items);
-    const attemptReference=items=>reviewOnly?subsetReference(book,items):reference(items);
-    const rowReference=row=>`${row.chapter}:${row.verse}`;
+    const reference=items=>bookPassageReference(items,index=>nameFor(index??quizBookIndex),config.collection);
+    const attemptReference=items=>reviewOnly?bookPassageReference(items,index=>nameFor(index??quizBookIndex),true):reference(items);
+    const rowReference=row=>`${config.collection?nameFor(row.bookIndex)+' ':''}${row.chapter}:${row.verse}`;
+    const activeRows=()=>config.collection?collectionRows:rows;
     const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
     const header=el('header','memory-header'),title=el('h2','',l.title),closeButton=button(l.close,close,'memory-close');
@@ -250,7 +277,6 @@
     function queueViewport(event){if(event.type==='resize')revealFocused=true;if(!viewportFrame)viewportFrame=requestAnimationFrame(syncViewport);}
     window.addEventListener('resize',queueViewport);viewport?.addEventListener('resize',queueViewport);viewport?.addEventListener('scroll',queueViewport);
     dialog.addEventListener('close',()=>{window.removeEventListener('resize',queueViewport);viewport?.removeEventListener('resize',queueViewport);viewport?.removeEventListener('scroll',queueViewport);cancelAnimationFrame(viewportFrame);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
-    dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
     function preview(target,items){for(const row of items){const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p);}}
     function errorLegend(){
       const legend=el('div','memory-legend');legend.setAttribute('role','list');
@@ -271,7 +297,7 @@
     }
     function setup(){
       moveClose(header);
-      ++bookLoadRun;const activeDialog=dialog;
+      ++bookLoadRun;const activeDialog=dialog,currentSetup=++setupRun;
       context.textContent=`${book} · ${version}`;dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
       const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
@@ -302,15 +328,40 @@
       const study=el('details','memory-study'),studyTitle=el('summary','',l.preview),passage=el('div','memory-preview');study.append(studyTitle,passage);
       const summary=el('p','memory-reference');
       let loading=false,loadFailed=false;
+      const collection=el('details','memory-collection'),collectionTitle=el('summary'),collectionToggleLabel=el('label','memory-use-selected'),collectionToggle=el('input');collectionToggle.type='checkbox';collectionToggle.id='memoryUseCollection';collectionToggleLabel.append(collectionToggle,document.createTextNode(l.useCollection));
+      const collectionList=el('ul','memory-collection-list'),collectionStatus=el('p','memory-load-status');collectionStatus.setAttribute('role','status');
+      const persistCollection=()=>{try{localStorage.setItem(collectionKey,JSON.stringify(collectionRefs));}catch{}};
+      const clearCollection=button(l.clearCollection,()=>{collectionRefs=[];config.collection=false;persistCollection();loadCollection();},'memory-collection-clear');
+      const collectionRetry=button(l.reload,()=>loadCollection(),'memory-collection-reload');
+      collection.append(collectionTitle,collectionToggleLabel,el('p','memory-privacy',l.savedCollection),collectionStatus,collectionRetry,collectionList,clearCollection);
+      collection.open=!!collectionRefs.length;
+      function renderCollection(){
+        collectionTitle.textContent=`${l.collection} · ${collectionRefs.length} ${l.count}`;collectionToggle.checked=config.collection;collectionToggle.disabled=!collectionRefs.length;clearCollection.disabled=!collectionRefs.length;collectionRetry.hidden=!collectionFailed;
+        collectionStatus.hidden=!collectionLoading&&!collectionFailed;collectionStatus.textContent=collectionFailed?l.collectionError:l.loading;collectionStatus.setAttribute('role',collectionFailed?'alert':'status');
+        collectionList.replaceChildren();for(const ref of collectionRefs){const text=`${nameFor(ref.bookIndex)} ${ref.chapter}:${ref.verse}`,item=el('li'),remove=button('×',()=>{collectionRefs=collectionRefs.filter(r=>passageKey(r)!==passageKey(ref));if(!collectionRefs.length)config.collection=false;persistCollection();loadCollection();});remove.setAttribute('aria-label',`${l.removeCollection} ${text}`);item.append(el('span','',text),remove);collectionList.append(item);}
+      }
+      async function loadCollection(){
+        const run=++collectionRun,refs=collectionRefs.slice();collectionLoading=true;collectionFailed=false;collectionRows=[];refresh();
+        try{
+          const needed=[...new Set(refs.filter(ref=>!collectionTexts.has(passageKey(ref))).map(ref=>ref.bookIndex))];
+          const data=new Map(await Promise.all(needed.map(async index=>[index,await fetchBook(BOOKS[index],quizTranslationId)])));
+          const resolved=refs.map(ref=>{const cached=collectionTexts.get(passageKey(ref));if(cached)return cached;const text=data.get(ref.bookIndex)?.chapters?.find(ch=>Number(ch.chapter)===ref.chapter)?.verses?.find(v=>Number(v.verse)===ref.verse)?.text;if(!text)throw new Error('Missing collection verse');return {...ref,text:String(text).trim()};});
+          if(run!==collectionRun||currentSetup!==setupRun||dialog!==activeDialog||!dialog?.open)return;
+          resolved.forEach(row=>collectionTexts.set(passageKey(row),row));collectionRows=resolved;
+        }catch{if(run!==collectionRun||currentSetup!==setupRun||dialog!==activeDialog||!dialog?.open)return;collectionFailed=true;}
+        collectionLoading=false;refresh();
+      }
       function refresh(){
         config.selected=quizBookIndex===readerBookIndex&&!!selected.length&&useSelected.checked;config.fromChapter=Number(fromChapter.value);config.toChapter=Number(toChapter.value);config.fromVerse=Number(fromVerse.value);config.toVerse=Number(toVerse.value);
         selectedLabel.hidden=!selected.length||quizBookIndex!==readerBookIndex;useSelected.disabled=loading||loadFailed;
         for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected||loading||loadFailed;
         rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
         if(loading||loadFailed)rows=[];
-        summary.textContent=rows.length?`${reference(rows)} · ${rows.length} ${l.count}`:'';rangeTitle.textContent=l.range;startButton.disabled=!rows.length;passage.replaceChildren();preview(passage,rows);
+        const target=activeRows();summary.textContent=target.length?`${reference(target)} · ${target.length} ${l.count}`:'';rangeTitle.textContent=l.range;startButton.disabled=!target.length||(config.collection&&(collectionLoading||collectionFailed));passage.replaceChildren();preview(passage,target);addCollection.disabled=!rows.length||loading||loadFailed;renderCollection();
       }
       const startButton=button(l.start,()=>begin(),'memory-primary');
+      const addCollection=button(l.addCollection,()=>{for(const row of rows){const ref={bookIndex:quizBookIndex,chapter:row.chapter,verse:row.verse};if(!collectionRefs.some(r=>passageKey(r)===passageKey(ref)))collectionRefs.push(ref);collectionTexts.set(passageKey(ref),{...ref,text:row.text});}config.collection=true;collection.open=true;persistCollection();loadCollection();},'memory-collection-add');range.append(addCollection);
+      collectionToggle.addEventListener('change',()=>{config.collection=collectionToggle.checked;refresh();});
       async function loadQuizBook(){
         const run=++bookLoadRun,index=Number(bookSelect.value);quizBookIndex=index;loading=true;loadFailed=false;useSelected.checked=false;
         book=window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||'';context.textContent=`${book} · ${version}`;
@@ -335,10 +386,10 @@
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
-      content.append(views,summary,range,study,help,startButton);refresh();content.scrollTop=0;syncViewport();
+      content.append(views,summary,range,collection,study,help,startButton);refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
       if(dialog.open){bookSelect.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
     }
-    function begin(items=rows,isReview=false){attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
+    function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
       moveClose(header);
       context.textContent=reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
@@ -362,8 +413,8 @@
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.value=draftAnswers[index]||'';
-        input.setAttribute('aria-label',`${book} ${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
-        const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
+        input.setAttribute('aria-label',`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
+        const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.bookIndex??quizBookIndex}_${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
         input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();clearFeedback();error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;

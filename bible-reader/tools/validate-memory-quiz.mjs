@@ -4,7 +4,19 @@ import assert from 'node:assert/strict';
 
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
-const {grade,normalize,comparisonRuns,comparisonWords,labels,passageRows,passageReference,subsetReference,createSession}=context.window.BibleMemory;
+const {grade,normalize,comparisonRuns,comparisonWords,labels,passageRows,passageReference,subsetReference,createSession,passageKey,bookPassageReference}=context.window.BibleMemory;
+const repeated='아셀 지파 중에 일만 이천이요 납달리 지파 중에 일만 이천이요 므낫세 지파 중에 일만 이천이요';
+const prefix='아셀지파중에 일만 이천이요 납달리 지파 중에 일만이천';
+const prefixGrade=grade(repeated,prefix),prefixLength=Array.from(normalize(prefix)).length;
+assert.equal(prefixGrade.exact,false);assert.equal(prefixGrade.score,61);
+assert(prefixGrade.parts.slice(0,prefixLength).every(p=>p.kind==='correct'),'Exact prefix must remain correct despite repeated phrases');
+assert.equal(prefixGrade.parts.slice(prefixLength).map(p=>p.expected).join(''),normalize('이요 므낫세 지파 중에 일만 이천이요'));
+assert(prefixGrade.parts.slice(prefixLength).every(p=>p.kind==='missing'));
+assert.equal(grade('abcabc','abcabcabc').parts.slice(6).map(p=>p.entered).join(''),'abc','Extra repeated suffix is anchored at the end');
+const collected=[{bookIndex:42,chapter:3,verse:16,text:'first'},{bookIndex:0,chapter:3,verse:16,text:'second'},{bookIndex:0,chapter:5,verse:1,text:'third'}];
+assert.notEqual(passageKey(collected[0]),passageKey(collected[1]));
+assert.equal(bookPassageReference(collected,i=>i===42?'John':'Genesis',true),'John 3:16 · Genesis 3:16 · 5:1','Collection must not imply unselected intervening chapters');
+assert.equal(createSession(collected,'chapter').unitCount,3,'Different books with the same chapter number stay separate');
 for(const [expected,entered] of [['예수께서 눈물을 흘리시더라','애수께서 물을 흘리시더라요'],['내가 보매','또 내가보매'],['Love, one another!','loveoneanother'],['كلمة','كلمه'],['café','cafe'],['İstanbul','istanbul'],['a😀 b','a b'],['말씀','']]){
   const runs=comparisonRuns(expected,entered);
   assert.equal(runs.map(run=>run.kind==='wrong'?run.expected:run.kind==='extra'?'':run.text).join(''),expected.normalize('NFC'),'Merged feedback must preserve the exact canonical text');

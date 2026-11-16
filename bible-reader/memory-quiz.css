@@ -120,3 +120,11 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-stacked-controls .memory-aids{grid-column:1 / -1;grid-row:2}
 .memory-stacked-controls .memory-aids button{overflow-wrap:normal;word-break:normal}
 .memory-unit-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 12px}.memory-unit-nav button{min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:14px}
+.memory-collection{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+.memory-collection summary{min-height:44px;padding-block:10px;cursor:pointer;font-weight:650;overflow-wrap:anywhere}
+.memory-collection-list{list-style:none;margin:10px 0;padding:0;max-height:240px;overflow:auto}
+.memory-collection-list li{display:flex;align-items:center;gap:12px;justify-content:space-between;border-bottom:1px solid var(--line);padding:4px 0;font-size:15px;overflow-wrap:anywhere}
+.memory-collection-list li span{min-width:0}
+.memory-collection-list button{min-width:44px;min-height:44px;flex:none}
+.memory-collection-add,.memory-collection-clear,.memory-collection-reload{white-space:normal;overflow-wrap:anywhere;min-height:44px}
+.memory-collection-add{width:100%;margin-top:12px}
