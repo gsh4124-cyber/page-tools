@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 import re
 from mic_guide import add_mic_guide
+from output_guides import add_output_guide
 
 ROOT = Path('dist')
 ORIGIN = 'https://pc-checkup.pages.dev'
@@ -53,6 +54,8 @@ for path in pages:
     text = path.read_text(encoding='utf-8')
     if path.name == 'mic.html':
         text = add_mic_guide(text, lang)
+    if path.name in {'speaker.html', 'webcam.html'}:
+        text = add_output_guide(text, lang, path.name)
     privacy = (f'<p class="privacy-policy-link"><a href="/privacy/#{"ko" if lang == "ko" else "en"}" '
                f'style="display:inline-block;min-height:44px;padding:10px 0;color:inherit">{PRIVACY_LABELS[lang]}</a></p>')
     if text.count('</footer>') != 1:
@@ -119,6 +122,7 @@ for path in pages:
 # The home gained static language links and clearer entry content on November 5.
 last_modified = {ORIGIN+'/': '2026-11-05', ORIGIN+'/checkup': '2026-11-04', ORIGIN+'/mobile': '2026-11-04'}
 last_modified.update({url(lang, 'mic.html'): '2026-11-14' for lang in LOCALES})
+last_modified.update({url(lang, page): '2026-11-16' for lang in LOCALES for page in ['speaker.html', 'webcam.html']})
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>{escape(address)}</loc>' + (f'<lastmod>{last_modified[address]}</lastmod>' if address in last_modified else '') + '</url>\n' for address in canonical_urls)
