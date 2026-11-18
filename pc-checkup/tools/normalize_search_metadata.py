@@ -80,7 +80,9 @@ for path in pages:
             text = text.replace('</main>', guide + '</main>', 1)
     if lang == 'ko' and path.name in {'checkup.html', 'mobile.html'}:
         heading = {'checkup.html': 'PC·노트북 기기 점검', 'mobile.html': '휴대폰 기기 점검'}[path.name]
-        text = re.sub(r'<title>[\s\S]*?</title>', f'<title>{heading} | 기본 기능 검사 - DEVICE CHECKUP</title>', text, count=1)
+        page_title = ('중고 노트북 점검 | 키보드·화면·마이크 테스트 - DEVICE CHECKUP'
+                      if path.name == 'checkup.html' else f'{heading} | 기본 기능 검사 - DEVICE CHECKUP')
+        text = re.sub(r'<title>[\s\S]*?</title>', lambda _: f'<title>{page_title}</title>', text, count=1)
         text = re.sub(r'<h1>[\s\S]*?</h1>', f'<h1>{heading}</h1>', text, count=1)
         guide = Path(__file__).with_name('search_' + path.stem + '_ko.html').read_text(encoding='utf-8')
         if 'id="device-flow-guide"' not in text:
@@ -123,6 +125,7 @@ for path in pages:
 last_modified = {ORIGIN+'/': '2026-11-05', ORIGIN+'/checkup': '2026-11-04', ORIGIN+'/mobile': '2026-11-04'}
 last_modified.update({url(lang, 'mic.html'): '2026-11-14' for lang in LOCALES})
 last_modified.update({url(lang, page): '2026-11-16' for lang in LOCALES for page in ['speaker.html', 'webcam.html']})
+last_modified[ORIGIN+'/checkup'] = '2026-11-17'
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>{escape(address)}</loc>' + (f'<lastmod>{last_modified[address]}</lastmod>' if address in last_modified else '') + '</url>\n' for address in canonical_urls)
