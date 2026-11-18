@@ -101,11 +101,14 @@ jobs:
         run: |
           sudo python3 - <<'PY'
           from pathlib import Path
+          import re
           mirrors = Path('/etc/apt/apt-mirrors.txt')
           if mirrors.exists():
               original = mirrors.read_text()
-              for scheme in ('http', 'https'):
-                  original = original.replace(f'{scheme}://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+              original = re.sub(
+                  r'https?://(?:[A-Za-z0-9-]+\.)*archive\.ubuntu\.com/ubuntu',
+                  'https://archive.ubuntu.com/ubuntu', original
+              )
               mirrors.write_text(original)
           PY
       - name: Install browser engine
