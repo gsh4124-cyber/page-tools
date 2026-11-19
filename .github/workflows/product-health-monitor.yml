@@ -43,6 +43,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Trust checked-out workspace in container
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git -C "$GITHUB_WORKSPACE" ls-files > /dev/null
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -238,6 +242,10 @@ jobs:
           echo "Require new Cloudflare deployment: ${deploy_projects[*]:-none}"
           echo "projects=${projects[*]}" >> "$GITHUB_OUTPUT"
           echo "deploy_projects=${deploy_projects[*]}" >> "$GITHUB_OUTPUT"
+      - name: Trust checked-out workspace in container
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git -C "$GITHUB_WORKSPACE" ls-files > /dev/null
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'

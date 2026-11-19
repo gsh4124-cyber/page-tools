@@ -99,6 +99,10 @@ jobs:
         engine: [chromium, webkit, firefox]
     steps:
       - uses: actions/checkout@v4
+      - name: Trust checked-out workspace in container
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git -C "$GITHUB_WORKSPACE" ls-files > /dev/null
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
