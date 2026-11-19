@@ -263,17 +263,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Build output includes packaging-time metadata such as favicon links.
+          # Workflow-only runs skip the earlier deployment build, so prepare the
+          # same artifact here when it is not already available.
+          if [ ! -s bible-reader/dist/build-manifest.json ]; then
+            python3 tools/build_static.py bible-reader
+          fi
           for asset in index.html reader-experience.js topbar-polish.css; do
             tmp=$(mktemp)
             curl -fsSL --retry 2 --max-time 25 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?verify=$GITHUB_SHA" -o "$tmp"
-            if ! cmp -s "bible-reader/$asset" "$tmp"; then
-              echo "::error::Bible Reader live $asset does not match repository main at $GITHUB_SHA"
+            if ! cmp -s "bible-reader/dist/$asset" "$tmp"; then
+              echo "::error::Bible Reader live $asset does not match the built artifact at $GITHUB_SHA"
               rm -f "$tmp"
               exit 1
             fi
             rm -f "$tmp"
           done
-          echo "Bible Reader production source readback matched: HTML, JS and CSS."
+          echo "Bible Reader production artifact readback matched: HTML, JS and CSS."
       - uses: actions/setup-node@v4
         if: steps.changed.outputs.projects != ''
         with:
