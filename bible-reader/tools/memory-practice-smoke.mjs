@@ -39,9 +39,9 @@ try{
     const context=await browser.newContext({viewport:{width,height},hasTouch:true});
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
     const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));
-    await page.goto(base+'/?qa=memory-practice',{waitUntil:'domcontentloaded'});
+    await page.goto(base+(language==='ko'?'/':`/${language}/`)+'?qa=memory-practice',{waitUntil:'domcontentloaded'});
+    await page.locator('#verses .verse').first().waitFor({timeout:40000});
     await page.waitForFunction(()=>document.querySelector('#status')?.hidden&&window.BibleMemory&&document.querySelector('.memory-practice-menu-button'));
-    await page.locator('#languageSelect').selectOption(language);
     await page.evaluate(({key,saved})=>localStorage.setItem(key,JSON.stringify(saved)),{key,saved});
     const l=await page.evaluate(code=>BibleMemory.labels(code),language);
     await page.locator('#toolbarMoreToggle').click();
@@ -110,7 +110,7 @@ try{
     assert.equal(await page.locator('#memoryQuizTitle').textContent(),l.title);assert.equal(await start.textContent(),l.examStart);
     await start.click();assert.equal(await dialog.locator('.memory-practice-text,.memory-practice-controls').count(),0,'Exam never reveals practice source text');
     await dialog.locator('.memory-close').click();
-    await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
+    await page.reload({waitUntil:'domcontentloaded'});await page.locator('#verses .verse').first().waitFor({timeout:40000});await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
     assert.deepEqual(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key),[...saved,{bookIndex:42,chapter:3,verse:1}],'Restored references survive reload');
     assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),{book:42,chapter:3});assert.deepEqual(errors,[]);
     observations.push({width,height,language,delete_cancel_and_undo:true,undo_preserves_new_additions:true,practice_source_hide_repeat:true,drafts_preserved:true,practice_latest_results:true,exam_source_absent:true,restored_refs_persist:true,reader_position_preserved:true,physical_device_tested:false});
