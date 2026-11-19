@@ -499,7 +499,11 @@
       placeNotices();
       if(config.mode==='practice'){
         const controls=el('div','memory-practice-controls');
-        const reveal=button('',()=>{practiceShown=!practiceShown;practiceSources.forEach(text=>text.hidden=!practiceShown);syncReveal();},'memory-practice-reveal');
+        const reveal=button('',()=>{
+          practiceShown=!practiceShown;practiceSources.forEach(text=>text.hidden=!practiceShown);
+          if(!practiceShown){session.invalidate();clearFeedback();error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';}
+          syncReveal();
+        },'memory-practice-reveal');
         function syncReveal(){reveal.textContent=practiceShown?l.hidePracticeText:l.showPracticeText;reveal.setAttribute('aria-pressed',String(practiceShown));}
         reveal.setAttribute('aria-controls',practiceSources.map(text=>text.id).join(' '));syncReveal();
         controls.append(reveal,button(l.repeatPractice,()=>{items.forEach(({index})=>draftAnswers[index]='');session.invalidate();showUnit();},'memory-practice-repeat'));content.append(controls);

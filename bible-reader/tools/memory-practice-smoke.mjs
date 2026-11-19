@@ -95,6 +95,10 @@ try{
     assert(await sources.first().isVisible());
     await inputs.first().fill('wrong');await dialog.locator('.memory-primary').click();
     assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');
+    await page.locator('.memory-practice-reveal').click();
+    assert.equal(await dialog.locator('.memory-result').count(),0,'Hiding the passage also removes answer-revealing feedback');
+    assert.equal(await inputs.first().inputValue(),'wrong');
+    await page.locator('.memory-practice-reveal').click();
     await fillCorrect(page);await dialog.locator('.memory-primary').click();
     assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'true');
     await fit(page);await page.screenshot({path:path.join(output,`practice-writing-${width}.png`)});
