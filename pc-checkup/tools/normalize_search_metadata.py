@@ -84,6 +84,8 @@ for path in pages:
                       if path.name == 'checkup.html' else f'{heading} | 기본 기능 검사 - DEVICE CHECKUP')
         text = re.sub(r'<title>[\s\S]*?</title>', lambda _: f'<title>{page_title}</title>', text, count=1)
         text = re.sub(r'<h1>[\s\S]*?</h1>', f'<h1>{heading}</h1>', text, count=1)
+        if path.name == 'checkup.html':
+            text = re.sub(r'(<section class="tool-head">[\s\S]*?<p\b[^>]*>)[\s\S]*?(</p>)', r'\1중고 노트북 구매 전 키보드·화면·스피커·마이크·카메라를 직접 확인하고 결과를 기록하세요. 설치·가입 없이 무료로 사용할 수 있으며, 미확인 항목은 정상과 구별합니다.\2', text, count=1)
         guide = Path(__file__).with_name('search_' + path.stem + '_ko.html').read_text(encoding='utf-8')
         if 'id="device-flow-guide"' not in text:
             text = text.replace('</main>', guide + '</main>', 1)
@@ -125,7 +127,8 @@ for path in pages:
 last_modified = {ORIGIN+'/': '2026-11-05', ORIGIN+'/checkup': '2026-11-04', ORIGIN+'/mobile': '2026-11-04'}
 last_modified.update({url(lang, 'mic.html'): '2026-11-14' for lang in LOCALES})
 last_modified.update({url(lang, page): '2026-11-16' for lang in LOCALES for page in ['speaker.html', 'webcam.html']})
-last_modified[ORIGIN+'/checkup'] = '2026-11-17'
+last_modified[ORIGIN+'/checkup'] = '2026-11-19'
+last_modified[ORIGIN+'/'] = '2026-11-19'
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>{escape(address)}</loc>' + (f'<lastmod>{last_modified[address]}</lastmod>' if address in last_modified else '') + '</url>\n' for address in canonical_urls)
