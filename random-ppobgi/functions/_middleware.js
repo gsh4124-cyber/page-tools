@@ -82,6 +82,14 @@ export async function onRequest(context) {
   const rootPage=url.pathname==='/';
   const infoPage=/^\/(about|guide|privacy|terms|contact)\/$/.test(url.pathname);
   const languageMatch=url.pathname.match(new RegExp(`^/(${foreign.join('|')})/$`));
+  // Older localized pages used relative icon paths. Preserve those published
+  // resource URLs after the HTML moved to root-relative icon declarations.
+  const oldIcon=url.pathname.match(new RegExp(`^/(${foreign.join('|')})/(favicon\\.svg|favicon\\.ico|apple-touch-icon\\.png)$`));
+  if(oldIcon && (context.request.method==='GET'||context.request.method==='HEAD')){
+    const target=new URL('/'+oldIcon[2],url.origin);
+    target.search=url.search;
+    return Response.redirect(target.toString(),301);
+  }
   // Preserve previously published localized document links and their query flags.
   const oldInfo=url.pathname.match(new RegExp(`^/(${foreign.join('|')})/(about|guide|privacy|terms|contact)/$`));
   if(oldInfo){
