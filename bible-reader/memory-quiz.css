@@ -150,3 +150,22 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .topbar .toolbar-more-menu .memory-practice-menu-button{font-size:14px;white-space:normal;line-height:1.4}
 .topbar .toolbar-more-menu .memory-practice-menu-button::after{content:none}
 .topbar .toolbar-more-menu:has(.memory-practice-menu-button){max-height:calc(100dvh - 160px);overflow-y:auto;overscroll-behavior:contain}
+.memory-practice-row{margin:10px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.memory-practice-row[open]{border-color:color-mix(in srgb,var(--text) 45%,var(--line))}
+.memory-practice-row>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;box-sizing:border-box;min-height:44px;padding:10px 12px;list-style:none;font-size:14px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
+.memory-practice-row>summary::-webkit-details-marker{display:none}
+.memory-practice-row[open]>summary{background:var(--hover);border-bottom:1px solid var(--line)}
+.memory-practice-state{flex:none;font-size:12px;font-weight:400;color:var(--muted)}
+.memory-practice-state[data-complete=true]{font-weight:650;color:var(--text)}
+.memory-practice-row .memory-practice-text{margin:0;padding:14px;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.memory-practice-row .memory-answer-label{display:block;margin:0;padding:12px}
+.memory-practice-row .memory-answer{min-height:92px;margin:0;line-height:1.8}
+.memory-practice-row .memory-practice-controls{margin:0;padding:8px 12px;border-bottom:1px solid var(--line)}
+.memory-practice-row .memory-practice-controls button{flex-basis:100px}
+.memory-practice-row .memory-row-feedback:not(:empty){padding:12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.memory-practice-row .memory-result{margin:0;padding:0;border:0}
+.memory-practice-row .memory-result h4{display:none}
+.memory-practice-row .memory-diff{margin-bottom:0}
+.memory-practice-review{margin-block:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.memory-practice-review>summary{min-height:44px;padding:10px 12px;font-size:14px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
+.memory-practice-review .memory-result{margin:0;padding:12px}

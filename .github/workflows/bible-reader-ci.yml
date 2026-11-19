@@ -83,8 +83,15 @@ jobs:
 
   mobile-browser-qa:
     name: Mobile layout (${{ matrix.engine }})
-    # Keep the three engines on a reproducible, Playwright-supported dependency set.
+    # The official matching image includes all browser binaries, libraries and fonts.
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
+        working-directory: bible-reader
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -92,34 +99,27 @@ jobs:
         engine: [chromium, webkit, firefox]
     steps:
       - uses: actions/checkout@v4
+      - name: Trust checked-out workspace in container
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git -C "$GITHUB_WORKSPACE" ls-files > /dev/null
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Build local artifact
         run: python3 ../tools/build_static.py bible-reader
-      - name: Prefer canonical HTTPS Ubuntu archive
-        run: |
-          sudo python3 - <<'PY'
-          from pathlib import Path
-          import re
-          mirrors = Path('/etc/apt/apt-mirrors.txt')
-          if mirrors.exists():
-              original = mirrors.read_text()
-              original = re.sub(
-                  r'https?://(?:[A-Za-z0-9-]+\.)*archive\.ubuntu\.com/ubuntu',
-                  'https://archive.ubuntu.com/ubuntu', original
-              )
-              mirrors.write_text(original)
-          PY
-      - name: Install browser engine
-        run: |
-          npm install --no-save --package-lock=false playwright@1.64.1
-          npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Install matching Playwright package
+        run: npm install --no-save --package-lock=false playwright@1.64.1
       - name: Test typing practice and recoverable collection deletion
         if: matrix.engine == 'chromium'
         run: node tools/memory-practice-smoke.mjs --local
       - name: Test both views across mobile layouts
         env:
+          # GitHub mounts /github/home with a host owner; Firefox requires its own user's home.
+          HOME: /root
           MEMORY_QUIZ_ENGINES: ${{ matrix.engine }}
         run: node tools/memory-quiz-mobile.mjs --local
       - name: Test reading, notes and verse selection
@@ -173,3 +173,4 @@ jobs:
           test "$STATIC_RESULT" = success
           test "$BEHAVIOR_RESULT" = success
           test "$MOBILE_RESULT" = success
+

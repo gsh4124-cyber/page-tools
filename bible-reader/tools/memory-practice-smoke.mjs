@@ -29,10 +29,8 @@ async function fit(page){
   const box=await page.locator('#memoryQuizDialog').boundingBox(),size=page.viewportSize();
   assert(box.x>=-1&&box.y>=-1&&box.x+box.width<=size.width+1&&box.y+box.height<=size.height+1);
 }
-async function fillCorrect(page){
-  const values=await page.locator('#memoryQuizDialog textarea').evaluateAll(inputs=>inputs.map(input=>currentBookData.chapters.find(ch=>Number(ch.chapter)===Number(input.dataset.chapter)).verses.find(v=>Number(v.verse)===Number(input.dataset.verse)).text));
-  for(let i=0;i<values.length;i++)await page.locator('#memoryQuizDialog textarea').nth(i).fill(values[i]);
-  return values;
+async function expectedAnswers(page){
+  return page.locator('#memoryQuizDialog textarea').evaluateAll(inputs=>inputs.map(input=>currentBookData.chapters.find(ch=>Number(ch.chapter)===Number(input.dataset.chapter)).verses.find(v=>Number(v.verse)===Number(input.dataset.verse)).text));
 }
 try{
   for(const [width,height,language] of [[320,740,'ko'],[390,844,'en'],[844,390,'ar'],[1280,800,'ko']]){
@@ -76,11 +74,19 @@ try{
     assert(await page.locator('.memory-collection-clear').isHidden());
     await page.locator('#memoryViewChapter').check();
     await start.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,`practice-setup-${width}.png`)});await start.click();
-    const inputs=dialog.locator('textarea'),sources=dialog.locator('.memory-practice-text');
+    const inputs=dialog.locator('textarea'),sources=dialog.locator('.memory-practice-text'),cards=dialog.locator('.memory-practice-row');
     assert.equal(await inputs.count(),3);assert.equal(await sources.count(),3);
-    const expected=await fillCorrect(page);assert.deepEqual(await sources.allTextContents(),expected);
+    const expected=await expectedAnswers(page);assert.deepEqual(await sources.allTextContents(),expected);
+    assert.equal(await dialog.locator('.memory-practice-row[open]').count(),1);
+    assert.equal(await dialog.locator('textarea:visible').count(),1,'Chapter practice focuses one verse at a time');
     assert(await sources.first().isVisible());
-    await inputs.first().fill('practice draft');await page.locator('.memory-practice-reveal').click();
+    await page.screenshot({path:path.join(output,`practice-focused-${width}.png`)});
+    await inputs.first().fill('practice draft');
+    await cards.nth(2).locator('summary').click();await inputs.nth(2).fill('other draft');
+    await cards.first().locator('summary').click();
+    assert.equal(await inputs.first().inputValue(),'practice draft','Changing the focused verse preserves drafts');
+    assert.equal(await dialog.locator('.memory-practice-row[open]').count(),1);
+    await page.locator('.memory-practice-reveal').click();
     assert.equal(await page.locator('.memory-practice-reveal').textContent(),l.showPracticeText);
     for(const source of await sources.all())assert(await source.isHidden());
     assert.equal(await inputs.first().inputValue(),'practice draft','Hiding the source must preserve input');
@@ -93,33 +99,80 @@ try{
     }
     await page.locator('.memory-practice-reveal').click();assert(await sources.first().isVisible());
     await page.locator('.memory-practice-repeat').click();
-    for(const input of await inputs.all())assert.equal(await input.inputValue(),'');
+    assert.equal(await inputs.first().inputValue(),'');assert.equal(await inputs.nth(2).inputValue(),'other draft','Repeat clears only the focused verse');
     assert(await sources.first().isVisible());
     await inputs.first().fill('wrong');await dialog.locator('.memory-primary').click();
     assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'false');
+    assert.equal(await dialog.locator('.memory-practice-text:visible').count(),0,'Comparison replaces the source instead of adding a third passage copy');
+    assert.equal(await dialog.locator('.memory-diff:visible').count(),1);
+    await page.screenshot({path:path.join(output,`practice-correction-${width}.png`)});
     await page.locator('.memory-practice-reveal').click();
     assert.equal(await dialog.locator('.memory-result').count(),0,'Hiding the passage also removes answer-revealing feedback');
     assert.equal(await inputs.first().inputValue(),'wrong');
     await page.locator('.memory-practice-reveal').click();
-    await fillCorrect(page);await dialog.locator('.memory-primary').click();
-    assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'true');
+    for(let i=0;i<3;i++){
+      assert(await cards.nth(i).evaluate(card=>card.open));
+      await inputs.nth(i).fill(expected[i]);await dialog.locator('.memory-primary').click();
+      assert.equal(await dialog.locator('.memory-feedback').getAttribute('data-correct'),'true');
+      assert.equal(await dialog.locator('.memory-result:visible').count(),0,'Correct answers use a compact confirmation');
+      assert.equal(await dialog.locator('.memory-practice-text:visible').count(),1);
+      assert.equal(await dialog.locator('textarea:visible').count(),1);
+      if(i<2){assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'practice-next');await dialog.locator('.memory-primary').click();}
+    }
+    assert.equal(await cards.first().locator('.memory-practice-state').textContent(),l.correct);
     await fit(page);await page.screenshot({path:path.join(output,`practice-writing-${width}.png`)});
     await dialog.locator('.memory-primary').click();
     assert.equal(await dialog.locator('h3').textContent(),l.practiceResult);
     assert.equal(await dialog.locator('.memory-score').textContent(),'100%','Practice results use the latest answers after correction');
     assert((await dialog.innerText()).includes(l.practiceResultNote));
+    assert.equal(await dialog.locator('.memory-practice-review').count(),3);
+    assert.equal(await dialog.locator('.memory-diff:visible').count(),0,'Result details start folded when every verse is correct');
+    await dialog.locator('.memory-practice-review summary').first().click();assert.equal(await dialog.locator('.memory-diff:visible').count(),1);
     await dialog.getByRole('button',{name:l.change,exact:true}).click();await page.locator('#memoryModeExam').check();
     assert.equal(await page.locator('#memoryQuizTitle').textContent(),l.title);assert.equal(await start.textContent(),l.examStart);
     await start.click();assert.equal(await dialog.locator('.memory-practice-text,.memory-practice-controls').count(),0,'Exam never reveals practice source text');
     await dialog.locator('.memory-close').click();
     await page.reload({waitUntil:'domcontentloaded'});await page.locator('#verses .verse').first().waitFor({timeout:40000});await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
     assert.deepEqual(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key),[...saved,{bookIndex:42,chapter:3,verse:1}],'Restored references survive reload');
-    assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),{book:42,chapter:3});assert.deepEqual(errors,[]);
-    observations.push({width,height,language,delete_cancel_and_undo:true,undo_preserves_new_additions:true,practice_source_hide_repeat:true,drafts_preserved:true,practice_latest_results:true,exam_source_absent:true,restored_refs_persist:true,reader_position_preserved:true,physical_device_tested:false});
+    assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),{book:42,chapter:3});
+    if(width===1280&&language==='ko'){
+      await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-practice-menu-button').click();await page.locator('.memory-primary').click();
+      assert.equal(await dialog.locator('.memory-practice-row').count(),1);assert(await dialog.locator('.memory-practice-row>summary').isHidden());
+      const input=dialog.locator('textarea'),answer=(await expectedAnswers(page))[0];
+      await input.fill('wrong');await input.press('Enter');assert.equal(await dialog.locator('.memory-practice-text:visible').count(),0);assert.equal(await dialog.locator('.memory-diff:visible').count(),1);
+      await input.fill(answer);await input.press('Enter');assert.equal(await dialog.locator('.memory-diff:visible').count(),0);assert.equal(await dialog.locator('.memory-practice-text:visible').count(),1);
+      await input.press('Enter');assert.equal(await input.getAttribute('data-verse'),'17');
+      await dialog.locator('.memory-previous').click();assert.equal(await input.getAttribute('data-verse'),'16');assert.equal(await input.inputValue(),answer);
+      assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next','Confirmed practice work survives unit navigation');
+      await page.screenshot({path:path.join(output,'practice-single-1280.png')});await dialog.locator('.memory-close').click();
+    }
+    assert.deepEqual(errors,[]);
+    observations.push({width,height,language,delete_cancel_and_undo:true,undo_preserves_new_additions:true,practice_source_hide_repeat:true,drafts_preserved:true,practice_latest_results:true,focused_verse_only:true,comparison_reuses_source_panel:true,compact_results:true,exam_source_absent:true,restored_refs_persist:true,reader_position_preserved:true,physical_device_tested:false});
     await context.close();
   }
+  // A long chapter must keep its controls beside the active verse and never size hidden fields at zero width.
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true});await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
+    const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));
+    await page.goto(base+'/?qa=practice-long-chapter',{waitUntil:'domcontentloaded'});await page.locator('#verses .verse').first().waitFor({timeout:40000});await page.waitForFunction(()=>document.querySelector('.memory-practice-menu-button'));
+    await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-practice-menu-button').click();
+    await chooseMemory(page,'memoryBook',18);await chooseMemory(page,'memoryFromChapter',119);await chooseMemory(page,'memoryToChapter',119);
+    await chooseMemory(page,'memoryFromVerse',1);await chooseMemory(page,'memoryToVerse',176);await page.locator('#memoryViewChapter').check();await page.locator('#memoryQuizDialog .memory-primary').click();
+    const dialog=page.locator('#memoryQuizDialog'),cards=dialog.locator('.memory-practice-row'),inputs=dialog.locator('textarea');assert.equal(await cards.count(),176);
+    await inputs.first().fill('first draft');await cards.last().locator('summary').click();
+    assert.equal(await dialog.locator('.memory-practice-row[open]').count(),1);assert.equal(await dialog.locator('textarea:visible').count(),1);
+    assert(await dialog.locator('.memory-practice-controls').evaluate(node=>node.closest('details').open&&node.closest('details').querySelector('textarea').dataset.verse==='176'));
+    const answer=await cards.last().locator('.memory-practice-text').textContent();await inputs.last().fill(answer);assert((await inputs.last().boundingBox()).height<500);
+    await dialog.locator('.memory-practice-reveal').click();assert.equal(await inputs.last().inputValue(),answer);await dialog.locator('.memory-practice-repeat').click();
+    assert.equal(await inputs.last().inputValue(),'');assert.equal(await inputs.first().inputValue(),'first draft');
+    await dialog.locator('.memory-practice-reveal').click();await inputs.last().fill(answer);await dialog.locator('.memory-primary').click();
+    assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'practice-next');await fit(page);
+    await page.screenshot({path:path.join(output,'practice-psalm119-390.png')});await dialog.locator('.memory-primary').click();
+    assert(await cards.first().evaluate(card=>card.open));assert.equal(await inputs.first().inputValue(),'first draft');assert.deepEqual(errors,[]);
+    observations.push({width:390,chapter:'Psalm 119',verses:176,focused_verse_only:true,controls_follow_active_verse:true,repeat_preserves_other_drafts:true,hidden_input_sizing_safe:true,physical_device_tested:false});await context.close();
+  }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,observations,physical_device_tested:false},null,2));
-  console.log(`Memory practice QA PASS: ${observations.length} viewport/language flows, safe collection deletion and undo, visible/hidden source, repeat, drafts and exam isolation.`);
+  console.log(`Memory practice QA PASS: ${observations.length} viewport/language flows, focused verse cards, one source/comparison panel, per-verse checks, drafts, long chapters and exam isolation.`);
 }catch(error){
   if(debugPage&&!debugPage.isClosed()){
     await debugPage.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});

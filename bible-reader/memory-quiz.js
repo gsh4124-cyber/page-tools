@@ -198,7 +198,9 @@
     pt:['Modo','Memorizar digitando','Teste de memória','Copie o texto visível e depois oculte-o para praticar de memória.','Digite de memória com o texto oculto.','Começar a prática','Começar o teste','Trecho para prática','Praticar os versículos reunidos','Digite o texto mostrado acima','Mostrar texto','Ocultar texto','Digitar novamente','Resultado da prática','Com base nas respostas mais recentes.','Gerenciar coleção','Excluir todos os versículos salvos','Excluir todas as {count} referências salvas?','Excluir tudo','Cancelar','{count} versículos excluídos da coleção.','Desfazer'],
     ar:['وضع التدريب','الحفظ بالكتابة','اختبار الحفظ','انسخ النص الظاهر ثم أخفه للتدرب من الذاكرة.','اكتب من الذاكرة والنص مخفي.','بدء تدريب الكتابة','بدء اختبار الحفظ','نطاق التدريب','تدريب الآيات المجمعة فقط','اكتب النص المعروض أعلاه','عرض النص','إخفاء النص','الكتابة مجدداً','نتائج التدريب','حسب آخر الإجابات المدخلة.','إدارة المجموعة','حذف جميع الآيات المحفوظة','حذف جميع المراجع المحفوظة وعددها {count}؟','حذف الكل','إلغاء','تم حذف {count} آيات من المجموعة.','تراجع']
   };
+  const FOCUS_COPY={ko:['입력 전','입력 중','장별로 연습'],en:['Not started','In progress','Practise by chapter'],fr:['À écrire','En cours','Pratiquer par chapitre'],de:['Noch leer','In Bearbeitung','Kapitelweise üben'],zh:['待输入','输入中','按章练习'],ru:['Не начато','В процессе','Практика по главам'],la:['Nondum scriptum','In cursu','Per capitula exerce'],pt:['Não iniciado','Em andamento','Praticar por capítulo'],ar:['لم يبدأ','قيد الكتابة','التدريب حسب الأصحاح']};
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
+    ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
     ...Object.fromEntries(TRAINING_KEYS.map((key,i)=>[key,(TRAINING_COPY[code]||TRAINING_COPY.en)[i]])),
     ...Object.fromEntries(['collection','addCollection','useCollection','clearCollection','removeCollection','savedCollection','collectionError'].map((key,i)=>[key,(COLLECTION_COPY[code]||COLLECTION_COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
@@ -234,7 +236,7 @@
     let collectionRows=[],collectionRun=0,collectionLoading=false,collectionFailed=false,setupRun=0;
     const collectionTexts=new Map(),nameFor=index=>window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||book;
     const config={mode,view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
-    let lastDeletedCollection=null,practiceShown=true;
+    let lastDeletedCollection=null,practiceShown=true,practiceConfirmed=new Set();
     let rows=[],attemptRows=[],draftAnswers=[],reviewOnly=false,started=0,session=null;
     const reference=items=>bookPassageReference(items,index=>nameFor(index??quizBookIndex),config.collection);
     const attemptReference=items=>reviewOnly?bookPassageReference(items,index=>nameFor(index??quizBookIndex),true):reference(items);
@@ -259,6 +261,7 @@
     const measure=el('div');measure.setAttribute('aria-hidden','true');
     measure.style.cssText='position:fixed;left:-100000px;top:0;visibility:hidden;pointer-events:none;white-space:pre-wrap;overflow-wrap:anywhere;min-height:0;height:auto;margin:0;';dialog.append(measure);
     function fitAnswer(input){
+      if(!input.getClientRects().length)return;
       const style=getComputedStyle(input);
       for(const property of ['boxSizing','font','lineHeight','letterSpacing','wordSpacing','textIndent','textTransform','tabSize','padding','border','wordBreak','direction'])measure.style[property]=style[property];
       measure.style.width=`${input.getBoundingClientRect().width}px`;
@@ -320,10 +323,11 @@
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryMode';input.value=value;input.id=value==='practice'?'memoryModePractice':'memoryModeExam';input.checked=config.mode===value;
         input.addEventListener('change',()=>{config.mode=value;syncMode();refresh();});label.append(input,document.createTextNode(text));modes.append(label);
       }
-      const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
+      const views=el('fieldset','memory-views');views.append(el('legend','',l.view));let chapterViewText;
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
-        input.addEventListener('change',()=>{config.view=value;});label.append(input,document.createTextNode(text));views.append(label);
+        const copy=document.createTextNode(text);if(value==='chapter')chapterViewText=copy;
+        input.addEventListener('change',()=>{config.view=value;});label.append(input,copy);views.append(label);
       }
       const range=el('details','memory-range'),rangeTitle=el('summary'),fields=el('div','memory-fields memory-chapter-fields');range.open=true;range.append(rangeTitle);
       const bookField=el('label','memory-book-field',l.book),bookSelect=el('select');bookSelect.id='memoryBook';
@@ -405,6 +409,7 @@
       function syncMode(){
         const practice=config.mode==='practice';title.textContent=practice?l.practiceTitle:l.title;dock.setAttribute('aria-label',title.textContent);
         modeDescription.textContent=practice?l.practiceIntro:l.examIntro;startButton.textContent=practice?l.practiceStart:l.examStart;collectionToggleText.nodeValue=practice?l.practiceUseCollection:l.useCollection;
+        chapterViewText.nodeValue=practice?l.practiceChapterView:l.chapterView;
       }
       const addCollection=button(l.addCollection,()=>{for(const row of rows){const ref={bookIndex:quizBookIndex,chapter:row.chapter,verse:row.verse};if(!collectionRefs.some(r=>passageKey(r)===passageKey(ref)))collectionRefs.push(ref);collectionTexts.set(passageKey(ref),{...ref,text:row.text});}config.collection=true;collection.open=true;persistCollection();loadCollection();},'memory-collection-add');range.append(addCollection);
       collectionToggle.addEventListener('change',()=>{config.collection=collectionToggle.checked;refresh();});
@@ -443,16 +448,17 @@
       content.append(modes,modeDescription,views,summary,range,collection,study,help,startButton);syncMode();refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
       if(dialog.open){rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
     }
-    function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
+    function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;practiceConfirmed=new Set();started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
       moveClose(header);
       context.textContent=config.mode==='practice'?`${version} · ${l.practiceTitle}`:reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
-      const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
+      const practice=config.mode==='practice',items=session.current,unitHeading=el('div','memory-unit-heading'),unitProgress=el('p','memory-progress',`${session.index+1} / ${session.unitCount}`);
+      unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),unitProgress);content.replaceChildren(unitHeading);
       shortNotices=el('div','memory-short-notices');content.append(shortNotices);
       const navigation=el('nav','memory-unit-nav');navigation.setAttribute('aria-label',l.view);
       const previous=button(config.view==='verse'?l.previousVerse:l.previousChapter,()=>{if(session.move(-1))showUnit();});
       const next=button(config.view==='verse'?l.nextVerse:l.nextChapter,()=>{if(session.move(1))showUnit();});
-      previous.classList.add('memory-previous');next.classList.add('memory-next');previous.disabled=session.index===0;next.disabled=session.index===session.unitCount-1;navigation.append(previous,next);content.append(navigation);
+      previous.classList.add('memory-previous');next.classList.add('memory-next');previous.disabled=session.index===0;next.disabled=session.index===session.unitCount-1;navigation.append(previous,next);navigation.hidden=practice&&session.unitCount===1;content.append(navigation);
       const form=el('div','memory-answers'),feedback=el('div','memory-feedback');feedback.setAttribute('aria-live','polite');
       const error=el('p','memory-error');error.hidden=true;error.setAttribute('role','alert');
       const primary=button(l.checkAnswer,act,'memory-primary');
@@ -461,26 +467,65 @@
       const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
       const rowFeedbacks=[];
-      const practiceSources=[];
-      function clearFeedback(){feedback.replaceChildren();feedback.removeAttribute('data-correct');rowFeedbacks.forEach(row=>row.replaceChildren());inputs.forEach(input=>input.removeAttribute('aria-invalid'));}
-      function focusAnswer(index){const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:'start',behavior:'instant'});}
-      const inputs=items.map(({row,index})=>{
+      const practiceSources=[],practiceCards=[],practiceStates=[],practiceChecked=items.map(({index})=>practiceConfirmed.has(index));let practiceIndex=0,practiceControls;
+      function clearFeedback(position){
+        feedback.replaceChildren();feedback.removeAttribute('data-correct');
+        rowFeedbacks.forEach((row,i)=>{if(practice&&Number.isInteger(position)&&i!==position)return;row.replaceChildren();inputs[i].removeAttribute('aria-invalid');if(practice)practiceSources[i].hidden=!practiceShown;});
+      }
+      function syncPracticeRows(){
+        practiceStates.forEach((node,i)=>{
+          const text=practiceChecked[i]?l.correct:normalize(inputs[i].value)?l.practiceDraft:l.practicePending,complete=String(practiceChecked[i]);
+          if(node.textContent!==text)node.textContent=text;if(node.dataset.complete!==complete)node.dataset.complete=complete;
+        });
+      }
+      function syncPracticePrimary(){
+        let text,action;
+        if(practiceChecked.every(Boolean)){
+          if(!session.canAdvance)session.check(inputs.map(input=>input.value));
+          text=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;action='next';
+        }else{text=practiceChecked[practiceIndex]?l.nextVerse:l.checkAnswer;action=practiceChecked[practiceIndex]?'practice-next':'check';}
+        if(primary.textContent!==text)primary.textContent=text;if(primary.dataset.action!==action)primary.dataset.action=action;
+      }
+      function activatePractice(index,{scroll=true}={}){
+        const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
+        if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index]);
+        if(changed){feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;}
+        if(config.view==='chapter'){const text=`${index+1} / ${items.length}`;if(unitProgress.textContent!==text)unitProgress.textContent=text;}
+        fitAnswer(inputs[index]);syncPracticePrimary();
+        if(scroll)practiceCards[index].scrollIntoView({block:'nearest',behavior:'instant'});
+      }
+      function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});}
+      const inputs=items.map(({row,index},position)=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.value=draftAnswers[index]||'';
         input.setAttribute('aria-label',`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${config.mode==='practice'?l.practiceAnswer:l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
         const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.bookIndex??quizBookIndex}_${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);
-        if(config.mode==='practice'){
-          const text=el('p','memory-practice-text',row.text);text.id=`memoryPracticeText${index}`;text.setAttribute('dir','auto');text.hidden=!practiceShown;practiceSources.push(text);form.append(text);
-        }
-        form.append(label,rowFeedback);
+        if(practice){
+          const card=el('details','memory-practice-row'),summary=el('summary'),stateLabel=el('span','memory-practice-state');summary.hidden=items.length===1;
+          summary.append(el('span','',rowReference(row)),stateLabel);summary.addEventListener('click',event=>{event.preventDefault();activatePractice(position);});
+          const text=el('p','memory-practice-text',row.text);text.id=`memoryPracticeText${index}`;text.setAttribute('dir','auto');text.hidden=!practiceShown;
+          caption.hidden=true;practiceSources.push(text);practiceCards.push(card);practiceStates.push(stateLabel);card.append(summary,text,rowFeedback,label);form.append(card);
+          input.addEventListener('focus',()=>activatePractice(position,{scroll:false}));
+        }else form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();clearFeedback();error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
+        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
       function act(){
         if(session.canAdvance){session.advance();if(session.done)results(config.mode==='practice'?draftAnswers:session.firstAnswers);else showUnit();return;}
+        if(practice){
+          if(practiceChecked[practiceIndex]){
+            const next=items.map((_,offset)=>(practiceIndex+offset+1)%items.length).find(index=>!practiceChecked[index]);focusAnswer(next);return;
+          }
+          const index=practiceIndex,value=inputs[index].value,g=grade(items[index].row.text,value);clearFeedback(index);error.hidden=true;
+          feedback.dataset.correct=String(g.exact);inputs[index].setAttribute('aria-invalid',String(!g.exact));practiceChecked[index]=g.exact;
+          if(g.exact)practiceConfirmed.add(items[index].index);else practiceConfirmed.delete(items[index].index);
+          if(g.exact)feedback.append(el('p','memory-correct',l.correct));
+          else{practiceSources[index].hidden=true;rowFeedbacks[index].append(gradeCard(items[index].row,value,g));feedback.append(errorLegend());error.textContent=l.editRetry;error.hidden=false;focusAnswer(index);}
+          syncPracticeRows();syncPracticePrimary();return;
+        }
         const values=inputs.map(input=>input.value),checked=session.check(values);
         if(checked.empty){error.textContent=l.empty;error.hidden=false;focusAnswer(0);return;}
         clearFeedback();error.hidden=true;feedback.dataset.correct=String(checked.correct);checked.grades.forEach((g,i)=>inputs[i].setAttribute('aria-invalid',String(!g.exact)));
@@ -497,18 +542,19 @@
       }
       const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,feedback,status,primary,aids);
       placeNotices();
-      if(config.mode==='practice'){
-        const controls=el('div','memory-practice-controls');
+      if(practice){
+        const controls=el('div','memory-practice-controls');practiceControls=controls;
         const reveal=button('',()=>{
-          practiceShown=!practiceShown;practiceSources.forEach(text=>text.hidden=!practiceShown);
-          if(!practiceShown){session.invalidate();clearFeedback();error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';}
+          practiceShown=!practiceShown;clearFeedback();error.hidden=true;syncPracticePrimary();
           syncReveal();
         },'memory-practice-reveal');
         function syncReveal(){reveal.textContent=practiceShown?l.hidePracticeText:l.showPracticeText;reveal.setAttribute('aria-pressed',String(practiceShown));}
         reveal.setAttribute('aria-controls',practiceSources.map(text=>text.id).join(' '));syncReveal();
-        controls.append(reveal,button(l.repeatPractice,()=>{items.forEach(({index})=>draftAnswers[index]='');session.invalidate();showUnit();},'memory-practice-repeat'));content.append(controls);
+        controls.append(reveal,button(l.repeatPractice,()=>{
+          const index=practiceIndex,input=inputs[index];input.value='';draftAnswers[items[index].index]='';practiceChecked[index]=false;practiceConfirmed.delete(items[index].index);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);
+        },'memory-practice-repeat'));
       }
-      content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
+      content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
     }
     function results(answers){
       moveClose(header);
@@ -521,7 +567,11 @@
       const actions=el('div','memory-actions'),retryAll=button(l.retryAll,()=>begin(),'memory-retry-all');
       const retry=mistakes.length?button(`${l.retryWrong} (${mistakes.length})`,()=>begin(mistakes,true),'memory-primary memory-retry-wrong'):retryAll;
       if(mistakes.length)actions.append(retry);else retryAll.classList.add('memory-primary');actions.append(retryAll,button(l.change,setup));content.append(actions);
-      const list=el('div','memory-results');grades.forEach((g,i)=>list.append(gradeCard(attemptRows[i],answers[i],g)));if(mistakes.length)content.append(errorLegend());content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});syncViewport();
+      const list=el('div','memory-results');grades.forEach((g,i)=>{
+        const card=gradeCard(attemptRows[i],answers[i],g);
+        if(config.mode==='practice'){const review=el('details','memory-practice-review');review.append(el('summary','',`${rowReference(attemptRows[i])} · ${g.score}%`),card);review.open=!g.exact&&mistakes[0]===attemptRows[i];list.append(review);}
+        else list.append(card);
+      });if(mistakes.length)content.append(errorLegend());content.append(list);content.scrollTop=0;retry.focus({preventScroll:true});syncViewport();
     }
     setup();dialog.showModal();syncViewport();
   }
