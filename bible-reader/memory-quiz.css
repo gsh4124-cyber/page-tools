@@ -160,6 +160,9 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-practice-row .memory-practice-text{margin:0;padding:14px;border:0;border-bottom:1px solid var(--line);border-radius:0}
 .memory-practice-row .memory-answer-label{display:block;margin:0;padding:12px}
 .memory-practice-row .memory-answer{min-height:92px;margin:0;line-height:1.8}
+.memory-practice-row .memory-answer::placeholder{color:var(--muted);opacity:1;font-size:15px;font-weight:400}
+.memory-practice-row .memory-answer:focus{border-color:var(--muted);outline:2px solid var(--muted);outline-offset:-1px;box-shadow:0 0 0 3px color-mix(in srgb,var(--muted) 12%,transparent)}
+.memory-practice-row .memory-answer[aria-invalid=true]:focus{border-color:var(--memory-wrong-fg);outline-color:var(--memory-wrong-fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--memory-wrong-fg) 10%,transparent)}
 .memory-practice-row .memory-practice-controls{margin:0;padding:8px 12px;border-bottom:1px solid var(--line)}
 .memory-practice-row .memory-practice-controls button{flex-basis:100px}
 .memory-practice-row .memory-row-feedback:not(:empty){padding:12px;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -169,3 +172,4 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-practice-review{margin-block:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .memory-practice-review>summary{min-height:44px;padding:10px 12px;font-size:14px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
 .memory-practice-review .memory-result{margin:0;padding:12px}
+
