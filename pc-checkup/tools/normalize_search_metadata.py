@@ -15,6 +15,7 @@ LANGUAGE_NAMES = {'ko':'한국어','en':'English','ja':'日本語','es':'Españo
                   'zh-CN':'简体中文','ru':'Русский'}
 DIRECTORY_STYLE = '''<style id="language-directory-style">
 .language-directory{margin-top:12px;text-align:start}.language-directory summary{width:fit-content;min-height:44px;padding:12px 0;cursor:pointer;font-size:13px}.language-directory nav{display:flex;flex-wrap:wrap;gap:4px}.language-directory a{display:inline-flex;align-items:center;min-height:44px;padding:8px 10px;border-radius:10px;color:inherit;font-size:12px;text-decoration:none}.language-directory a:hover,.language-directory a:focus-visible{background:var(--line)}.language-directory a[aria-current]{font-weight:800;text-decoration:underline}
+#device-flow-guide .wrap{max-width:960px;text-align:start}#device-flow-guide p,#device-flow-guide dd{text-align:start;line-height:1.8;max-width:75ch}#device-flow-guide dd{margin:6px 0 20px;color:var(--muted)}#device-flow-guide dt{margin-top:20px;font-weight:750}#device-flow-guide ol,#device-flow-guide ul{padding-inline-start:1.4em;line-height:1.8}#device-flow-guide h2,#device-flow-guide h3{line-height:1.45;scroll-margin-top:100px}
 </style>'''
 PRIVACY_LABELS = {'ko':'개인정보처리방침','en':'Privacy Policy','ja':'プライバシーポリシー',
                   'es':'Privacidad','de':'Datenschutz','fr':'Confidentialité','pt':'Privacidade',
