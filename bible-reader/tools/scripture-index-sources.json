@@ -1,0 +1,83 @@
+{
+  "provider": "https://github.com/midvash/bible-data",
+  "provider_revision": "9586bd8228a747962df1ee8692730422fb7eb2ec",
+  "translations": {
+    "krv1961": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31102,
+      "sparse_chapters": 0,
+      "structure_sha256": "38c3bc4f01c6ba39f2818714c25747239b141f8ace3c4e30f584be6d4e0e7148"
+    },
+    "kjv": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31102,
+      "sparse_chapters": 0,
+      "structure_sha256": "5eefcc000e765edac13e5484fe29b89d70843f857b3bd8a21a519f32c89f42e7"
+    },
+    "web": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31098,
+      "sparse_chapters": 4,
+      "structure_sha256": "4d052511b7415289c44366486c3be3a7957dcfee6ab8518f3f4ea9454f38da7c"
+    },
+    "asv": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31086,
+      "sparse_chapters": 15,
+      "structure_sha256": "814dded1580c1ad1043bc9f7173df3c93a2e28960c36a0632e30f3f2b5c77859"
+    },
+    "lsg": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31102,
+      "sparse_chapters": 0,
+      "structure_sha256": "5eefcc000e765edac13e5484fe29b89d70843f857b3bd8a21a519f32c89f42e7"
+    },
+    "luth1912": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31102,
+      "sparse_chapters": 0,
+      "structure_sha256": "5eefcc000e765edac13e5484fe29b89d70843f857b3bd8a21a519f32c89f42e7"
+    },
+    "cuv": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31021,
+      "sparse_chapters": 61,
+      "structure_sha256": "6480fcf73ee62ecfd698917df36337b01bff0be8cbab0cae3a651e3c9a098d9d"
+    },
+    "synodal": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31169,
+      "sparse_chapters": 0,
+      "structure_sha256": "ce9ff3d3ab6a05f655f7d540afae223fe1085da935517a5326dddde49e52b73d"
+    },
+    "vulg": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31211,
+      "sparse_chapters": 11,
+      "structure_sha256": "ff700e2366fdc1dc378b461aa2b13da399169c4d33a90d7f9de9a1770313761b"
+    },
+    "almeida1819": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31102,
+      "sparse_chapters": 0,
+      "structure_sha256": "5eefcc000e765edac13e5484fe29b89d70843f857b3bd8a21a519f32c89f42e7"
+    },
+    "svd": {
+      "books": 66,
+      "chapters": 1189,
+      "verses": 31104,
+      "sparse_chapters": 0,
+      "structure_sha256": "6c0ac4a29ef818072e0ca3b1d195b8c4c59a9b561ccb3a049840cea8081df7fd"
+    }
+  }
+}

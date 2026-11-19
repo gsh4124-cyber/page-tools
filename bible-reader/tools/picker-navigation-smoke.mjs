@@ -100,8 +100,54 @@ try{
     observations.push({width,idle_body_mutations:mutations,cold_reader_grids_before_response:true,exact_verse_counts:true,cancel_preserves_reading:true,shared_exam_grid:true,nested_escape_preserves_exam:true,cold_exam_range_before_response:true,range_preserved_after_response:true,exam_reader_isolation:true,physical_device_tested:false});
     await context.close();
   }
+  const fixtures=JSON.parse(await fs.readFile(new URL('./fixtures/picker-translations.json',import.meta.url),'utf8'));
+  for(const width of [320,1280])for(const [translation,fixture] of Object.entries(fixtures)){
+    const context=await browser.newContext({viewport:{width,height:width===1280?800:844},hasTouch:true,locale:'ko-KR'});
+    let releaseBook;
+    try{
+      await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
+      const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));
+      const prefix=`**/versions/${fixture.lang}/${fixture.slug}/books/`;
+      // Three one-verse chapters initialize the reader; Acts never arrives.
+      await page.route(prefix+'John.json',route=>route.fulfill({json:fixture.seed}));
+      await page.route(prefix+'Acts.json',async route=>{
+        await new Promise(resolve=>releaseBook=resolve);await route.abort().catch(()=>{});
+      });
+      await page.goto(base+'/?qa=foreign-picker',{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelector('#status')?.hidden&&window.BibleTitleNavigator&&window.BibleMemory);
+      await page.locator('#translationSelect').selectOption(translation);
+      await page.waitForFunction(id=>activeTranslationId===id&&document.querySelector('#status').hidden&&currentBookData?.chapters.length===3,translation);
+      await page.locator('#chapterTitle').click();
+      await page.locator('#titleNavigatorDialog [data-switch="new"]').click();
+      const requested=page.waitForRequest(request=>request.url().includes(`/versions/${fixture.lang}/${fixture.slug}/books/Acts.json`),{timeout:5000});
+      await page.locator('.title-navigator-books button').nth(4).click();await requested;
+      assert.equal(await page.locator('.title-navigator-chapters button').count(),28,`${translation}: chapters must appear while text is held`);
+      await page.locator('.title-navigator-chapters').getByRole('button',{name:'8',exact:true}).click();
+      const numbers=await page.locator('.title-navigator-verses button').allTextContents();
+      assert.deepEqual(numbers.map(Number),fixture.acts8,`${translation}: exact verse numbering before the response`);
+      if(translation==='asv')await page.screenshot({path:path.join(output,`asv-reader-verses-${width}.png`)});
+      await page.locator('.title-navigator-dismiss').click();
+      assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),{book:42,chapter:3});
+      await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
+      await chooseMemory(page,'memoryBook',43);
+      assert.equal(await page.locator('#memoryFromChapter option').count(),28);
+      assert(await page.locator('[data-memory-select="memoryFromChapter"]').isEnabled());
+      await chooseMemory(page,'memoryFromChapter',8);await chooseMemory(page,'memoryToChapter',8);
+      assert.deepEqual((await page.locator('#memoryFromVerse option').allTextContents()).map(Number),fixture.acts8);
+      assert.deepEqual((await page.locator('#memoryToVerse option').allTextContents()).map(Number),fixture.acts8);
+      const last=fixture.acts8.at(-1);
+      await chooseMemory(page,'memoryFromVerse',last);await chooseMemory(page,'memoryToVerse',last);
+      assert.equal(await page.locator('#memoryFromVerse').inputValue(),String(last));
+      assert(await page.locator('#memoryQuizDialog .memory-primary').isDisabled(),'Missing text must still block grading');
+      assert(await page.locator('#memoryQuizDialog').evaluate(node=>node.scrollWidth<=node.clientWidth+1));
+      if(translation==='asv')await page.screenshot({path:path.join(output,`asv-memory-range-${width}.png`)});
+      await page.locator('#memoryQuizDialog .memory-close').click();
+      assert.deepEqual(errors,[]);
+      observations.push({width,translation,cold_reader_grids_before_response:true,cold_exam_range_before_response:true,exact_sparse_verse_numbers:true,missing_text_start_blocked:true,physical_device_tested:false});
+    }finally{releaseBook?.();await context.close();}
+  }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({observations},null,2));
-  console.log('Picker QA PASS: immediate cold-book grids, preserved ranges, shared styling, focus/cancellation and settled localization.');
+  console.log('Picker QA PASS: all 11 translations have immediate cold-book grids, exact sparse verse numbering and independent exam choices.');
 }catch(error){
   if(debugPage&&!debugPage.isClosed()){
     await debugPage.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});

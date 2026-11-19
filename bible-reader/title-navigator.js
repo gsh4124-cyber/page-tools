@@ -156,7 +156,7 @@
         currentStep = 'chapter';
         const run = ++structureRequest, translationId = activeTranslationId;
         draftStructure = getBookStructure(draftBookIndex,translationId);
-        // A 3.7 KB index supplies every KRV number grid synchronously. Start the
+        // The per-translation index supplies every number grid synchronously. Start the
         // passage request in parallel; browsing the index never waits for it.
         awaitingBookIndex = draftStructure ? null : Number(option.value);
         setStep('chapter',{focusChoice:false});
