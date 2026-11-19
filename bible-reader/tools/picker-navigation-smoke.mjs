@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {chooseMemory} from './picker-test-helpers.mjs';
 
-const root=fileURLToPath(new URL('../dist/',import.meta.url));
+const root=path.resolve(fileURLToPath(new URL('../dist/',import.meta.url)));
 const output=fileURLToPath(new URL('../qa_evidence/pickers/',import.meta.url));
 await fs.mkdir(output,{recursive:true});
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json'};
@@ -19,12 +19,12 @@ const server=createServer(async(req,res)=>{try{
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base=`http://127.0.0.1:${server.address().port}`;
 const browser=await chromium.launch({headless:true});
-const observations=[];
+const observations=[];let debugPage;
 try{
   for(const width of [320,390,1280]){
     const context=await browser.newContext({viewport:{width,height:width===1280?800:844},hasTouch:true,locale:'ko-KR'});
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
-    const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(String(error)));
+    const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));
     await page.goto(base+'/?qa=picker',{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>document.querySelector('#status')?.hidden&&window.BibleTitleNavigator&&window.BibleMemory);
     await page.waitForTimeout(2300); // Initial one-off localization timers must have settled.
@@ -102,4 +102,10 @@ try{
   }
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({observations},null,2));
   console.log('Picker QA PASS: immediate cold-book grids, preserved ranges, shared styling, focus/cancellation and settled localization.');
+}catch(error){
+  if(debugPage&&!debugPage.isClosed()){
+    await debugPage.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});
+    await fs.writeFile(path.join(output,'failure.txt'),String(error)+'\n'+await debugPage.locator('body').innerText().catch(()=>''));
+  }
+  throw error;
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
