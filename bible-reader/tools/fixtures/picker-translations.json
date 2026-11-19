@@ -1,0 +1,768 @@
+{
+  "kjv": {
+    "lang": "en",
+    "slug": "kjv",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "In the beginning was the Word, and the Word was with God, and the Word was God."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "And the third day there was a marriage in Cana of Galilee; and the mother of Jesus was there:"
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "There was a man of the Pharisees, named Nicodemus, a ruler of the Jews:"
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ]
+  },
+  "web": {
+    "lang": "en",
+    "slug": "web",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "In the beginning was the Word, and the Word was with God, and the Word was God."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "The third day, there was a wedding in Cana of Galilee. Jesus’ mother was there."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Now there was a man of the Pharisees named Nicodemus, a ruler of the Jews."
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      38,
+      39,
+      40
+    ]
+  },
+  "asv": {
+    "lang": "en",
+    "slug": "asv",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "In the beginning was the Word, and the Word was with God, and the Word was God."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "And the third day there was a marriage in Cana of Galilee; and the mother of Jesus was there:"
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Now there was a man of the Pharisees, named Nicodemus, a ruler of the Jews:"
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      38,
+      39,
+      40
+    ]
+  },
+  "lsg": {
+    "lang": "fr",
+    "slug": "lsg",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Au commencement était la Parole, et la Parole était avec Dieu, et la Parole était Dieu."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Trois jours après, il y eut des noces à Cana en Galilée. La mère de Jésus était là,"
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Mais il y eut un homme d''entre les pharisiens, nommé Nicodème, un chef des Juifs,"
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ]
+  },
+  "luth1912": {
+    "lang": "de",
+    "slug": "luth1912",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Im Anfang war das Wort, und das Wort war bei Gott, und Gott war das Wort."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Und am dritten Tag ward eine Hochzeit zu Kana in Galiläa; und die Mutter Jesu war da."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Es war aber ein Mensch unter den Pharisäern mit Namen Nikodemus, ein Oberster unter den Juden."
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ]
+  },
+  "cuv": {
+    "lang": "zh",
+    "slug": "cuv",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "太初有道，道與上帝同在，道就是上帝。"
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "第三日，在加利利的迦拿有娶親的筵席，耶穌的母親在那裏。"
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "有一個法利賽人，名叫尼哥德慕，是猶太人的官。"
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      38,
+      39,
+      40
+    ]
+  },
+  "synodal": {
+    "lang": "ru",
+    "slug": "synodal",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "В начале было Слово, и Слово было у Бога, и Слово было Бог."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "На третий день был брак в Кане Галилейской, и Матерь Иисуса была там."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "Между фарисеями был некто, именем Никодим, один из начальников Иудейских."
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ]
+  },
+  "vulg": {
+    "lang": "la",
+    "slug": "vulg",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "in principio erat Verbum et Verbum erat apud Deum et Deus erat Verbum"
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "et die tertio nuptiae factae sunt in Cana Galilaeae et erat mater Iesu ibi"
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "erat autem homo ex Pharisaeis Nicodemus nomine princeps Iudaeorum"
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      38,
+      39,
+      40
+    ]
+  },
+  "almeida1819": {
+    "lang": "pt",
+    "slug": "almeida-livre",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "No princípio era a Palavra, e a Palavra estava junto de Deus, e a Palavra era Deus."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "E no terceiro dia houve um casamento em Caná da Galileia; e a mãe de Jesus estava ali."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "E havia um homem dos fariseus, cujo nome era Nicodemos, chefe dos judeus."
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ]
+  },
+  "svd": {
+    "lang": "ar",
+    "slug": "svd",
+    "seed": {
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "فِي ٱلْبَدْءِ كَانَ ٱلْكَلِمَةُ، وَٱلْكَلِمَةُ كَانَ عِنْدَ ٱللهِ، وَكَانَ ٱلْكَلِمَةُ ٱللهَ."
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "number": 1,
+              "text": "وَفِي ٱلْيَوْمِ ٱلثَّالِثِ كَانَ عُرْسٌ فِي قَانَا ٱلْجَلِيلِ، وَكَانَتْ أُمُّ يَسُوعَ هُنَاكَ."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "number": 1,
+              "text": "كَانَ إِنْسَانٌ مِنَ ٱلْفَرِّيسِيِّينَ ٱسْمُهُ نِيقُودِيمُوسُ، رَئِيسٌ لِلْيَهُودِ."
+            }
+          ]
+        }
+      ]
+    },
+    "acts8": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ]
+  }
+}

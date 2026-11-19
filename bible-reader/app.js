@@ -26,6 +26,8 @@ const TRANSLATIONS = {
   synodal:{id:"synodal",name:"Синодальный перевод",language:"Русский",rights:"Public Domain",type:"midvash",lang:"ru",slug:"synodal"},
   vulg:{id:"vulg",name:"Biblia Sacra Vulgata",language:"Latina",rights:"Public Domain",type:"midvash",lang:"la",slug:"vulg"}
 };
+// Keep remote passage bytes and the generated navigation index on one revision.
+const MIDVASH_REVISION='9586bd8228a747962df1ee8692730422fb7eb2ec';
 
 const $=s=>document.querySelector(s);
 const bookSelect=$("#bookSelect"),chapterSelect=$("#chapterSelect"),translationSelect=$("#translationSelect"),chapterTitle=$("#chapterTitle"),versesEl=$("#verses"),statusEl=$("#status");
@@ -52,8 +54,10 @@ function getBookStructure(bookIndex,translationId=activeTranslationId){
   const book=BOOKS[Number(bookIndex)];if(!book)return null;
   const data=cache.get(`${translationId}:${book.osis}`);
   if(data)return data.chapters.map(ch=>({chapter:Number(ch.chapter),verses:ch.verses.map(v=>Number(v.verse))}));
-  const counts=window.BibleChapterIndex?.[translationId]?.[Number(bookIndex)];
-  return counts?.map((count,index)=>({chapter:index+1,verses:Array.from({length:count},(_,n)=>n+1)}))||null;
+  const entries=window.BibleChapterIndex?.[translationId]?.[Number(bookIndex)];
+  return entries?.map((entry,index)=>typeof entry==='number'
+    ?{chapter:index+1,verses:Array.from({length:entry},(_,n)=>n+1)}
+    :{chapter:entry.chapter,verses:entry.verses.slice()})||null;
 }
 
 async function fetchBook(book,translationId=activeTranslationId){
@@ -68,7 +72,7 @@ async function fetchBook(book,translationId=activeTranslationId){
       const url=`/scripture/krv1961/${book.file}.json`;
       const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=await r.json();
     }else{
-      const url=`https://raw.githubusercontent.com/midvash/bible-data/main/versions/${tr.lang}/${tr.slug}/books/${book.osis}.json`;
+      const url=`https://raw.githubusercontent.com/midvash/bible-data/${MIDVASH_REVISION}/versions/${tr.lang}/${tr.slug}/books/${book.osis}.json`;
       const r=await fetch(url,{cache:"force-cache"}); if(!r.ok)throw new Error(`${tr.name} ${book.ko} 본문을 불러오지 못했습니다.`); data=normalizeMidvash(await r.json());
     }
     cache.set(key,data);
