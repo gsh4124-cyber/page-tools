@@ -1,0 +1,74 @@
+{
+  "status": "DONE_LOCAL_BROWSER_QA",
+  "hosted_supabase": "NOT_TESTED",
+  "real_mobile_devices": "NOT_TESTED",
+  "external_deployment": "NOT_EXECUTED",
+  "browser": {
+    "base": "http://127.0.0.1:62216",
+    "engine": "Microsoft Edge Chromium",
+    "manifest": {
+      "product": "moa",
+      "revision": "f3a16d4647544b7f9e2dfeadcebc37fbfbd0f881",
+      "sourceSha256": "2c82032bb9fa074f1549dc8bf0ec3d720f6ffdb9d1119417181b015832b5ced9",
+      "cloudConfigured": false
+    },
+    "results": [
+      {
+        "name": "original mobile layout, 320/390/768/1280px and CSP",
+        "status": "DONE"
+      },
+      {
+        "name": "habit create, check, duplicate refusal, persistence",
+        "status": "DONE"
+      },
+      {
+        "name": "create text, photo, video, decoration and XSS remains plain text",
+        "status": "DONE"
+      },
+      {
+        "name": "edit title/date/category and attachment removal, reload, calendar/filter/search",
+        "status": "DONE"
+      },
+      {
+        "name": "full encrypted backup download, delete and restore including video and habits",
+        "status": "DONE"
+      },
+      {
+        "name": "invalid backup and unsupported upload keep current records",
+        "status": "DONE"
+      },
+      {
+        "name": "two tabs reject stale writes without losing editor input",
+        "status": "DONE"
+      },
+      {
+        "name": "keyboard navigation and account configuration fallback",
+        "status": "DONE"
+      },
+      {
+        "name": "browser console uncaught errors",
+        "status": "DONE",
+        "count": 0
+      }
+    ],
+    "errors": []
+  },
+  "supabase_local_contract": {
+    "type": "local intercepted Supabase API contract, not live hosted test",
+    "manifest": {
+      "product": "moa",
+      "revision": "f3a16d4647544b7f9e2dfeadcebc37fbfbd0f881",
+      "sourceSha256": "2c82032bb9fa074f1549dc8bf0ec3d720f6ffdb9d1119417181b015832b5ced9",
+      "cloudConfigured": false
+    },
+    "results": [
+      "guest records are not automatically uploaded; A saved through supabase-js RPC",
+      "authenticated session reload and cloud readback",
+      "cross-tab logout clears private title/body/files, backup password and selected restore file",
+      "B sees only B data after account switch; guest data preserved",
+      "network failure does not report saved or discard draft",
+      "second browser reopens the same A cloud record"
+    ],
+    "errors": []
+  }
+}
