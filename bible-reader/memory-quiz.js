@@ -473,19 +473,24 @@
         rowFeedbacks.forEach((row,i)=>{if(practice&&Number.isInteger(position)&&i!==position)return;row.replaceChildren();inputs[i].removeAttribute('aria-invalid');if(practice)practiceSources[i].hidden=!practiceShown;});
       }
       function syncPracticeRows(){
-        practiceStates.forEach((node,i)=>{node.textContent=practiceChecked[i]?l.correct:normalize(inputs[i].value)?l.practiceDraft:l.practicePending;node.dataset.complete=String(practiceChecked[i]);});
+        practiceStates.forEach((node,i)=>{
+          const text=practiceChecked[i]?l.correct:normalize(inputs[i].value)?l.practiceDraft:l.practicePending,complete=String(practiceChecked[i]);
+          if(node.textContent!==text)node.textContent=text;if(node.dataset.complete!==complete)node.dataset.complete=complete;
+        });
       }
       function syncPracticePrimary(){
+        let text,action;
         if(practiceChecked.every(Boolean)){
           if(!session.canAdvance)session.check(inputs.map(input=>input.value));
-          primary.textContent=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;primary.dataset.action='next';
-        }else{primary.textContent=practiceChecked[practiceIndex]?l.nextVerse:l.checkAnswer;primary.dataset.action=practiceChecked[practiceIndex]?'practice-next':'check';}
+          text=session.index===session.unitCount-1?l.finish:config.view==='verse'?l.nextVerse:l.nextChapter;action='next';
+        }else{text=practiceChecked[practiceIndex]?l.nextVerse:l.checkAnswer;action=practiceChecked[practiceIndex]?'practice-next':'check';}
+        if(primary.textContent!==text)primary.textContent=text;if(primary.dataset.action!==action)primary.dataset.action=action;
       }
       function activatePractice(index,{scroll=true}={}){
         const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
         if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index]);
         if(changed){feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;}
-        if(config.view==='chapter')unitProgress.textContent=`${index+1} / ${items.length}`;
+        if(config.view==='chapter'){const text=`${index+1} / ${items.length}`;if(unitProgress.textContent!==text)unitProgress.textContent=text;}
         fitAnswer(inputs[index]);syncPracticePrimary();
         if(scroll)practiceCards[index].scrollIntoView({block:'nearest',behavior:'instant'});
       }
