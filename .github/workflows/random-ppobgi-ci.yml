@@ -84,11 +84,13 @@ jobs:
         run: |
           sudo python3 - <<'PY'
           from pathlib import Path
+          import re
           mirrors = Path('/etc/apt/apt-mirrors.txt')
           if mirrors.exists():
-              text = mirrors.read_text()
-              for scheme in ('http', 'https'):
-                  text = text.replace(f'{scheme}://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+              text = re.sub(
+                  r'https?://(?:[A-Za-z0-9-]+\.)*archive\.ubuntu\.com/ubuntu',
+                  'https://archive.ubuntu.com/ubuntu', mirrors.read_text()
+              )
               mirrors.write_text(text)
           PY
       - name: Install Playwright Chromium
