@@ -13,3 +13,15 @@ body.title-navigator-open{overflow:hidden}.chapter-title-navigator-trigger{curso
 
 /* Keep keyboard focus visible without drawing a box around the heading. */
 .chapter-title-navigator-trigger:focus-visible{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.18em}
+
+/* The exam opens the same choice surface in the native dialog top layer. */
+dialog.memory-choice-dialog{box-sizing:border-box;position:fixed;inset:0;width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 32px);margin:auto;padding:0;color:var(--text);overscroll-behavior:contain}
+dialog.memory-choice-dialog::backdrop{background:rgba(0,0,0,.42);backdrop-filter:blur(4px)}
+.memory-choice-dialog .title-navigator-head{padding:14px 16px}
+.memory-choice-dialog .title-navigator-close{min-width:44px;min-height:44px}
+.memory-choice-dialog .title-navigator-choice{font:inherit;min-height:44px}
+.memory-choice-dialog .title-navigator-books{grid-template-columns:repeat(4,minmax(0,1fr))}
+.memory-choice-trigger{position:relative;box-sizing:border-box;width:100%;min-width:0;min-height:46px;padding:10px 36px 10px 14px!important;text-align:start;font:inherit;font-weight:650;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;white-space:normal;overflow-wrap:anywhere}
+.memory-choice-trigger::after{content:"";position:absolute;inset-inline-end:15px;top:50%;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-70%) rotate(45deg);opacity:.6}
+@media(max-width:620px){.memory-choice-dialog .title-navigator-books{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:360px){.memory-choice-dialog .title-navigator-books{grid-template-columns:repeat(2,minmax(0,1fr))}}

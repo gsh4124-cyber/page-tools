@@ -1,3 +1,4 @@
+import {chooseMemory} from './picker-test-helpers.mjs';
 import {chromium} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -11,7 +12,7 @@ if(local){const root=path.resolve(fileURLToPath(new URL('../dist/',import.meta.u
 const browser=await chromium.launch({headless:true,...(process.env.MEMORY_QUIZ_CHANNEL?{channel:process.env.MEMORY_QUIZ_CHANNEL}:{})}),observations=[];
 const key='bible-reader-memory-passages-v1';
 async function open(page){await page.locator('#verses .verse').first().waitFor({timeout:40000});await page.waitForFunction(()=>document.querySelector('#status')?.hidden&&document.querySelector('.memory-menu-button'));await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();await page.locator('#memoryQuizDialog').waitFor();}
-async function select(page,book,chapter,verse){await page.locator('#memoryBook').selectOption(String(book));await page.waitForFunction(()=>!document.querySelector('#memoryFromChapter').disabled);await page.locator('#memoryFromChapter').selectOption(String(chapter));await page.locator('#memoryToChapter').selectOption(String(chapter));await page.locator('#memoryFromVerse').selectOption(String(verse));await page.locator('#memoryToVerse').selectOption(String(verse));}
+async function select(page,book,chapter,verse){await chooseMemory(page,'memoryBook',String(book));await page.waitForFunction(()=>!document.querySelector('#memoryFromChapter').disabled);await chooseMemory(page,'memoryFromChapter',String(chapter));await chooseMemory(page,'memoryToChapter',String(chapter));await chooseMemory(page,'memoryFromVerse',String(verse));await chooseMemory(page,'memoryToVerse',String(verse));}
 async function add(page){await page.locator('.memory-collection-add').click();await page.waitForFunction(()=>!document.querySelector('.memory-primary').disabled);}
 async function fit(page){assert(await page.locator('#memoryQuizDialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1),'No dialog horizontal overflow');assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
 try{

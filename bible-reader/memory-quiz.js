@@ -214,6 +214,7 @@
     const quizTranslationId=activeTranslationId;
     const version=document.querySelector('#translationSelect')?.selectedOptions[0]?.textContent||'';
     let chapters=typeof currentBookData!=='undefined'&&currentBookData?.chapters?.length?currentBookData.chapters:[{chapter,verses:source}];
+    let quizStructure=chapters.map(ch=>({chapter:Number(ch.chapter),verses:ch.verses.map(v=>Number(v.verse))}));
     let chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b),bookLoadRun=0;
     const collectionKey='bible-reader-memory-passages-v1';
     let collectionRefs=[];try{const saved=JSON.parse(localStorage.getItem(collectionKey)||'[]');if(Array.isArray(saved))collectionRefs=[...new Map(saved.filter(r=>r&&Number.isInteger(r.bookIndex)&&r.bookIndex>=0&&r.bookIndex<BOOKS.length&&Number.isInteger(r.chapter)&&r.chapter>0&&Number.isInteger(r.verse)&&r.verse>0).map(r=>[passageKey(r),{bookIndex:r.bookIndex,chapter:r.chapter,verse:r.verse}])).values()];}catch{}
@@ -314,14 +315,16 @@
       fillChapters();
       fromChapter.value=String(config.fromChapter);toChapter.value=String(config.toChapter);
       function fillVerses(chapterSelect,verseSelect,value,last=false){
-        const items=passageRows(chapters,Number(chapterSelect.value),1,Number(chapterSelect.value),Number.MAX_SAFE_INTEGER);verseSelect.replaceChildren();
-        for(const row of items){const option=el('option','',String(row.verse));option.value=String(row.verse);verseSelect.append(option);}
-        if(items.some(r=>r.verse===Number(value)))verseSelect.value=String(value);else if(last&&items.length)verseSelect.value=String(items.at(-1).verse);
+        const numbers=quizStructure?.find(ch=>ch.chapter===Number(chapterSelect.value))?.verses||[];verseSelect.replaceChildren();
+        for(const n of numbers){const option=el('option','',String(n));option.value=String(n);verseSelect.append(option);}
+        if(numbers.includes(Number(value)))verseSelect.value=String(value);else if(last&&numbers.length)verseSelect.value=String(numbers.at(-1));
       }
       fillVerses(fromChapter,fromVerse,config.fromVerse);fillVerses(toChapter,toVerse,config.toVerse,true);
       const useSelected=el('input');useSelected.type='checkbox';useSelected.checked=config.selected;useSelected.id='memoryUseSelected';
       const selectedLabel=el('label','memory-use-selected');selectedLabel.append(useSelected,document.createTextNode(`${l.selected} (${selected.length})`));selectedLabel.hidden=!selected.length||quizBookIndex!==readerBookIndex;range.append(selectedLabel);
       for(const [text,select] of [[l.firstChapter,fromChapter],[l.from,fromVerse],[l.lastChapter,toChapter],[l.to,toVerse]]){const label=el('label','',text);label.append(select);fields.append(label);}
+      const rangePickers=[[bookSelect,l.book,true],[fromChapter,l.firstChapter],[fromVerse,l.from],[toChapter,l.lastChapter],[toVerse,l.to]]
+        .map(([select,label,isBook])=>window.BibleTitleNavigator.enhanceSelect(select,{label,isBook,owner:dialog}));
       const loadStatus=el('p','memory-load-status');loadStatus.hidden=true;loadStatus.setAttribute('role','status');
       const reloadButton=button(l.reload,()=>loadQuizBook());reloadButton.hidden=true;
       range.append(fields,loadStatus,reloadButton);
@@ -354,7 +357,8 @@
       function refresh(){
         config.selected=quizBookIndex===readerBookIndex&&!!selected.length&&useSelected.checked;config.fromChapter=Number(fromChapter.value);config.toChapter=Number(toChapter.value);config.fromVerse=Number(fromVerse.value);config.toVerse=Number(toVerse.value);
         selectedLabel.hidden=!selected.length||quizBookIndex!==readerBookIndex;useSelected.disabled=loading||loadFailed;
-        for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected||loading||loadFailed;
+        for(const select of [fromChapter,fromVerse,toChapter,toVerse])select.disabled=config.selected||(loading&&!quizStructure)||loadFailed;
+        rangePickers.forEach(picker=>picker.sync());
         rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
         if(loading||loadFailed)rows=[];
         const target=activeRows();summary.textContent=target.length?`${reference(target)} · ${target.length} ${l.count}`:'';rangeTitle.textContent=l.range;startButton.disabled=!target.length||(config.collection&&(collectionLoading||collectionFailed));passage.replaceChildren();preview(passage,target);addCollection.disabled=!rows.length||loading||loadFailed;renderCollection();
@@ -364,16 +368,24 @@
       collectionToggle.addEventListener('change',()=>{config.collection=collectionToggle.checked;refresh();});
       async function loadQuizBook(){
         const run=++bookLoadRun,index=Number(bookSelect.value);quizBookIndex=index;loading=true;loadFailed=false;useSelected.checked=false;
+        quizStructure=getBookStructure(index,quizTranslationId);
+        chapterNumbers=quizStructure?.map(ch=>ch.chapter)||[];
+        fillChapters();fromChapter.value=toChapter.value=String(chapterNumbers[0]||'');
+        fillVerses(fromChapter,fromVerse,1);fillVerses(toChapter,toVerse,null,true);
         book=window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||'';context.textContent=`${book} · ${version}`;
         loadStatus.textContent=l.loading;loadStatus.hidden=false;loadStatus.setAttribute('role','status');reloadButton.hidden=true;refresh();
         try{
           const data=await fetchBook(BOOKS[index],quizTranslationId);
           if(run!==bookLoadRun||dialog!==activeDialog||!dialog?.open)return;
           if(!data?.chapters?.length)throw new Error('Empty passage');
+          const chosen={fromChapter:fromChapter.value,toChapter:toChapter.value,fromVerse:fromVerse.value,toVerse:toVerse.value};
           chapters=data.chapters;chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b);
+          quizStructure=chapters.map(ch=>({chapter:Number(ch.chapter),verses:ch.verses.map(v=>Number(v.verse))}));
           book=window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||'';context.textContent=`${book} · ${version}`;
-          fillChapters();fromChapter.value=toChapter.value=String(chapterNumbers[0]);
-          fillVerses(fromChapter,fromVerse,1);fillVerses(toChapter,toVerse,null,true);loadStatus.hidden=true;
+          fillChapters();
+          fromChapter.value=chapterNumbers.includes(Number(chosen.fromChapter))?chosen.fromChapter:String(chapterNumbers[0]);
+          toChapter.value=chapterNumbers.includes(Number(chosen.toChapter))?chosen.toChapter:fromChapter.value;
+          fillVerses(fromChapter,fromVerse,chosen.fromVerse||1);fillVerses(toChapter,toVerse,chosen.toVerse||null,true);loadStatus.hidden=true;
         }catch(_){
           if(run!==bookLoadRun||dialog!==activeDialog||!dialog?.open)return;
           loadFailed=true;loadStatus.textContent=l.loadError;loadStatus.setAttribute('role','alert');reloadButton.hidden=false;
@@ -387,7 +399,7 @@
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
       content.append(views,summary,range,collection,study,help,startButton);refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
-      if(dialog.open){bookSelect.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
+      if(dialog.open){rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
     }
     function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){

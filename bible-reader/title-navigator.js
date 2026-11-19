@@ -22,6 +22,9 @@
   let activeTestament = Number(bookSelect.selectedIndex) > OT_END_INDEX ? 'new' : 'old';
   let currentStep = 'book';
   let awaitingBookIndex = null;
+  let draftBookIndex = Number(bookSelect.value), draftChapter = Number(chapterSelect.value)||1;
+  let draftVerse = Number(verseSelect.value)||1;
+  let draftStructure = null, structureRequest = 0;
 
   const overlay = document.createElement('div');
   overlay.className = 'title-navigator-overlay';
@@ -146,47 +149,63 @@
     selectOptions(bookSelect).forEach((option,index) => {
       const belongs = activeTestament === 'old' ? index <= OT_END_INDEX : index > OT_END_INDEX;
       if (!belongs) return;
-      books.append(makeChoice(option.textContent.trim(), option.value === bookSelect.value, () => {
-        const changed = bookSelect.value !== option.value;
+      books.append(makeChoice(option.textContent.trim(), Number(option.value) === draftBookIndex, () => {
+        const changed = draftBookIndex !== Number(option.value);
+        draftBookIndex = Number(option.value);
+        if (changed) { draftChapter = 1; draftVerse = 1; }
         currentStep = 'chapter';
-        if (changed) {
-          awaitingBookIndex = Number(option.value);
-          showLoading(chapters);
-          setStep('chapter',{focusChoice:false});
-          bookSelect.value = option.value;
-          bookSelect.dispatchEvent(new Event('change',{bubbles:true}));
-          return;
-        }
+        const run = ++structureRequest, translationId = activeTranslationId;
+        draftStructure = getBookStructure(draftBookIndex,translationId);
+        // A 3.7 KB index supplies every KRV number grid synchronously. Start the
+        // passage request in parallel; browsing the index never waits for it.
+        awaitingBookIndex = draftStructure ? null : Number(option.value);
+        setStep('chapter',{focusChoice:false});
         renderAll();
+        fetchBook(BOOKS[draftBookIndex],translationId).then(() => {
+          if (run !== structureRequest || overlay.hidden) return;
+          if (!draftStructure) {
+            draftStructure = getBookStructure(draftBookIndex,translationId);
+            awaitingBookIndex = null;
+            renderAll();
+          }
+        }).catch(() => {
+          if (run !== structureRequest || overlay.hidden || draftStructure) return;
+          const error = document.createElement('p');
+          error.setAttribute('role','alert');
+          error.textContent = window.BibleMemory?.labels?.(lang())?.loadError || 'Could not load the passage. Please try again.';
+          chapters.replaceChildren(error);
+        });
       }));
     });
   }
 
   function renderNumberGrid(select,target,step){
     target.replaceChildren();
-    selectOptions(select).forEach(option => {
-      const value = option.value;
-      target.append(makeChoice(value, value === select.value, () => {
+    const numbers = step === 'chapter' ? draftStructure.map(ch=>ch.chapter)
+      : draftStructure.find(ch=>ch.chapter===draftChapter)?.verses || [];
+    numbers.forEach(number => {
+      const value = String(number);
+      const selected = step === 'chapter' ? number === draftChapter : number === draftVerse;
+      target.append(makeChoice(value, selected, async () => {
         if (step === 'verse') {
-          select.value = value;
+          const bookIndex = draftBookIndex, chapter = draftChapter;
           close({restoreFocus:false});
-          requestAnimationFrame(() => select.dispatchEvent(new Event('change',{bubbles:true})));
-          return;
-        }
-
-        const changed = select.value !== value;
-        currentStep = 'verse';
-        if (changed) {
-          showLoading(verses);
-          setStep('verse',{focusChoice:false});
+          if (Number(bookSelect.value) !== bookIndex || Number(chapterSelect.value) !== chapter || !currentBookData) {
+            state.bookIndex = bookIndex; state.chapter = chapter;
+            const expectedLoad = loadRun + 1;
+            if (!await loadCurrent({scrollTop:false}) || loadRun !== expectedLoad) return;
+          }
+          window.BibleVersePicker?.sync?.();
           select.value = value;
           select.dispatchEvent(new Event('change',{bubbles:true}));
-          // Same-book changes render the chapter synchronously. Rebuild the verse
-          // choices from that new chapter before the next paint, not a frame later.
-          window.BibleVersePicker?.sync?.();
-          if (!overlay.hidden && currentStep === 'verse') renderAll();
+          window.ReaderExperience?.recordLocation?.(number);
+          title.focus({preventScroll:true});
           return;
         }
+        draftChapter = number;
+        draftVerse = 1;
+        currentStep = 'verse';
+        setStep('verse',{focusChoice:false});
         renderAll();
       }));
     });
@@ -194,8 +213,8 @@
 
   function renderAll(){
     const l = labels();
-    const bookName = bookSelect.selectedOptions[0]?.textContent?.trim() || l.book;
-    const chapterName = chapterSelect.selectedOptions[0]?.textContent?.trim() || chapterSelect.value;
+    const bookName = bookSelect.options[draftBookIndex]?.textContent?.trim() || l.book;
+    const chapterName = String(draftChapter);
     heading.textContent = l.title;
     closeButton.setAttribute('aria-label',l.close);
     backButton.setAttribute('aria-label',l.back);
@@ -203,21 +222,16 @@
     overlay.querySelector('[data-label="chapter"]').textContent = `${bookName} · ${l.chapter}`;
     overlay.querySelector('[data-label="verse"]').textContent = `${bookName} · ${chapterName} · ${l.verse}`;
     if (!hint.hidden) hint.textContent = l.hint;
-    renderSwitch();
-    renderBooks();
-    // A new book may take time to fetch. Never paint the old book's chapters
-    // while that request is pending; reveal only the newly loaded options.
-    if (awaitingBookIndex !== null && (chapterSelect.disabled || !(
-      typeof currentBookData !== 'undefined' && currentBookData
-    ))) {
+    if (currentStep === 'book') { renderSwitch(); renderBooks(); }
+    if (!draftStructure) {
       showLoading(chapters);
       showLoading(verses);
       setStep(currentStep,{focusChoice:false});
       return;
     }
     awaitingBookIndex = null;
-    renderNumberGrid(chapterSelect,chapters,'chapter');
-    renderNumberGrid(verseSelect,verses,'verse');
+    if (currentStep === 'chapter') renderNumberGrid(chapterSelect,chapters,'chapter');
+    if (currentStep === 'verse') renderNumberGrid(verseSelect,verses,'verse');
     setStep(currentStep);
   }
 
@@ -226,6 +240,11 @@
     activeTestament = Number(bookSelect.selectedIndex) > OT_END_INDEX ? 'new' : 'old';
     currentStep = 'book';
     awaitingBookIndex = null;
+    ++structureRequest;
+    draftBookIndex = Number(bookSelect.value);
+    draftChapter = Number(chapterSelect.value)||1;
+    draftVerse = Number(verseSelect.value)||1;
+    draftStructure = getBookStructure(draftBookIndex);
     overlay.hidden = false;
     title.setAttribute('aria-expanded','true');
     document.body.classList.add('title-navigator-open');
@@ -234,6 +253,7 @@
   }
 
   function close({restoreFocus=true}={}){
+    ++structureRequest;
     overlay.hidden = true;
     title.setAttribute('aria-expanded','false');
     document.body.classList.remove('title-navigator-open');
@@ -248,7 +268,7 @@
     }
     if (currentStep === 'chapter') {
       currentStep = 'book';
-      activeTestament = Number(bookSelect.selectedIndex) > OT_END_INDEX ? 'new' : 'old';
+      activeTestament = draftBookIndex > OT_END_INDEX ? 'new' : 'old';
       renderAll();
     }
   }
@@ -268,6 +288,89 @@
   closeButton.addEventListener('click',()=>close());
   overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden)close();});
+
+  dialog.addEventListener('keydown',event=>{
+    event.stopPropagation();
+    if(event.key==='Escape'){event.preventDefault();close();return;}
+    if(event.key!=='Tab')return;
+    const targets=[...dialog.querySelectorAll('button')].filter(node=>!node.hidden&&node.getClientRects().length);
+    const first=targets[0],last=targets.at(-1);
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+  });
+
+  // Exam range controls share the reader's choice buttons, number grids and
+  // testament tabs instead of invoking an unrelated Android native select UI.
+  function enhanceSelect(select,{label,isBook=false,owner}={}){
+    select.hidden=true;select.tabIndex=-1;
+    const trigger=makeChoice('',false,openChoices);
+    trigger.className='memory-choice-trigger';trigger.dataset.memorySelect=select.id;
+    trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-expanded','false');
+    select.after(trigger);
+    let picker=null;
+    function sync(){
+      const next=select.selectedOptions[0]?.textContent||'…';
+      if(trigger.textContent!==next)trigger.textContent=next;
+      trigger.disabled=select.disabled;
+      trigger.setAttribute('aria-label',`${label}: ${next}`);
+    }
+    function openChoices(){
+      if(select.disabled||picker)return;
+      picker=document.createElement('dialog');picker.id='memoryChoiceDialog';
+      picker.className='title-navigator memory-choice-dialog';picker.dataset.select=select.id;
+      picker.setAttribute('aria-labelledby','memoryChoiceHeading');
+      const head=document.createElement('div');head.className='title-navigator-head';
+      const name=document.createElement('strong');name.id='memoryChoiceHeading';name.textContent=label;
+      const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='title-navigator-close';
+      dismiss.textContent='×';dismiss.setAttribute('aria-label',labels().close);dismiss.addEventListener('click',()=>picker.close());
+      head.append(name,dismiss);
+      const section=document.createElement('section');section.className='title-navigator-section';
+      const grid=document.createElement('div');grid.className=`title-navigator-grid title-navigator-${isBook?'books':'verses'}`;
+      let testament=Number(select.value)>OT_END_INDEX?'new':'old',tabs;
+      function render(){
+        grid.replaceChildren();
+        if(tabs)[...tabs.children].forEach((tab,index)=>{const active=(index===0?'old':'new')===testament;tab.setAttribute('aria-selected',String(active));tab.classList.toggle('active',active);});
+        selectOptions(select).forEach(option=>{
+          if(isBook&&((Number(option.value)>OT_END_INDEX?'new':'old')!==testament))return;
+          const choice=makeChoice(option.textContent,select.value===option.value,()=>{
+            select.value=option.value;
+            picker.close();
+            select.dispatchEvent(new Event('change',{bubbles:true}));
+            sync();
+          });
+          choice.dataset.value=option.value;grid.append(choice);
+        });
+      }
+      if(isBook){
+        tabs=document.createElement('div');tabs.className='title-navigator-testament-switch';tabs.setAttribute('role','tablist');
+        for(const [key,text] of [['old',labels().old],['new',labels().new]]){
+          const tab=document.createElement('button');tab.type='button';tab.textContent=text;tab.dataset.switch=key;tab.setAttribute('role','tab');
+          tab.addEventListener('click',()=>{testament=key;render();});tabs.append(tab);
+        }
+        section.append(tabs);
+      }
+      section.append(grid);picker.append(head,section);document.body.append(picker);
+      const current=picker;
+      const ownerClosed=()=>{if(current.open)current.close();};
+      owner?.addEventListener('close',ownerClosed,{once:true});
+      current.addEventListener('close',()=>{
+        owner?.removeEventListener('close',ownerClosed);current.remove();picker=null;
+        trigger.setAttribute('aria-expanded','false');
+        if(trigger.isConnected)trigger.focus({preventScroll:true});
+      },{once:true});
+      current.addEventListener('click',event=>{
+        if(event.target!==current)return;
+        const rect=current.getBoundingClientRect();
+        if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)current.close();
+      });
+      render();current.showModal();trigger.setAttribute('aria-expanded','true');
+      const selected=grid.querySelector('[aria-pressed="true"]')||grid.querySelector('button');
+      selected?.focus({preventScroll:true});selected?.scrollIntoView({block:'nearest'});
+    }
+    select.addEventListener('change',sync);sync();
+    return {trigger,sync};
+  }
+  window.BibleTitleNavigator={enhanceSelect};
 
   const observer = new MutationObserver(() => { if (!overlay.hidden) requestAnimationFrame(renderAll); });
   observer.observe(bookSelect,{childList:true,subtree:true,attributes:true});
