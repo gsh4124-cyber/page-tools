@@ -48,6 +48,14 @@ function saveTranslation(){localStorage.setItem("bible-reader-translation",activ
 function setupBookSelect(){bookSelect.innerHTML="";BOOKS.forEach(book=>{const o=document.createElement("option");o.value=book.index;o.textContent=book.ko;bookSelect.append(o)});bookSelect.value=String(state.bookIndex)}
 
 function normalizeMidvash(raw){return{chapters:(raw.chapters||[]).map((ch,i)=>({chapter:Number(ch.chapter||i+1),verses:(ch.verses||[]).map((v,j)=>({verse:Number(v.number||v.verse||j+1),text:String(v.text||"")}))}))}}
+function getBookStructure(bookIndex,translationId=activeTranslationId){
+  const book=BOOKS[Number(bookIndex)];if(!book)return null;
+  const data=cache.get(`${translationId}:${book.osis}`);
+  if(data)return data.chapters.map(ch=>({chapter:Number(ch.chapter),verses:ch.verses.map(v=>Number(v.verse))}));
+  const counts=window.BibleChapterIndex?.[translationId]?.[Number(bookIndex)];
+  return counts?.map((count,index)=>({chapter:index+1,verses:Array.from({length:count},(_,n)=>n+1)}))||null;
+}
+
 async function fetchBook(book,translationId=activeTranslationId){
   const tr=TRANSLATIONS[translationId]||TRANSLATIONS.krv1961;
   const key=`${tr.id}:${book.osis}`;

@@ -38,6 +38,8 @@
     });
   }
 
+  function setText(node,value){if(node&&node.textContent!==value)node.textContent=value;}
+
   function applyAccess(){
     const a=access();
     const labels={translationSelect:a.translation,languageSelect:a.language,bookSelect:a.book,chapterSelect:a.chapter,verseSelect:a.verse,searchInput:a.search,leftTranslation:a.left,rightTranslation:a.right,themeToggle:a.theme};
@@ -57,9 +59,9 @@
     const title=panel.querySelector('.notebook-title');if(title&&title.textContent!==t.recordsTitle)title.textContent=t.recordsTitle || title.textContent;
     const close=panel.querySelector('.notebook-close');if(close&&close.textContent!==t.close)close.textContent=t.close || close.textContent;
     const tabMap={highlights:'highlights',saved:'savedVerses',chapters:'savedChapters'};
-    Object.entries(tabMap).forEach(([tab,key])=>{const el=panel.querySelector(`[data-tab="${tab}"]`);const next=t[key];if(el&&!el.hidden&&next&&el.textContent!==next)el.textContent=next;});
+    Object.entries(tabMap).forEach(([tab,key])=>{const el=panel.querySelector(`[data-tab="${tab}"]`);const next=t[key];if(el&&!el.hidden&&next&&el.textContent!==next)setText(el,next);});
     const tools=panel.querySelector('.notebook-data-tools');
-    if(tools){const buttons=tools.querySelectorAll('button');if(buttons[0]&&t.backup&&buttons[0].textContent!==t.backup)buttons[0].textContent=t.backup;if(buttons[1]&&t.restore&&buttons[1].textContent!==t.restore)buttons[1].textContent=t.restore;}
+    if(tools){const buttons=tools.querySelectorAll('button');if(buttons[0]&&t.backup&&buttons[0].textContent!==t.backup)setText(buttons[0],t.backup);if(buttons[1]&&t.restore&&buttons[1].textContent!==t.restore)setText(buttons[1],t.restore);}
     panel.querySelectorAll('textarea').forEach(el=>{if(t.notePlaceholder&&el.placeholder!==t.notePlaceholder)el.placeholder=t.notePlaceholder;});
   }
 
@@ -68,25 +70,25 @@
     document.querySelectorAll('.notebook-item-actions').forEach(group=>{
       [...group.querySelectorAll('button')].forEach(button=>{
         const raw=button.textContent.trim();
-        if(['구절로 이동','Go to verse'].includes(raw))button.textContent=t.goVerse||raw;
-        else if(['장으로 이동','Go to chapter'].includes(raw))button.textContent=t.goChapter||raw;
-        else if(['메모 추가','Add note'].includes(raw))button.textContent=t.addNote||raw;
-        else if(['메모 수정','Edit note'].includes(raw))button.textContent=t.editNote||raw;
-        else if(['하이라이트 삭제','Delete highlight'].includes(raw))button.textContent=t.deleteHighlight||raw;
-        else if(['저장 삭제','Delete saved item'].includes(raw))button.textContent=t.deleteSaved||raw;
+        if(['구절로 이동','Go to verse'].includes(raw))setText(button,t.goVerse||raw);
+        else if(['장으로 이동','Go to chapter'].includes(raw))setText(button,t.goChapter||raw);
+        else if(['메모 추가','Add note'].includes(raw))setText(button,t.addNote||raw);
+        else if(['메모 수정','Edit note'].includes(raw))setText(button,t.editNote||raw);
+        else if(['하이라이트 삭제','Delete highlight'].includes(raw))setText(button,t.deleteHighlight||raw);
+        else if(['저장 삭제','Delete saved item'].includes(raw))setText(button,t.deleteSaved||raw);
       });
     });
     document.querySelectorAll('.notebook-empty').forEach(el=>{
       const raw=el.textContent.trim();
-      if(raw==='하이라이트한 성구가 없습니다.')el.textContent=t.emptyHighlights||raw;
-      else if(raw==='저장한 성구가 없습니다.')el.textContent=t.emptySaved||raw;
-      else if(raw==='저장한 장이 없습니다.')el.textContent=t.emptyChapters||raw;
+      if(raw==='하이라이트한 성구가 없습니다.')setText(el,t.emptyHighlights||raw);
+      else if(raw==='저장한 성구가 없습니다.')setText(el,t.emptySaved||raw);
+      else if(raw==='저장한 장이 없습니다.')setText(el,t.emptyChapters||raw);
     });
     const editor=document.querySelector('.record-note-editor');if(editor){
       const buttons=editor.querySelectorAll('.verse-note-actions button');
-      if(buttons[0])buttons[0].textContent=t.save||buttons[0].textContent;
-      if(buttons[1])buttons[1].textContent=t.deleteNote||buttons[1].textContent;
-      if(buttons[2])buttons[2].textContent=t.cancel||buttons[2].textContent;
+      if(buttons[0])setText(buttons[0],t.save||buttons[0].textContent);
+      if(buttons[1])setText(buttons[1],t.deleteNote||buttons[1].textContent);
+      if(buttons[2])setText(buttons[2],t.cancel||buttons[2].textContent);
       const textarea=editor.querySelector('textarea');if(textarea)textarea.placeholder=t.notePlaceholder||textarea.placeholder;
     }
   }
@@ -95,13 +97,13 @@
     const el=document.querySelector('#searchSummary');if(!el)return;
     const raw=el.textContent.trim();if(!raw||lang()==='ko')return;
     const t=text();let m;
-    m=raw.match(/^“(.+)” 검색 준비 중…$/);if(m){el.textContent=`“${m[1]}” ${t.search || 'Search'}…`;return;}
-    m=raw.match(/^“(.+)” 검색 중… (\d+)\/(\d+)권$/);if(m){el.textContent=`“${m[1]}” ${t.search || 'Search'}… ${m[2]}/${m[3]}`;return;}
+    m=raw.match(/^“(.+)” 검색 준비 중…$/);if(m){setText(el,`“${m[1]}” ${t.search || 'Search'}…`);return;}
+    m=raw.match(/^“(.+)” 검색 중… (\d+)\/(\d+)권$/);if(m){setText(el,`“${m[1]}” ${t.search || 'Search'}… ${m[2]}/${m[3]}`);return;}
     m=raw.match(/^“(.+)” (\d+)(\+?)개 결과 · (.+?)(?: · (\d+)권 로딩 실패)?$/);
     if(m){
       const resultWord={en:'results',fr:'résultats',de:'Ergebnisse',zh:'个结果',ru:'результатов',la:'eventus',pt:'resultados',ar:'نتيجة'}[lang()]||'results';
       const count=lang()==='zh'?`${m[2]}${m[3]}${resultWord}`:`${m[2]}${m[3]} ${resultWord}`;
-      el.textContent=`“${m[1]}” ${count} · ${m[4]}`;return;
+      setText(el,`“${m[1]}” ${count} · ${m[4]}`);return;
     }
   }
 
@@ -109,8 +111,8 @@
     const el=document.querySelector('#translationAttribution');if(!el)return;
     const tr=typeof TRANSLATIONS!=='undefined'?TRANSLATIONS[document.querySelector('#translationSelect')?.value]:null;if(!tr)return;
     const rights=RIGHTS[lang()]||RIGHTS.en;
-    if(tr.id==='krv1961'){el.textContent=`${tr.name} · ${tr.attribution||'대한성서공회'} · ${rights.expired}`;return;}
-    el.textContent=`${tr.name} · ${tr.language} · ${rights.pd}`;
+    if(tr.id==='krv1961'){setText(el,`${tr.name} · ${tr.attribution||'대한성서공회'} · ${rights.expired}`);return;}
+    setText(el,`${tr.name} · ${tr.language} · ${rights.pd}`);
   }
 
   function scriptureHeading(book,chapter,scriptureLang){

@@ -82,21 +82,23 @@
     return raw;
   }
 
+  function setText(node,value){if(node&&node.textContent!==value)node.textContent=value;}
+
   function applyStatic(){
     const privacyLabels={ko:'개인정보처리방침',en:'Privacy Policy',fr:'Confidentialité',de:'Datenschutz',zh:'隐私政策',ru:'Конфиденциальность',la:'De secreto',pt:'Privacidade',ar:'سياسة الخصوصية'};
     const privacy=document.querySelector('#privacyPolicyLink');
     if(privacy){const label=privacyLabels[uiLang]||privacyLabels.en;if(privacy.textContent!==label)privacy.textContent=label;privacy.href='/privacy/#'+(uiLang==='ko'?'ko':'en');}
-    document.documentElement.lang=uiLang;
+    if(document.documentElement.lang!==uiLang)document.documentElement.lang=uiLang;
     const map={'#searchButton':'search','#compareToggle':'compare','#prevChapterTitle':'prev','#nextChapterTitle':'next','#prevChapterBottom':'prev','#nextChapterBottom':'next','#singlePageView':'single','#dualPageView':'dual','#fontDown':'fontDown','#fontUp':'fontUp','#widthToggle':null,'#notebookToggle':'notes','#closeSearch':'close'};
-    Object.entries(map).forEach(([sel,key])=>{const el=document.querySelector(sel);if(el&&key)el.textContent=text(key)});
+    Object.entries(map).forEach(([sel,key])=>{const el=document.querySelector(sel);if(el&&key)setText(el,text(key));});
     const input=document.querySelector('#searchInput'); if(input){input.placeholder=text('search');input.setAttribute('aria-label',text('search'));}
     const fd=document.querySelector('#fontDown'); if(fd){fd.title=text('fontDownTitle');fd.setAttribute('aria-label',text('fontDownTitle'));}
     const fu=document.querySelector('#fontUp'); if(fu){fu.title=text('fontUpTitle');fu.setAttribute('aria-label',text('fontUpTitle'));}
-    const wt=document.querySelector('#widthToggle'); if(wt){wt.textContent='↔';wt.title=text('widthTitle');wt.setAttribute('aria-label',text('widthTitle'));}
-    const note=document.querySelector('.source-note');if(note)note.textContent=text('source');
-    const serviceHeading=document.querySelector('#reader-service-title');if(serviceHeading)serviceHeading.textContent=text('pageTitle').split(/[·|]/)[0].trim();
-    const serviceSummary=document.querySelector('#reader-service-summary');if(serviceSummary)serviceSummary.textContent=text('description');
-    document.querySelectorAll('.ad-slot span').forEach(el=>el.textContent=text('ad'));
+    const wt=document.querySelector('#widthToggle'); if(wt){setText(wt,'↔');wt.title=text('widthTitle');wt.setAttribute('aria-label',text('widthTitle'));}
+    const note=document.querySelector('.source-note');if(note)setText(note,text('source'));
+    const serviceHeading=document.querySelector('#reader-service-title');if(serviceHeading)setText(serviceHeading,text('pageTitle').split(/[·|]/)[0].trim());
+    const serviceSummary=document.querySelector('#reader-service-summary');if(serviceSummary)setText(serviceSummary,text('description'));
+    document.querySelectorAll('.ad-slot span').forEach(el=>setText(el,text('ad')));
     document.querySelectorAll('.ad-slot').forEach(el=>el.setAttribute('aria-label',text('ad')));
   }
 

@@ -1,3 +1,4 @@
+import {chooseMemory} from './picker-test-helpers.mjs';
 import {chromium} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -45,10 +46,10 @@ async function openPage(width=390,route='/',expectedChapter=null,options={}){
 }
 async function setRange(page,fromChapter,fromVerse,toChapter,toVerse){
   if(!await page.locator('.memory-range').evaluate(n=>n.open))await page.locator('.memory-range summary').click();
-  await page.locator('#memoryFromChapter').selectOption(String(fromChapter));
-  await page.locator('#memoryToChapter').selectOption(String(toChapter));
-  await page.locator('#memoryFromVerse').selectOption(String(fromVerse));
-  await page.locator('#memoryToVerse').selectOption(String(toVerse));
+  await chooseMemory(page,'memoryFromChapter',String(fromChapter));
+  await chooseMemory(page,'memoryToChapter',String(toChapter));
+  await chooseMemory(page,'memoryFromVerse',String(fromVerse));
+  await chooseMemory(page,'memoryToVerse',String(toVerse));
 }
 async function answerFor(page,chapter,verse){return page.evaluate(({chapter,verse})=>currentBookData.chapters.find(c=>Number(c.chapter)===chapter).verses.find(v=>Number(v.verse)===verse).text,{chapter,verse});}
 async function identity(dialog){return dialog.locator('textarea').evaluateAll(nodes=>nodes.map(n=>`${n.dataset.chapter}:${n.dataset.verse}`).join(','));}
@@ -96,7 +97,7 @@ try{
   {
     const {context,page,errors}=await openPage(390),dialog=page.locator('#memoryQuizDialog');
     const readerBefore=await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent}));
-    await dialog.locator('#memoryBook').selectOption('18');
+    await chooseMemory(page,'memoryBook','18');
     await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===150&&!document.querySelector('#memoryFromChapter')?.disabled);
     await setRange(page,119,175,119,176);await page.locator('#memoryViewChapter').check();await dialog.locator('.memory-primary').click();
     assert.equal(await identity(dialog),'119:175,119:176','A book independent of the reader supports long Psalms and chapter view');
@@ -106,7 +107,7 @@ try{
     assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent})),readerBefore,'Quiz selection must not change the reading location');
     if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
     await page.route('**/scripture/krv1961/Genesis.json',route=>route.abort());
-    await dialog.locator('#memoryBook').selectOption('0');await dialog.locator('.memory-load-status[role=alert]').waitFor({state:'visible'});
+    await chooseMemory(page,'memoryBook','0');await dialog.locator('.memory-load-status[role=alert]').waitFor({state:'visible'});
     assert(await dialog.locator('.memory-primary').isDisabled(),'Failed book load cannot start a stale passage');
     await page.unroute('**/scripture/krv1961/Genesis.json');await dialog.getByRole('button',{name:'다시 불러오기',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===50&&!document.querySelector('#memoryFromChapter')?.disabled);
@@ -346,7 +347,7 @@ try{
     assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1);
     await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),await dialog.locator('textarea').count(),'All-correct checks also display every correct passage');assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
     await dialog.locator('.memory-aids button').click();
-    assert(await page.locator('#memoryBook').evaluate(n=>document.activeElement===n),'Change passage returns focus to the book selector');
+    assert(await page.locator('[data-memory-select="memoryBook"]').evaluate(n=>document.activeElement===n),'Change passage returns focus to the book selector');
     assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, cleared stale grading, next remaining error after correction, reduced-height navigation, clean success and passage focus',pass:true});await context.close();
   }
   for(const width of (local?[320,390,430,1280]:[390,1280])){

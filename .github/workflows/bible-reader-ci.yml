@@ -122,9 +122,17 @@ jobs:
       - name: Test reading, notes and verse selection
         if: matrix.engine == 'chromium'
         run: node tools/reader-detail-smoke.mjs --local
+      - name: Test instant book grids and exam range choices
+        if: matrix.engine == 'chromium'
+        run: node tools/picker-navigation-smoke.mjs
       - name: Test collected passages and persistent exam dialog
         if: matrix.engine == 'chromium'
         run: node tools/memory-collection-smoke.mjs --local
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.engine == 'chromium'
+        with:
+          name: bible-picker-navigation
+          path: bible-reader/qa_evidence/pickers/
       - uses: actions/upload-artifact@v4
         if: always() && matrix.engine == 'chromium'
         with:

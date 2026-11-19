@@ -30,14 +30,15 @@ for(const fragment of [
   "close({restoreFocus:false})",
   "renderNumberGrid(chapterSelect,chapters,'chapter')",
   "renderNumberGrid(verseSelect,verses,'verse')",
-  "bookSelect.dispatchEvent(new Event('change',{bubbles:true}))",
 ]){
   if(!nav.includes(fragment)) throw new Error(`title navigator regression guard missing: ${fragment}`);
 }
-// Chapter and verse grids must update within the same selection turn.
+// Number grids come from a small index; a passage request cannot block them.
 for(const fragment of [
   'window.BibleVersePicker?.sync?.()',
-  'awaitingBookIndex = Number(option.value)',
+  'draftStructure = getBookStructure(draftBookIndex,translationId)',
+  'const expectedLoad = loadRun + 1',
+  'window.BibleTitleNavigator={enhanceSelect}',
   'showLoading(chapters)',
 ]){
   if(!nav.includes(fragment)) throw new Error(`stale title navigation grid regression: ${fragment}`);
