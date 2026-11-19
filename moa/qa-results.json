@@ -1,8 +1,8 @@
 {
-  "status": "DONE_LOCAL_BROWSER_QA",
-  "hosted_supabase": "NOT_TESTED",
+  "status": "PARTIAL",
+  "hosted_supabase": "DONE",
   "real_mobile_devices": "NOT_TESTED",
-  "external_deployment": "NOT_EXECUTED",
+  "external_deployment": "HOLD",
   "browser": {
     "base": "http://127.0.0.1:62216",
     "engine": "Microsoft Edge Chromium",
@@ -70,5 +70,136 @@
       "second browser reopens the same A cloud record"
     ],
     "errors": []
+  },
+  "fixture_cleanup": "ESCALATE",
+  "hosted_verification": {
+    "hosted": {
+      "status": "DONE",
+      "projectRef": "afiqaibosavbjzkffggr",
+      "runtimeIdentity": {
+        "revision": "f36282719fb6570aca9ea077652f3771343d1a86",
+        "sourceSha256": "b21c0fab923ee142350c91f7ab3b4b0724ba73dcaa9d4954c6c059d83c78cef3",
+        "cloudConfigured": true
+      },
+      "results": [
+        {
+          "name": "real hosted password login A/B and verified user IDs",
+          "status": "DONE"
+        },
+        {
+          "name": "real RPC create/read A/B, stale-write rejection and anonymous denial",
+          "status": "DONE"
+        },
+        {
+          "name": "real REST ownership read/update/insert and ownership reassignment isolation",
+          "status": "DONE"
+        },
+        {
+          "name": "real GraphQL schema visibility does not bypass owner RLS",
+          "status": "DONE"
+        },
+        {
+          "name": "real private PNG upload/download and byte checksum",
+          "status": "DONE"
+        },
+        {
+          "name": "Storage B/anonymous/public read, cross-owner upload/overwrite/delete/signing denied",
+          "status": "DONE"
+        },
+        {
+          "name": "real cloud encrypted full backup, delete, restore and checksum readback",
+          "status": "DONE"
+        },
+        {
+          "name": "mobile browser real login and existing cloud record readback",
+          "status": "DONE"
+        },
+        {
+          "name": "mobile browser real PNG/WebM upload and cloud persistence",
+          "status": "DONE"
+        },
+        {
+          "name": "real cloud video centered autoplay and offscreen pause",
+          "status": "DONE"
+        },
+        {
+          "name": "mobile browser real encrypted backup, delete, restore and full media checksums",
+          "status": "DONE"
+        },
+        {
+          "name": "separate browser B real login cannot see A records or media",
+          "status": "DONE"
+        }
+      ],
+      "errors": [],
+      "mediaSha256": {
+        "png": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec",
+        "webm": "b75d230e47db46ca5ad255411cd5435a8fddf8f13a5accf7675794ca9a5b2cf3"
+      },
+      "cleanup": [
+        {
+          "user": "A",
+          "removedObjects": 4,
+          "remainingObjects": 0,
+          "signedOut": true
+        },
+        {
+          "user": "B",
+          "removedObjects": 0,
+          "remainingObjects": 0,
+          "signedOut": true
+        }
+      ],
+      "limitations": [
+        "email verification delivery and public signup not tested; temporary confirmed accounts were seeded by SQL",
+        "real Android/iOS devices not tested",
+        "no external website deployment"
+      ],
+      "engine": "installed Google Chrome; 390x844 mobile emulation"
+    },
+    "preservation": {
+      "existingColumnsUnchanged": true,
+      "existingPoliciesUnchanged": true,
+      "existingBucketsUnchanged": true,
+      "originalProfileDataUnchanged": true,
+      "originalAuthIdsUnchanged": true,
+      "existingProductCountsBefore": {
+        "bible": 45,
+        "device": 10,
+        "random": 568
+      },
+      "existingProductCountsAfter": {
+        "bible": 45,
+        "device": 10,
+        "random": 568
+      }
+    },
+    "migration": {
+      "version": "20261119102755",
+      "name": "moa_private_diary_initial"
+    },
+    "fixtureCleanup": {
+      "status": "ESCALATE",
+      "mediaRemoved": true,
+      "refreshSessionsRevoked": true,
+      "temporaryAccountsRemaining": 2,
+      "reason": "Supabase delete confirmations expired; awaiting owner's chosen cleanup method",
+      "passwordsRotatedAndDiscarded": true,
+      "oldPasswordsRejected": true,
+      "retirementChecks": [
+        {
+          "user": "A",
+          "passwordRotatedAndDiscarded": true,
+          "oldPasswordRejected": true,
+          "sessionsRevoked": true
+        },
+        {
+          "user": "B",
+          "passwordRotatedAndDiscarded": true,
+          "oldPasswordRejected": true,
+          "sessionsRevoked": true
+        }
+      ]
+    }
   }
 }

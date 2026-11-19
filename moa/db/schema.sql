@@ -1,4 +1,5 @@
--- Proposed hosted setup, NOT APPLIED. Run only after owner approval.
+-- Canonical initial schema, applied as migration 20261119102755 (moa_private_diary_initial).
+-- Do not rerun against an initialized project; use a separately reviewed migration for changes.
 -- Additive Moa-only objects. Existing product tables, buckets and policies stay intact.
 begin;
 
