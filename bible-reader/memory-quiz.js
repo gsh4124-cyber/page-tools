@@ -186,7 +186,20 @@
     pt:['Correto','Prática','Ajuda','Começar','Prévia do texto','Corrija e confira.'],
     ar:['صحيح','تدريب','مساعدة','ابدأ','معاينة النص','صحح وتحقق مجدداً.']
   };
+  const TRAINING_KEYS='mode practiceTitle examMode practiceIntro examIntro practiceStart examStart practiceRange practiceUseCollection practiceAnswer showPracticeText hidePracticeText repeatPractice practiceResult practiceResultNote manageCollection deleteCollection confirmCollectionDelete confirmDelete cancel collectionDeleted undo'.split(' ');
+  const TRAINING_COPY={
+    ko:['연습 방식','타이핑 암기','암기시험','본문을 보며 따라 쓰세요. 익숙해지면 본문을 가려 연습할 수 있습니다.','본문을 가리고 기억나는 말씀을 입력합니다.','타이핑 암기 시작','암기시험 시작','암기 범위','모은 성구만 연습','본문을 따라 입력하세요','본문 보기','본문 가리기','다시 쓰기','암기 연습 결과','마지막으로 입력한 답안을 기준으로 표시합니다.','모음 관리','저장한 성구 전체 삭제','모음에 저장한 {count}절을 모두 삭제할까요?','전체 삭제','취소','모음에서 {count}절을 삭제했습니다.','되돌리기'],
+    en:['Practice mode','Typing practice','Memory test','Copy the passage while reading. Hide it when you are ready to practise from memory.','Type from memory with the passage hidden.','Start typing practice','Start memory test','Practice passage','Practise only collected verses','Type the passage shown above','Show passage','Hide passage','Type again','Practice results','Based on your most recent answers.','Manage collection','Delete all saved verses','Delete all {count} saved verse references?','Delete all','Cancel','Deleted {count} verses from the collection.','Undo'],
+    fr:['Mode','Mémorisation par saisie','Test de mémoire','Recopiez le texte, puis masquez-le pour vous entraîner de mémoire.','Écrivez de mémoire avec le texte masqué.','Commencer la pratique','Commencer le test','Passage à pratiquer','Pratiquer les versets collectés','Recopiez le texte affiché','Afficher le texte','Masquer le texte','Écrire à nouveau','Résultats de la pratique','Selon vos dernières réponses.','Gérer la collection','Supprimer tous les versets enregistrés','Supprimer les {count} références enregistrées ?','Tout supprimer','Annuler','{count} versets supprimés de la collection.','Annuler la suppression'],
+    de:['Modus','Tippen und merken','Gedächtnistest','Schreibe den sichtbaren Text ab. Blende ihn zum Üben aus dem Gedächtnis aus.','Schreibe aus dem Gedächtnis bei ausgeblendetem Text.','Tippübung starten','Gedächtnistest starten','Übungstext','Gesammelte Verse üben','Sichtbaren Text eingeben','Text zeigen','Text ausblenden','Erneut schreiben','Übungsergebnis','Basierend auf deinen letzten Antworten.','Sammlung verwalten','Alle gespeicherten Verse löschen','Alle {count} gespeicherten Versangaben löschen?','Alle löschen','Abbrechen','{count} Verse aus der Sammlung gelöscht.','Rückgängig'],
+    zh:['练习方式','打字背诵','默写测验','先看原文跟打，熟悉后可隐藏原文练习。','隐藏原文，凭记忆输入经文。','开始打字背诵','开始默写测验','练习范围','仅练习集合中的经节','输入上方显示的经文','显示原文','隐藏原文','重新输入','背诵练习结果','按最后输入的答案显示。','管理集合','删除全部已保存经节','删除集合中保存的全部 {count} 节经文位置吗？','全部删除','取消','已从集合删除 {count} 节。','撤销'],
+    ru:['Режим','Заучивание набором','Проверка памяти','Перепишите видимый текст, затем скройте его для тренировки памяти.','Введите текст по памяти без подсказки.','Начать тренировку','Начать проверку','Отрывок для практики','Тренировать собранные стихи','Перепишите показанный текст','Показать текст','Скрыть текст','Написать снова','Результаты тренировки','По последним введённым ответам.','Управление сборником','Удалить все сохранённые стихи','Удалить все сохранённые ссылки: {count}?','Удалить все','Отмена','Из сборника удалено стихов: {count}.','Восстановить'],
+    la:['Modus','Memoria scribendo','Probatio memoriae','Textum visibilem transcribe, deinde cela ut ex memoria exerceas.','Textu celato ex memoria scribe.','Exercitationem incipe','Probationem incipe','Locus exercendus','Versus collectos exerce','Textum monstratum transcribe','Monstra textum','Cela textum','Iterum scribe','Eventus exercitationis','Secundum responsa novissima.','Collectionem administra','Omnes versus servatos dele','Omnes {count} locos servatos delere?','Omnes dele','Revoca','{count} versus ex collectione deleti.','Restitue'],
+    pt:['Modo','Memorizar digitando','Teste de memória','Copie o texto visível e depois oculte-o para praticar de memória.','Digite de memória com o texto oculto.','Começar a prática','Começar o teste','Trecho para prática','Praticar os versículos reunidos','Digite o texto mostrado acima','Mostrar texto','Ocultar texto','Digitar novamente','Resultado da prática','Com base nas respostas mais recentes.','Gerenciar coleção','Excluir todos os versículos salvos','Excluir todas as {count} referências salvas?','Excluir tudo','Cancelar','{count} versículos excluídos da coleção.','Desfazer'],
+    ar:['وضع التدريب','الحفظ بالكتابة','اختبار الحفظ','انسخ النص الظاهر ثم أخفه للتدرب من الذاكرة.','اكتب من الذاكرة والنص مخفي.','بدء تدريب الكتابة','بدء اختبار الحفظ','نطاق التدريب','تدريب الآيات المجمعة فقط','اكتب النص المعروض أعلاه','عرض النص','إخفاء النص','الكتابة مجدداً','نتائج التدريب','حسب آخر الإجابات المدخلة.','إدارة المجموعة','حذف جميع الآيات المحفوظة','حذف جميع المراجع المحفوظة وعددها {count}؟','حذف الكل','إلغاء','تم حذف {count} آيات من المجموعة.','تراجع']
+  };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
+    ...Object.fromEntries(TRAINING_KEYS.map((key,i)=>[key,(TRAINING_COPY[code]||TRAINING_COPY.en)[i]])),
     ...Object.fromEntries(['collection','addCollection','useCollection','clearCollection','removeCollection','savedCollection','collectionError'].map((key,i)=>[key,(COLLECTION_COPY[code]||COLLECTION_COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
     ...Object.fromEntries(['view','verseView','chapterView','checkAnswer','nextVerse','nextChapter','finish','correct','editRetry','enterHelp','chapterHelp','firstCheck'].map((key,i)=>[key,(VIEW_COPY[code]||VIEW_COPY.en)[i]])),
@@ -203,7 +216,7 @@
   const el = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; };
   let dialog = null, opener = null;
   function close() { if (dialog?.open) dialog.close(); }
-  function open(event) {
+  function open(event,mode='exam') {
     if(dialog?.open)return;
     opener=event?.currentTarget||document.activeElement;
     const l=labels(lang()),chapter=Number(state.chapter);
@@ -220,7 +233,8 @@
     let collectionRefs=[];try{const saved=JSON.parse(localStorage.getItem(collectionKey)||'[]');if(Array.isArray(saved))collectionRefs=[...new Map(saved.filter(r=>r&&Number.isInteger(r.bookIndex)&&r.bookIndex>=0&&r.bookIndex<BOOKS.length&&Number.isInteger(r.chapter)&&r.chapter>0&&Number.isInteger(r.verse)&&r.verse>0).map(r=>[passageKey(r),{bookIndex:r.bookIndex,chapter:r.chapter,verse:r.verse}])).values()];}catch{}
     let collectionRows=[],collectionRun=0,collectionLoading=false,collectionFailed=false,setupRun=0;
     const collectionTexts=new Map(),nameFor=index=>window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||book;
-    const config={view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
+    const config={mode,view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
+    let lastDeletedCollection=null,practiceShown=true;
     let rows=[],attemptRows=[],draftAnswers=[],reviewOnly=false,started=0,session=null;
     const reference=items=>bookPassageReference(items,index=>nameFor(index??quizBookIndex),config.collection);
     const attemptReference=items=>reviewOnly?bookPassageReference(items,index=>nameFor(index??quizBookIndex),true):reference(items);
@@ -300,6 +314,12 @@
       moveClose(header);
       ++bookLoadRun;const activeDialog=dialog,currentSetup=++setupRun;
       context.textContent=`${book} · ${version}`;dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
+      const modes=el('fieldset','memory-modes');modes.append(el('legend','',l.mode));modes.setAttribute('aria-describedby','memoryModeDescription');
+      const modeDescription=el('p','memory-mode-description');modeDescription.id='memoryModeDescription';
+      for(const [value,text] of [['practice',l.practiceTitle],['exam',l.examMode]]){
+        const label=el('label'),input=el('input');input.type='radio';input.name='memoryMode';input.value=value;input.id=value==='practice'?'memoryModePractice':'memoryModeExam';input.checked=config.mode===value;
+        input.addEventListener('change',()=>{config.mode=value;syncMode();refresh();});label.append(input,document.createTextNode(text));modes.append(label);
+      }
       const views=el('fieldset','memory-views');views.append(el('legend','',l.view));
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
@@ -331,15 +351,33 @@
       const study=el('details','memory-study'),studyTitle=el('summary','',l.preview),passage=el('div','memory-preview');study.append(studyTitle,passage);
       const summary=el('p','memory-reference');
       let loading=false,loadFailed=false;
-      const collection=el('details','memory-collection'),collectionTitle=el('summary'),collectionToggleLabel=el('label','memory-use-selected'),collectionToggle=el('input');collectionToggle.type='checkbox';collectionToggle.id='memoryUseCollection';collectionToggleLabel.append(collectionToggle,document.createTextNode(l.useCollection));
+      const collection=el('details','memory-collection'),collectionTitle=el('summary'),collectionToggleLabel=el('label','memory-use-selected'),collectionToggle=el('input'),collectionToggleText=document.createTextNode(l.useCollection);collectionToggle.type='checkbox';collectionToggle.id='memoryUseCollection';collectionToggleLabel.append(collectionToggle,collectionToggleText);
       const collectionList=el('ul','memory-collection-list'),collectionStatus=el('p','memory-load-status');collectionStatus.setAttribute('role','status');
       const persistCollection=()=>{try{localStorage.setItem(collectionKey,JSON.stringify(collectionRefs));}catch{}};
-      const clearCollection=button(l.clearCollection,()=>{collectionRefs=[];config.collection=false;persistCollection();loadCollection();},'memory-collection-clear');
+      const management=el('details','memory-collection-management');management.append(el('summary','',l.manageCollection));
+      const clearPrompt=el('div','memory-collection-confirm');clearPrompt.hidden=true;clearPrompt.setAttribute('role','group');clearPrompt.setAttribute('aria-labelledby','memoryCollectionDeleteQuestion');
+      const clearQuestion=el('p');clearQuestion.id='memoryCollectionDeleteQuestion';
+      const clearCollection=button(l.deleteCollection,()=>{clearPrompt.hidden=false;clearCollection.hidden=true;renderCollection();cancelClear.focus({preventScroll:true});},'memory-collection-clear');
+      const cancelClear=button(l.cancel,()=>{clearPrompt.hidden=true;clearCollection.hidden=false;clearCollection.focus({preventScroll:true});},'memory-collection-cancel');
+      const confirmClear=button(l.confirmDelete,()=>{
+        if(!collectionRefs.length)return;
+        lastDeletedCollection={refs:collectionRefs.map(ref=>({...ref})),useCollection:config.collection};collectionRefs=[];config.collection=false;
+        clearPrompt.hidden=true;clearCollection.hidden=false;persistCollection();loadCollection();undoClear.focus({preventScroll:true});
+      },'memory-collection-confirm-delete');
+      const clearActions=el('div','memory-collection-delete-actions');clearActions.append(cancelClear,confirmClear);clearPrompt.append(clearQuestion,clearActions);management.append(clearCollection,clearPrompt);
+      const undoNotice=el('div','memory-collection-undo');undoNotice.setAttribute('role','status');
+      const undoMessage=el('span'),undoClear=button(l.undo,()=>{
+        if(!lastDeletedCollection)return;
+        collectionRefs=[...new Map([...lastDeletedCollection.refs,...collectionRefs].map(ref=>[passageKey(ref),ref])).values()];config.collection=config.collection||lastDeletedCollection.useCollection;lastDeletedCollection=null;
+        persistCollection();loadCollection();management.open=false;collectionToggle.focus({preventScroll:true});
+      },'memory-collection-restore');undoNotice.append(undoMessage,undoClear);
       const collectionRetry=button(l.reload,()=>loadCollection(),'memory-collection-reload');
-      collection.append(collectionTitle,collectionToggleLabel,el('p','memory-privacy',l.savedCollection),collectionStatus,collectionRetry,collectionList,clearCollection);
+      collection.append(collectionTitle,collectionToggleLabel,el('p','memory-privacy',l.savedCollection),collectionStatus,collectionRetry,collectionList,management,undoNotice);
       collection.open=!!collectionRefs.length;
       function renderCollection(){
         collectionTitle.textContent=`${l.collection} · ${collectionRefs.length} ${l.count}`;collectionToggle.checked=config.collection;collectionToggle.disabled=!collectionRefs.length;clearCollection.disabled=!collectionRefs.length;collectionRetry.hidden=!collectionFailed;
+        confirmClear.disabled=!collectionRefs.length;clearQuestion.textContent=l.confirmCollectionDelete.replace('{count}',collectionRefs.length);
+        undoNotice.hidden=!lastDeletedCollection;undoMessage.textContent=lastDeletedCollection?l.collectionDeleted.replace('{count}',lastDeletedCollection.refs.length):'';
         collectionStatus.hidden=!collectionLoading&&!collectionFailed;collectionStatus.textContent=collectionFailed?l.collectionError:l.loading;collectionStatus.setAttribute('role',collectionFailed?'alert':'status');
         collectionList.replaceChildren();for(const ref of collectionRefs){const text=`${nameFor(ref.bookIndex)} ${ref.chapter}:${ref.verse}`,item=el('li'),remove=button('×',()=>{collectionRefs=collectionRefs.filter(r=>passageKey(r)!==passageKey(ref));if(!collectionRefs.length)config.collection=false;persistCollection();loadCollection();});remove.setAttribute('aria-label',`${l.removeCollection} ${text}`);item.append(el('span','',text),remove);collectionList.append(item);}
       }
@@ -361,9 +399,13 @@
         rangePickers.forEach(picker=>picker.sync());
         rows=config.selected?selected:passageRows(chapters,config.fromChapter,config.fromVerse,config.toChapter,config.toVerse);
         if(loading||loadFailed)rows=[];
-        const target=activeRows();summary.textContent=target.length?`${reference(target)} · ${target.length} ${l.count}`:'';rangeTitle.textContent=l.range;startButton.disabled=!target.length||(config.collection&&(collectionLoading||collectionFailed));passage.replaceChildren();preview(passage,target);addCollection.disabled=!rows.length||loading||loadFailed;renderCollection();
+        const target=activeRows();summary.textContent=target.length?`${reference(target)} · ${target.length} ${l.count}`:'';rangeTitle.textContent=config.mode==='practice'?l.practiceRange:l.range;startButton.disabled=!target.length||(config.collection&&(collectionLoading||collectionFailed));passage.replaceChildren();preview(passage,target);addCollection.disabled=!rows.length||loading||loadFailed;renderCollection();
       }
-      const startButton=button(l.start,()=>begin(),'memory-primary');
+      const startButton=button('',()=>begin(),'memory-primary memory-setup-start');
+      function syncMode(){
+        const practice=config.mode==='practice';title.textContent=practice?l.practiceTitle:l.title;dock.setAttribute('aria-label',title.textContent);
+        modeDescription.textContent=practice?l.practiceIntro:l.examIntro;startButton.textContent=practice?l.practiceStart:l.examStart;collectionToggleText.nodeValue=practice?l.practiceUseCollection:l.useCollection;
+      }
       const addCollection=button(l.addCollection,()=>{for(const row of rows){const ref={bookIndex:quizBookIndex,chapter:row.chapter,verse:row.verse};if(!collectionRefs.some(r=>passageKey(r)===passageKey(ref)))collectionRefs.push(ref);collectionTexts.set(passageKey(ref),{...ref,text:row.text});}config.collection=true;collection.open=true;persistCollection();loadCollection();},'memory-collection-add');range.append(addCollection);
       collectionToggle.addEventListener('change',()=>{config.collection=collectionToggle.checked;refresh();});
       async function loadQuizBook(){
@@ -398,13 +440,13 @@
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
       const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
-      content.append(views,summary,range,collection,study,help,startButton);refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
+      content.append(modes,modeDescription,views,summary,range,collection,study,help,startButton);syncMode();refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
       if(dialog.open){rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
     }
-    function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
+    function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
       moveClose(header);
-      context.textContent=reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
+      context.textContent=config.mode==='practice'?`${version} · ${l.practiceTitle}`:reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const items=session.current,unitHeading=el('div','memory-unit-heading');unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),el('p','memory-progress',`${session.index+1} / ${session.unitCount}`));content.replaceChildren(unitHeading);
       shortNotices=el('div','memory-short-notices');content.append(shortNotices);
       const navigation=el('nav','memory-unit-nav');navigation.setAttribute('aria-label',l.view);
@@ -419,21 +461,26 @@
       const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
       const rowFeedbacks=[];
+      const practiceSources=[];
       function clearFeedback(){feedback.replaceChildren();feedback.removeAttribute('data-correct');rowFeedbacks.forEach(row=>row.replaceChildren());inputs.forEach(input=>input.removeAttribute('aria-invalid'));}
       function focusAnswer(index){const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:'start',behavior:'instant'});}
       const inputs=items.map(({row,index})=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.value=draftAnswers[index]||'';
-        input.setAttribute('aria-label',`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
-        const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.bookIndex??quizBookIndex}_${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);form.append(label,rowFeedback);
+        input.setAttribute('aria-label',`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${config.mode==='practice'?l.practiceAnswer:l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
+        const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.bookIndex??quizBookIndex}_${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);
+        if(config.mode==='practice'){
+          const text=el('p','memory-practice-text',row.text);text.id=`memoryPracticeText${index}`;text.setAttribute('dir','auto');text.hidden=!practiceShown;practiceSources.push(text);form.append(text);
+        }
+        form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
         input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();clearFeedback();error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';fitAnswer(input);updateProgress();});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
       function act(){
-        if(session.canAdvance){session.advance();if(session.done)results(session.firstAnswers);else showUnit();return;}
+        if(session.canAdvance){session.advance();if(session.done)results(config.mode==='practice'?draftAnswers:session.firstAnswers);else showUnit();return;}
         const values=inputs.map(input=>input.value),checked=session.check(values);
         if(checked.empty){error.textContent=l.empty;error.hidden=false;focusAnswer(0);return;}
         clearFeedback();error.hidden=true;feedback.dataset.correct=String(checked.correct);checked.grades.forEach((g,i)=>inputs[i].setAttribute('aria-invalid',String(!g.exact)));
@@ -450,6 +497,13 @@
       }
       const aids=el('div','memory-aids');aids.append(button(l.shortChange,setup));dock.append(error,feedback,status,primary,aids);
       placeNotices();
+      if(config.mode==='practice'){
+        const controls=el('div','memory-practice-controls');
+        const reveal=button('',()=>{practiceShown=!practiceShown;practiceSources.forEach(text=>text.hidden=!practiceShown);syncReveal();},'memory-practice-reveal');
+        function syncReveal(){reveal.textContent=practiceShown?l.hidePracticeText:l.showPracticeText;reveal.setAttribute('aria-pressed',String(practiceShown));}
+        reveal.setAttribute('aria-controls',practiceSources.map(text=>text.id).join(' '));syncReveal();
+        controls.append(reveal,button(l.repeatPractice,()=>{items.forEach(({index})=>draftAnswers[index]='');session.invalidate();showUnit();},'memory-practice-repeat'));content.append(controls);
+      }
       content.append(form);updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
     }
     function results(answers){
@@ -458,8 +512,8 @@
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
       const grades=attemptRows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
       const mistakes=attemptRows.filter((row,i)=>!grades[i].exact);
-      content.replaceChildren(el('h3','',l.result),el('p','memory-reference',attemptReference(attemptRows)));
-      const result=el('p','memory-score',`${score}%`);result.setAttribute('aria-label',`${l.score} ${score}%`);content.append(result,el('p','memory-rule',l.firstCheck),el('p','memory-verdict',exact?l.perfect:l.tryAgain),el('p','memory-rule',`${Math.round((performance.now()-started)/1000)} ${l.time}`));
+      content.replaceChildren(el('h3','',config.mode==='practice'?l.practiceResult:l.result),el('p','memory-reference',attemptReference(attemptRows)));
+      const result=el('p','memory-score',`${score}%`);result.setAttribute('aria-label',`${l.score} ${score}%`);content.append(result,el('p','memory-rule',config.mode==='practice'?l.practiceResultNote:l.firstCheck),el('p','memory-verdict',exact?l.perfect:l.tryAgain),el('p','memory-rule',`${Math.round((performance.now()-started)/1000)} ${l.time}`));
       const actions=el('div','memory-actions'),retryAll=button(l.retryAll,()=>begin(),'memory-retry-all');
       const retry=mistakes.length?button(`${l.retryWrong} (${mistakes.length})`,()=>begin(mistakes,true),'memory-primary memory-retry-wrong'):retryAll;
       if(mistakes.length)actions.append(retry);else retryAll.classList.add('memory-primary');actions.append(retryAll,button(l.change,setup));content.append(actions);
@@ -468,14 +522,15 @@
     setup();dialog.showModal();syncViewport();
   }
 
-  function entry(className) {const b=el('button',className,labels(lang()).title);b.type='button';b.addEventListener('click',open);return b;}
+  function entry(className,mode='exam') {const l=labels(lang()),b=el('button',className,mode==='practice'?l.practiceTitle:l.title);b.type='button';b.addEventListener('click',event=>open(event,mode));return b;}
   const menuButton=entry('memory-menu-button');menu.append(menuButton);
+  const practiceMenuButton=entry('memory-practice-menu-button','practice');menu.append(practiceMenuButton);
   const bar=document.querySelector('.verse-multi-actions');if(bar)bar.insertBefore(entry('verse-multi-memory'),bar.querySelector('.verse-multi-done'));
   if(bar&&typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{
     const height=bar.parentElement.getBoundingClientRect().height;
     if(height)document.body.style.setProperty('--memory-actionbar-space',`${Math.ceil(height)+32}px`);
   }).observe(bar.parentElement);
-  function updateAvailability(){const ready=!!root.querySelector('.verse-text')&&!!document.querySelector('#status')?.hidden;menuButton.disabled=!ready;menuButton.title=ready?labels(lang()).title:labels(lang()).unavailable;}
+  function updateAvailability(){const ready=!!root.querySelector('.verse-text')&&!!document.querySelector('#status')?.hidden,l=labels(lang());for(const [button,label] of [[menuButton,l.title],[practiceMenuButton,l.practiceTitle]]){button.disabled=!ready;button.title=ready?label:l.unavailable;}}
   new MutationObserver(updateAvailability).observe(root,{childList:true});updateAvailability();
-  new MutationObserver(()=>{document.querySelectorAll('.memory-menu-button,.verse-multi-memory').forEach(b=>b.textContent=labels(lang()).title);}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  new MutationObserver(()=>{const l=labels(lang());document.querySelectorAll('.memory-menu-button,.verse-multi-memory').forEach(b=>b.textContent=l.title);practiceMenuButton.textContent=l.practiceTitle;}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 })();

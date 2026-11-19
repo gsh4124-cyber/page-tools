@@ -128,6 +128,14 @@ jobs:
       - name: Test collected passages and persistent exam dialog
         if: matrix.engine == 'chromium'
         run: node tools/memory-collection-smoke.mjs --local
+      - name: Test typing practice and recoverable collection deletion
+        if: matrix.engine == 'chromium'
+        run: node tools/memory-practice-smoke.mjs --local
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.engine == 'chromium'
+        with:
+          name: memory-practice
+          path: bible-reader/qa_evidence/live/memory-practice/
       - uses: actions/upload-artifact@v4
         if: always() && matrix.engine == 'chromium'
         with:

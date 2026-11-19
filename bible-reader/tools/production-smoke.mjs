@@ -277,3 +277,5 @@ if (problems.length) {
 }
 console.log('Cloudflare production browser QA passed: compact topbar stayed one row, title navigation followed book -> chapter -> verse, multi-verse selection supported copy/note/highlight actions, and multilingual Scripture/UI separation remained intact.');
 await import('./memory-quiz-smoke.mjs');
+
+await import('./memory-practice-smoke.mjs');
