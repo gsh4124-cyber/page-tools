@@ -1,0 +1,25 @@
+import {build} from 'esbuild';
+import {readFile,writeFile,mkdir,copyFile,rm} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {resolve} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const root=fileURLToPath(new URL('../',import.meta.url)),dist=resolve(root,'dist');
+if(dist!==resolve(root,'dist'))throw Error('Invalid output');
+const config={url:process.env.MOA_SUPABASE_URL||'',key:process.env.MOA_SUPABASE_PUBLISHABLE_KEY||''};
+if(Boolean(config.url)!==Boolean(config.key))throw Error('Both public configuration values required');
+if(config.url&&(!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(config.url)))throw Error('Invalid Supabase URL');
+if(config.key&&!config.key.startsWith('sb_publishable_')){let p;try{p=JSON.parse(Buffer.from(config.key.split('.')[1],'base64url'));}catch{}if(p?.role!=='anon')throw Error('Secret/service_role key forbidden');}
+const revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+const sources=['index.html','service.css','app.mjs','core.mjs','repository.mjs','package-lock.json','db/schema.sql'];
+const sha=createHash('sha256');for(const f of sources)sha.update(await readFile(resolve(root,f)));sha.update(JSON.stringify(config));
+const digest=sha.digest('hex');
+await rm(dist,{recursive:true,force:true});await mkdir(dist);
+await build({entryPoints:[resolve(root,'app.mjs')],outfile:resolve(dist,'app.js'),bundle:true,format:'esm',minify:true,target:['safari15','chrome100'],define:{__MOA_CONFIG__:JSON.stringify(config),__MOA_BUILD__:JSON.stringify(digest.slice(0,12))}});
+for(const f of ['index.html','service.css'])await copyFile(resolve(root,f),resolve(dist,f));
+const connect=config.url?` ${config.url} ${config.url.replace('https:','wss:')}`:'';
+await writeFile(resolve(dist,'_headers'),`/*\n  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'${connect}; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Cache-Control: no-store\n`);
+await writeFile(resolve(dist,'robots.txt'),'User-agent: *\nDisallow: /\n');
+await writeFile(resolve(dist,'404.html'),'<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>모아 · 찾을 수 없는 페이지</title><h1>페이지를 찾을 수 없어요</h1><a href="/">모아로 돌아가기</a></html>');
+await writeFile(resolve(dist,'build-manifest.json'),JSON.stringify({product:'moa',revision,sourceSha256:digest,cloudConfigured:Boolean(config.url)},null,2));
+console.log(`Moa build ${digest.slice(0,12)} · cloud ${config.url?'configured':'disabled'} · ${dist}`);

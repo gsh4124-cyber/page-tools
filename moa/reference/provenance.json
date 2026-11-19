@@ -1,0 +1,6 @@
+{
+  "source": "user attachment moa_diary_v7.html",
+  "bytes": 33644,
+  "sha256": "2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db",
+  "derivation": "index.html retains v7 CSS and section markup; runtime replaced with modular authenticated storage"
+}
