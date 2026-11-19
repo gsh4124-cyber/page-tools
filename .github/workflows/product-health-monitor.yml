@@ -2,6 +2,14 @@ name: Vibe Coding Product Health Monitor
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "random-ppobgi/**"
+      - "bible-reader/**"
+      - "pc-checkup/**"
+      - "tools/**"
+      - ".github/workflows/product-health-monitor.yml"
   schedule:
     - cron: '40 */6 * * *'
   push:
@@ -22,7 +30,64 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  search-entry-source:
+    name: Search Guide Source QA
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build all three candidate products
+        run: |
+          python3 tools/build_static.py random-ppobgi
+          python3 tools/build_static.py bible-reader
+          python3 pc-checkup/tools/build_site.py
+      - name: Use canonical HTTPS archive for browser dependencies
+        run: |
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          for p in [Path('/etc/apt/apt-mirrors.txt'), *Path('/etc/apt/sources.list.d').glob('*.sources')]:
+              if p.exists():
+                  s=p.read_text()
+                  import re
+                  s=re.sub(r'https?://(?:[a-z0-9-]+\.)?(?:ec2\.)?archive\.ubuntu\.com/ubuntu', 'https://archive.ubuntu.com/ubuntu', s)
+                  p.write_text(s)
+          PY
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Exercise search entry flows against candidate builds
+        env:
+          SEARCH_RANDOM_BASE: http://127.0.0.1:4182
+          SEARCH_BIBLE_BASE: http://127.0.0.1:4183
+          SEARCH_DEVICE_BASE: http://127.0.0.1:4184
+        run: |
+          python3 -m http.server 4182 --bind 127.0.0.1 --directory random-ppobgi/dist > /tmp/entry-random.log 2>&1 &
+          python3 -m http.server 4183 --bind 127.0.0.1 --directory bible-reader/dist > /tmp/entry-bible.log 2>&1 &
+          python3 -m http.server 4184 --bind 127.0.0.1 --directory pc-checkup/dist > /tmp/entry-device.log 2>&1 &
+          trap 'kill $(jobs -p) 2>/dev/null || true' EXIT
+          for port in 4182 4183 4184; do
+            for attempt in $(seq 1 20); do
+              if curl -fsS http://127.0.0.1:$port/ >/dev/null; then break; fi
+              sleep 1
+            done
+            curl -fsS http://127.0.0.1:$port/ >/dev/null
+          done
+          node tools/search-entry-smoke.mjs
+      - name: Preserve candidate screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-tools-search-entry-source-${{ github.run_id }}
+          path: qa_evidence/search-entry/
+          retention-days: 7
+
   health:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -250,6 +315,9 @@ jobs:
       - name: DEVICE CHECKUP production PC and mobile result interactions
         if: contains(steps.changed.outputs.projects, 'pc-checkup')
         run: node pc-checkup/tools/device-experience-smoke.mjs
+      - name: Verify search guide entry and destination behavior
+        if: steps.changed.outputs.projects != ''
+        run: node tools/search-entry-smoke.mjs
       - name: Notify participating search engines after verified production deployment
         if: github.event_name == 'push' && steps.changed.outputs.deploy_projects != ''
         env:
@@ -261,6 +329,7 @@ jobs:
         with:
           name: page-tools-production-browser-${{ github.run_id }}
           path: |
+            qa_evidence/search-entry/
             random-ppobgi/qa_evidence/live/
             bible-reader/qa_evidence/live/
             pc-checkup/qa_evidence/live/

@@ -15,6 +15,7 @@ LANGUAGE_NAMES = {'ko':'한국어','en':'English','ja':'日本語','es':'Españo
                   'zh-CN':'简体中文','ru':'Русский'}
 DIRECTORY_STYLE = '''<style id="language-directory-style">
 .language-directory{margin-top:12px;text-align:start}.language-directory summary{width:fit-content;min-height:44px;padding:12px 0;cursor:pointer;font-size:13px}.language-directory nav{display:flex;flex-wrap:wrap;gap:4px}.language-directory a{display:inline-flex;align-items:center;min-height:44px;padding:8px 10px;border-radius:10px;color:inherit;font-size:12px;text-decoration:none}.language-directory a:hover,.language-directory a:focus-visible{background:var(--line)}.language-directory a[aria-current]{font-weight:800;text-decoration:underline}
+#device-flow-guide .wrap{max-width:960px;text-align:start}#device-flow-guide p,#device-flow-guide dd{text-align:start;line-height:1.8;max-width:75ch}#device-flow-guide dd{margin:6px 0 20px;color:var(--muted)}#device-flow-guide dt{margin-top:20px;font-weight:750}#device-flow-guide ol,#device-flow-guide ul{padding-inline-start:1.4em;line-height:1.8}#device-flow-guide h2,#device-flow-guide h3{line-height:1.45;scroll-margin-top:100px}
 </style>'''
 PRIVACY_LABELS = {'ko':'개인정보처리방침','en':'Privacy Policy','ja':'プライバシーポリシー',
                   'es':'Privacidad','de':'Datenschutz','fr':'Confidentialité','pt':'Privacidade',
@@ -84,6 +85,8 @@ for path in pages:
                       if path.name == 'checkup.html' else f'{heading} | 기본 기능 검사 - DEVICE CHECKUP')
         text = re.sub(r'<title>[\s\S]*?</title>', lambda _: f'<title>{page_title}</title>', text, count=1)
         text = re.sub(r'<h1>[\s\S]*?</h1>', f'<h1>{heading}</h1>', text, count=1)
+        if path.name == 'checkup.html':
+            text = re.sub(r'(<section class="tool-head">[\s\S]*?<p\b[^>]*>)[\s\S]*?(</p>)', r'\1중고 노트북 구매 전 키보드·화면·스피커·마이크·카메라를 직접 확인하고 결과를 기록하세요. 설치·가입 없이 무료로 사용할 수 있으며, 미확인 항목은 정상과 구별합니다.\2', text, count=1)
         guide = Path(__file__).with_name('search_' + path.stem + '_ko.html').read_text(encoding='utf-8')
         if 'id="device-flow-guide"' not in text:
             text = text.replace('</main>', guide + '</main>', 1)
@@ -125,7 +128,8 @@ for path in pages:
 last_modified = {ORIGIN+'/': '2026-11-05', ORIGIN+'/checkup': '2026-11-04', ORIGIN+'/mobile': '2026-11-04'}
 last_modified.update({url(lang, 'mic.html'): '2026-11-14' for lang in LOCALES})
 last_modified.update({url(lang, page): '2026-11-16' for lang in LOCALES for page in ['speaker.html', 'webcam.html']})
-last_modified[ORIGIN+'/checkup'] = '2026-11-17'
+last_modified[ORIGIN+'/checkup'] = '2026-11-19'
+last_modified[ORIGIN+'/'] = '2026-11-19'
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>{escape(address)}</loc>' + (f'<lastmod>{last_modified[address]}</lastmod>' if address in last_modified else '') + '</url>\n' for address in canonical_urls)
