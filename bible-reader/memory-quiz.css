@@ -128,3 +128,25 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-collection-list button{min-width:44px;min-height:44px;flex:none}
 .memory-collection-add,.memory-collection-clear,.memory-collection-reload{white-space:normal;overflow-wrap:anywhere;min-height:44px}
 .memory-collection-add{width:100%;margin-top:12px}
+.memory-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;margin:18px 0 8px;padding:0;border:0}
+.memory-modes legend{margin-bottom:8px;font-size:14px;font-weight:650}
+.memory-modes label{box-sizing:border-box;display:flex;align-items:center;gap:8px;min-height:52px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:14px;line-height:1.5;cursor:pointer;overflow-wrap:anywhere}
+.memory-modes label:has(input:checked){border-color:var(--text);background:var(--hover);font-weight:700}
+.memory-modes input{flex:none;margin:0;accent-color:var(--text)}
+.memory-mode-description{margin:0 0 16px;font-size:13px;line-height:1.6;color:var(--muted)}
+.memory-quiz .memory-setup-start{width:100%;margin-top:20px;white-space:normal;overflow-wrap:anywhere}
+.memory-collection-management{margin-block:12px;border-top:1px dashed var(--line)}
+.memory-collection-management summary{width:fit-content;max-width:100%;margin-inline-start:auto;font-size:13px;font-weight:400;color:var(--muted);list-style-position:inside}
+.memory-quiz .memory-collection-clear{display:block;max-width:100%;margin-inline-start:auto;background:transparent;border-color:transparent;color:var(--memory-wrong-fg);font-size:13px;text-align:end}
+.memory-collection-confirm{padding:12px;border:1px solid var(--memory-wrong-fg);border-radius:12px;font-size:14px;overflow-wrap:anywhere}
+.memory-collection-confirm p{margin:0 0 10px}
+.memory-collection-delete-actions,.memory-collection-undo{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px}
+.memory-quiz .memory-collection-confirm-delete{background:var(--memory-wrong-bg);border-color:var(--memory-wrong-fg);color:var(--memory-wrong-fg)}
+.memory-collection-undo{justify-content:space-between;padding:10px;border:1px solid var(--line);border-radius:12px;font-size:13px}
+.memory-collection-undo span{flex:1 1 150px;min-width:0;overflow-wrap:anywhere}
+.memory-practice-controls{display:flex;flex-wrap:wrap;gap:8px;margin-block:12px}
+.memory-practice-controls button{flex:1 1 130px;min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:14px}
+.memory-practice-text{padding:12px 14px;border-inline-start:3px solid var(--line);border-radius:8px;background:var(--panel);font-size:19px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin:16px 0 8px}
+.topbar .toolbar-more-menu .memory-practice-menu-button{font-size:14px;white-space:normal;line-height:1.4}
+.topbar .toolbar-more-menu .memory-practice-menu-button::after{content:none}
+.topbar .toolbar-more-menu:has(.memory-practice-menu-button){max-height:calc(100dvh - 160px);overflow-y:auto;overscroll-behavior:contain}
