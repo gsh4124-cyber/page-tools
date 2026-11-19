@@ -34,9 +34,18 @@ jobs:
     name: Search Guide Source QA
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble@sha256:b27e719ecbfef153e13fd24e8341736733bf2658b229677eb21ff57ff5d7fb29
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -45,21 +54,8 @@ jobs:
           python3 tools/build_static.py random-ppobgi
           python3 tools/build_static.py bible-reader
           python3 pc-checkup/tools/build_site.py
-      - name: Use canonical HTTPS archive for browser dependencies
-        run: |
-          sudo python3 - <<'PY'
-          from pathlib import Path
-          for p in [Path('/etc/apt/apt-mirrors.txt'), *Path('/etc/apt/sources.list.d').glob('*.sources')]:
-              if p.exists():
-                  s=p.read_text()
-                  import re
-                  s=re.sub(r'https?://(?:[a-z0-9-]+\.)?(?:ec2\.)?archive\.ubuntu\.com/ubuntu', 'https://archive.ubuntu.com/ubuntu', s)
-                  p.write_text(s)
-          PY
-      - name: Install Chromium
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+      - name: Install matching Playwright package
+        run: npm install --no-save playwright@1.55.0
       - name: Exercise search entry flows against candidate builds
         env:
           SEARCH_RANDOM_BASE: http://127.0.0.1:4182
@@ -188,6 +184,12 @@ jobs:
     name: Production Browser QA (live deployed sites)
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble@sha256:b27e719ecbfef153e13fd24e8341736733bf2658b229677eb21ff57ff5d7fb29
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -236,6 +238,9 @@ jobs:
           echo "Require new Cloudflare deployment: ${deploy_projects[*]:-none}"
           echo "projects=${projects[*]}" >> "$GITHUB_OUTPUT"
           echo "deploy_projects=${deploy_projects[*]}" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -284,25 +289,9 @@ jobs:
         if: steps.changed.outputs.projects != ''
         with:
           node-version: 22
-      - name: Prefer canonical HTTPS Ubuntu archive
+      - name: Install matching Playwright package
         if: steps.changed.outputs.projects != ''
-        run: |
-          sudo python3 - <<'PY'
-          from pathlib import Path
-          import re
-          mirrors = Path('/etc/apt/apt-mirrors.txt')
-          if mirrors.exists():
-              text = re.sub(
-                  r'https?://(?:[A-Za-z0-9-]+\.)*archive\.ubuntu\.com/ubuntu',
-                  'https://archive.ubuntu.com/ubuntu', mirrors.read_text()
-              )
-              mirrors.write_text(text)
-          PY
-      - name: Install supported Playwright Chromium
-        if: steps.changed.outputs.projects != ''
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+        run: npm install --no-save playwright@1.55.0
       - name: Random Picker desktop and mobile production interaction
         if: contains(steps.changed.outputs.projects, 'random-ppobgi')
         env:
