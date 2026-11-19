@@ -198,9 +198,19 @@
     pt:['Modo','Memorizar digitando','Teste de memória','Copie o texto visível e depois oculte-o para praticar de memória.','Digite de memória com o texto oculto.','Começar a prática','Começar o teste','Trecho para prática','Praticar os versículos reunidos','Digite o texto mostrado acima','Mostrar texto','Ocultar texto','Digitar novamente','Resultado da prática','Com base nas respostas mais recentes.','Gerenciar coleção','Excluir todos os versículos salvos','Excluir todas as {count} referências salvas?','Excluir tudo','Cancelar','{count} versículos excluídos da coleção.','Desfazer'],
     ar:['وضع التدريب','الحفظ بالكتابة','اختبار الحفظ','انسخ النص الظاهر ثم أخفه للتدرب من الذاكرة.','اكتب من الذاكرة والنص مخفي.','بدء تدريب الكتابة','بدء اختبار الحفظ','نطاق التدريب','تدريب الآيات المجمعة فقط','اكتب النص المعروض أعلاه','عرض النص','إخفاء النص','الكتابة مجدداً','نتائج التدريب','حسب آخر الإجابات المدخلة.','إدارة المجموعة','حذف جميع الآيات المحفوظة','حذف جميع المراجع المحفوظة وعددها {count}؟','حذف الكل','إلغاء','تم حذف {count} آيات من المجموعة.','تراجع']
   };
-  const FOCUS_COPY={ko:['입력 전','입력 중','장별로 연습'],en:['Not started','In progress','Practise by chapter'],fr:['À écrire','En cours','Pratiquer par chapitre'],de:['Noch leer','In Bearbeitung','Kapitelweise üben'],zh:['待输入','输入中','按章练习'],ru:['Не начато','В процессе','Практика по главам'],la:['Nondum scriptum','In cursu','Per capitula exerce'],pt:['Não iniciado','Em andamento','Praticar por capítulo'],ar:['لم يبدأ','قيد الكتابة','التدريب حسب الأصحاح']};
+  const FOCUS_COPY={
+    ko:['입력 전','입력 중','장별로 연습','위 말씀을 보며 입력해 보세요','본문을 떠올리며 입력해 보세요'],
+    en:['Not started','In progress','Practise by chapter','Type the passage shown above','Type the passage from memory'],
+    fr:['À écrire','En cours','Pratiquer par chapitre','Recopiez le passage ci-dessus','Écrivez le passage de mémoire'],
+    de:['Noch leer','In Bearbeitung','Kapitelweise üben','Schreiben Sie den obigen Text ab','Schreiben Sie den Text aus dem Gedächtnis'],
+    zh:['待输入','输入中','按章练习','请参照上方经文输入','请凭记忆输入经文'],
+    ru:['Не начато','В процессе','Практика по главам','Перепишите текст выше','Введите текст по памяти'],
+    la:['Nondum scriptum','In cursu','Per capitula exerce','Textum supra monstratum transcribe','Textum ex memoria scribe'],
+    pt:['Não iniciado','Em andamento','Praticar por capítulo','Digite o trecho mostrado acima','Digite o trecho de memória'],
+    ar:['لم يبدأ','قيد الكتابة','التدريب حسب الأصحاح','اكتب النص المعروض أعلاه','اكتب النص من الذاكرة']
+  };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
-    ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
+    ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView','practiceHint','practiceMemoryHint'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
     ...Object.fromEntries(TRAINING_KEYS.map((key,i)=>[key,(TRAINING_COPY[code]||TRAINING_COPY.en)[i]])),
     ...Object.fromEntries(['collection','addCollection','useCollection','clearCollection','removeCollection','savedCollection','collectionError'].map((key,i)=>[key,(COLLECTION_COPY[code]||COLLECTION_COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
@@ -499,6 +509,7 @@
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.value=draftAnswers[index]||'';
+        if(practice)input.placeholder=practiceShown?l.practiceHint:l.practiceMemoryHint;
         input.setAttribute('aria-label',`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${config.mode==='practice'?l.practiceAnswer:l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
         const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.bookIndex??quizBookIndex}_${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);
         if(practice){
@@ -548,7 +559,11 @@
           practiceShown=!practiceShown;clearFeedback();error.hidden=true;syncPracticePrimary();
           syncReveal();
         },'memory-practice-reveal');
-        function syncReveal(){reveal.textContent=practiceShown?l.hidePracticeText:l.showPracticeText;reveal.setAttribute('aria-pressed',String(practiceShown));}
+        function syncReveal(){
+          reveal.textContent=practiceShown?l.hidePracticeText:l.showPracticeText;reveal.setAttribute('aria-pressed',String(practiceShown));
+          const hint=practiceShown?l.practiceHint:l.practiceMemoryHint;
+          inputs.forEach(input=>{if(input.placeholder!==hint)input.placeholder=hint;});
+        }
         reveal.setAttribute('aria-controls',practiceSources.map(text=>text.id).join(' '));syncReveal();
         controls.append(reveal,button(l.repeatPractice,()=>{
           const index=practiceIndex,input=inputs[index];input.value='';draftAnswers[items[index].index]='';practiceChecked[index]=false;practiceConfirmed.delete(items[index].index);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);
@@ -588,3 +603,4 @@
   new MutationObserver(updateAvailability).observe(root,{childList:true});updateAvailability();
   new MutationObserver(()=>{const l=labels(lang());document.querySelectorAll('.memory-menu-button,.verse-multi-memory').forEach(b=>b.textContent=l.title);practiceMenuButton.textContent=l.practiceTitle;}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 })();
+
