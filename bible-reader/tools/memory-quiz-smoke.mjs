@@ -110,7 +110,7 @@ try{
     await chooseMemory(page,'memoryBook','0');await dialog.locator('.memory-load-status[role=alert]').waitFor({state:'visible'});
     assert(await dialog.locator('.memory-primary').isDisabled(),'Failed book load cannot start a stale passage');
     await page.unroute('**/scripture/krv1961/Genesis.json');await dialog.getByRole('button',{name:'다시 불러오기',exact:true}).click();
-    await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===50&&!document.querySelector('#memoryFromChapter')?.disabled);
+    await page.waitForFunction(()=>document.querySelector('#memoryFromChapter')?.options.length===50&&!document.querySelector('#memoryQuizDialog .memory-primary')?.disabled&&document.querySelector('.memory-load-status')?.hidden);
     assert(await dialog.locator('.memory-primary').isEnabled());
     assert.deepEqual(errors,[]);observations.push({flow:'independent book selection, Psalm119 verses175–176, reading location preserved, load failure blocks stale start, reload recovery',pass:true});await context.close();
   }
