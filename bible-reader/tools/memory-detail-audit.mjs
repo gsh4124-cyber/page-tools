@@ -44,6 +44,7 @@ try{
   try{for(const [languageIndex,language] of languages.entries()){
    const profile=profiles[languageIndex%profiles.length],context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,reducedMotion:'reduce'});
    await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
+   if(language==='ko')await context.addInitScript(()=>{const v=new EventTarget();Object.assign(v,{width:innerWidth,height:innerHeight,offsetTop:0,offsetLeft:0,scale:1});Object.defineProperty(window,'visualViewport',{configurable:true,value:v});window.__detailViewport=v;});
    await context.addInitScript(({refs,collectionKey,theme})=>{localStorage.setItem(collectionKey,JSON.stringify(refs));localStorage.setItem('bible-reader-theme',theme);},{refs,collectionKey,theme:profile.theme});
    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
    let view='setup';const common={engine,language,...profile};
@@ -83,6 +84,22 @@ try{
      record(meta,'IME Enter does not check or navigate',await input.inputValue()==='draft'&&await dialog.locator('.memory-diff').count()===0);
      await page.locator('.memory-practice-reveal').click();
      record(meta,'Showing source restores hint and preserves draft',await input.getAttribute('placeholder')===l.practiceHint&&await input.inputValue()==='draft'&&await dialog.locator('.memory-practice-text:visible').count()===1);
+     if(language==='ko'||language==='ar'){
+      await input.fill('x'.repeat(Math.min(1000,Number(await input.getAttribute('maxlength')))));
+      record(meta,'Long unbroken input grows without clipping',await input.evaluate(n=>n.scrollHeight<=n.clientHeight+2)&&!(await geometry(dialog)).horizontal);
+      await input.fill('draft');
+     }
+     if(language==='ko'){
+      await page.evaluate(()=>{Object.assign(window.__detailViewport,{height:240,offsetTop:25});window.__detailViewport.dispatchEvent(new Event('resize'));});
+      await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===240);
+      await input.evaluate(n=>{const c=n.closest('.memory-content');c.scrollTop+=n.getBoundingClientRect().top-c.getBoundingClientRect().top-8;});
+      const k=await geometry(dialog),b=await input.boundingBox(),close=await dialog.locator('.memory-close').boundingBox();
+      record(meta,'Simulated keyboard keeps input and pinned actions reachable',!k.horizontal&&k.content.height>=44&&k.primary.height>=44&&k.primary.bottom<=k.viewport.y+k.viewport.height+1&&close.height>=44&&close.y>=k.viewport.y-1&&close.y+close.height<=k.viewport.y+k.viewport.height+1&&b.y<k.content.bottom&&b.y+b.height>k.content.y);
+      await page.screenshot({path:path.join(output,`${engine}-ko-${view}-keyboard.png`)});
+      await page.evaluate(()=>{Object.assign(window.__detailViewport,{height:innerHeight,offsetTop:0});window.__detailViewport.dispatchEvent(new Event('resize'));});
+      await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===innerHeight);
+      record(meta,'Keyboard dismissal retains draft and restores header',await input.inputValue()==='draft'&&await dialog.locator('.memory-header .memory-close').count()===1);
+     }
      if(view==='chapter'){
       const cards=dialog.locator('.memory-practice-row');
       await cards.nth(1).locator('summary').focus();await page.keyboard.press('Enter');
@@ -97,8 +114,10 @@ try{
      record(meta,'Editing clears stale error feedback',await input.getAttribute('aria-invalid')===null&&await dialog.locator('.memory-diff').count()===0);
      await input.press('Shift+Enter');
      record(meta,'Shift+Enter keeps the answer in place',await input.getAttribute('data-verse')==='16'&&(await input.inputValue()).includes('\n'));
+     if(view==='chapter'){await input.press('Enter');record(meta,'Chapter Enter inserts a line break without checking',await input.getAttribute('data-verse')==='16'&&await dialog.locator('.memory-primary').getAttribute('data-action')==='check');}
      await dialog.locator('.memory-primary').click();
      record(meta,'Correct check is compact and preserves actual input',await dialog.locator('.memory-diff:visible').count()===0&&(await input.inputValue()).startsWith(expected)&&await dialog.locator('.memory-correct').isVisible());
+     if(language==='ar')record(meta,'Arabic source and answer use RTL text direction',await input.evaluate(n=>getComputedStyle(n).direction==='rtl')&&await dialog.locator('.memory-practice-text:visible').first().evaluate(n=>getComputedStyle(n).direction==='rtl'));
      await page.screenshot({path:path.join(output,`${engine}-${language}-${view}.png`)});
      if(view==='verse'){
       await input.press('Enter');
@@ -121,7 +140,7 @@ try{
   }}finally{await browser.close();}
  }
 }finally{if(server)await new Promise(r=>server.close(r));}
-const failed=observations.filter(o=>!o.pass),result={base,local,physical_device_tested:false,ime_events_simulated:true,observations,failed:failed.length};
+const failed=observations.filter(o=>!o.pass),result={base,local,physical_device_tested:false,ime_events_simulated:true,software_keyboard_simulated:true,observations,failed:failed.length};
 await fs.writeFile(path.join(output,'result.json'),JSON.stringify(result,null,2));
 console.log(`Memory detail audit: ${observations.length-failed.length}/${observations.length} checks passed.`);
 if(failed.length){console.error(JSON.stringify(failed,null,2));process.exitCode=1;}

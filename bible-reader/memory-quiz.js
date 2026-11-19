@@ -199,18 +199,18 @@
     ar:['وضع التدريب','الحفظ بالكتابة','اختبار الحفظ','انسخ النص الظاهر ثم أخفه للتدرب من الذاكرة.','اكتب من الذاكرة والنص مخفي.','بدء تدريب الكتابة','بدء اختبار الحفظ','نطاق التدريب','تدريب الآيات المجمعة فقط','اكتب النص المعروض أعلاه','عرض النص','إخفاء النص','الكتابة مجدداً','نتائج التدريب','حسب آخر الإجابات المدخلة.','إدارة المجموعة','حذف جميع الآيات المحفوظة','حذف جميع المراجع المحفوظة وعددها {count}؟','حذف الكل','إلغاء','تم حذف {count} آيات من المجموعة.','تراجع']
   };
   const FOCUS_COPY={
-    ko:['입력 전','입력 중','장별로 연습','위 말씀을 보며 입력해 보세요','본문을 떠올리며 입력해 보세요'],
-    en:['Not started','In progress','Practise by chapter','Type the passage shown above','Type the passage from memory'],
-    fr:['À écrire','En cours','Pratiquer par chapitre','Recopiez le passage ci-dessus','Écrivez le passage de mémoire'],
-    de:['Noch leer','In Bearbeitung','Kapitelweise üben','Schreiben Sie den obigen Text ab','Schreiben Sie den Text aus dem Gedächtnis'],
-    zh:['待输入','输入中','按章练习','请参照上方经文输入','请凭记忆输入经文'],
-    ru:['Не начато','В процессе','Практика по главам','Перепишите текст выше','Введите текст по памяти'],
-    la:['Nondum scriptum','In cursu','Per capitula exerce','Textum supra monstratum transcribe','Textum ex memoria scribe'],
-    pt:['Não iniciado','Em andamento','Praticar por capítulo','Digite o trecho mostrado acima','Digite o trecho de memória'],
-    ar:['لم يبدأ','قيد الكتابة','التدريب حسب الأصحاح','اكتب النص المعروض أعلاه','اكتب النص من الذاكرة']
+    ko:['입력 전','입력 중','장별로 연습','위 말씀을 보며 입력해 보세요','본문을 떠올리며 입력해 보세요','현재 절을 입력하고 답 확인을 누르세요. 정답이면 다음 절로 이동할 수 있습니다. Enter는 줄바꿈입니다.'],
+    en:['Not started','In progress','Practise by chapter','Type the passage shown above','Type the passage from memory','Check the current verse, then move to the next when correct. Enter adds a line break.'],
+    fr:['À écrire','En cours','Pratiquer par chapitre','Recopiez le passage ci-dessus','Écrivez le passage de mémoire','Vérifiez le verset actuel, puis passez au suivant si la réponse est correcte. Entrée ajoute une nouvelle ligne.'],
+    de:['Noch leer','In Bearbeitung','Kapitelweise üben','Schreiben Sie den obigen Text ab','Schreiben Sie den Text aus dem Gedächtnis','Prüfen Sie den aktuellen Vers und gehen Sie bei richtiger Antwort zum nächsten. Enter fügt einen Zeilenumbruch ein.'],
+    zh:['待输入','输入中','按章练习','请参照上方经文输入','请凭记忆输入经文','核对当前经节，答对后可进入下一节。Enter 用于换行。'],
+    ru:['Не начато','В процессе','Практика по главам','Перепишите текст выше','Введите текст по памяти','Проверьте текущий стих. После верного ответа переходите к следующему. Enter добавляет новую строку.'],
+    la:['Nondum scriptum','In cursu','Per capitula exerce','Textum supra monstratum transcribe','Textum ex memoria scribe','Versum praesentem examina; responso recto ad sequentem procede. Enter novam lineam addit.'],
+    pt:['Não iniciado','Em andamento','Praticar por capítulo','Digite o trecho mostrado acima','Digite o trecho de memória','Confira o versículo atual e avance ao próximo quando estiver correto. Enter insere uma nova linha.'],
+    ar:['لم يبدأ','قيد الكتابة','التدريب حسب الأصحاح','اكتب النص المعروض أعلاه','اكتب النص من الذاكرة','تحقق من الآية الحالية ثم انتقل إلى التالية عند صحة الإجابة. Enter يضيف سطراً جديداً.']
   };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
-    ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView','practiceHint','practiceMemoryHint'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
+    ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView','practiceHint','practiceMemoryHint','practiceChapterHelp'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
     ...Object.fromEntries(TRAINING_KEYS.map((key,i)=>[key,(TRAINING_COPY[code]||TRAINING_COPY.en)[i]])),
     ...Object.fromEntries(['collection','addCollection','useCollection','clearCollection','removeCollection','savedCollection','collectionError'].map((key,i)=>[key,(COLLECTION_COPY[code]||COLLECTION_COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
@@ -337,7 +337,7 @@
       for(const [value,text] of [['verse',l.verseView],['chapter',l.chapterView]]){
         const label=el('label'),input=el('input');input.type='radio';input.name='memoryView';input.value=value;input.id=value==='verse'?'memoryViewVerse':'memoryViewChapter';input.checked=config.view===value;
         const copy=document.createTextNode(text);if(value==='chapter')chapterViewText=copy;
-        input.addEventListener('change',()=>{config.view=value;});label.append(input,copy);views.append(label);
+        input.addEventListener('change',()=>{config.view=value;syncHelp();});label.append(input,copy);views.append(label);
       }
       const range=el('details','memory-range'),rangeTitle=el('summary'),fields=el('div','memory-fields memory-chapter-fields');range.open=true;range.append(rangeTitle);
       const bookField=el('label','memory-book-field',l.book),bookSelect=el('select');bookSelect.id='memoryBook';
@@ -419,7 +419,7 @@
       function syncMode(){
         const practice=config.mode==='practice';title.textContent=practice?l.practiceTitle:l.title;dock.setAttribute('aria-label',title.textContent);
         modeDescription.textContent=practice?l.practiceIntro:l.examIntro;startButton.textContent=practice?l.practiceStart:l.examStart;collectionToggleText.nodeValue=practice?l.practiceUseCollection:l.useCollection;
-        chapterViewText.nodeValue=practice?l.practiceChapterView:l.chapterView;
+        chapterViewText.nodeValue=practice?l.practiceChapterView:l.chapterView;syncHelp();
       }
       const addCollection=button(l.addCollection,()=>{for(const row of rows){const ref={bookIndex:quizBookIndex,chapter:row.chapter,verse:row.verse};if(!collectionRefs.some(r=>passageKey(r)===passageKey(ref)))collectionRefs.push(ref);collectionTexts.set(passageKey(ref),{...ref,text:row.text});}config.collection=true;collection.open=true;persistCollection();loadCollection();},'memory-collection-add');range.append(addCollection);
       collectionToggle.addEventListener('change',()=>{config.collection=collectionToggle.checked;refresh();});
@@ -454,7 +454,8 @@
       toChapter.addEventListener('change',()=>{fillVerses(toChapter,toVerse,null,true);if(Number(fromChapter.value)>Number(toChapter.value)){fromChapter.value=toChapter.value;fillVerses(fromChapter,fromVerse,1);}if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});
       fromVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))toVerse.value=fromVerse.value;refresh();});
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
-      const help=el('details','memory-help');help.append(el('summary','',l.help),el('p','memory-rule',l.enterHelp),el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
+      const interactionHelp=el('p','memory-rule'),help=el('details','memory-help');help.append(el('summary','',l.help),interactionHelp,el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
+      function syncHelp(){interactionHelp.textContent=config.view==='chapter'?(config.mode==='practice'?l.practiceChapterHelp:l.chapterHelp):l.enterHelp;}
       content.append(modes,modeDescription,views,summary,range,collection,study,help,startButton);syncMode();refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
       if(dialog.open){rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
     }
@@ -505,12 +506,13 @@
         if(scroll)practiceCards[index].scrollIntoView({block:'nearest',behavior:'instant'});
       }
       function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});}
+      const answerLabel=row=>`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${practice&&practiceShown?l.practiceAnswer:l.answer}`;
       const inputs=items.map(({row,index},position)=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
         const input=el('textarea','memory-answer');input.rows=2;input.maxLength=Math.min(3000,row.text.length*2+120);input.autocomplete='off';input.spellcheck=false;
         input.value=draftAnswers[index]||'';
         if(practice)input.placeholder=practiceShown?l.practiceHint:l.practiceMemoryHint;
-        input.setAttribute('aria-label',`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${config.mode==='practice'?l.practiceAnswer:l.answer}`);input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
+        input.setAttribute('aria-label',answerLabel(row));input.setAttribute('autocorrect','off');input.setAttribute('autocapitalize','off');input.setAttribute('dir','auto');input.dataset.book=String(row.bookIndex??quizBookIndex);input.dataset.chapter=String(row.chapter);input.dataset.verse=String(row.verse);label.append(caption,input);
         const rowFeedback=el('div','memory-row-feedback');rowFeedback.id=`memoryFeedback${row.bookIndex??quizBookIndex}_${row.chapter}_${row.verse}`;input.setAttribute('aria-describedby',rowFeedback.id);rowFeedbacks.push(rowFeedback);
         if(practice){
           const card=el('details','memory-practice-row'),summary=el('summary'),stateLabel=el('span','memory-practice-state');summary.hidden=items.length===1;
@@ -562,7 +564,7 @@
         function syncReveal(){
           reveal.textContent=practiceShown?l.hidePracticeText:l.showPracticeText;reveal.setAttribute('aria-pressed',String(practiceShown));
           const hint=practiceShown?l.practiceHint:l.practiceMemoryHint;
-          inputs.forEach(input=>{if(input.placeholder!==hint)input.placeholder=hint;});
+          inputs.forEach((input,i)=>{if(input.placeholder!==hint)input.placeholder=hint;const label=answerLabel(items[i].row);if(input.getAttribute('aria-label')!==label)input.setAttribute('aria-label',label);});
         }
         reveal.setAttribute('aria-controls',practiceSources.map(text=>text.id).join(' '));syncReveal();
         controls.append(reveal,button(l.repeatPractice,()=>{
@@ -603,4 +605,3 @@
   new MutationObserver(updateAvailability).observe(root,{childList:true});updateAvailability();
   new MutationObserver(()=>{const l=labels(lang());document.querySelectorAll('.memory-menu-button,.verse-multi-memory').forEach(b=>b.textContent=l.title);practiceMenuButton.textContent=l.practiceTitle;}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 })();
-
