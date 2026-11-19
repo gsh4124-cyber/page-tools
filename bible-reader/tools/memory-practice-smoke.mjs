@@ -45,6 +45,8 @@ try{
     await page.evaluate(({key,saved})=>localStorage.setItem(key,JSON.stringify(saved)),{key,saved});
     const l=await page.evaluate(code=>BibleMemory.labels(code),language);
     await page.locator('#toolbarMoreToggle').click();
+    const menuBox=await page.locator('#toolbarMoreMenu').boundingBox();
+    assert(menuBox.y>=0&&menuBox.y+menuBox.height<=height,'More menu stays inside the visible viewport');
     assert.equal(await page.locator('.memory-practice-menu-button').textContent(),l.practiceTitle);
     await page.locator('.memory-practice-menu-button').click();
     const dialog=page.locator('#memoryQuizDialog'),start=dialog.locator('.memory-primary');

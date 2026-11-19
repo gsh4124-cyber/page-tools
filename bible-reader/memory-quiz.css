@@ -149,3 +149,4 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-practice-text{padding:12px 14px;border-inline-start:3px solid var(--line);border-radius:8px;background:var(--panel);font-size:19px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin:16px 0 8px}
 .topbar .toolbar-more-menu .memory-practice-menu-button{font-size:14px;white-space:normal;line-height:1.4}
 .topbar .toolbar-more-menu .memory-practice-menu-button::after{content:none}
+.topbar .toolbar-more-menu:has(.memory-practice-menu-button){max-height:calc(100dvh - 160px);overflow-y:auto;overscroll-behavior:contain}
