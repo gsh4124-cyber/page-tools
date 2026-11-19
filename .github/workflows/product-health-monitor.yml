@@ -212,7 +212,133 @@ jobs:
           files=$(git diff --name-only "$before" "$GITHUB_SHA")
           projects=()
           shared=false
-          if grep -Eq '^tools/(build_static|release_metadata)\.py$' <<< "$files"; then shared=true; fi
+          if grep -Eq '^tools/(build_static|release_metadata)\.py$|^tools/notify-indexnow\.mjs <<< "$files"; then shared=true; fi
+          deploy_projects=()
+          # A workflow-only change runs all three live tests; it does not force a site deployment.
+          if grep -Eq '^(\.github/workflows/product-health-monitor\.yml|tools/verify-production\.mjs)$' <<< "$files"; then
+            projects=(bible-reader random-ppobgi pc-checkup)
+          fi
+          for project in bible-reader random-ppobgi pc-checkup; do
+            if [ "$shared" = true ] || grep -q "^$project/" <<< "$files"; then
+              if [[ ! " ${projects[*]} " =~ " $project " ]]; then projects+=("$project"); fi
+            fi
+            # These files change QA behavior only; the deployed application is unchanged.
+            case "$project" in
+              bible-reader) qa_script='bible-reader/tools/production-smoke.mjs' ;;
+              random-ppobgi) qa_script='random-ppobgi/tests/live-browser-proof.mjs' ;;
+              pc-checkup) qa_script='pc-checkup/tools/device-experience-smoke.mjs' ;;
+            esac
+            if [ "$shared" = true ] || { grep -q "^$project/" <<< "$files" && grep "^$project/" <<< "$files" | grep -Fvx "$qa_script" | grep -q .; }; then
+              deploy_projects+=("$project")
+            fi
+          done
+          echo "Live browser targets: ${projects[*]:-none}"
+          echo "Require new Cloudflare deployment: ${deploy_projects[*]:-none}"
+          echo "projects=${projects[*]}" >> "$GITHUB_OUTPUT"
+          echo "deploy_projects=${deploy_projects[*]}" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build expected production manifests with the same entry points
+        if: steps.changed.outputs.deploy_projects != ''
+        env:
+          PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in $PROJECTS; do
+            if [ "$project" = pc-checkup ]; then
+              python3 pc-checkup/tools/build_site.py
+            else
+              python3 tools/build_static.py "$project"
+            fi
+          done
+      - name: Verify production commit, manifest and served runtime bytes
+        if: steps.changed.outputs.deploy_projects != ''
+        env:
+          PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
+        run: node tools/verify-production.mjs
+      - name: Read back served Bible Reader code before browser QA
+        if: contains(steps.changed.outputs.projects, 'bible-reader')
+        shell: bash
+        run: |
+          set -euo pipefail
+          for asset in index.html reader-experience.js topbar-polish.css; do
+            tmp=$(mktemp)
+            curl -fsSL --retry 2 --max-time 25 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?verify=$GITHUB_SHA" -o "$tmp"
+            if ! cmp -s "bible-reader/$asset" "$tmp"; then
+              echo "::error::Bible Reader live $asset does not match repository main at $GITHUB_SHA"
+              rm -f "$tmp"
+              exit 1
+            fi
+            rm -f "$tmp"
+          done
+          echo "Bible Reader production source readback matched: HTML, JS and CSS."
+      - uses: actions/setup-node@v4
+        if: steps.changed.outputs.projects != ''
+        with:
+          node-version: 22
+      - name: Prefer canonical HTTPS Ubuntu archive
+        if: steps.changed.outputs.projects != ''
+        run: |
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          import re
+          mirrors = Path('/etc/apt/apt-mirrors.txt')
+          if mirrors.exists():
+              text = re.sub(
+                  r'https?://(?:[A-Za-z0-9-]+\.)*archive\.ubuntu\.com/ubuntu',
+                  'https://archive.ubuntu.com/ubuntu', mirrors.read_text()
+              )
+              mirrors.write_text(text)
+          PY
+      - name: Install supported Playwright Chromium
+        if: steps.changed.outputs.projects != ''
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Random Picker desktop and mobile production interaction
+        if: contains(steps.changed.outputs.projects, 'random-ppobgi')
+        env:
+          # A workflow/test-only push does not attest a new Cloudflare deployment.
+          DEPLOY_VERIFIED_SHA: ${{ contains(steps.changed.outputs.deploy_projects, 'random-ppobgi') && github.sha || '' }}
+        run: node random-ppobgi/tests/live-browser-proof.mjs
+      - name: Random Picker saved results and reroll regression
+        if: contains(steps.changed.outputs.projects, 'random-ppobgi')
+        run: node random-ppobgi/tests/experience-browser-smoke.mjs
+      - name: Random Picker saved setup restoration and legacy data preservation
+        if: contains(steps.changed.outputs.projects, 'random-ppobgi')
+        env:
+          SETTINGS_TEST_EVIDENCE: random-ppobgi/qa_evidence/live/settings
+        run: node random-ppobgi/tests/settings-browser-smoke.mjs
+      - name: Bible Reader production navigation and multilingual interactions
+        if: contains(steps.changed.outputs.projects, 'bible-reader')
+        run: node bible-reader/tools/production-smoke.mjs
+      - name: DEVICE CHECKUP production PC and mobile result interactions
+        if: contains(steps.changed.outputs.projects, 'pc-checkup')
+        run: node pc-checkup/tools/device-experience-smoke.mjs
+      - name: Verify search guide entry and destination behavior
+        if: steps.changed.outputs.projects != ''
+        run: node tools/search-entry-smoke.mjs
+      - name: Notify participating search engines after verified production deployment
+        if: github.event_name == 'push' && steps.changed.outputs.deploy_projects != ''
+        env:
+          PROJECTS: ${{ steps.changed.outputs.deploy_projects }}
+        run: node tools/notify-indexnow.mjs
+      - name: Preserve production browser screenshots and results
+        if: always() && steps.changed.outputs.projects != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-tools-production-browser-${{ github.run_id }}
+          path: |
+            qa_evidence/search-entry/
+            random-ppobgi/qa_evidence/live/
+            bible-reader/qa_evidence/live/
+            pc-checkup/qa_evidence/live/
+            qa_evidence/search-discovery/
+          if-no-files-found: warn
+          retention-days: 7
+ <<< "$files"; then shared=true; fi
           deploy_projects=()
           # A workflow-only change runs all three live tests; it does not force a site deployment.
           if grep -Eq '^(\.github/workflows/product-health-monitor\.yml|tools/verify-production\.mjs)$' <<< "$files"; then
