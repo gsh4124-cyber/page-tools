@@ -118,6 +118,8 @@ jobs:
         run: node tools/memory-practice-smoke.mjs --local
       - name: Test both views across mobile layouts
         env:
+          # GitHub mounts /github/home with a host owner; Firefox requires its own user's home.
+          HOME: /root
           MEMORY_QUIZ_ENGINES: ${{ matrix.engine }}
         run: node tools/memory-quiz-mobile.mjs --local
       - name: Test reading, notes and verse selection
@@ -171,3 +173,4 @@ jobs:
           test "$STATIC_RESULT" = success
           test "$BEHAVIOR_RESULT" = success
           test "$MOBILE_RESULT" = success
+
