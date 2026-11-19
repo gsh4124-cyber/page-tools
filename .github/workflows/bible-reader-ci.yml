@@ -116,6 +116,11 @@ jobs:
       - name: Test typing practice and recoverable collection deletion
         if: matrix.engine == 'chromium'
         run: node tools/memory-practice-smoke.mjs --local
+      - name: Audit detailed practice accessibility and keyboard flows
+        env:
+          HOME: /root
+          MEMORY_DETAIL_ENGINES: ${{ matrix.engine }}
+        run: node tools/memory-detail-audit.mjs --local
       - name: Test both views across mobile layouts
         env:
           # GitHub mounts /github/home with a host owner; Firefox requires its own user's home.
@@ -131,6 +136,11 @@ jobs:
       - name: Test collected passages and persistent exam dialog
         if: matrix.engine == 'chromium'
         run: node tools/memory-collection-smoke.mjs --local
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: memory-detail-${{ matrix.engine }}
+          path: bible-reader/qa_evidence/live/memory-detail/
       - uses: actions/upload-artifact@v4
         if: always() && matrix.engine == 'chromium'
         with:
@@ -173,4 +183,3 @@ jobs:
           test "$STATIC_RESULT" = success
           test "$BEHAVIOR_RESULT" = success
           test "$MOBILE_RESULT" = success
-
