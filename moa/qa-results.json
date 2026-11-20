@@ -11,7 +11,18 @@
     "status": "VERIFIED_NOT_DEPLOYED",
     "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
     "deployment": "BLOCKED",
-    "reason": "Automatic approval review rejected Sites source sync/deployment because external deployment approval remains withheld. Explicit owner-only update approval required."
+    "reason": "Automatic approval review rejected Sites source sync/deployment because external deployment approval remains withheld. Explicit owner-only update approval required.",
+    "codeCommit": "e42b57aedbd3df331221a78268d175c562fb8f88",
+    "manifest": {
+      "product": "moa",
+      "revision": "e42b57aedbd3df331221a78268d175c562fb8f88",
+      "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
+      "cloudConfigured": true
+    },
+    "workerSha256": "3a59a67b21d9d2f3475f3d73a4a885f78e2c97069cd948f57ed57a7d9f7537d8",
+    "finalCloudWorkerResponseTest": "DONE",
+    "compiledLocally": true,
+    "published": false
   },
   "unit": {
     "status": "DONE",
