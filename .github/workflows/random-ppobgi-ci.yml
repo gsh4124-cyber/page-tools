@@ -133,10 +133,48 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+  game-contract:
+    name: Game Interaction QA (${{ matrix.engine }})
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble@sha256:b27e719ecbfef153e13fd24e8341736733bf2658b229677eb21ff57ff5d7fb29
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    defaults:
+      run:
+        shell: bash
+        working-directory: random-ppobgi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build exact production artifact
+        run: python3 ../tools/build_static.py random-ppobgi
+      - name: Install matching browser API
+        run: npm install --no-save playwright@1.55.0
+      - name: Verify inputs, boards, shortcuts and displayed outcomes
+        env:
+          HOME: /root
+          GAME_CONTRACT_ENGINES: ${{ matrix.engine }}
+        run: node tests/game-contract-browser.mjs --local
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: game-contract-${{ matrix.engine }}
+          path: random-ppobgi/qa_evidence/local-game-contract/
+          retention-days: 7
+
   quality-gate:
     name: Combined Quality Gate
     if: always()
-    needs: [static-smoke, browser-smoke]
+    needs: [static-smoke, browser-smoke, game-contract]
     runs-on: ubuntu-latest
     steps:
       - name: Require both checks
@@ -144,6 +182,8 @@ jobs:
         env:
           STATIC_RESULT: ${{ needs.static-smoke.result }}
           BROWSER_RESULT: ${{ needs.browser-smoke.result }}
+          GAME_RESULT: ${{ needs.game-contract.result }}
         run: |
           test "$STATIC_RESULT" = success
           test "$BROWSER_RESULT" = success
+          test "$GAME_RESULT" = success

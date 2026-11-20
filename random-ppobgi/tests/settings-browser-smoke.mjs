@@ -19,7 +19,7 @@ for(const engine of (process.env.SETTINGS_TEST_ENGINES||'chromium').split(',')){
    async function ready(){await page.waitForFunction(()=>window.RandomPickerSettings&&document.querySelector('#pickBtn'));if(new URL(base).hostname==='127.0.0.1'&&await page.locator('#pickerConfigSets').count()===0)await page.addScriptTag({url:base+'/experience.js'});await page.locator('#pickerConfigSets').waitFor({state:'attached'});}
    await page.goto(base+route+'?qa=1',{waitUntil:'domcontentloaded'});await ready();
    const panel=page.locator('#pickerConfigSets');assert.equal(await panel.getAttribute('open'),null);await panel.locator('summary').click();assert(await page.locator('#loadPickerConfig').isDisabled());
-   await page.locator('.method[data-method="lot"]').click();await page.locator('#nameTab').click();await page.locator('#names').fill('Alice\nBob\nCharlie\nDana');await page.locator('#pickCount').fill('2');await page.locator('#resultMode').selectOption('custom');await page.locator('#customResults').fill('Lunch\nCoffee');
+   await page.locator('.method[data-method="ladder"]').click();await page.locator('#nameTab').click();await page.locator('#names').fill('Alice\nBob\nCharlie\nDana');await page.locator('#pickCount').fill('2');await page.locator('#resultMode').selectOption('custom');await page.locator('#customResults').fill('Lunch\nCoffee');
    const expected=await page.evaluate(()=>window.RandomPickerSettings.capture()),title='<b>Lunch club</b>';
    page.once('dialog',d=>d.accept(title));await page.locator('#savePickerConfig').click();
    assert.equal(await page.locator('#pickerConfigSelect').inputValue(),title);assert.equal(await page.locator('#pickerConfigSelect b').count(),0,'Title must remain plain text');

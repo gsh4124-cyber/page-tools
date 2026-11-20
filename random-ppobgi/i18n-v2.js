@@ -60,6 +60,7 @@
     set('#languageDirectory summary','🌐 '+pack.label);attr('#languageDirectory nav','aria-label',pack.label);
     qa('#languageDirectory a').forEach(a=>{if(a.hreflang===lang)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
 
+    window.RandomPickerSettings?.refreshLabels();
     const sample=q('#sampleBtn');if(sample&&!sample.dataset.i18nOverride){sample.dataset.i18nOverride='1';sample.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const names=q('#names');if(!names)return;const n=Math.max(2,Math.floor(Number(q('#totalPeople')?.value)||8));names.value=Array.from({length:n},(_,i)=>pack.dynamic.sampleNames[i%pack.dynamic.sampleNames.length]+(i>=pack.dynamic.sampleNames.length?` ${Math.floor(i/pack.dynamic.sampleNames.length)+1}`:'')).join('\n');names.dispatchEvent(new Event('input',{bubbles:true}));},{capture:true});}
   }
 
