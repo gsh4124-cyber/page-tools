@@ -281,3 +281,4 @@ await import('./memory-quiz-smoke.mjs');
 await import('./memory-practice-smoke.mjs');
 await import('./memory-detail-audit.mjs');
 await import('./memory-draft-smoke.mjs');
+await import('./memory-grading-smoke.mjs');
