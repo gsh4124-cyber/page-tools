@@ -9,7 +9,7 @@ const A='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',B='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbb
 const origin='https://moa-qa.supabase.co',key='sb_publishable_local_contract_test';
 const manifest=JSON.parse(await readFile(new URL('../dist/build-manifest.json',import.meta.url),'utf8'));
 const bundle=await build({entryPoints:[new URL('../app.mjs',import.meta.url).pathname.replace(/^\/(.:)/,'$1')],bundle:true,write:false,format:'esm',define:{__MOA_CONFIG__:JSON.stringify({url:origin,key}),__MOA_BUILD__:JSON.stringify('cloud-contract-test')}});
-const server=await serve(),base='http://127.0.0.1:'+server.address().port,browser=await chromium.launch({channel:'msedge',headless:true});
+const server=await serve(),base='http://127.0.0.1:'+server.address().port,browser=await chromium.launch({channel:process.env.MOA_QA_BROWSER||'chrome',headless:true});
 const documents=new Map(),results=[],errors=[];let failWrites=false;
 const users=new Map([[A,{id:A,email:'a@example.test',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-11-19T00:00:00Z'}],[B,{id:B,email:'b@example.test',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-11-19T00:00:00Z'}]]);
 const token=id=>['e30',Buffer.from(JSON.stringify({sub:id,exp:Math.floor(Date.now()/1000)+3600})).toString('base64url'),'test'].join('.');
@@ -26,6 +26,7 @@ async function context(){const c=await browser.newContext({viewport:{width:390,h
  if(url.pathname==='/auth/v1/signup')return send({id:A,email:body.email,identities:[]});
  const user=getUser(req);if(!user)return send({message:'AUTH_REQUIRED'},401);
  if(url.pathname==='/rest/v1/moa_documents'){const row=documents.get(user.id);return send(row?[row]:[]);}
+ if(url.pathname==='/rest/v1/rpc/moa_storage_usage')return send({active:0,reserved:0,count:0});
  if(url.pathname==='/rest/v1/rpc/moa_commit'){if(failWrites)return route.abort('internetdisconnected');const old=documents.get(user.id);if(body.p_expected_version!==(old?.version||0))return send({message:'STALE_WRITE',code:'P0001'},400);const version=(old?.version||0)+1;documents.set(user.id,{document:body.p_document,version});return send(version);}
  return send({message:'unexpected '+url.pathname},404);
 });return c;}

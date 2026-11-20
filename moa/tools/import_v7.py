@@ -41,12 +41,14 @@ s = s.replace('<body>', '''<body><div id="notice" role="status" aria-live="polit
 <form id="loginForm"><label for="email">이메일</label><input id="email" type="email" autocomplete="username" required>
 <label for="password">비밀번호</label><input id="password" type="password" autocomplete="current-password" minlength="12" required>
 <div class="row"><button type="submit">로그인</button><button type="button" class="secondary" id="signupBtn">회원가입</button></div></form>
-<p class="muted" id="authHint">회원가입 후 이메일 인증이 필요할 수 있어요.</p><button id="logoutBtn" hidden>로그아웃</button>
+<p class="muted" id="authHint">회원가입 후 받은 인증 링크를 복사해 아래에서 확인해 주세요.</p>
+<form id="confirmEmailForm"><label for="confirmEmailLink">이메일 인증 링크</label><input id="confirmEmailLink" type="url" autocomplete="off" required><button type="submit" class="secondary">인증하고 로그인</button></form><button id="logoutBtn" hidden>로그아웃</button>
 <hr><p class="muted">이 기기의 기록은 로그인해도 자동 전송되지 않아요. 전체 백업 후 계정에서 복원해 옮길 수 있어요.</p>
 <button id="legacyBtn" class="secondary">이 기기의 v7 기록 가져오기</button><button id="closeAccount" class="secondary">닫기</button></dialog>
 <dialog id="backupDialog" aria-labelledby="backupTitle"><form id="backupForm"><h2 id="backupTitle">암호화 백업</h2>
 <p id="backupHint">백업 암호를 안전하게 보관해 주세요. 암호를 잊으면 복원할 수 없어요.</p><label for="backupPassword">백업 암호 (12자 이상)</label>
 <input id="backupPassword" type="password" autocomplete="off" minlength="12"><div class="row"><button type="submit">계속</button><button type="button" id="cancelBackup" class="secondary">취소</button></div></form></dialog>''')
+s = s.replace('<p class="muted">누적 기록 수</p>', '<p class="muted">누적 기록 수</p><p class="muted" id="storageUsage">첨부 사용량 확인 중…</p><button type="button" id="cleanupMedia" class="secondary">하루 지난 미사용 첨부 정리</button>')
 s = '\n'.join(line.rstrip() for line in s.splitlines()) + '\n'
 (root / 'index.html').write_text(s, encoding='utf-8', newline='\n')
 print('Imported original:', len(source), hashlib.sha256(source).hexdigest())

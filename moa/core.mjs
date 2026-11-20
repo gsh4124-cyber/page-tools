@@ -54,7 +54,7 @@ export async function decodeBackup(raw,password){
   const db=validateDocument(p.format?p.db:p),files=new Map();let total=0;
   for(const k of new Set(db.entries.flatMap(e=>e.mediaKeys))){
     const f=p.files?.[k];if(!f||!MIME.includes(f.type)||typeof f.data!=='string'||!f.data.startsWith(`data:${f.type};base64,`))fail('백업에 첨부 파일이 없거나 안전하지 않은 형식이에요.');
-    const bytes=un64(f.data.slice(f.data.indexOf(',')+1));total+=bytes.length;if(total>64*1024*1024)fail('백업 미디어가 64MB를 초과해요.');
+    const bytes=un64(f.data.slice(f.data.indexOf(',')+1));total+=bytes.length;if(total>MAX_BACKUP_MEDIA)fail('백업 미디어가 48MiB를 초과해요.');
     if(f.sha256 && await hash(bytes)!==f.sha256)fail('첨부 파일 검증에 실패했어요.');
     const file=new File([bytes],text(f.name,200)?f.name:'media',{type:f.type});validateFile(file);files.set(k,file);
   }
