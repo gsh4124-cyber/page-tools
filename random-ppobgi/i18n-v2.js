@@ -49,7 +49,7 @@
     const toolNames={dice:pack.tools.dice,yut:pack.tools.yut,coin:pack.tools.coin,order:pack.tools.order,team:pack.tools.team};
     qa('.tool-tab').forEach(b=>textAfterIcon(b,toolNames[b.dataset.tool]));
     const dice=q('[data-panel="dice"]');if(dice){set('h3',pack.tools.diceTitle,dice);set('.tool-desc',pack.tools.diceDesc,dice);const l=q('label',dice);if(l)l.textContent=pack.tools.count;set('#rollDice',pack.tools.roll);set('#diceResult',pack.tools.rollPrompt);}
-    const yut=q('[data-panel="yut"]');if(yut){set('h3',pack.tools.yutTitle,yut);set('.tool-desc',pack.tools.yutDesc,yut);set('#throwYut',pack.tools.throwYut);set('#yutResult',pack.tools.yutPrompt);}
+    const yut=q('[data-panel="yut"]');if(yut){set('h3',pack.tools.yutTitle,yut);set('.tool-desc',pack.tools.yutDesc,yut);set('#throwYut',pack.tools.throwYut);if(!q('#yutResult')?.dataset.yutReady)set('#yutResult',pack.tools.yutPrompt);}
     const coin=q('[data-panel="coin"]');if(coin){set('h3',pack.tools.coinTitle,coin);set('.tool-desc',pack.tools.coinDesc,coin);set('#flipCoin',pack.tools.flipCoin);}
     const order=q('[data-panel="order"]');if(order){set('h3',pack.tools.orderTitle,order);set('.tool-desc',pack.tools.orderDesc,order);attr('#orderNames','placeholder',pack.tools.participantPlaceholder);set('#makeOrder',pack.tools.shuffleOrder);set('#orderResult',pack.tools.orderPrompt);}
     const team=q('[data-panel="team"]');if(team){set('h3',pack.tools.teamTitle,team);set('.tool-desc',pack.tools.teamDesc,team);attr('#teamNames','placeholder',pack.tools.participantPlaceholder);const l=q('label',team);if(l)l.textContent=pack.tools.teamCount;set('#makeTeams',pack.tools.makeTeams);set('#teamResult',pack.tools.teamPrompt);}
