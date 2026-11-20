@@ -1,56 +1,73 @@
 # 모아 (Moa)
 
-모바일에서 하루의 글·사진·영상과 습관을 기록하는 웹 서비스. 사용자 첨부 v7을 실제 기준본으로 적용했다. 기존 무료 Supabase에 모아 전용 테이블·RLS·비공개 Storage를 적용했고, 실제 로그인·격리·미디어·백업 복원 12개 검사를 통과했다. 웹사이트는 **외부 미배포**다.
+사용자가 첨부한 v7 원본을 실제 기준으로 만든 모바일 다이어리다. 글·사진·영상, 월간 달력, 다꾸, 습관, 수정·삭제, 로그인, 사용자별 비공개 클라우드, 암호화 전체 백업·복원을 제공한다.
 
-## 원본과 보존 경계
+소유자 전용 검토 사이트: [모아 열기](https://moa-diary-20261120.gsh4124.chatgpt.site). 일반 공개는 하지 않았다. 사이트 접근에는 소유자 ChatGPT 계정, 기록 저장에는 모아의 Supabase 계정 로그인이 필요하다.
 
-- `reference/moa_diary_v7.html`: 첨부 원본 33,644바이트 그대로 보존. SHA-256 `2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db`.
-- `index.html`: v7의 CSS·섹션·달력·스티커·모바일 하단 메뉴를 계승. 원본의 로컬 전용 스크립트는 `app.mjs`, `core.mjs`, `repository.mjs`로 교체했다.
-- 수정 범위는 `moa/`뿐이다. `random-ppobgi/`, `bible-reader/`, `pc-checkup/`, 공통 `tools/`, 기존 `.github/workflows/`를 변경하지 않는다.
-- 작업 기준 feature HEAD `17c0c291240dc29dfb884282a7c5084b0352f786`. 별도 확인한 main `ef5e12cd6ff8ee80d11cf420b27fc3b3f583c457`의 기존 health-monitor 수정은 이 작업에서 덮어쓰거나 병합하지 않았다.
+## 원본과 보존 범위
 
-## 구현
+- 원본 `reference/moa_diary_v7.html`: 33,644바이트, SHA-256 `2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db`.
+- `index.html`은 원본 CSS와 섹션 구성을 계승한다. 재생성은 `python tools/import_v7.py reference/moa_diary_v7.html`.
+- Canonical은 `gsh4124-cyber/page-tools`의 `feature/moa-integration-20261119`, 변경 범위는 `moa/`다.
+- `random-ppobgi/`, `bible-reader/`, `pc-checkup/`, 공통 `tools/`, `.github/workflows/`는 변경하지 않았다. main 병합·push도 하지 않았다.
 
-- 월 이동, 날짜별·월별·전체 기록, 검색·분류 필터, 월간 요약.
-- 글·사진·영상 작성, 제목·내용·날짜·분류·꾸미기·첨부 수정, 기록 및 첨부 삭제.
-- 화면에 60% 이상 들어온 영상 하나만 음소거 자동 재생. 화면 밖·숨긴 탭·동작 줄이기 설정에서는 일시정지. 기본 영상 컨트롤로 수동 재생 가능.
-- 일곱 배경과 스티커, 포인터 드래그·방향키 위치 이동. 습관 추가·날짜별 체크·삭제와 과거 체크 보존.
-- Supabase 이메일/비밀번호 로그인·회원가입·세션 확인·로그아웃 연결 코드. 실제 hosted Auth 비밀번호 로그인은 확인했다. 공개 회원가입·인증 메일 전달은 아직 시험하지 않았다.
-- 기기 모드는 IndexedDB. 클라우드 설정과 로그인이 있으면 사용자별 `moa_documents`와 비공개 `moa-private` Storage 사용. 기기 기록을 로그인만으로 전송하지 않는다.
-- 계정 변경 시 화면 기록·입력 중인 내용·선택 파일을 초기화한다. 저장 실패 시 초안 유지, 버전 충돌 시 덮어쓰기 거부.
-- AES-256-GCM/PBKDF2-SHA256(310,000회) 암호화 전체 백업. 미디어 SHA-256 확인. 복원 전 전체 형식·크기·첨부 검증, 새 파일 경로에 준비 후 문서를 한 번에 교체한다. v7 full-backup-v4도 지원한다. 임의 URL을 가져오는 복원은 금지한다.
-- 계정 화면의 v7 가져오기는 같은 origin에 남아 있는 기존 로컬 데이터를 명시적 확인 후 가져온다. 다른 origin/file URL의 원본은 백업 파일로 옮겨야 한다.
+## 사용과 저장
 
-## 실행·검사
+기기 모드는 IndexedDB를 사용한다. 로그인하면 본인 클라우드 기록을 불러오며 기기 기록을 자동 전송하지 않는다. 기기 기록은 암호화 백업 후 계정에서 복원해 옮긴다. 계정 변경 시 비공개 초안·선택 파일·백업 상태를 비운다. 저장 충돌은 덮어쓰지 않고 초안을 보존한다.
 
-Node.js 22 이상, Python 3. 브라우저 테스트는 설치된 Microsoft Edge를 사용한다.
+이메일 회원가입 후 받은 인증 링크를 계정 화면에 붙여 넣으면 인증과 로그인을 완료한다. 다른 제품과 공유하는 Auth 리디렉션·메일 설정은 바꾸지 않았다.
+
+화면에 60% 이상 보이는 영상 하나만 음소거로 자동 재생한다. 화면 밖·숨긴 탭·동작 줄이기·데이터 절약 설정에서는 정지한다. 실제 코덱 지원은 브라우저에 따른다.
+
+| 한도 | 값 |
+|---|---|
+| 첨부 | 기록당 6개, 파일당 25MiB |
+| 기록에 연결된 미디어 | 사용자당 48MiB |
+| 임시·복원 파일을 포함한 예약 | 사용자당 96MiB, 500개 |
+| 글 데이터 | 2MiB, 기록 2,000개, 습관 100개 |
+| 전체 백업 | 미디어 48MiB, 암호화 파일 100MiB |
+
+백업은 AES-256-GCM, PBKDF2-SHA256 310,000회와 파일 SHA-256을 사용한다. 백업 암호는 보관·복구하지 않는다. 복원은 새 경로에 파일을 준비한 뒤 문서를 교체하고 이전 파일을 정리한다. 실패 응답이 불명확한 파일은 즉시 삭제하지 않는다. 하루 이상 지난 미사용 첨부는 아카이브의 정리 버튼으로 확인 후 지운다. 사용 중인 파일은 서버가 삭제·덮어쓰기를 막는다.
+
+## Supabase 적용
+
+기존 free 프로젝트 `afiqaibosavbjzkffggr`만 사용한다. `moa_documents`, `moa_media`에 RLS·FORCE RLS를 적용했고, `moa-private` 버킷은 비공개다. 함수는 SECURITY INVOKER와 빈 search_path를 사용한다. 파일 업로드·다운로드·삭제는 Storage API로 수행한다.
+
+| 원격 적용 버전 | 내용 / 로컬 SQL |
+|---|---|
+| 20261119102755 | 초기 스키마 · `db/schema.sql` |
+| 20261120011359 | 예약·용량·정리 보호 · `supabase/migrations/20261120010940_moa_media_budget.sql` |
+| 20261120020023 | 업로드 사전 검사 호환·완료 크기 검증 · `supabase/migrations/20261120015919_moa_upload_probe_compatibility.sql` |
+
+적용된 SQL을 재실행하지 않는다. 기존 프로젝트의 전체 migration 이력이 이 폴더에 있지 않으며, 로컬 생성 시각과 MCP 적용 버전도 다르다. 이 폴더에서 자동 `db push/reset`을 실행하지 않는다.
+
+Storage는 업로드 사전 검사 때 실제 크기가 없을 수 있어, 모아 버킷에만 완료 메타데이터를 검증하는 트리거를 추가했다. Storage 스키마 변경은 업그레이드 호환성 위험이 있으므로 Supabase Storage 업그레이드 후 예약·업로드·삭제 회귀 검사를 다시 해야 한다. 실제 크기 허위 신고 차단도 hosted API로 확인했다.
+
+## 실행·검사·검토 배포
+
+Node.js 22 이상과 Python 3, 브라우저 검사는 설치된 Chrome을 사용한다.
 
 ```text
 cd moa
 npm ci --ignore-scripts
+npm run build
 npm test
 npm audit
-npm run build
-node tools/serve.mjs
 npm run qa:browser
 npm run qa:cloud-contract
+node tools/serve.mjs
 ```
 
-프리뷰는 `http://127.0.0.1:4175`다. 빌드는 `moa/dist/`만 생성한다. 배포용 산출물에 원본·SQL·테스트·개인 백업을 포함하지 않는다. CSP, 캐시 금지, MIME 보호, referrer 제한 헤더와 빌드 원본 해시를 생성한다. 클라우드 설정이 없으면 로그인 버튼 내부에서 연결 미설정을 설명하며 기기 모드만 제공한다.
+로컬 주소는 `http://127.0.0.1:4175`다. 기본 빌드는 클라우드 연결이 꺼진 기기 모드다. 공개 설정은 빌드 프로세스의 `MOA_SUPABASE_URL`, `MOA_SUPABASE_PUBLISHABLE_KEY`로 전달하거나, 숨긴 stdin을 사용하는 `node tools/build-cloud.mjs`에 전달한다. service_role/secret 키는 거부한다. 비밀번호·토큰·관리 키는 저장소에 넣지 않는다.
 
-`MOA_SUPABASE_URL`, `MOA_SUPABASE_PUBLISHABLE_KEY`는 **빌드 프로세스 환경변수**로 전달한다. `.env`를 자동으로 읽지는 않는다. 공개용 publishable/legacy anon 키만 허용하며 service_role/secret은 거부한다. 어떤 키도 이 저장소에 추가하지 않았다.
+Sites 검토 배포는 공개 설정 빌드 후 `node tools/build-worker.mjs`로 만든다. 정적 호스팅이 `_headers`를 적용하지 않아, 작은 Worker가 CSP·no-store·MIME 보호·404·허용 메서드를 직접 응답한다. `.openai/hosting.json`의 기존 project_id와 소유자 전용 접근을 유지한다. 소스 동기화·패키징·배포에는 Sites 스킬의 공식 helper와 native 도구를 사용한다.
 
-## 적용 상태와 출시 전 남은 일
+실제 hosted 검사는 `tests/live-supabase.mjs`, `tests/media-live.mjs`, `tests/auth-live.mjs`, `tests/deployment.mjs`이며 설정·임시 자격 증명은 stdin으로만 받는다. 폐기한 QA 계정을 재사용하려면 별도 준비가 필요하다.
 
-사용자는 기존 Supabase 적용과 실제 검증을 승인했다. 새 비용·웹사이트 외부 배포는 승인하지 않았다.
+## 검증과 남은 항목
 
-1. **적용 완료:** 기존 `afiqaibosavbjzkffggr` 프로젝트에 migration `20261119102755_moa_private_diary_initial` 반영. `moa_documents` 1개·함수 2개·정책 7개·비공개 `moa-private` 버킷 1개를 추가했다. 초기 SQL을 다시 실행하지 않는다.
-2. **실제 검증 완료:** 임시 A/B 계정의 Auth 로그인, REST/RPC/GraphQL 격리, Storage 업로드·다운로드·삭제·타 사용자 접근 차단, 실제 PNG/WebM 저장과 자동 재생, 암호화 백업 삭제·복원 후 SHA-256 확인. 공개 회원가입·이메일 인증·시간 경과에 따른 토큰 만료는 미검증이다.
-3. 별도 모아 호스팅 identity·허용 도메인·요금/한도·복구 기준 확인 후 출시 승인. 기존 세 제품의 호스팅 프로젝트를 재사용하지 않는다. CI/배포 자동화를 새로 등록하지 않았다.
-4. Android Chrome·iOS Safari 실기기에서 터치, 네이티브 날짜·파일 선택, 키보드, 코덱/자동 재생, 대용량 미디어와 메모리 검증.
+단위/DB/응답 래퍼 13개, 로컬 브라우저 9개 검사군, 가상 Supabase 연결 6개, 실제 Supabase 연결 12개, 실제 용량/복원 8개, 배포 후 6개 검사군과 2개 정리를 통과했다. 공개 회원가입 메일 수신·인증 화면, 실제 토큰 갱신·폐기와 오래된 미사용 예약 정리도 확인했다.
 
-현재 제한: 첨부는 기록당 6개, 파일당 25MB. 글 데이터 최대 2MB·2,000개, 습관 100개. 암호화 전체 백업은 미디어 합계 48MB·백업 파일 100MB 한도다. 지원 MIME은 JPEG/PNG/WebP/GIF/MP4/WebM/MOV지만 실제 재생 코덱 지원은 브라우저에 따른다.
+실기기 제공 불가로 Android/iOS 실기기는 미검증이다. 자연적인 토큰 만료까지 기다린 검사, 실제 전송 중 케이블/망 단절, 모바일 메모리·코덱 전수, ChatGPT 소유자 대화형 로그인, 독립 off-site/PITR 재해복구는 미검증이다. 새 유료 자원·별도 SMTP/PITR·요금제 변경은 하지 않았다.
 
-업로드 후 저장 응답이 불명확하면 파일을 자동 삭제하지 않아 참조 없는 파일이 남을 수 있다. 복원 전의 미디어도 즉시 정리하지 않는다. 운영 전 사용자별 총량 제한과 안전한 미참조 파일 정리·비용 감시가 필요하다. 클라우드 기록에는 오프라인 변경 병합 기능이 없다. 백업 암호는 저장하거나 복구할 수 없다. 모든 보안·실기기·실서비스 QA 완료를 주장하지 않는다.
-
-최종 로컬 브라우저 9개 검사군·가상 Supabase 연결 6개와 실제 Supabase 연결 12개 검사를 통과했다. 다른 탭 로그아웃 시 비공개 초안·선택 파일·백업 상태 제거도 검증했다. 실기기·외부 배포는 미실행이다. 실행별 판정은 [QA_REPORT.md](QA_REPORT.md), 검사 대상과 목록은 [qa-results.json](qa-results.json)에 기록한다. 실제 검증 스크립트 `tests/live-supabase.mjs`는 URL·공개 키·임시 QA 계정 정보를 stdin으로만 받으며, 계정의 QA 실행 표식을 확인하고 사용한다. 이번 환경에서는 설치된 Chrome으로 실행했다.
+QA 미디어·예약·세션은 모두 0개이며 QA 계정 4개는 암호를 교체·폐기하고 영구 로그인 차단했다. 삭제 확인이 만료되어 계정·합성 프로필과 빈 문서 행은 남아 있다. 기존 사용자/프로필 1개는 보존했다. 전체 결과는 [QA_REPORT.md](QA_REPORT.md), 기계 판독 결과는 [qa-results.json](qa-results.json)에 기록한다.

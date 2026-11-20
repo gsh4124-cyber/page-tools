@@ -3,6 +3,7 @@ import {createInterface} from 'node:readline';
 import {createClient} from '@supabase/supabase-js';
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
+import {randomBytes} from 'node:crypto';
 if(process.stdin.isTTY)process.stdin.setRawMode(true);
 console.log('READY_FOR_CONFIG');
 const input=createInterface({input:process.stdin,terminal:false});
@@ -13,7 +14,9 @@ const make=()=>createClient(cfg.url,cfg.key,{auth:{persistSession:false,autoRefr
 const c=make(),results=[];
 const ok=r=>{if(r.error)throw Error(r.error.code||r.error.name||'AUTH_ERROR');return r.data;};
 try{
- if(cfg.mode==='signup'){
+ if(cfg.mode==='retire'){
+  for(const u of cfg.users){const own=make(),d=ok(await own.auth.signInWithPassword({email:u.email,password:u.password}));assert.equal(d.user.id,u.id);assert.equal(d.user.user_metadata.moa_qa_run,u.qa_run);ok(await own.auth.updateUser({password:randomBytes(32).toString('base64url')}));ok(await own.auth.signOut({scope:'global'}));assert.ok((await make().auth.signInWithPassword({email:u.email,password:u.password})).error);results.push({check:'email QA account password discarded, old login denied, sessions globally signed out',status:'DONE'});}
+ }else if(cfg.mode==='signup'){
   const r=await c.auth.signUp({email:cfg.email,password:cfg.password,options:{data:{moa_qa_run:cfg.run}}});
   results.push({check:'public signUp with owner QA mailbox alias',status:r.error?'BLOCKED':'DONE',code:r.error?.code||null,message:r.error?.message||null,id:r.data?.user?.id||null,sessionIssued:Boolean(r.data?.session),emailConfirmed:Boolean(r.data?.user?.email_confirmed_at)});
  }else if(cfg.mode==='resend'){
