@@ -27,7 +27,7 @@ try{
   try{
    for(const [lang,width] of [['ko',320],['ko',390],['ko',1280],['en',390],['ar',390]]){
     const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',locale:lang==='ko'?'ko-KR':lang});
-    const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',e=>errors.push(String(e)));
+    const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',e=>{errors.push(String(e));console.error('Page script error:',e);});page.on('crash',()=>console.error(`Browser page crashed: ${engine} ${lang} ${width}`));
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
     await page.goto(`${base}/${lang==='ko'?'':lang+'/'}?qa=1`,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>window.RandomPickerSettings&&window.RandomPickerFlowText);
@@ -55,7 +55,7 @@ try{
       assert(!(await page.locator('#excludeBtn').isVisible()));
       if(lang==='ko'&&width===390){await page.locator('#stage').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,`${engine}-lots.png`)});}
      }else if(method==='bomb'){
-      await page.locator('#bombStart').click();assert(await page.locator('#bombStart').isDisabled());await page.locator('#bombNow').click();await page.waitForFunction(()=>document.querySelector('#bombResult').textContent.trim());assert(await page.locator('#bombNow').isDisabled());
+      await page.locator('#bombStart').click();assert(await page.locator('#bombStart').isDisabled());await page.locator('#bombNow').click();await page.locator('#bombResult').filter({hasText:/\S/}).waitFor({state:'visible',timeout:5000});assert(await page.locator('#bombNow').isDisabled());
      }else{
       if(method==='wheel'){await page.locator('#wheelStart').click();}
       if(method==='slot')await page.locator('#slotStart').click();
@@ -90,6 +90,8 @@ try{
     if(method==='slot')assert(result.includes(await page.locator('#slotItem2').innerText()));
     results.push({engine,method,phase:'skip-during-animation',pass:true});
    }
+   await page.evaluate(()=>window.RandomPickerSettings.apply({version:1,method:'bomb',inputMode:'number',names:'',customResults:'',totalPeople:4,pickCount:1,resultMode:'winner',bombTimerMode:'fixed',bombSeconds:15}));
+   await page.locator('#pickBtn').click();await page.locator('#bombStart').click();await page.locator('#bombNow').click();await page.locator('#bombResult').filter({hasText:/\S/}).waitFor({state:'visible',timeout:5000});await page.waitForTimeout(700);assert(await page.locator('#bombStart').isEnabled());results.push({engine,method:'bomb',phase:'manual-explosion-normal-motion',pass:true});
    await context.close();
    const raceContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
    await raceContext.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
@@ -111,4 +113,3 @@ try{
  await fs.writeFile(path.join(output,'results.json'),JSON.stringify({base,revision:revision||null,physical_device_tested:false,cases:results},null,2));
 }
 console.log(`Game interaction contract PASS: ${results.length} flows at ${base}`);
-
