@@ -149,6 +149,8 @@ jobs:
         working-directory: random-ppobgi
     steps:
       - uses: actions/checkout@v4
+      - name: Trust this checked-out workspace in the test container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -187,3 +189,4 @@ jobs:
           test "$STATIC_RESULT" = success
           test "$BROWSER_RESULT" = success
           test "$GAME_RESULT" = success
+
