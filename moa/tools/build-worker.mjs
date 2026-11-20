@@ -3,7 +3,7 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 const dist=new URL('../dist/',import.meta.url),routes={};
 for(const [name,type] of [['index.html','text/html; charset=utf-8'],['app.js','text/javascript; charset=utf-8'],['service.css','text/css; charset=utf-8'],['build-manifest.json','application/json'],['404.html','text/html; charset=utf-8'],['robots.txt','text/plain']])routes['/'+name]={body:await readFile(new URL(name,dist),'utf8'),type};
-routes['/']=routes['/index.html'];
+routes['/']=routes['/index.html'];const build=JSON.parse(routes['/build-manifest.json'].body);routes['/healthz']={body:JSON.stringify({status:'ready',product:'moa',revision:build.revision,build:build.sourceSha256,cloudConfigured:build.cloudConfigured}),type:'application/json'};
 const headers=Object.fromEntries((await readFile(new URL('_headers',dist),'utf8')).split('\n').slice(1).filter(s=>s.includes(':')).map(s=>{const i=s.indexOf(':');return [s.slice(0,i).trim(),s.slice(i+1).trim()];}));
 const source=`const routes=${JSON.stringify(routes)},baseHeaders=${JSON.stringify(headers)};
 export default {async fetch(request){const path=new URL(request.url).pathname;const item=routes[path]||routes['/404.html'];const allowed=request.method==='GET'||request.method==='HEAD';const headers={...baseHeaders,'Content-Type':item.type};if(!allowed)headers.Allow='GET, HEAD';return new Response(request.method==='HEAD'?null:allowed?item.body:'Method not allowed',{status:allowed?(routes[path]?200:404):405,headers});}};\n`;

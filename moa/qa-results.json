@@ -5,27 +5,29 @@
     "repository": "gsh4124-cyber/page-tools",
     "branch": "feature/moa-integration-20261119",
     "changedPaths": "moa/ only",
-    "frontendCommit": "53c71051d313d78a11f8f9ac8a1fe2705a52c886",
-    "frontendSha256": "5d1b768cddf7b23c04eaab4b80c43063414a17fb82f95974495c7f117ea8600b",
-    "workerSha256": "d9e1d6b3d225d20b8373b38cb5295676e3c354e7c357141ca6ac5ab60787d684",
-    "mainObserved": "909496de84b18f0c611b2cc2efb1c2d7cd5043d3",
     "mainMergedOrPushed": false
+  },
+  "candidate": {
+    "status": "VERIFIED_NOT_DEPLOYED",
+    "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
+    "deployment": "BLOCKED",
+    "reason": "Automatic approval review rejected Sites source sync/deployment because external deployment approval remains withheld. Explicit owner-only update approval required."
   },
   "unit": {
     "status": "DONE",
-    "passed": 13
+    "passed": 15
   },
   "audit": {
     "status": "DONE",
     "vulnerabilities": 0
   },
   "browser": {
-    "base": "http://127.0.0.1:52029",
+    "base": "http://127.0.0.1:49196",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "5312b2f2fa49299f37bfdec581bee36b69e8f428",
-      "sourceSha256": "e523135c2a8ebf99404956983935581098d499a086457312d781ec33d9b8f539",
+      "revision": "5a23ed24a95adea39a8f63dccaa0ad1ee763007c",
+      "sourceSha256": "cd36bed9d37d785ad176413e193d77017e0482289c71cb609304c14ec841d30b",
       "cloudConfigured": false
     },
     "results": [
@@ -73,8 +75,8 @@
     "type": "local intercepted Supabase API contract, not live hosted test",
     "manifest": {
       "product": "moa",
-      "revision": "5312b2f2fa49299f37bfdec581bee36b69e8f428",
-      "sourceSha256": "e523135c2a8ebf99404956983935581098d499a086457312d781ec33d9b8f539",
+      "revision": "5a23ed24a95adea39a8f63dccaa0ad1ee763007c",
+      "sourceSha256": "cd36bed9d37d785ad176413e193d77017e0482289c71cb609304c14ec841d30b",
       "cloudConfigured": false
     },
     "results": [
@@ -91,8 +93,8 @@
     "status": "DONE",
     "projectRef": "afiqaibosavbjzkffggr",
     "runtimeIdentity": {
-      "revision": "5312b2f2fa49299f37bfdec581bee36b69e8f428",
-      "sourceSha256": "5d1b768cddf7b23c04eaab4b80c43063414a17fb82f95974495c7f117ea8600b",
+      "revision": "5a23ed24a95adea39a8f63dccaa0ad1ee763007c",
+      "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
       "cloudConfigured": true
     },
     "results": [
@@ -148,12 +150,12 @@
     "errors": [],
     "mediaSha256": {
       "png": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec",
-      "webm": "2cfee676b58809e69ed758818e42ea9277889bb2eb95e2c324f87ba1ef1ae191"
+      "webm": "9245d71a66718037bbb2318106ffe93590832ef1bd490f5ef0d9e2f52e5f35f8"
     },
     "cleanup": [
       {
         "user": "A",
-        "removedObjects": 4,
+        "removedObjects": 3,
         "remainingObjects": 0,
         "reservedBytes": 0,
         "signedOut": true
@@ -173,156 +175,83 @@
       "external website verified separately"
     ]
   },
-  "mediaStress": {
+  "lifecycle": {
+    "status": "DONE",
     "results": [
       {
-        "name": "hosted under-declared bytes and unreserved upload denied",
+        "name": "real partial streaming upload cancellation preserves document and releases unused reservation",
         "status": "DONE"
       },
       {
-        "name": "five concurrent 24MiB reservations admit exactly four; aggregate cannot exceed 96MiB",
+        "name": "independent encrypted file backup restores into a separate empty account with media hashes",
         "status": "DONE"
       },
       {
-        "name": "actual 48MiB referenced media accepted; extra byte RPC and direct REST rejected",
+        "name": "withdrawal blocks old live JWT; interrupted cleanup resumes; rejoin cannot revive pre-deletion sessions",
         "status": "DONE"
       },
       {
-        "name": "Storage API cannot delete or overwrite referenced media; reservation cannot release early",
+        "name": "photo optimization, remaining quota, offline notice, diagnostic export and current device-mode IndexedDB erase; legacy v7 and downloaded backups retained",
         "status": "DONE"
       },
       {
-        "name": "48MiB encrypted full backup and safe same-account replacement at 96MiB staging",
+        "name": "mobile withdrawal UI requires confirmation and password, deletes only Moa, then permits explicit fresh rejoin",
         "status": "DONE"
       },
       {
-        "name": "oversized file rejected by client and actual bucket",
+        "name": "real emailed recovery link changes password, rejects old login and old JWT while preserving diary",
         "status": "DONE"
       },
       {
-        "name": "aborted upload leaves saved document unchanged and reservation recoverable",
-        "status": "DONE"
-      },
-      {
-        "name": "all synthetic objects/reservations removed and session revoked",
-        "status": "DONE"
-      }
-    ],
-    "limitations": [
-      "synthetic binary quota fixtures are not codec validation",
-      "abort was before transport; arbitrary mid-transfer failures not exhaustively tested",
-      "real devices unavailable"
-    ]
-  },
-  "emailAuth": {
-    "status": "DONE",
-    "signup": [
-      {
-        "check": "public signUp with owner QA mailbox alias",
+        "name": "browser uncaught errors",
         "status": "DONE",
-        "code": null,
-        "message": null,
-        "sessionIssued": false,
-        "emailConfirmed": false
+        "count": 0
+      },
+      {
+        "name": "QA fixture cleanup",
+        "status": "DONE"
+      },
+      {
+        "name": "QA fixture cleanup",
+        "status": "DONE"
+      },
+      {
+        "name": "QA fixture cleanup",
+        "status": "DONE"
       }
     ],
-    "mailTokenVerification": [
-      {
-        "check": "email confirmation through received message token",
-        "status": "DONE"
-      }
-    ],
-    "inAppEmailVerification": {
-      "result": {
-        "name": "mobile browser verifies a real emailed signup link without changing shared redirect settings",
-        "status": "DONE"
-      },
-      "runtimeIdentity": {
-        "revision": "5312b2f2fa49299f37bfdec581bee36b69e8f428",
-        "sourceSha256": "5d1b768cddf7b23c04eaab4b80c43063414a17fb82f95974495c7f117ea8600b",
-        "cloudConfigured": true
-      },
-      "notes": "Extracted from the run where signup verification passed before a synthetic video fixture failed."
-    },
-    "refresh": [
-      {
-        "check": "real refresh token rotation and verified session continuity",
-        "status": "DONE"
-      },
-      {
-        "check": "invalid access token rejected by hosted REST",
-        "status": "DONE"
-      },
-      {
-        "check": "globally revoked refresh token cannot renew session",
-        "status": "DONE"
-      }
+    "errors": [],
+    "limitations": [
+      "Chrome mobile emulation is not a physical phone",
+      "encrypted-file recovery used a separate QA account, not an off-site provider outage",
+      "stream cancellation does not simulate a physical cable pull"
     ]
   },
-  "privateDeployment": {
+  "checkpointOrder": "Lifecycle live tests preceded final write-barrier migration; unit 15, browser 9, contract 6 and hosted core 12 reran after it. Exhaustive concurrent interleavings not tested.",
+  "fileRecovery": {
+    "checkedAt": "2026-11-20T09:54:56.144Z",
+    "mode": "restore",
+    "backupSha256": "ba3323e805fa377479a7841c3f2ad9d5d738864c254139d36832321d1585f3b9",
+    "entries": 1,
+    "files": 1,
+    "mediaBytes": 68,
     "status": "DONE",
-    "audience": "owner-only",
-    "versionNumber": 2,
-    "externalVisitors": 0,
-    "siteSourceCommit": "f71cd7325d5d1e6ce45e106b6b332db06c67e505",
-    "deployment": {
-      "id": "appgdep_6afff696dfe081919cba6abcd1bbca03",
-      "project_id": "appgprj_6affac07c0088191a0598311d53bd69e",
-      "title": "모아 · MOA",
-      "version_id": "appgprj_6affac07c0088191a0598311d53bd69e~appgver_e8d1880882ec8191b1af6d5f25249e3e",
-      "type": "publish",
-      "status": "succeeded",
-      "url": "https://moa-diary-20261120.gsh4124.chatgpt.site",
-      "has_mcp": false,
-      "screenshot_asset_pointer": null,
-      "provider_deployment_id": "release---6afff3f180e08191986f4c507fea6d65",
-      "failure_message": null,
-      "env_set_revision": 0,
-      "updated_at": "2026-11-20T07:28:35.295877+00:00"
-    },
-    "readback": {
-      "site": "https://moa-diary-20261120.gsh4124.chatgpt.site",
-      "status": "DONE",
-      "results": [
-        {
-          "name": "unauthenticated production requests cannot read private app HTML",
-          "status": "DONE"
-        },
-        {
-          "name": "production build manifest and actual security headers match approved artifact",
-          "status": "DONE"
-        },
-        {
-          "name": "production real login and aged unused reservation cleanup",
-          "status": "DONE"
-        },
-        {
-          "name": "production PNG/WebM save, reload, autoplay and offscreen pause",
-          "status": "DONE"
-        },
-        {
-          "name": "production encrypted backup, deletion, restoration and media SHA-256 readback",
-          "status": "DONE"
-        },
-        {
-          "name": "production separate B browser cannot see A diary",
-          "status": "DONE"
-        },
-        {
-          "name": "fixture 0 cleanup and logout",
-          "status": "DONE"
-        },
-        {
-          "name": "fixture 1 cleanup and logout",
-          "status": "DONE"
-        }
-      ],
-      "errors": [],
-      "limitations": [
-        "service access verifies owner-private Site; interactive ChatGPT sign-in was not tested",
-        "390px Chrome emulation is not a real phone"
-      ]
-    }
+    "verifiedHashes": 1
+  },
+  "health": {
+    "status": "DONE",
+    "checkedAt": "2026-11-20T10:59:09.769Z",
+    "results": [
+      {
+        "name": "Auth health",
+        "http": 200
+      },
+      {
+        "name": "moa_health",
+        "http": 200
+      }
+    ],
+    "scheduledMonitoringCreated": false
   },
   "database": {
     "projectRef": "afiqaibosavbjzkffggr",
@@ -330,7 +259,6 @@
     "status": "ACTIVE_HEALTHY",
     "rls": true,
     "forceRls": true,
-    "securityDefinerFunctions": 0,
     "storageBucketPrivate": true,
     "migrations": [
       {
@@ -346,6 +274,26 @@
         "version": "20261120020023",
         "name": "moa_upload_probe_compatibility",
         "localFile": "supabase/migrations/20261120015919_moa_upload_probe_compatibility.sql"
+      },
+      {
+        "version": "20261120090924",
+        "name": "moa_account_lifecycle",
+        "localFile": "supabase/migrations/20261120082747_moa_account_lifecycle.sql"
+      },
+      {
+        "version": "20261120092206",
+        "name": "moa_rejoin_session_guard",
+        "localFile": "supabase/migrations/20261120092053_moa_rejoin_session_guard.sql"
+      },
+      {
+        "version": "20261120095034",
+        "name": "moa_withdrawal_variable_scope",
+        "localFile": "supabase/migrations/20261120092521_moa_withdrawal_variable_scope.sql"
+      },
+      {
+        "version": "20261120105101",
+        "name": "moa_lifecycle_write_barrier",
+        "localFile": "supabase/migrations/20261120104942_moa_lifecycle_write_barrier.sql"
       }
     ],
     "limits": {
@@ -354,7 +302,15 @@
       "fileBytes": 26214400,
       "reservations": 500
     },
-    "upgradeRegressionRequired": "Moa-only Storage completion-validation trigger; retain API file operations"
+    "upgradeRegressionRequired": "Moa-only Storage completion-validation trigger; retain API file operations",
+    "publicMoaSecurityDefinerFunctions": 0,
+    "privateMoaSecurityDefinerFunctions": 4,
+    "privateDefinerPurpose": "Verified caller Auth session checks and own Moa lifecycle only; unexposed schema, empty search_path, PUBLIC execute revoked",
+    "rlsTables": [
+      "moa_documents",
+      "moa_media",
+      "moa_accounts"
+    ]
   },
   "preservation": {
     "existingProductCodeDiff": 0,
@@ -388,18 +344,24 @@
     },
     "countComparison": "Different observation times; live counters grew. No Moa SQL writes these tables. Cause not exhaustively audited.",
     "existingAuthAndProfileCount": 1,
-    "existingBucketSettingsPreserved": true
+    "existingBucketSettingsPreserved": true,
+    "currentCountObservationIsHistorical": true
   },
   "fixtureCleanup": {
     "status": "PARTIAL",
     "verified": {
+      "banned": 4,
       "objects": 0,
-      "qa_sessions": 0,
+      "sessions": 0,
+      "documents": 0,
       "reservations": 0,
-      "original_profiles": 1,
-      "qa_accounts_banned": 4,
-      "original_auth_count": 1,
-      "qa_document_entries": 0
+      "accountStates": [
+        "withdrawn",
+        "withdrawn",
+        "withdrawn"
+      ],
+      "originalUsers": 1,
+      "originalProfiles": 1
     },
     "coreAccountsRetirement": [
       {
@@ -415,16 +377,6 @@
         "sessionsRevoked": true
       }
     ],
-    "emailAccountsRetirement": [
-      {
-        "check": "email QA account password discarded, old login denied, sessions globally signed out",
-        "status": "DONE"
-      },
-      {
-        "check": "email QA account password discarded, old login denied, sessions globally signed out",
-        "status": "DONE"
-      }
-    ],
     "accountRowDeletion": {
       "status": "BLOCKED",
       "reason": "Earlier destructive-action confirmations expired; four exact QA accounts are now permanently banned with discarded passwords; synthetic rows retained."
@@ -432,9 +384,14 @@
   },
   "notTested": [
     {
-      "item": "Android/iOS real devices",
+      "item": "Latest candidate deployment and deployment readback",
+      "status": "BLOCKED",
+      "reason": "Explicit owner-only update approval required after automatic approval rejection"
+    },
+    {
+      "item": "Android/iOS real devices, native picker, touch, keyboard, codecs and memory",
       "status": "NOT_TESTED",
-      "reason": "User cannot provide devices; ADB 0 devices"
+      "reason": "User cannot provide real devices"
     },
     {
       "item": "Natural access-token expiry over time",
@@ -443,19 +400,24 @@
     {
       "item": "Physical mid-transfer outage or mobile OS eviction",
       "status": "NOT_TESTED",
-      "verifiedAlternative": "Abort before dispatch only; saved document preserved, reservation released"
+      "verifiedAlternative": "Actual partial streaming upload cancellation after transport began"
+    },
+    {
+      "item": "All concurrent withdrawal/upload/document-write interleavings",
+      "status": "NOT_TESTED",
+      "verifiedAlternative": "Post-lock authorization check plus database and live core regression"
     },
     {
       "item": "Interactive owner ChatGPT sign-in",
-      "status": "NOT_TESTED",
-      "verifiedAlternative": "Native owner-only policy, unauthenticated challenge and supported service access"
-    },
-    {
-      "item": "Independent off-site/PITR disaster recovery",
       "status": "NOT_TESTED"
     },
     {
-      "item": "Public launch and real-user business outcomes",
+      "item": "Off-site provider outage/PITR recovery",
+      "status": "NOT_TESTED",
+      "verifiedAlternative": "Separately saved encrypted file restored into another empty QA account on the same PC"
+    },
+    {
+      "item": "Real-user pilot, business outcomes and public launch",
       "status": "HOLD"
     }
   ],
@@ -468,5 +430,169 @@
     "Storage completion-validation trigger requires regression after Supabase Storage upgrades",
     "Existing project-wide advisor warnings remain; authenticated GraphQL schema discovery is separate from verified row isolation",
     "Real-device codec/memory coverage is unavailable"
-  ]
+  ],
+  "previousCheckpoint": {
+    "meaning": "Historical version-2 evidence, not latest candidate deployment validation",
+    "scope": {
+      "repository": "gsh4124-cyber/page-tools",
+      "branch": "feature/moa-integration-20261119",
+      "changedPaths": "moa/ only",
+      "frontendCommit": "53c71051d313d78a11f8f9ac8a1fe2705a52c886",
+      "frontendSha256": "5d1b768cddf7b23c04eaab4b80c43063414a17fb82f95974495c7f117ea8600b",
+      "workerSha256": "d9e1d6b3d225d20b8373b38cb5295676e3c354e7c357141ca6ac5ab60787d684",
+      "mainObserved": "909496de84b18f0c611b2cc2efb1c2d7cd5043d3",
+      "mainMergedOrPushed": false
+    },
+    "mediaStress": {
+      "results": [
+        {
+          "name": "hosted under-declared bytes and unreserved upload denied",
+          "status": "DONE"
+        },
+        {
+          "name": "five concurrent 24MiB reservations admit exactly four; aggregate cannot exceed 96MiB",
+          "status": "DONE"
+        },
+        {
+          "name": "actual 48MiB referenced media accepted; extra byte RPC and direct REST rejected",
+          "status": "DONE"
+        },
+        {
+          "name": "Storage API cannot delete or overwrite referenced media; reservation cannot release early",
+          "status": "DONE"
+        },
+        {
+          "name": "48MiB encrypted full backup and safe same-account replacement at 96MiB staging",
+          "status": "DONE"
+        },
+        {
+          "name": "oversized file rejected by client and actual bucket",
+          "status": "DONE"
+        },
+        {
+          "name": "aborted upload leaves saved document unchanged and reservation recoverable",
+          "status": "DONE"
+        },
+        {
+          "name": "all synthetic objects/reservations removed and session revoked",
+          "status": "DONE"
+        }
+      ],
+      "limitations": [
+        "synthetic binary quota fixtures are not codec validation",
+        "abort was before transport; arbitrary mid-transfer failures not exhaustively tested",
+        "real devices unavailable"
+      ]
+    },
+    "emailAuth": {
+      "status": "DONE",
+      "signup": [
+        {
+          "check": "public signUp with owner QA mailbox alias",
+          "status": "DONE",
+          "code": null,
+          "message": null,
+          "sessionIssued": false,
+          "emailConfirmed": false
+        }
+      ],
+      "mailTokenVerification": [
+        {
+          "check": "email confirmation through received message token",
+          "status": "DONE"
+        }
+      ],
+      "inAppEmailVerification": {
+        "result": {
+          "name": "mobile browser verifies a real emailed signup link without changing shared redirect settings",
+          "status": "DONE"
+        },
+        "runtimeIdentity": {
+          "revision": "5312b2f2fa49299f37bfdec581bee36b69e8f428",
+          "sourceSha256": "5d1b768cddf7b23c04eaab4b80c43063414a17fb82f95974495c7f117ea8600b",
+          "cloudConfigured": true
+        },
+        "notes": "Extracted from the run where signup verification passed before a synthetic video fixture failed."
+      },
+      "refresh": [
+        {
+          "check": "real refresh token rotation and verified session continuity",
+          "status": "DONE"
+        },
+        {
+          "check": "invalid access token rejected by hosted REST",
+          "status": "DONE"
+        },
+        {
+          "check": "globally revoked refresh token cannot renew session",
+          "status": "DONE"
+        }
+      ]
+    },
+    "privateDeployment": {
+      "status": "DONE",
+      "audience": "owner-only",
+      "versionNumber": 2,
+      "externalVisitors": 0,
+      "siteSourceCommit": "f71cd7325d5d1e6ce45e106b6b332db06c67e505",
+      "deployment": {
+        "id": "appgdep_6afff696dfe081919cba6abcd1bbca03",
+        "project_id": "appgprj_6affac07c0088191a0598311d53bd69e",
+        "title": "모아 · MOA",
+        "version_id": "appgprj_6affac07c0088191a0598311d53bd69e~appgver_e8d1880882ec8191b1af6d5f25249e3e",
+        "type": "publish",
+        "status": "succeeded",
+        "url": "https://moa-diary-20261120.gsh4124.chatgpt.site",
+        "has_mcp": false,
+        "screenshot_asset_pointer": null,
+        "provider_deployment_id": "release---6afff3f180e08191986f4c507fea6d65",
+        "failure_message": null,
+        "env_set_revision": 0,
+        "updated_at": "2026-11-20T07:28:35.295877+00:00"
+      },
+      "readback": {
+        "site": "https://moa-diary-20261120.gsh4124.chatgpt.site",
+        "status": "DONE",
+        "results": [
+          {
+            "name": "unauthenticated production requests cannot read private app HTML",
+            "status": "DONE"
+          },
+          {
+            "name": "production build manifest and actual security headers match approved artifact",
+            "status": "DONE"
+          },
+          {
+            "name": "production real login and aged unused reservation cleanup",
+            "status": "DONE"
+          },
+          {
+            "name": "production PNG/WebM save, reload, autoplay and offscreen pause",
+            "status": "DONE"
+          },
+          {
+            "name": "production encrypted backup, deletion, restoration and media SHA-256 readback",
+            "status": "DONE"
+          },
+          {
+            "name": "production separate B browser cannot see A diary",
+            "status": "DONE"
+          },
+          {
+            "name": "fixture 0 cleanup and logout",
+            "status": "DONE"
+          },
+          {
+            "name": "fixture 1 cleanup and logout",
+            "status": "DONE"
+          }
+        ],
+        "errors": [],
+        "limitations": [
+          "service access verifies owner-private Site; interactive ChatGPT sign-in was not tested",
+          "390px Chrome emulation is not a real phone"
+        ]
+      }
+    }
+  }
 }

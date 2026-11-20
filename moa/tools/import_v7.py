@@ -49,6 +49,12 @@ s = s.replace('<body>', '''<body><div id="notice" role="status" aria-live="polit
 <p id="backupHint">백업 암호를 안전하게 보관해 주세요. 암호를 잊으면 복원할 수 없어요.</p><label for="backupPassword">백업 암호 (12자 이상)</label>
 <input id="backupPassword" type="password" autocomplete="off" minlength="12"><div class="row"><button type="submit">계속</button><button type="button" id="cancelBackup" class="secondary">취소</button></div></form></dialog>''')
 s = s.replace('<p class="muted">누적 기록 수</p>', '<p class="muted">누적 기록 수</p><p class="muted" id="storageUsage">첨부 사용량 확인 중…</p><button type="button" id="cleanupMedia" class="secondary">하루 지난 미사용 첨부 정리</button>')
+s = s.replace('<button id="logoutBtn"', '<button id="forgotPassword" class="secondary" type="button">비밀번호 찾기</button><button id="withdrawBtn" class="secondary" type="button" hidden>모아 탈퇴 · 기록 전체 삭제</button><button id="rejoinBtn" class="secondary" type="button" hidden>모아 다시 시작</button><button id="clearDeviceBtn" class="secondary" type="button">현재 기기 모드 기록 삭제</button><button id="logoutBtn"')
+s = s.replace('<dialog id="backupDialog"', (root / 'ui/lifecycle.html').read_text(encoding='utf-8') + '<dialog id="backupDialog"')
+s = s.replace('<h2>새로운 순간 남기기</h2>', '<h2>새로운 순간 남기기</h2><p class="muted">첨부 합계 48MiB까지 저장할 수 있어요. 사진은 선택해서 용량을 줄이고, 큰 영상은 기기에서 짧게 편집해 주세요.</p>')
+s = s.replace('<form id="entryForm">', '<form id="entryForm"><label class="optimize-toggle"><input type="checkbox" id="optimizePhotos"> 사진을 최대 1920px로 줄여 저장 (원본은 기기에 유지)</label><p class="muted" id="uploadEstimate" aria-live="polite"></p>')
+s = s.replace('<p class="muted" id="storageUsage">', '<progress id="storageBar" max="50331648" value="0" aria-label="미디어 저장 용량"></progress><p class="muted" id="backupStatus"></p><button id="diagnosticBtn" type="button" class="secondary">연결 점검 · 진단 받기</button><p class="muted" id="storageUsage">')
+s = s.replace('<body>', '<body><p id="connectionNotice" role="status" hidden>연결이 끊겼어요. 클라우드 저장과 미디어 불러오기를 확인해 주세요.</p>')
 s = '\n'.join(line.rstrip() for line in s.splitlines()) + '\n'
 (root / 'index.html').write_text(s, encoding='utf-8', newline='\n')
 print('Imported original:', len(source), hashlib.sha256(source).hexdigest())

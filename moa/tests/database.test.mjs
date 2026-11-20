@@ -12,7 +12,7 @@ test('real PostgreSQL: migration, auth, ownership, CAS, shape and private storag
  create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
  grant usage on schema auth to anon,authenticated;grant execute on all functions in schema auth to anon,authenticated;
  create schema storage; create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
- create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb);
+ create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb,owner_id text);
  alter table storage.objects enable row level security;
  create function storage.foldername(name text) returns text[] language sql immutable as $$select (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1]$$;
  grant usage on schema storage to anon,authenticated;grant select,insert,update,delete on storage.objects to anon,authenticated;grant execute on function storage.foldername(text) to anon,authenticated;
@@ -20,7 +20,7 @@ test('real PostgreSQL: migration, auth, ownership, CAS, shape and private storag
  create policy preexisting_broad on storage.objects for all to public using(true) with check(true);
  insert into auth.users values('${A}'),('${B}');`);
  await pg.exec(await readFile(new URL('../db/schema.sql',import.meta.url),'utf8'));
- async function as(role,user,fn,anonymous=false){await pg.exec('begin');try{await pg.query("select set_config('request.jwt.claims',$1,true)",[JSON.stringify({sub:user,is_anonymous:anonymous})]);await pg.exec(`set local role ${role}`);const value=await fn();await pg.exec('commit');return value;}catch(e){await pg.exec('rollback');throw e;}}
+ async function as(role,user,fn,anonymous=false,sid=user){await pg.exec('begin');try{await pg.query("select set_config('request.jwt.claims',$1,true)",[JSON.stringify({sub:user,is_anonymous:anonymous,session_id:sid,exp:Math.floor(Date.now()/1000)+3600})]);await pg.exec(`set local role ${role}`);const value=await fn();await pg.exec('commit');return value;}catch(e){await pg.exec('rollback');throw e;}}
  const commit=(v,d)=>pg.query('select public.moa_commit($1,$2::jsonb) as version',[v,JSON.stringify(d)]);
  await t.test('owner can create and read; same expected version cannot overwrite',async()=>{assert.equal((await as('authenticated',A,()=>commit(0,empty()))).rows[0].version,1);await assert.rejects(()=>as('authenticated',A,()=>commit(0,empty())),/STALE_WRITE/);assert.equal((await as('authenticated',A,()=>commit(1,{...empty(),habits:['산책']}))).rows[0].version,2);await assert.rejects(()=>as('authenticated',A,()=>commit(1,empty())),/STALE_WRITE/);});
  await t.test('other user cannot read/update or reassign ownership',async()=>{assert.equal((await as('authenticated',B,()=>pg.query('select * from public.moa_documents'))).rows.length,0);assert.equal((await as('authenticated',B,()=>pg.query('update public.moa_documents set version=99 returning *'))).rows.length,0);await assert.rejects(()=>as('authenticated',A,()=>pg.query('update public.moa_documents set user_id=$1 returning *',[B])),/row-level security/);});
@@ -63,6 +63,50 @@ test('real PostgreSQL: migration, auth, ownership, CAS, shape and private storag
   // Restrictive policies must return true for other buckets, including the anon role.
   await as('anon',null,()=>pg.query("insert into storage.objects(bucket_id,name) values('existing-product','untouched')"));
   assert.equal((await as('anon',null,()=>pg.query("update storage.objects set name='preserved' where bucket_id='existing-product' returning *"))).rows.length,1);
+  assert.equal((await as('anon',null,()=>pg.query("delete from storage.objects where bucket_id='existing-product' returning *"))).rows.length,1);
+ });
+
+ await t.test('withdrawal, retries, old-token isolation, rejoin, revocation and shared Auth preservation',async()=>{
+  await pg.exec(`alter table auth.users add column banned_until timestamptz;
+  create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id),created_at timestamptz default clock_timestamp(),not_after timestamptz);
+  insert into auth.sessions(id,user_id) values('${A}','${A}'),('${B}','${B}'),('${M}','${A}');`);
+  await pg.exec(await readFile(new URL('../supabase/migrations/20261120082747_moa_account_lifecycle.sql',import.meta.url),'utf8'));
+  await pg.exec(await readFile(new URL('../supabase/migrations/20261120092053_moa_rejoin_session_guard.sql',import.meta.url),'utf8'));
+  await pg.exec(await readFile(new URL('../supabase/migrations/20261120092521_moa_withdrawal_variable_scope.sql',import.meta.url),'utf8'));
+  await pg.exec(await readFile(new URL('../supabase/migrations/20261120104942_moa_lifecycle_write_barrier.sql',import.meta.url),'utf8'));
+  const rpc=name=>pg.query('select public.'+name+'() as result');
+  assert.equal((await as('authenticated',A,()=>rpc('moa_account_status'))).rows[0].result.status,'active');
+  await as('authenticated',B,()=>commit(0,{...empty(),habits:['B preserved']}));
+  const p=(await as('authenticated',A,()=>pg.query("select public.moa_reserve_media(1,'image/png') as path"))).rows[0].path;
+  await as('authenticated',A,()=>pg.query("insert into storage.objects(bucket_id,name,metadata) values('moa-private',$1,$2)",[p,{size:1,mimetype:'image/png'}]));
+  await as('authenticated',A,()=>commit(6,{...empty(),entries:[{...entry,mediaKeys:[p]}]}));
+  const inflight=(await as('authenticated',A,()=>pg.query("select public.moa_reserve_media(1,'image/png') as path"))).rows[0].path;
+  await pg.query("update auth.sessions set created_at=now()-interval '10 minutes' where id=$1",[M]);
+  await assert.rejects(()=>as('authenticated',A,()=>rpc('moa_begin_withdrawal'),false,M),/REAUTH_REQUIRED/);
+  await pg.query('update auth.sessions set created_at=clock_timestamp() where id=$1',[M]);
+  assert.equal((await as('authenticated',A,()=>rpc('moa_begin_withdrawal'),false,M)).rows[0].result.status,'deleting');
+  assert.equal((await as('authenticated',A,()=>pg.query('select * from public.moa_documents'))).rows.length,0);
+  assert.equal((await as('authenticated',A,()=>pg.query("select * from storage.objects where bucket_id='moa-private'"))).rows.length,0);
+  assert.equal((await as('authenticated',A,()=>pg.query("delete from storage.objects where bucket_id='moa-private' returning *"))).rows.length,0);
+  await assert.rejects(()=>as('authenticated',A,()=>commit(0,empty())),/row-level security|MOA_ACCOUNT_CLOSED/);
+  await assert.rejects(()=>pg.query("insert into storage.objects(bucket_id,name,metadata) values('moa-private',$1,$2)",[inflight,{size:1,mimetype:'image/png'}]),/MOA_ACCOUNT_CLOSED/);
+  await assert.rejects(()=>as('authenticated',A,()=>rpc('moa_finish_withdrawal'),false,M),/DELETION_INCOMPLETE/);
+  assert.equal((await as('authenticated',A,()=>pg.query("delete from storage.objects where bucket_id='moa-private' returning *"),false,M)).rows.length,1);
+  assert.equal((await as('authenticated',A,()=>pg.query('delete from public.moa_media returning *'),false,M)).rows.length,2);
+  assert.equal((await as('authenticated',A,()=>rpc('moa_finish_withdrawal'),false,M)).rows[0].result.status,'withdrawn');
+  await assert.rejects(()=>as('authenticated',A,()=>rpc('moa_rejoin'),false,M),/NEW_LOGIN_REQUIRED/);
+  const fresh='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+  await pg.query('insert into auth.sessions(id,user_id) values($1,$2)',[fresh,A]);
+  assert.equal((await as('authenticated',A,()=>rpc('moa_rejoin'),false,fresh)).rows[0].result.status,'active');
+  await as('authenticated',A,()=>commit(0,empty()),false,fresh);
+  await assert.rejects(()=>as('authenticated',A,()=>rpc('moa_account_status')),/AUTH_REQUIRED/);
+  assert.equal((await as('authenticated',A,()=>pg.query('select * from public.moa_documents'))).rows.length,0,'pre-withdrawal JWT must stay denied after rejoin');
+  await assert.rejects(()=>as('authenticated',A,()=>pg.query("update public.moa_accounts set status='active'")),/permission denied/);
+  assert.equal((await as('authenticated',B,()=>pg.query('select document from public.moa_documents'))).rows[0].document.habits[0],'B preserved');
+  assert.equal((await pg.query('select count(*)::int as n from auth.users')).rows[0].n,2);
+  await pg.query('delete from auth.sessions where id=$1',[fresh]);
+  await assert.rejects(()=>as('authenticated',A,()=>rpc('moa_account_status'),false,fresh),/AUTH_REQUIRED/);
+  await as('anon',null,()=>pg.query("insert into storage.objects(bucket_id,name) values('existing-product','still-works')"));
   assert.equal((await as('anon',null,()=>pg.query("delete from storage.objects where bucket_id='existing-product' returning *"))).rows.length,1);
  });
  await pg.close();
