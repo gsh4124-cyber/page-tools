@@ -209,8 +209,21 @@
     pt:['Não iniciado','Em andamento','Praticar por capítulo','Digite o trecho mostrado acima','Digite o trecho de memória','Confira o versículo atual e avance ao próximo quando estiver correto. Enter insere uma nova linha.'],
     ar:['لم يبدأ','قيد الكتابة','التدريب حسب الأصحاح','اكتب النص المعروض أعلاه','اكتب النص من الذاكرة','تحقق من الآية الحالية ثم انتقل إلى التالية عند صحة الإجابة. Enter يضيف سطراً جديداً.']
   };
+  const DRAFT_KEYS=['resumeDraft','draftAvailable','protectDraftTitle','closeDraftPrompt','restartDraftPrompt','keepDraft','discardClose','discardStart'];
+  const DRAFT_COPY={
+    ko:['작성하던 답안으로 돌아가기','작성 중인 답안을 유지하고 있습니다.','작성 중인 답안','지금 닫으면 작성 중인 답안이 사라집니다.','새로 시작하면 작성 중인 답안이 사라집니다.','계속 연습하기','답안을 비우고 닫기','답안을 비우고 새로 시작'],
+    en:['Return to your answers','Your unfinished answers are still available.','Unfinished answers','Closing now will discard your unfinished answers.','Starting again will discard your unfinished answers.','Keep writing','Discard answers and close','Discard answers and start again'],
+    fr:['Revenir aux réponses','Vos réponses en cours sont conservées.','Réponses en cours','Fermer effacera vos réponses en cours.','Recommencer effacera vos réponses en cours.','Continuer à écrire','Effacer et fermer','Effacer et recommencer'],
+    de:['Zu den Antworten zurück','Ihre bisherigen Antworten bleiben erhalten.','Unfertige Antworten','Beim Schließen gehen Ihre bisherigen Antworten verloren.','Beim Neustart gehen Ihre bisherigen Antworten verloren.','Weiterschreiben','Antworten verwerfen und schließen','Antworten verwerfen und neu starten'],
+    zh:['返回正在填写的答案','正在填写的答案仍然保留。','未完成的答案','现在关闭将丢弃正在填写的答案。','重新开始将丢弃正在填写的答案。','继续练习','清空答案并关闭','清空答案并重新开始'],
+    ru:['Вернуться к ответам','Незавершённые ответы сохранены в этом окне.','Незавершённые ответы','При закрытии незавершённые ответы будут потеряны.','При новом запуске незавершённые ответы будут потеряны.','Продолжить ввод','Удалить ответы и закрыть','Удалить ответы и начать заново'],
+    la:['Ad responsa redi','Responsa nondum perfecta in hac fenestra manent.','Responsa nondum perfecta','Si claudis, responsa nondum perfecta amittentur.','Si denuo incipis, responsa nondum perfecta amittentur.','Perge scribere','Responsa dele et claude','Responsa dele et denuo incipe'],
+    pt:['Voltar às respostas','Suas respostas em andamento continuam disponíveis.','Respostas em andamento','Fechar agora descartará suas respostas em andamento.','Recomeçar descartará suas respostas em andamento.','Continuar escrevendo','Descartar respostas e fechar','Descartar respostas e recomeçar'],
+    ar:['العودة إلى الإجابات','إجاباتك غير المكتملة ما زالت متاحة.','إجابات غير مكتملة','سيؤدي الإغلاق الآن إلى فقدان إجاباتك غير المكتملة.','ستؤدي البداية من جديد إلى فقدان إجاباتك غير المكتملة.','متابعة الكتابة','حذف الإجابات والإغلاق','حذف الإجابات والبدء من جديد']
+  };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
     ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView','practiceHint','practiceMemoryHint','practiceChapterHelp'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
+    ...Object.fromEntries(DRAFT_KEYS.map((key,i)=>[key,(DRAFT_COPY[code]||DRAFT_COPY.en)[i]])),
     ...Object.fromEntries(TRAINING_KEYS.map((key,i)=>[key,(TRAINING_COPY[code]||TRAINING_COPY.en)[i]])),
     ...Object.fromEntries(['collection','addCollection','useCollection','clearCollection','removeCollection','savedCollection','collectionError'].map((key,i)=>[key,(COLLECTION_COPY[code]||COLLECTION_COPY.en)[i]])),
     ...Object.fromEntries(['multi','firstChapter','lastChapter','chapterScope'].map((key,i)=>[key,(CHAPTER_COPY[code]||CHAPTER_COPY.en)[i]])),
@@ -248,17 +261,49 @@
     const config={mode,view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
     let lastDeletedCollection=null,practiceShown=true,practiceConfirmed=new Set();
     let rows=[],attemptRows=[],draftAnswers=[],reviewOnly=false,started=0,session=null;
+    let phase='setup',attemptActive=false,suspendedAttempt=null,leaveDialog=null,lastAnswerFocus=null;
     const reference=items=>bookPassageReference(items,index=>nameFor(index??quizBookIndex),config.collection);
     const attemptReference=items=>reviewOnly?bookPassageReference(items,index=>nameFor(index??quizBookIndex),true):reference(items);
     const rowReference=row=>`${config.collection?nameFor(row.bookIndex)+' ':''}${row.chapter}:${row.verse}`;
     const activeRows=()=>config.collection?collectionRows:rows;
     const button=(text,handler,className='')=>{const b=el('button',className,text);b.type='button';b.addEventListener('click',handler);return b;};
     dialog=el('dialog','memory-quiz');dialog.id='memoryQuizDialog';dialog.setAttribute('aria-labelledby','memoryQuizTitle');
-    const header=el('header','memory-header'),title=el('h2','',l.title),closeButton=button(l.close,close,'memory-close');
+    const header=el('header','memory-header'),title=el('h2','',l.title),closeButton=button(l.close,requestClose,'memory-close');
     title.id='memoryQuizTitle';closeButton.setAttribute('aria-label',l.close);
     const closeIcon=el('span','memory-close-icon','×');closeIcon.setAttribute('aria-hidden','true');closeButton.replaceChildren(el('span','memory-close-label',l.close),closeIcon);header.append(title,closeButton);
     const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
     const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false,shortNotices=null;
+    content.addEventListener('focusin',event=>{if(event.target.matches('.memory-answer'))lastAnswerFocus=event.target;});
+    dialog.addEventListener('cancel',event=>{event.preventDefault();requestClose();});
+    const hasDraftWork=()=>attemptActive&&draftAnswers.some(value=>String(value||'').trim());
+    function requestClose(){if(hasDraftWork())confirmLeave('close',close);else close();}
+    function confirmLeave(kind,accept){
+      if(leaveDialog?.open)return;
+      const returnFocus=document.activeElement,guard=el('dialog','memory-leave-confirm');leaveDialog=guard;
+      guard.setAttribute('role','alertdialog');guard.setAttribute('aria-labelledby','memoryLeaveTitle');guard.setAttribute('aria-describedby','memoryLeavePrompt');
+      const heading=el('h3','',l.protectDraftTitle);heading.id='memoryLeaveTitle';
+      const body=el('div','memory-leave-body'),message=el('p','',kind==='close'?l.closeDraftPrompt:l.restartDraftPrompt);message.id='memoryLeavePrompt';body.append(message);
+      const actions=el('div','memory-leave-actions');
+      function finish(discard){
+        if(leaveDialog!==guard)return;
+        guard.close();guard.remove();leaveDialog=null;
+        if(discard)accept();else if(suspendedAttempt)resumeAttempt();else{const focus=lastAnswerFocus?.isConnected&&lastAnswerFocus.getClientRects().length?lastAnswerFocus:returnFocus;if(focus?.isConnected)focus.focus({preventScroll:true});}
+      }
+      const keep=button(l.keepDraft,()=>finish(false),'memory-leave-keep'),discard=button(kind==='close'?l.discardClose:l.discardStart,()=>finish(true),'memory-leave-discard');
+      actions.append(keep,discard);guard.append(heading,body,actions);document.body.append(guard);
+      guard.addEventListener('cancel',event=>{event.preventDefault();finish(false);});
+      syncViewport();guard.showModal();keep.focus({preventScroll:true});
+    }
+    function resumeAttempt(){
+      if(!suspendedAttempt)return;
+      const saved=suspendedAttempt;suspendedAttempt=null;++bookLoadRun;++collectionRun;++setupRun;
+      Object.assign(config,saved.config);quizBookIndex=saved.quizBookIndex;book=saved.book;chapters=saved.chapters;quizStructure=saved.quizStructure;chapterNumbers=saved.chapterNumbers;rows=saved.rows;collectionRows=saved.collectionRows;collectionLoading=false;collectionFailed=false;
+      phase='attempt';title.textContent=saved.title;context.textContent=saved.context;dock.setAttribute('aria-label',saved.dockLabel);
+      content.classList.toggle('memory-chapter-view',config.view==='chapter');content.replaceChildren(...saved.content);dock.replaceChildren(...saved.dock);dock.hidden=false;
+      resizeAnswers();syncViewport();content.scrollTop=saved.scroll;
+      const focus=saved.focus?.isConnected&&saved.focus.getClientRects().length?saved.focus:content.querySelector('.memory-practice-row[open] textarea')||content.querySelector('textarea');focus?.focus({preventScroll:true});
+    }
+
     function moveClose(target,before=null){if(closeButton.parentElement===target&&(before?closeButton.nextElementSibling===before:target.lastElementChild===closeButton))return;const focused=document.activeElement===closeButton;target.insertBefore(closeButton,before);if(focused)closeButton.focus({preventScroll:true});}
     function placeNotices(){
       if(dock.hidden||!shortNotices)return;
@@ -291,6 +336,7 @@
       dialog.style.setProperty('--memory-view-width',`${width}px`);
       dialog.style.setProperty('--memory-center-x',`${(viewport?.offsetLeft||0)+width/2}px`);
       dialog.style.setProperty('--memory-center-y',`${(viewport?.offsetTop||0)+height/2}px`);
+      if(leaveDialog)for(const property of ['--memory-view-height','--memory-view-width','--memory-center-x','--memory-center-y'])leaveDialog.style.setProperty(property,dialog.style.getPropertyValue(property));
       dialog.classList.toggle('memory-compact-height',height<500);
       dialog.classList.toggle('memory-tight-height',height<400);
       dialog.classList.toggle('memory-minimal-header',height<320&&width<500);
@@ -304,7 +350,7 @@
     }
     function queueViewport(event){if(event.type==='resize')revealFocused=true;if(!viewportFrame)viewportFrame=requestAnimationFrame(syncViewport);}
     window.addEventListener('resize',queueViewport);viewport?.addEventListener('resize',queueViewport);viewport?.addEventListener('scroll',queueViewport);
-    dialog.addEventListener('close',()=>{window.removeEventListener('resize',queueViewport);viewport?.removeEventListener('resize',queueViewport);viewport?.removeEventListener('scroll',queueViewport);cancelAnimationFrame(viewportFrame);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
+    dialog.addEventListener('close',()=>{leaveDialog?.close();leaveDialog?.remove();leaveDialog=null;suspendedAttempt=null;window.removeEventListener('resize',queueViewport);viewport?.removeEventListener('resize',queueViewport);viewport?.removeEventListener('scroll',queueViewport);cancelAnimationFrame(viewportFrame);const old=dialog;dialog=null;old.remove();if(opener?.isConnected&&opener.getClientRects().length)opener.focus();else document.querySelector('#toolbarMoreToggle')?.focus();});
     function preview(target,items){for(const row of items){const p=el('p');p.append(el('span','memory-verse-number',rowReference(row)),document.createTextNode(row.text));target.append(p);}}
     function errorLegend(){
       const legend=el('div','memory-legend');legend.setAttribute('role','list');
@@ -325,6 +371,10 @@
     }
     function setup(){
       moveClose(header);
+      if(phase==='attempt')suspendedAttempt={config:{...config},quizBookIndex,book,chapters,quizStructure,chapterNumbers,rows,collectionRows,title:title.textContent,context:context.textContent,dockLabel:dock.getAttribute('aria-label'),content:[...content.childNodes],dock:[...dock.childNodes],scroll:content.scrollTop,focus:lastAnswerFocus};
+      phase='setup';
+      if(!collectionRefs.length){config.collection=false;collectionLoading=false;collectionFailed=false;}
+
       ++bookLoadRun;const activeDialog=dialog,currentSetup=++setupRun;
       context.textContent=`${book} · ${version}`;dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');content.replaceChildren();
       const modes=el('fieldset','memory-modes');modes.append(el('legend','',l.mode));modes.setAttribute('aria-describedby','memoryModeDescription');
@@ -415,7 +465,9 @@
         if(loading||loadFailed)rows=[];
         const target=activeRows();summary.textContent=target.length?`${reference(target)} · ${target.length} ${l.count}`:'';rangeTitle.textContent=config.mode==='practice'?l.practiceRange:l.range;startButton.disabled=!target.length||(config.collection&&(collectionLoading||collectionFailed));passage.replaceChildren();preview(passage,target);addCollection.disabled=!rows.length||loading||loadFailed;renderCollection();
       }
-      const startButton=button('',()=>begin(),'memory-primary memory-setup-start');
+      const startButton=button('',()=>{
+        const target=activeRows().slice();if(hasDraftWork())confirmLeave('restart',()=>begin(target));else begin(target);
+      },'memory-primary memory-setup-start');
       function syncMode(){
         const practice=config.mode==='practice';title.textContent=practice?l.practiceTitle:l.title;dock.setAttribute('aria-label',title.textContent);
         modeDescription.textContent=practice?l.practiceIntro:l.examIntro;startButton.textContent=practice?l.practiceStart:l.examStart;collectionToggleText.nodeValue=practice?l.practiceUseCollection:l.useCollection;
@@ -456,12 +508,13 @@
       toVerse.addEventListener('change',()=>{if(fromChapter.value===toChapter.value&&Number(fromVerse.value)>Number(toVerse.value))fromVerse.value=toVerse.value;refresh();});useSelected.addEventListener('change',refresh);
       const interactionHelp=el('p','memory-rule'),help=el('details','memory-help');help.append(el('summary','',l.help),interactionHelp,el('p','memory-rule',l.rule),el('p','memory-privacy',l.privacy));
       function syncHelp(){interactionHelp.textContent=config.view==='chapter'?(config.mode==='practice'?l.practiceChapterHelp:l.chapterHelp):l.enterHelp;}
+      if(suspendedAttempt){const resume=el('section','memory-resume-panel');resume.append(el('p','',l.draftAvailable),button(l.resumeDraft,resumeAttempt,'memory-setup-resume'));content.append(resume);}
       content.append(modes,modeDescription,views,summary,range,collection,study,help,startButton);syncMode();refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
-      if(dialog.open){rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}
+      if(dialog.open){if(suspendedAttempt){content.scrollTop=0;content.querySelector('.memory-setup-resume')?.focus({preventScroll:true});}else{rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}}
     }
-    function begin(items=activeRows(),isReview=false){++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;practiceConfirmed=new Set();started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
+    function begin(items=activeRows(),isReview=false){suspendedAttempt=null;attemptActive=true;++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;practiceConfirmed=new Set();started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
-      moveClose(header);
+      phase='attempt';moveClose(header);
       context.textContent=config.mode==='practice'?`${version} · ${l.practiceTitle}`:reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const practice=config.mode==='practice',items=session.current,unitHeading=el('div','memory-unit-heading'),unitProgress=el('p','memory-progress',`${session.index+1} / ${session.unitCount}`);
       unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),unitProgress);content.replaceChildren(unitHeading);
@@ -574,7 +627,7 @@
       content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
     }
     function results(answers){
-      moveClose(header);
+      phase='results';attemptActive=false;suspendedAttempt=null;moveClose(header);
       answers=attemptRows.map((row,index)=>answers[index]===undefined?(draftAnswers[index]||''):answers[index]);
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
       const grades=attemptRows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;

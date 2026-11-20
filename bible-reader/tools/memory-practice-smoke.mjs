@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
-import {chooseMemory} from './picker-test-helpers.mjs';
+import {chooseMemory,closeMemory} from './picker-test-helpers.mjs';
 
 const local=process.argv.includes('--local');
 const output=process.env.MEMORY_PRACTICE_EVIDENCE||fileURLToPath(new URL('../qa_evidence/live/memory-practice/',import.meta.url));
@@ -131,7 +131,7 @@ try{
     await dialog.getByRole('button',{name:l.change,exact:true}).click();await page.locator('#memoryModeExam').check();
     assert.equal(await page.locator('#memoryQuizTitle').textContent(),l.title);assert.equal(await start.textContent(),l.examStart);
     await start.click();assert.equal(await dialog.locator('.memory-practice-text,.memory-practice-controls').count(),0,'Exam never reveals practice source text');
-    await dialog.locator('.memory-close').click();
+    await closeMemory(page);
     await page.reload({waitUntil:'domcontentloaded'});await page.locator('#verses .verse').first().waitFor({timeout:40000});await page.waitForFunction(()=>document.querySelector('#status')?.hidden);
     assert.deepEqual(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key),[...saved,{bookIndex:42,chapter:3,verse:1}],'Restored references survive reload');
     assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),{book:42,chapter:3});
@@ -144,7 +144,7 @@ try{
       await input.press('Enter');assert.equal(await input.getAttribute('data-verse'),'17');
       await dialog.locator('.memory-previous').click();assert.equal(await input.getAttribute('data-verse'),'16');assert.equal(await input.inputValue(),answer);
       assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next','Confirmed practice work survives unit navigation');
-      await page.screenshot({path:path.join(output,'practice-single-1280.png')});await dialog.locator('.memory-close').click();
+      await page.screenshot({path:path.join(output,'practice-single-1280.png')});await closeMemory(page);
     }
     assert.deepEqual(errors,[]);
     observations.push({width,height,language,delete_cancel_and_undo:true,undo_preserves_new_additions:true,practice_source_hide_repeat:true,drafts_preserved:true,practice_latest_results:true,focused_verse_only:true,comparison_reuses_source_panel:true,compact_results:true,exam_source_absent:true,restored_refs_persist:true,reader_position_preserved:true,physical_device_tested:false});

@@ -1,4 +1,4 @@
-import {chooseMemory} from './picker-test-helpers.mjs';
+import {chooseMemory,closeMemory} from './picker-test-helpers.mjs';
 import {chromium} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -103,7 +103,7 @@ try{
     assert.equal(await identity(dialog),'119:175,119:176','A book independent of the reader supports long Psalms and chapter view');
     assert.equal(await dialog.locator('textarea').first().getAttribute('aria-label'),'시편 119:175 · 기억나는 본문을 입력하세요');
     await page.screenshot({path:path.join(output,'independent-book-psalm119.png')});
-    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
+    await closeMemory(page,{escape:true});
     assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter,title:document.querySelector('#chapterTitle').textContent})),readerBefore,'Quiz selection must not change the reading location');
     if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
     await page.route('**/scripture/krv1961/Genesis.json',route=>route.abort());
@@ -167,7 +167,7 @@ try{
     assert(!(await dialog.locator('.memory-context').textContent()).includes('오답 재시험'));
     for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');await dialog.locator('.memory-primary').click();}
     assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-result').count(),2);assert.equal(await dialog.locator('.memory-retry-wrong').count(),0);
-    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});assert.equal(await page.locator('#chapterSelect').inputValue(),chapter);
+    await closeMemory(page,{escape:true});assert.equal(await page.locator('#chapterSelect').inputValue(),chapter);
     await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
     assert(await page.locator('#memoryUseSelected').isChecked());
     await dialog.locator('.memory-primary').click();assert.equal(await identity(dialog),'3:1');
@@ -208,7 +208,7 @@ try{
     await fillUnit(page,dialog);await dialog.locator('.memory-primary').click();await dialog.locator('.memory-primary').click();
     assert.equal(await dialog.locator('.memory-score').textContent(),'100%');assert.equal(await dialog.locator('.memory-result').count(),4);
     assert.equal(await dialog.locator('.memory-result').last().locator('h4').textContent(),'4:2 · 100%');
-    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});assert.equal(await page.locator('#chapterSelect').inputValue(),'3');
+    await closeMemory(page,{escape:true});assert.equal(await page.locator('#chapterSelect').inputValue(),'3');
     assert.deepEqual(errors,[]);observations.push({passage:'John 3:35–4:2',flow:'chapter mode shows one chapter at a time, separate check/next, whole scope completion, reading preserved',pass:true});await context.close();
   }
   {
@@ -256,7 +256,7 @@ try{
     for(let i=0;i<2;i++){await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');}
     assert(!(await dialog.locator('h3').textContent()).includes('연습'),'Unaided attempt remains a test');
     await dialog.locator('.memory-primary').click();assert.equal(await dialog.locator('.memory-inline-hint,.memory-peek,.memory-preview').count(),0);
-    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.keyboard.press('f');
+    await closeMemory(page,{escape:true});await page.keyboard.press('f');
     assert(await page.locator('body').evaluate(n=>n.classList.contains('reader-focus')));
     await page.locator('#verses .verse[data-verse="1"]').click();await page.locator('#verses .verse[data-verse="3"]').click();await page.locator('.verse-multi-memory').click();
     await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock').isVisible(),'Reader focus mode must not hide quiz controls');assert(await dialog.locator('.memory-primary').isVisible());
@@ -288,7 +288,7 @@ try{
     const kinds=['wrong','missing','extra'],palettes={};
     for(const theme of ['light','dark']){
       if(await page.locator('html').getAttribute('data-theme')!==theme){
-        await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
+        await closeMemory(page,{escape:true});
         if(!await page.locator('#themeToggle').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('#themeToggle').click();
         if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();
       }
@@ -317,7 +317,7 @@ try{
       await fillUnit(page,dialog);await dialog.locator('textarea').press('Enter');await dialog.locator('textarea').press('Enter');
       assert.equal(await dialog.locator('.memory-retry-wrong').count(),1);assert.equal(await dialog.locator('.memory-legend').count(),1,'Result must also explain the colors');
       for(const kind of kinds)assert(await dialog.locator(`.memory-results .memory-${kind}`).count()>0);
-      if(theme==='light'){await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();}
+      if(theme==='light'){await closeMemory(page,{escape:true});if(!await page.locator('.memory-menu-button').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-menu-button').click();}
     }
     assert.notDeepEqual(palettes.light,palettes.dark);assert.deepEqual(errors,[]);observations.push({flow:'real verse with substitution/deletion/insertion, matching legend, distinct readable colors, underline/dots/strike, equal text size, light/dark feedback and results',palettes,pass:true});await context.close();
   }
@@ -347,7 +347,7 @@ try{
     assert.equal(await dialog.getByText('다시 입력해 주세요.',{exact:true}).count(),1);
     await second.fill(await answerFor(page,3,29));await dialog.locator('.memory-primary').click();assert(await dialog.locator('.memory-dock .memory-error').isHidden());assert.equal(await dialog.locator('.memory-row-feedback .memory-result').count(),await dialog.locator('textarea').count(),'All-correct checks also display every correct passage');assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next');
     await dialog.locator('.memory-aids button').click();
-    assert(await page.locator('[data-memory-select="memoryBook"]').evaluate(n=>document.activeElement===n),'Change passage returns focus to the book selector');
+    assert(await page.locator('.memory-setup-resume').evaluate(n=>document.activeElement===n),'Change passage offers the safe return action first');await page.locator('.memory-setup-resume').click();assert.equal(await dialog.locator('.memory-primary').getAttribute('data-action'),'next','Returning preserves confirmed grading');
     assert.deepEqual(errors,[]);observations.push({width,flow:'single dock warning, first incorrect input focus/scroll, inline comparisons and accessible association, cleared stale grading, next remaining error after correction, reduced-height navigation, clean success and passage focus',pass:true});await context.close();
   }
   for(const width of (local?[320,390,430,1280]:[390,1280])){
@@ -388,7 +388,7 @@ try{
     await page.evaluate(()=>{Object.assign(window.__qaVisualViewport,{scale:1,height:844,width:390,offsetTop:0});window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
     await page.waitForFunction(()=>parseFloat(document.querySelector('#memoryQuizDialog').style.getPropertyValue('--memory-view-height'))===844);
     box=await dialog.boundingBox();assert(box.y>=0&&box.y+box.height<=844);assert(!(await dialog.evaluate(n=>n.classList.contains('memory-compact-height'))));
-    await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.evaluate(()=>{window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
+    await closeMemory(page,{escape:true});await page.evaluate(()=>{window.__qaVisualViewport.dispatchEvent(new Event('resize'));});
     assert.deepEqual(errors,[]);observations.push({flow:'simulated visual-only keyboard shrink, offset/pan, compact layout, first-error focus, native zoom guard, keyboard dismissal and close cleanup',physical_device:false,visual_viewport_simulated:true,pass:true});await context.close();
   }
   {
