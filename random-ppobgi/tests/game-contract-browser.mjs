@@ -14,7 +14,7 @@ if(local){
 }
 const output=process.env.GAME_CONTRACT_EVIDENCE||path.join(product,'qa_evidence/local-game-contract');
 await fs.mkdir(output,{recursive:true});
-const results=[],engines={chromium,firefox,webkit},revision=process.env.DEPLOY_VERIFIED_SHA;
+const results=[],engines={chromium,firefox,webkit},revision=process.env.DEPLOY_VERIFIED_SHA;let debugPage;
 function inlineCore(html){const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);return scripts.find(s=>s.includes('function initWheel('));}
 try{
  if(!local&&revision){
@@ -27,12 +27,13 @@ try{
   try{
    for(const [lang,width] of [['ko',320],['ko',390],['ko',1280],['en',390],['ar',390]]){
     const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',locale:lang==='ko'?'ko-KR':lang});
-    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+    const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',e=>errors.push(String(e)));
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
     await page.goto(`${base}/${lang==='ko'?'':lang+'/'}?qa=1`,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>window.RandomPickerSettings&&window.RandomPickerFlowText);
     if(lang!=='ko')await page.waitForFunction(()=>window.__RANDOM_PICKER_I18N_READY__);
     for(const method of ['ladder','wheel','lot','pinball','race','capsule','slot','bomb']){
+     console.log(`Game contract ${engine} ${lang} ${width} ${method}`);
      const setup={version:1,method,inputMode:'name',names:'산다\n안 산다\n산다\n안 산다',customResults:'산다\n안 산다\n산다\n안 산다',totalPeople:4,pickCount:4,resultMode:['ladder','lot'].includes(method)?'custom':'winner',bombTimerMode:'fixed',bombSeconds:15};
      assert(await page.evaluate(s=>window.RandomPickerSettings.apply(s),setup));
      assert((await page.locator('#methodFlow').textContent()).trim());
@@ -50,7 +51,7 @@ try{
       for(let i=0;i<4;i++)await page.locator('.paper-lot').nth(i).click();
       await page.waitForFunction(()=>document.querySelectorAll('.paper-lot.open').length===4);
       assert.deepEqual((await page.locator('.paper-lot .inside').allTextContents()).sort(),['산다','산다','안 산다','안 산다'].sort());
-      await page.locator('#showAllBtn').click();const before=await page.locator('.paper-lot .inside').allTextContents();await page.locator('#showAllBtn').click();assert.deepEqual(await page.locator('.paper-lot .inside').allTextContents(),before);
+      await page.locator('#showAllBtn').click();const before=await page.locator('.paper-lot .inside').allTextContents();assert(!(await page.locator('#showAllBtn').isVisible()));await page.waitForTimeout(80);assert.deepEqual(await page.locator('.paper-lot .inside').allTextContents(),before);
       assert(!(await page.locator('#excludeBtn').isVisible()));
       if(lang==='ko'&&width===390){await page.locator('#stage').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,`${engine}-lots.png`)});}
      }else if(method==='bomb'){
@@ -68,7 +69,7 @@ try{
       if(method==='capsule')assert(winner.includes(await page.locator('.capsule-paper').innerText()));
       if(method==='race'){assert.equal(await page.locator('.racer.finished').count(),4);assert((await page.locator('#raceResult').textContent()).includes((await page.locator('.race-rank-chip').first().textContent()).split(' · ')[1]));}
       if(method==='pinball')assert.equal(await page.locator('.finish-chip').count(),4);
-      const before=await page.locator('#winners').innerText();await page.locator('#showAllBtn').click();assert.equal(await page.locator('#winners').innerText(),before,'Repeated reveal must preserve results');
+      const before=await page.locator('#winners').innerText();if(await page.locator('#showAllBtn').isVisible())await page.locator('#showAllBtn').click();assert.equal(await page.locator('#winners').innerText(),before,'Repeated reveal must preserve results');
       if(method==='wheel'&&lang==='ko'&&width===390){await page.locator('#stage').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,`${engine}-wheel.png`)});}
      }
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),`${method} page overflow`);
@@ -101,8 +102,13 @@ try{
    results.push({engine,method:'race',phase:'reduced-motion-natural-finish',pass:true});await raceContext.close();
   }finally{await browser.close();}
  }
+}catch(error){
+ await fs.writeFile(path.join(output,'failure.json'),JSON.stringify({message:String(error),stack:error.stack,cases:results},null,2));
+ try{await debugPage?.screenshot({path:path.join(output,'failure.png'),fullPage:true});}catch{}
+ throw error;
 }finally{
  if(server)server.close();
  await fs.writeFile(path.join(output,'results.json'),JSON.stringify({base,revision:revision||null,physical_device_tested:false,cases:results},null,2));
 }
 console.log(`Game interaction contract PASS: ${results.length} flows at ${base}`);
+
