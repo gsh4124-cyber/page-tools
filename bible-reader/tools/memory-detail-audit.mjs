@@ -130,7 +130,13 @@ try{
      }
      await dialog.locator('.memory-close').focus();await page.keyboard.press('Tab');
      record(meta,'Native modal contains keyboard focus',await dialog.evaluate(d=>d.contains(document.activeElement)));
-     await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
+     const draftBeforeClose=await dialog.locator('textarea').evaluateAll(nodes=>nodes.map(n=>n.value));
+     await page.keyboard.press('Escape');
+     const guard=page.locator('.memory-leave-confirm');await guard.waitFor();
+     record(meta,'Escape protects drafts and defaults to keeping work',await guard.locator('.memory-leave-keep').evaluate(n=>n===document.activeElement)&&await dialog.isVisible());
+     await page.keyboard.press('Escape');
+     record(meta,'Escape cancels the confirmation without losing drafts',await guard.count()===0&&JSON.stringify(await dialog.locator('textarea').evaluateAll(nodes=>nodes.map(n=>n.value)))===JSON.stringify(draftBeforeClose));
+     await dialog.locator('.memory-close').click();await guard.locator('.memory-leave-discard').click();await dialog.waitFor({state:'detached'});
      record(meta,'Escape closes and restores reachable toolbar focus',await page.evaluate(()=>document.activeElement?.matches('.memory-practice-menu-button,#toolbarMoreToggle')&&!!document.activeElement.getClientRects().length));
      record(meta,'Closing preserves collection and reading position',JSON.stringify(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),collectionKey))===JSON.stringify(refs)&&JSON.stringify(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})))===JSON.stringify(reader));
     }

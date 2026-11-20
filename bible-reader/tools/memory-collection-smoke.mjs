@@ -1,4 +1,4 @@
-import {chooseMemory} from './picker-test-helpers.mjs';
+import {chooseMemory,closeMemory} from './picker-test-helpers.mjs';
 import {chromium} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -27,7 +27,7 @@ try{
   const dialog=page.locator('#memoryQuizDialog'),box=await dialog.boundingBox();const x=box.x>4?box.x/2:2,y=box.x>4?Math.max(box.y+20,20):1;await page.mouse.click(x,y);assert(await dialog.isVisible(),'Backdrop does not close the exam');assert.equal(await input.inputValue(),'draft preserved');
   await page.locator('.memory-next').click();assert.equal(await input.getAttribute('data-book'),'0');assert.equal(await input.getAttribute('data-chapter'),'3');await page.locator('.memory-previous').click();assert.equal(await input.inputValue(),'draft preserved');
   await input.fill('');await page.locator('.memory-primary').click();assert(await page.locator('.memory-result .memory-missing').count()>0,'Blank Enter reveals canonical text');
-  await page.locator('.memory-close').click();assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),reader,'Collection does not move the reader');
+  await closeMemory(page);assert.deepEqual(await page.evaluate(()=>({book:state.bookIndex,chapter:state.chapter})),reader,'Collection does not move the reader');
   await page.reload({waitUntil:'domcontentloaded'});await open(page);await page.waitForFunction(()=>!document.querySelector('.memory-primary').disabled);assert.equal(await page.locator('.memory-collection-list li').count(),3,'Collection survives reload');assert(await page.locator('#memoryUseCollection').isChecked());
   await page.locator('.memory-collection-list li').nth(1).locator('button').click();await page.waitForFunction(()=>!document.querySelector('.memory-primary').disabled);assert.equal(await page.locator('.memory-collection-list li').count(),2);const beforeClear=await page.evaluate(k=>localStorage.getItem(k),key);
   await page.locator('.memory-collection-management summary').click();await page.locator('.memory-collection-clear').click();
@@ -42,7 +42,7 @@ try{
   assert.equal(await page.evaluate(k=>localStorage.getItem(k),key),beforeClear,'Undo restores the exact saved references');
   assert(await page.locator('#memoryUseCollection').isChecked());
   await page.locator('.memory-collection-management summary').click();await page.locator('.memory-collection-clear').click();await page.locator('.memory-collection-confirm-delete').click();
-  assert.equal(await page.locator('.memory-collection-list li').count(),0);await page.locator('.memory-close').click();
+  assert.equal(await page.locator('.memory-collection-list li').count(),0);await closeMemory(page);
   await open(page);await select(page,65,7,6);await page.locator('.memory-primary').click();const answer='아셀지파중에 일만 이천이요 납달리 지파 중에 일만이천';
   if(route==='/'){await input.fill(answer);await input.press('Enter');assert.match(await page.locator('.memory-result h4').textContent(),/61%/);const missing=await page.locator('.memory-result .memory-missing').allTextContents();assert.equal(await page.evaluate(a=>BibleMemory.normalize(a),missing.join('')),await page.evaluate(()=>BibleMemory.normalize('이요 므낫세 지파 중에 일만 이천이요')));await page.screenshot({path:path.join(output,`prefix-feedback-${width}.png`)});}
   await fit(page);assert.deepEqual(errors,[]);observations.push({width,height,route,collection_add_duplicate_remove_clear_persist:true,delete_confirm_cancel_undo:true,chapter_book_isolation:true,backdrop_preserves_draft:true,reader_position_preserved:true,blank_check_reveal:true,prefix_omission_anchored:route==='/',pass:true});await context.close();

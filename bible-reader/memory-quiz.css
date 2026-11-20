@@ -172,4 +172,19 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-practice-review{margin-block:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .memory-practice-review>summary{min-height:44px;padding:10px 12px;font-size:14px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
 .memory-practice-review .memory-result{margin:0;padding:12px}
-
+.memory-resume-panel{margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--hover)}
+.memory-resume-panel p{margin:0 0 8px;font-size:14px;line-height:1.6;color:var(--muted)}
+.memory-resume-panel button{width:100%;font-weight:650;white-space:normal;overflow-wrap:anywhere}
+.memory-leave-confirm{--memory-wrong-fg:#b42318;box-sizing:border-box;position:fixed;inset:auto;left:var(--memory-center-x,50%);top:var(--memory-center-y,50%);transform:translate(-50%,-50%);width:min(440px,calc(var(--memory-view-width,100vw) - 24px));max-height:calc(var(--memory-view-height,100dvh) - 24px);margin:0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--bg);color:var(--text);font:inherit;box-shadow:0 18px 70px #0003;overflow:hidden}
+.memory-leave-confirm[open]{display:flex;flex-direction:column;gap:12px}
+.memory-leave-confirm::backdrop{background:#0006}
+.memory-leave-confirm h3{flex:none;margin:0;font-size:18px;line-height:1.4}
+.memory-leave-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+.memory-leave-body p{margin:0;font-size:15px;line-height:1.65;overflow-wrap:anywhere}
+.memory-leave-actions{flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.memory-leave-actions button{min-width:0;min-height:44px;padding:10px 12px;font:inherit;font-size:15px;line-height:1.5;white-space:normal;overflow-wrap:anywhere;cursor:pointer}
+.memory-leave-confirm .memory-leave-keep{background:var(--text);border-color:var(--text);color:var(--bg);font-weight:650}
+.memory-leave-confirm .memory-leave-discard{color:var(--memory-wrong-fg);background:transparent}
+.memory-leave-confirm :focus-visible{outline:2px solid var(--muted);outline-offset:2px}
+:root[data-theme=dark] .memory-leave-confirm{--memory-wrong-fg:#ffb4ab}
+@media(max-width:480px){.memory-leave-actions{grid-template-columns:minmax(0,1fr)}}
