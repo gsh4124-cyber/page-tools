@@ -104,3 +104,4 @@ try{
 }finally{if(server)await new Promise(resolve=>server.close(resolve));}
 await fs.writeFile(path.join(output,'result.json'),JSON.stringify({base,local,physical_device_tested:false,software_keyboard_simulated:true,engine_emulation_not_native_mobile_browser:true,ads_blocked_for_qa:true,observations},null,2));
 const failed=observations.filter(x=>!x.pass);console.log(`Mobile engine QA: ${observations.length-failed.length}/${observations.length} PASS; ${output}`);if(failed.length)process.exitCode=1;
+await import('./memory-grading-smoke.mjs');

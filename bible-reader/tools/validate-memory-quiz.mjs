@@ -5,6 +5,24 @@ import assert from 'node:assert/strict';
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
 const {grade,normalize,comparisonRuns,comparisonWords,labels,passageRows,passageReference,subsetReference,createSession,passageKey,bookPassageReference}=context.window.BibleMemory;
+// Reported Revelation 8:11 answer: one inserted character must not displace correct words.
+const wormwood='이 별 이름은 쑥이라 물들의 삼분의 일이 쑥이 되매 그 물들이 쓰게 됨을 인하여 많은 사람이 죽더라';
+for(const entered of ['이 별의 이름은 쑥이라','이별의이름은쑥이라','이 별의 이름은 쑥이라']){
+  const result=grade(wormwood,entered),head=result.parts.slice(0,9),tail=result.parts.slice(9);
+  assert.equal(head.map(p=>p.kind[0]).join(''),'ccecccccc');
+  assert.equal(head.filter(p=>p.kind==='correct').map(p=>p.expected).join(''),'이별이름은쑥이라');
+  assert.equal(head.filter(p=>p.kind==='extra').map(p=>p.entered).join(''),'의');
+  assert(tail.every(p=>p.kind==='missing'));
+  assert.equal(tail.map(p=>p.expected).join(''),normalize(wormwood).slice(8));
+  assert.equal(result.parts.filter(p=>p.kind==='wrong').length,0);
+  assert.equal(result.distance,32);assert.equal(result.score,18);
+  assert.equal(comparisonRuns(wormwood,entered).filter(p=>p.kind==='correct').map(p=>p.text).join('').replace(/\s/g,''),'이별이름은쑥이라');
+}
+const partialTypo=grade(wormwood,'이 별 이룸은 쑥이라');
+assert.equal(partialTypo.parts.filter(p=>p.kind==='wrong').map(p=>p.expected+p.entered).join(''),'름룸');
+assert.equal(partialTypo.parts.filter(p=>p.kind==='correct').map(p=>p.expected).join(''),'이별이은쑥이라');
+assert.equal(grade('aab','ab').parts.map(p=>p.kind).join(','),'correct,missing,correct','Repeated letters anchor at the earliest matching position');
+assert.equal(grade('axbxcxd','abcd').parts.filter(p=>p.kind==='missing').length,3,'Multiple omissions must not become substitutions');
 const repeated='아셀 지파 중에 일만 이천이요 납달리 지파 중에 일만 이천이요 므낫세 지파 중에 일만 이천이요';
 const prefix='아셀지파중에 일만 이천이요 납달리 지파 중에 일만이천';
 const prefixGrade=grade(repeated,prefix),prefixLength=Array.from(normalize(prefix)).length;

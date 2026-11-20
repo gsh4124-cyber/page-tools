@@ -13,27 +13,31 @@
       const distance=Math.abs(a.length-b.length),units=Math.max(a.length,b.length);
       return {distance,units,exact:false,score:Math.min(99,Math.round(100*(1-distance/units))),parts:[...a.slice(0,prefix).map(character=>({kind:'correct',expected:character,entered:character})),...a.slice(prefix).map(character=>({kind:'missing',expected:character,entered:''})),...b.slice(prefix).map(character=>({kind:'extra',expected:'',entered:character}))]};
     }
-    const width = b.length + 1, table = new Uint16Array((a.length + 1) * width);
-    for (let i = 0; i <= a.length; i++) table[i * width] = i;
-    for (let j = 0; j <= b.length; j++) table[j] = j;
-    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
-      table[i * width + j] = Math.min(table[(i - 1) * width + j] + 1,
-        table[i * width + j - 1] + 1, table[(i - 1) * width + j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    // Keep the most correct characters among equally small edits, then trace from the start.
+    // End-first backtracking can attach a short answer to repeated words far later in a verse.
+    const width=b.length+1,size=(a.length+1)*width,table=new Uint32Array(size),matches=new Uint32Array(size);
+    for(let i=a.length;i>=0;i--)for(let j=b.length;j>=0;j--){
+      const at=i*width+j;
+      if(i===a.length){table[at]=b.length-j;continue;}
+      if(j===b.length){table[at]=a.length-i;continue;}
+      const same=a[i]===b[j],diagonal=(i+1)*width+j+1,down=(i+1)*width+j,right=at+1;
+      const cost=Math.min(table[diagonal]+(same?0:1),table[down]+1,table[right]+1);
+      table[at]=cost;matches[at]=Math.max(
+        table[diagonal]+(same?0:1)===cost?matches[diagonal]+(same?1:0):0,
+        table[down]+1===cost?matches[down]:0,
+        table[right]+1===cost?matches[right]:0);
     }
-    let i = a.length, j = b.length;
-    const parts = [];
-    while (i || j) {
-      const cost = table[i * width + j];
-      if (i && j && cost === table[(i - 1) * width + j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) {
-        parts.push({kind:a[i - 1] === b[j - 1] ? 'correct' : 'wrong', expected:a[--i], entered:b[--j]});
-      } else if (i && cost === table[(i - 1) * width + j] + 1) {
-        parts.push({kind:'missing', expected:a[--i], entered:''});
-      } else {
-        parts.push({kind:'extra', expected:'', entered:b[--j]});
-      }
+    let i=0,j=0;const parts=[];
+    while(i<a.length||j<b.length){
+      const at=i*width+j,cost=table[at],kept=matches[at],same=a[i]===b[j],diagonal=(i+1)*width+j+1;
+      if(i<a.length&&j<b.length&&cost===table[diagonal]+(same?0:1)&&kept===matches[diagonal]+(same?1:0)){
+        parts.push({kind:same?'correct':'wrong',expected:a[i++],entered:b[j++]});
+      }else if(j<b.length&&cost===table[at+1]+1&&kept===matches[at+1]){
+        parts.push({kind:'extra',expected:'',entered:b[j++]});
+      }else{parts.push({kind:'missing',expected:a[i++],entered:''});}
     }
-    const distance = table[a.length * width + b.length], units = Math.max(a.length, b.length);
-    return {distance, units, exact:distance === 0, score:units ? Math.min(distance ? 99 : 100, Math.round(100 * (1 - distance / units))) : 0, parts:parts.reverse()};
+    const distance=table[0],units=Math.max(a.length,b.length);
+    return {distance,units,exact:distance===0,score:units?Math.min(distance?99:100,Math.round(100*(1-distance/units))):0,parts};
   }
   function comparisonRuns(expected,entered,parts=grade(expected,entered).parts){
     function tokens(value){
