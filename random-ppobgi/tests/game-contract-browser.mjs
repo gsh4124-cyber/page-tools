@@ -16,17 +16,29 @@ const output=process.env.GAME_CONTRACT_EVIDENCE||path.join(product,'qa_evidence/
 await fs.mkdir(output,{recursive:true});
 const results=[],engines={chromium,firefox,webkit},revision=process.env.DEPLOY_VERIFIED_SHA;let debugPage;
 function inlineCore(html){const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);return scripts.find(s=>s.includes('function initWheel('));}
+async function seedYut(context){await context.addInitScript(()=>{const native=crypto.getRandomValues.bind(crypto);Object.defineProperty(crypto,'getRandomValues',{value(array){if(window.__testYutBits?.length){array[0]=window.__testYutBits.shift();window.__testYutCalls=(window.__testYutCalls||0)+1;return array;}return native(array);}});});}
+async function verifyYut(page,mask){
+ const faces=Array.from({length:4},(_,i)=>(mask>>i)&1),flat=faces.filter(Boolean).length,code=['mo','do','gae','geol','yut'][flat],before=Number(await page.locator('#yutResult').getAttribute('data-roll-id')||0);
+ await page.evaluate(bits=>{window.__testYutBits=bits;window.__testYutCalls=0;},faces);
+ await page.locator('#throwYut').click();await page.locator(`#yutResult[aria-busy="false"][data-result="${code}"]`).waitFor({state:'visible'});
+ assert.equal(await page.locator('#yutResult .yut-piece').count(),4);assert.equal(await page.locator('#yutResult .yut-piece[data-face="flat"]').count(),flat);assert.equal(await page.locator('#yutResult .yut-mark').count(),flat);
+ assert.equal(await page.evaluate(()=>window.__testYutCalls),4);assert.equal(Number(await page.locator('#yutResult').getAttribute('data-roll-id')),before+1);
+ assert.equal((await page.locator('#yutSteps').innerText()).match(/\d+/)?.[0],String(flat||5));assert.equal(await page.locator('.yut-again').count(),flat===0||flat===4?1:0);
+ assert(await page.locator('#throwYut').isEnabled());return code;
+}
 try{
  if(!local&&revision){
   const actual=(await (await fetch(base+'/build-revision.txt')).text()).trim();assert.equal(actual,revision);
   const actualCore=inlineCore(await (await fetch(base+'/?qa=1')).text()),expectedCore=inlineCore(await fs.readFile(path.join(product,'dist/index.html'),'utf8'));
   assert(actualCore&&expectedCore);assert.equal(createHash('sha256').update(actualCore).digest('hex'),createHash('sha256').update(expectedCore).digest('hex'),'Actual served game logic must match this release');
+  for(const asset of ['yut.js','yut.css']){const actual=Buffer.from(await (await fetch(base+'/'+asset)).arrayBuffer()),expected=await fs.readFile(path.join(product,'dist',asset));assert(actual.equals(expected),`${asset}: deployed bytes differ from the release`);}
  }
  for(const engine of (process.env.GAME_CONTRACT_ENGINES||'chromium').split(',')){
   const browser=await engines[engine].launch({headless:true});
   try{
    for(const [lang,width] of [['ko',320],['ko',390],['ko',1280],['en',390],['ar',390]]){
     const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',locale:lang==='ko'?'ko-KR':lang});
+    await seedYut(context);
     const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',e=>{errors.push(String(e));console.error('Page script error:',e);});page.on('crash',()=>console.error(`Browser page crashed: ${engine} ${lang} ${width}`));
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
     await page.goto(`${base}/${lang==='ko'?'':lang+'/'}?qa=1`,{waitUntil:'domcontentloaded'});
@@ -75,10 +87,16 @@ try{
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),`${method} page overflow`);
      results.push({engine,lang,width,method,pass:true});
     }
+    await page.locator('#showTools').click();await page.locator('[data-tool="yut"]').click();await page.locator('#throwYut[data-yut-ready="true"]').waitFor();
+    for(const mask of lang==='ko'&&width===390?Array.from({length:16},(_,i)=>i):[0,1,3,7,15]){
+     const code=await verifyYut(page,mask);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));results.push({engine,lang,width,method:'yut',mask,code,pass:true});
+     if(engine==='chromium'&&lang==='ko'&&width===390&&mask===3){const panel=page.locator('[data-panel="yut"]');await panel.screenshot({path:path.join(output,'yut-faces.png')});const proof=await panel.screenshot({type:'jpeg',quality:70});console.log('YUT_VISUAL_PROOF_JPEG:'+proof.toString('base64'));}
+    }
     assert.deepEqual(errors,[]);await context.close();
    }
    // Exercise stop-animation interruptions with ordinary motion, not just accessibility shortcuts.
    const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();
+   await seedYut(context);
    await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());await page.goto(base+'/?qa=1',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.RandomPickerSettings);
    for(const method of ['wheel','capsule','slot']){
     await page.evaluate(method=>window.RandomPickerSettings.apply({version:1,method,inputMode:'name',names:'A\nB\nC\nD',customResults:'',totalPeople:4,pickCount:1,resultMode:'winner',bombTimerMode:'random',bombSeconds:60}),method);
@@ -92,6 +110,9 @@ try{
    }
    await page.evaluate(()=>window.RandomPickerSettings.apply({version:1,method:'bomb',inputMode:'number',names:'',customResults:'',totalPeople:4,pickCount:1,resultMode:'winner',bombTimerMode:'fixed',bombSeconds:15}));
    await page.locator('#pickBtn').click();await page.locator('#bombStart').click();await page.locator('#bombNow').click();await page.locator('#bombResult').filter({hasText:/\S/}).waitFor({state:'visible',timeout:5000});await page.waitForTimeout(700);assert(await page.locator('#bombStart').isEnabled());results.push({engine,method:'bomb',phase:'manual-explosion-normal-motion',pass:true});
+   await page.locator('#showTools').click();await page.locator('[data-tool="yut"]').click();await page.locator('#throwYut[data-yut-ready="true"]').waitFor();
+   await page.evaluate(()=>{window.__testYutBits=[1,0,1,0];window.__testYutCalls=0;for(let i=0;i<20;i++)document.getElementById('throwYut').dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+   assert(await page.locator('#throwYut').isDisabled());await page.locator('#yutResult[aria-busy="false"]').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>window.__testYutCalls),4);assert.equal(await page.locator('#yutResult').getAttribute('data-result'),'gae');results.push({engine,method:'yut',phase:'single-result-during-rapid-clicks',pass:true});
    await context.close();
    const raceContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
    await raceContext.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());

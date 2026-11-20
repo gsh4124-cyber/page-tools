@@ -1037,6 +1037,7 @@ header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
 .ladder-svg{display:block;overflow:visible}.ladder-end{white-space:normal;line-height:1.35}
 .capsule-ball{display:flex;align-items:center;justify-content:center}.capsule-label{max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:900;color:#241c15}
 </style>
+<link rel="stylesheet" href="/yut.css">
 </head>
 <body>
 <main class="wrap">
@@ -1512,7 +1513,7 @@ document.querySelectorAll('[data-target]').forEach(btn=>btn.addEventListener('cl
   const namesOf=id=>{const a=document.getElementById(id).value.split(/[\n,]+/).map(v=>v.trim()).filter(Boolean);return a.length?a:Array.from({length:8},(_,i)=>String(i+1)+'번')};
   root.querySelectorAll('.tool-tab').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.tool-tab').forEach(b=>{const on=b===btn;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});root.querySelectorAll('.tool-panel').forEach(p=>p.hidden=p.dataset.panel!==btn.dataset.tool)}));
   document.getElementById('rollDice').addEventListener('click',()=>{const n=+document.getElementById('diceCount').value,out=document.getElementById('diceResult');const preview=Array.from({length:n},()=>rand(6)+1);out.className='tool-result rolling';out.innerHTML=preview.map(x=>'<span class="die" data-n="'+x+'" aria-label="'+x+'"></span>').join('');setTimeout(()=>{const v=Array.from({length:n},()=>rand(6)+1);out.className='tool-result landed';out.innerHTML=v.map(x=>'<span class="die" data-n="'+x+'" aria-label="'+x+'"></span>').join('')+(n>1?'<div class="tool-total">합계 '+v.reduce((a,b)=>a+b,0)+'</div>':'');setTimeout(()=>out.classList.remove('landed'),260)},900)});
-  document.getElementById('throwYut').addEventListener('click',()=>{const out=document.getElementById('yutResult'),preview=Array.from({length:4},()=>rand(2));out.className='tool-result rolling';out.innerHTML=preview.map(v=>'<i class="yut-stick '+(v?'back':'')+'"></i>').join('');setTimeout(()=>{const backs=Array.from({length:4},()=>rand(2)),flat=backs.reduce((a,b)=>a+b,0),name=['모','도','개','걸','윷'][flat];out.className='tool-result landed';out.innerHTML=backs.map(v=>'<i class="yut-stick '+(v?'back':'')+'"></i>').join('')+'<strong class="yut-name">'+name+'</strong>';setTimeout(()=>out.classList.remove('landed'),280)},980)});
+
   document.getElementById('flipCoin').addEventListener('click',()=>{const out=document.getElementById('coinResult');out.className='tool-result rolling';out.innerHTML='<div class="coin-face">●</div>';setTimeout(()=>{out.className='tool-result landed';out.innerHTML='<div class="coin-face">'+(rand(2)?'앞면':'뒷면')+'</div>';setTimeout(()=>out.classList.remove('landed'),280)},1020)});
   document.getElementById('makeOrder').addEventListener('click',()=>{const a=shuffle(namesOf('orderNames'));document.getElementById('orderResult').innerHTML='<div class="order-list">'+a.map((v,i)=>'<div class="order-item"><b>'+(i+1)+'</b>'+v.replace(/[&<>"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]))+'</div>').join('')+'</div>'});
   document.getElementById('makeTeams').addEventListener('click',()=>{const a=shuffle(namesOf('teamNames')),n=Math.min(+document.getElementById('teamCount').value,a.length),teams=Array.from({length:n},()=>[]);a.forEach((v,i)=>teams[i%n].push(v));const esc=v=>v.replace(/[&<>"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));document.getElementById('teamResult').innerHTML='<div class="team-grid">'+teams.map((t,i)=>'<div class="team-box"><strong>'+(i+1)+'팀</strong><div>'+t.map(esc).join('<br>')+'</div></div>').join('')+'</div>'});
@@ -1535,4 +1536,5 @@ document.querySelectorAll('[data-target]').forEach(btn=>btn.addEventListener('cl
 })();
 </script>
 <script src="/tool-entry.js" defer></script>
+<script type="module" src="/yut.js"></script>
 </body></html>
