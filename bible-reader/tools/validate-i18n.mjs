@@ -24,6 +24,19 @@ for(const lang of langs){
   }
 }
 
+// The UI title owner (ui-language-sync.js) rewrites document.title from i18n pageTitle.
+// It must match each served <title>, or search engines that render JS see a stale title.
+{
+  const i18nSource=fs.readFileSync('i18n.js','utf8');
+  for(const lang of ['ko',...langs]){
+    const html=fs.readFileSync(lang==='ko'?'index.html':`${lang}/index.html`,'utf8');
+    const served=(html.match(/<title>([^<]*)<\/title>/)||[])[1];
+    const row=i18nSource.split('\n').find(line=>line.trimStart().startsWith(`${lang}:{`))||'';
+    const runtime=(row.match(/pageTitle:'([^']*)'/)||[])[1];
+    if(!served||!runtime||served!==runtime) throw new Error(`${lang} i18n pageTitle must equal served <title>: html="${served}" i18n="${runtime}"`);
+  }
+}
+
 const app=fs.readFileSync('app.js','utf8');
 if(!app.includes('bookSelect.addEventListener("change"')||!app.includes('chapterSelect.addEventListener("change"')) throw new Error('shared native book/chapter state handlers missing');
 
