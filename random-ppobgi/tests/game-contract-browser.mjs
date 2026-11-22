@@ -58,6 +58,13 @@ try{
       assert(metric.overflow<=2);assert(metric.offsets.every(x=>x<=1));
       if(lang==='ko'&&width===390){await page.locator('#stage').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,`${engine}-ladder.png`)});}
       await page.locator('#showAllBtn').click();assert.equal(await page.locator('#winners li').count(),4);
+      if(width>=375){
+       // An 8-person ladder must fit a common phone width without sideways scrolling.
+       assert(await page.evaluate(s=>window.RandomPickerSettings.apply(s),{...setup,inputMode:'number',totalPeople:8,pickCount:1,resultMode:'winner'}));
+       await page.locator('#pickBtn').click();assert.equal(await page.locator('.ladder-pick').count(),8);
+       const scroll=await page.evaluate(()=>{const w=document.querySelector('.ladder-wrap');return w.scrollWidth-w.clientWidth;});
+       assert(scroll<=2,`8-person ladder scrolls sideways by ${scroll}px`);
+      }
      }else if(method==='lot'){
       assert.equal(await page.locator('.paper-lot').count(),4);assert.equal(await page.locator('.paper-lot .tag').filter({hasText:/산다/}).count(),0);
       for(let i=0;i<4;i++)await page.locator('.paper-lot').nth(i).click();
