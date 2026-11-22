@@ -11,7 +11,7 @@
     "status": "VERIFIED_NOT_DEPLOYED",
     "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
     "deployment": "BLOCKED",
-    "reason": "Automatic approval review rejected Sites source sync/deployment because external deployment approval remains withheld. Explicit owner-only update approval required.",
+    "reason": "User approved existing owner-private Site update on 2026-11-22. Official source workflow stdin was rejected by execution approval policy (AskForApproval::Granular.sandbox_approval=false). No source push, save or deployment call executed.",
     "codeCommit": "e42b57aedbd3df331221a78268d175c562fb8f88",
     "manifest": {
       "product": "moa",
@@ -397,7 +397,7 @@
     {
       "item": "Latest candidate deployment and deployment readback",
       "status": "BLOCKED",
-      "reason": "Explicit owner-only update approval required after automatic approval rejection"
+      "reason": "User authorized; execution approval for official source sync is blocked"
     },
     {
       "item": "Android/iOS real devices, native picker, touch, keyboard, codecs and memory",
@@ -604,6 +604,29 @@
           "390px Chrome emulation is not a real phone"
         ]
       }
+    }
+  },
+  "deploymentAttempt": {
+    "dateKST": "2026-11-22",
+    "status": "BLOCKED",
+    "userAuthorized": true,
+    "siteProjectId": "appgprj_6affac07c0088191a0598311d53bd69e",
+    "observedVersion": 2,
+    "observedAudience": "owner-only",
+    "externalVisitors": 0,
+    "sourceHost": "git.chatgpt-team.site",
+    "stage": "official source helper credential input",
+    "error": "write_stdin rejected: approval required by policy, but AskForApproval::Granular.sandbox_approval is false",
+    "sourcePushed": false,
+    "saveOrDeployCalled": false,
+    "unitRerun": {
+      "passed": 15,
+      "failed": 0
+    },
+    "deploymentTestUpdate": {
+      "change": "Compare complete deployed manifest against local intended candidate; explicit rejoin for retired synthetic QA fixtures",
+      "syntaxCheck": "DONE",
+      "deployedExecution": "NOT_TESTED"
     }
   }
 }
