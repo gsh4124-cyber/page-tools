@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 from release_metadata import clean_dist, write_metadata
+from asset_cache import fingerprint_assets
 
 product = sys.argv[1] if len(sys.argv) == 2 else ''
 if product not in {'random-ppobgi', 'bible-reader'}:
@@ -53,4 +54,5 @@ for path in root.rglob('*'):
         target = dist / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)
+fingerprint_assets(dist)
 write_metadata(product, dist)
