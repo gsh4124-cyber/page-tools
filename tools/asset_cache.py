@@ -25,7 +25,8 @@ def _normalized_bytes(path):
     return path.read_text(encoding='utf-8').replace('\r\n', '\n').encode('utf-8')
 
 
-def fingerprint_assets(dist):
+def fingerprint_assets(dist, verbatim=()):
+    """verbatim: top-level folders whose pages must be published byte-for-byte."""
     dist = Path(dist)
     if (dist / STATIC_DIR).exists():
         raise RuntimeError(f'{dist}: {STATIC_DIR}/ is reserved for fingerprinted assets')
@@ -44,7 +45,8 @@ def fingerprint_assets(dist):
 
     rewritten = 0
     for page in sorted(dist.rglob('*.html')):
-        if STATIC_DIR in page.relative_to(dist).parts:
+        parts = page.relative_to(dist).parts
+        if STATIC_DIR in parts or parts[0] in verbatim:
             continue
         text = page.read_text(encoding='utf-8')
         page_dir = PurePosixPath('/' + page.relative_to(dist).as_posix()).parent
