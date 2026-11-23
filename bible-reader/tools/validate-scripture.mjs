@@ -20,8 +20,12 @@ for(const book of books){
  });
  if(book.file==='John'){
   const html=fs.readFileSync('index.html','utf8');
-  const seed=JSON.parse(html.match(/<script[^>]+id="initial-scripture-data"[^>]*>([\s\S]*?)<\/script>/)[1]);
-  assert.deepEqual(data.chapters,seed.chapters,'Bundled John must exactly match the existing embedded text');
+  assert(!html.includes('initial-scripture-data'),'The full John seed must not be inlined again; the HTML carries only chapter 3');
+  const block=html.slice(html.indexOf('<!-- initial-scripture:start -->'),html.indexOf('<!-- initial-scripture:end -->'));
+  const unescape=t=>t.replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+  const shown=[...block.matchAll(/<p class="verse" data-verse="(\d+)"><span class="verse-number">\d+<\/span><span class="verse-text">([^<]*)<\/span><\/p>/g)].map(m=>({verse:Number(m[1]),text:unescape(m[2])}));
+  assert.deepEqual(shown,data.chapters[2].verses.map(v=>({verse:Number(v.verse),text:v.text})),'Server-rendered John 3 must exactly match the bundled text');
+  assert(block.includes('<link rel="preload" href="/scripture/krv1961/John.json" as="fetch" crossorigin>'),'Default book must be preloaded for the first read');
  }
 }
 assert.equal(books.length,66);assert.equal(chapters,1189);assert.equal(verses,31102);
