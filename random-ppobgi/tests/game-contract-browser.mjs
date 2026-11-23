@@ -15,7 +15,8 @@ if(local){
 const output=process.env.GAME_CONTRACT_EVIDENCE||path.join(product,'qa_evidence/local-game-contract');
 await fs.mkdir(output,{recursive:true});
 const results=[],engines={chromium,firefox,webkit},revision=process.env.DEPLOY_VERIFIED_SHA;let debugPage;
-function inlineCore(html){const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);return scripts.find(s=>s.includes('function initWheel('));}
+// The page references its game core by a content-hashed /static/ URL.
+function coreSrc(html){return html.match(/<script src="([^"]*\/game-core\.js)"><\/script>/)?.[1];}
 async function seedYut(context){await context.addInitScript(()=>{const native=crypto.getRandomValues.bind(crypto);Object.defineProperty(crypto,'getRandomValues',{value(array){if(window.__testYutBits?.length){array[0]=window.__testYutBits.shift();window.__testYutCalls=(window.__testYutCalls||0)+1;return array;}return native(array);}});});}
 async function verifyYut(page,mask){
  const faces=Array.from({length:4},(_,i)=>(mask>>i)&1),flat=faces.filter(Boolean).length,code=['mo','do','gae','geol','yut'][flat],before=Number(await page.locator('#yutResult').getAttribute('data-roll-id')||0);
@@ -29,8 +30,9 @@ async function verifyYut(page,mask){
 try{
  if(!local&&revision){
   const actual=(await (await fetch(base+'/build-revision.txt')).text()).trim();assert.equal(actual,revision);
-  const actualCore=inlineCore(await (await fetch(base+'/?qa=1')).text()),expectedCore=inlineCore(await fs.readFile(path.join(product,'dist/index.html'),'utf8'));
-  assert(actualCore&&expectedCore);assert.equal(createHash('sha256').update(actualCore).digest('hex'),createHash('sha256').update(expectedCore).digest('hex'),'Actual served game logic must match this release');
+  const actualSrc=coreSrc(await (await fetch(base+'/?qa=1')).text()),expectedSrc=coreSrc(await fs.readFile(path.join(product,'dist/index.html'),'utf8'));
+  assert(actualSrc&&expectedSrc);assert.equal(actualSrc,expectedSrc,'Served page must reference this release game core');
+  const actualCore=await (await fetch(base+actualSrc)).text(),expectedCore=await fs.readFile(path.join(product,'dist',expectedSrc),'utf8');assert.equal(createHash('sha256').update(actualCore).digest('hex'),createHash('sha256').update(expectedCore).digest('hex'),'Actual served game logic must match this release');
   for(const asset of ['yut.js','yut.css']){const actual=Buffer.from(await (await fetch(base+'/'+asset)).arrayBuffer()),expected=await fs.readFile(path.join(product,'dist',asset));assert(actual.equals(expected),`${asset}: deployed bytes differ from the release`);}
  }
  for(const engine of (process.env.GAME_CONTRACT_ENGINES||'chromium').split(',')){

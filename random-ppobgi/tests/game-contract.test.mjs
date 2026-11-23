@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-const source=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const source=fs.readFileSync(new URL('../game-core.js',import.meta.url),'utf8');
 let seed=123456789;
 const rand=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed%n;};
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};

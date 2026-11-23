@@ -3,7 +3,9 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+// The game core is served as its own cached file; the page must keep loading it.
+assert.ok(html.includes('<script src="/game-core.js"></script>'), 'index.html must load /game-core.js');
+const script = await readFile(new URL('../game-core.js', import.meta.url), 'utf8');
 
 test('inline JavaScript remains syntactically valid', () => {
   assert.ok(script);
