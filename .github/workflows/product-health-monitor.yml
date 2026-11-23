@@ -282,7 +282,7 @@ jobs:
           if [ ! -s bible-reader/dist/build-manifest.json ]; then
             python3 tools/build_static.py bible-reader
           fi
-          for asset in index.html reader-experience.js topbar-polish.css; do
+          for asset in index.html reader-experience.js i18n-layout.css; do
             tmp=$(mktemp)
             curl -fsSL --retry 2 --max-time 25 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?verify=$GITHUB_SHA" -o "$tmp"
             # Cloudflare Web Analytics injects a marked beacon block into served HTML.
