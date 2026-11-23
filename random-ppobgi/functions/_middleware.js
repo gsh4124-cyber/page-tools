@@ -59,6 +59,7 @@ function localizedApp(response,lang){
   const init=`<script>window.__RANDOM_PICKER_LANG__=${JSON.stringify(lang)};<\/script><script src="/locales.js"><\/script>`;
   const runtime='<script src="/i18n-v2.js"><\/script><script src="/language-switch.js"><\/script><script src="/experience.js"><\/script>';
   return new HTMLRewriter()
+    .on('#koKeywordNav',{element(el){el.remove();}})
     .on('#languageDirectory summary',{element(el){el.setInnerContent('🌐 '+languageNames[lang]);}})
     .on('#languageDirectory nav',{element(el){el.setAttribute('aria-label',languageNames[lang]);}})
     .on('#languageDirectory a',{element(el){if(el.getAttribute('hreflang')===lang)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');}})
