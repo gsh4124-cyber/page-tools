@@ -13,6 +13,7 @@ TOOLS = ROOT / 'tools'
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT.parent / 'tools'))
 from release_metadata import clean_dist, write_metadata
+from asset_cache import fingerprint_assets
 
 subprocess.run([sys.executable, 'security_guardrails.py'], check=True)
 for name in ['app.js', 'mobile.js', 'device-experience.js']:
@@ -40,10 +41,6 @@ if not revision:
 if not re.fullmatch(r'[0-9a-f]{40}', revision):
     raise RuntimeError('A full source commit is required for the deployment marker')
 dist = ROOT / 'dist'
-for page in dist.rglob('*.html'):
-    text = page.read_text(encoding='utf-8')
-    text = text.replace('device-experience.js"', f'device-experience.js?v={revision}"')
-    page.write_text(text, encoding='utf-8', newline='\n')
 (dist / 'build-revision.txt').write_text(revision + '\n', encoding='utf-8')
 # Keep CI's generated locale and navigation coverage in the production build.
 nav_order = ['checkup.html', 'keyboard.html', 'mouse.html', 'display.html', 'speaker.html', 'mic.html', 'webcam.html']
@@ -73,5 +70,7 @@ shutil.copytree(ROOT / 'privacy', dist / 'privacy', dirs_exist_ok=True)
 # A top-level error page disables Pages' implicit SPA fallback for unknown URLs.
 # Keep it outside the translated 117-page app and sitemap validation contract.
 shutil.copyfile(ROOT / '404.html', dist / '404.html')
+# Content-addressed /static/ URLs replace the old per-revision ?v= cache-buster.
+fingerprint_assets(dist)
 write_metadata('pc-checkup', dist)
 print(f'Production package ready: {revision}; core 117 pages and legacy URL assets preserved')
