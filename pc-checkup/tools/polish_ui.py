@@ -40,7 +40,7 @@ def icon_for(href, emoji):
     return BY_PAGE.get(page) or BY_EMOJI.get(emoji.strip())
 
 LAYOUT = """<style id="layout-polish">
-header .nav .brand{order:1}
+header .nav .brand{order:1;column-gap:.3em}
 header .nav .navlinks{order:2}
 header .nav .language-picker{order:3}
 @media(min-width:601px){header .nav.wrap{width:min(1120px,calc(100% - 32px))!important;gap:14px!important}}
