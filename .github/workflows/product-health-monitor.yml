@@ -285,6 +285,10 @@ jobs:
           for asset in index.html reader-experience.js topbar-polish.css; do
             tmp=$(mktemp)
             curl -fsSL --retry 2 --max-time 25 -H 'Cache-Control: no-cache' "https://bible-reader-1iz.pages.dev/$asset?verify=$GITHUB_SHA" -o "$tmp"
+            # Cloudflare Web Analytics injects a marked beacon block into served HTML.
+            if [ "${asset##*.}" = html ]; then
+              python3 -c 'import re,sys;p=sys.argv[1];s=open(p,encoding="utf-8").read();open(p,"w",encoding="utf-8",newline="").write(re.sub(r"<!-- Cloudflare Pages Analytics --><script defer src=.https://static\.cloudflareinsights\.com/beacon\.min\.js. data-cf-beacon=.\{\"token\": \"[0-9a-f]{32}\"\}.></script><!-- Cloudflare Pages Analytics -->","",s,count=1))' "$tmp"
+            fi
             if ! cmp -s "bible-reader/dist/$asset" "$tmp"; then
               echo "::error::Bible Reader live $asset does not match the built artifact at $GITHUB_SHA"
               rm -f "$tmp"
