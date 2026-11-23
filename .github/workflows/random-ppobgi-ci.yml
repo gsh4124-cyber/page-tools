@@ -43,6 +43,7 @@ jobs:
       - name: JavaScript syntax
         run: |
           node --check full-app-loader.js
+          node --check game-core.js
           node --check locales.js
           node --check i18n-v2.js
           node --check language-switch.js
