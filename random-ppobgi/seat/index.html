@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자리 바꾸기 | 랜덤 자리 배치 프로그램 (교실 자리표 무료)</title>
+<meta name="description" content="학생 명단을 넣고 버튼 한 번으로 교실 자리를 랜덤으로 바꿔 보세요. 짝 책상, 빈 자리, 자리 고정, 지난번과 같은 자리 피하기, 전체 화면과 인쇄까지 무료로 쓸 수 있는 자리 배치 프로그램입니다.">
+<link rel="canonical" href="https://random-ppobgi.pages.dev/seat/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="자리 바꾸기 | 랜덤 자리 배치 프로그램">
+<meta property="og:description" content="명단만 넣으면 교실 자리를 공정하게 랜덤 배치해요. 짝 책상, 빈 자리, 자리 고정, 같은 자리 피하기 지원.">
+<meta property="og:url" content="https://random-ppobgi.pages.dev/seat/"><meta property="og:image" content="https://random-ppobgi.pages.dev/og-image.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"자리 바꾸기 - 랜덤뽑기","url":"https://random-ppobgi.pages.dev/seat/","applicationCategory":"EducationalApplication","operatingSystem":"Any","inLanguage":"ko","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"자리 배치 결과는 정말 무작위인가요?","acceptedAnswer":{"@type":"Answer","text":"네. 브라우저의 암호학적 난수(crypto.getRandomValues)로 명단을 섞어 자리를 정해요. 교사도 결과를 미리 알 수 없어요."}},{"@type":"Question","name":"지난번과 같은 자리가 나오지 않게 할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"'지난번 자리 피하기'를 켜면 직전 배치와 같은 자리에 앉는 학생이 최대한 없도록 여러 번 섞어서 가장 겹치지 않는 결과를 보여 줘요."}},{"@type":"Question","name":"특정 학생은 앞자리에 고정할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"자리를 섞은 뒤 그 학생의 자리를 누르면 고정돼요. 다시 섞어도 고정한 학생은 그 자리에 그대로 남아요."}},{"@type":"Question","name":"학생 이름이 서버에 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 명단과 배치 결과는 이 브라우저 안에만 저장되고 서버로 보내지 않아요."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"랜덤뽑기","item":"https://random-ppobgi.pages.dev/"},{"@type":"ListItem","position":2,"name":"자리 바꾸기","item":"https://random-ppobgi.pages.dev/seat/"}]}</script>
+<style>
+:root{--bg:#f4f0e8;--card:#fffdf8;--text:#1f1c18;--muted:#756d62;--line:#e4ddd1;--dark:#24211d;--gold:#a07c4f;--soft:#f1ebe0;--lock:#2f6d55}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--text);font-family:Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 50% -10%,#fff 0,transparent 34%),var(--bg);line-height:1.7;-webkit-font-smoothing:antialiased}
+main{width:min(100% - 28px,1040px);margin:0 auto;padding:22px 0 56px}
+.home{display:inline-flex;align-items:center;min-height:44px;color:var(--muted);font-size:14px;font-weight:800;text-decoration:none}
+.eyebrow{margin:14px 0 4px;color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.12em}
+h1{margin:0 0 6px;font-size:clamp(30px,7vw,42px);line-height:1.15;letter-spacing:-1.5px}
+.lead{margin:0 0 20px;color:var(--muted)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 16px 44px rgba(48,40,29,.08);padding:clamp(16px,3vw,26px)}
+.tool{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start}
+.setup label{display:block;font-size:13px;font-weight:850;color:var(--text);margin:14px 0 6px}
+.setup label:first-child{margin-top:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input[type=number],select,textarea{width:100%;font:inherit;font-size:15px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+textarea{min-height:170px;resize:vertical;line-height:1.55}
+input:focus,select:focus,textarea:focus{outline:3px solid rgba(197,155,98,.35);border-color:#c59b62}
+.check{display:flex!important;align-items:center;gap:8px;font-weight:700!important;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--dark)}
+.hint{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:9px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.btn:hover{border-color:#c59b62}
+.btn.primary{width:100%;min-height:54px;margin-top:16px;background:var(--dark);border-color:var(--dark);color:#fff;font-size:17px}
+.btn.primary:hover{filter:brightness(1.15)}
+.btn.on{background:var(--soft);border-color:#c59b62}
+.small{min-height:40px;padding:7px 11px;font-size:13px}
+.board{min-width:0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.bar .group{display:flex;flex-wrap:wrap;gap:6px}
+.stat{font-size:13px;color:var(--muted);font-weight:700}
+.stat b{color:var(--text)}
+.warn{color:#b4532a}
+.room{background:var(--soft);border-radius:18px;padding:16px;overflow-x:auto}
+.front{display:flex;justify-content:center;margin:0 0 14px}
+.front span{background:var(--dark);color:#fff;font-size:12.5px;font-weight:850;padding:6px 26px;border-radius:8px;letter-spacing:.08em}
+.teacher .front{order:2;margin:14px 0 0}
+.roomin{display:flex;flex-direction:column}
+.grid{display:grid;gap:8px;justify-content:center}
+.seat{position:relative;display:flex;align-items:center;justify-content:center;min-width:74px;height:54px;padding:4px 6px;border-radius:11px;background:#fff;border:1px solid var(--line);font-weight:850;font-size:15px;text-align:center;line-height:1.2;cursor:pointer;user-select:none;word-break:keep-all;transition:transform .12s,border-color .12s}
+.seat:hover{border-color:#c59b62}
+.seat .no{position:absolute;left:6px;top:3px;font-size:10px;font-weight:700;color:#b3a998}
+.seat.empty{background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(117,109,98,.12) 6px 12px);color:#a59c8e;font-size:12px;border-style:dashed}
+.seat.locked{border:2px solid var(--lock);box-shadow:inset 0 0 0 2px rgba(47,109,85,.08)}
+.seat.locked::after{content:"고정";position:absolute;right:5px;top:3px;font-size:10px;font-weight:900;color:var(--lock)}
+.seat.blank{color:#c2b9aa;font-weight:700;font-size:12px}
+.seat.flip{animation:flip .32s ease}
+@keyframes flip{0%{transform:scale(.92);opacity:.4}100%{transform:none;opacity:1}}
+.gap{width:10px}
+.editing .seat{cursor:crosshair}
+.legend{margin:10px 2px 0;font-size:12.5px;color:var(--muted)}
+.room:fullscreen{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:40px}
+.room:fullscreen .seat{min-width:120px;height:84px;font-size:24px;border-radius:14px}
+.room:fullscreen .grid{gap:12px}
+.room:fullscreen .front span{font-size:18px;padding:8px 40px}
+article{margin-top:18px}
+article h2{margin:26px 0 8px;font-size:19px;letter-spacing:-.4px}
+article h2:first-child{margin-top:0}
+article p,article li,article dd{font-size:15px;color:#4e473e}
+article dt{margin-top:16px;font-weight:900}
+article dd{margin:3px 0 0}
+article ul,article ol{padding-left:22px}
+.links{display:flex;flex-wrap:wrap;gap:6px;padding:0;list-style:none}
+.links a{display:inline-flex;min-height:40px;align-items:center;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--text);font-size:14px;font-weight:750;text-decoration:none}
+nav.foot{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:20px}
+nav.foot a{display:inline-flex;align-items:center;min-height:44px;padding:7px 9px;color:#6f665b;font-size:12px;font-weight:800;text-decoration:none}
+@media(max-width:820px){.tool{grid-template-columns:1fr}.seat{min-width:58px;height:48px;font-size:13.5px}}
+@media(max-width:420px){.seat{min-width:48px;height:44px;font-size:12.5px;padding:3px}.seat .no{display:none}.grid{gap:5px}.room{padding:10px}}
+@media print{body{background:#fff}.home,.eyebrow,.lead,.setup,.bar,.legend,article,nav.foot{display:none!important}.panel{box-shadow:none;border:0;padding:0}.tool{display:block}.room{background:#fff;padding:0}.seat{border:1px solid #999}.seat.locked::after,.seat .no{display:none}}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="/">← 랜덤뽑기 홈</a>
+  <p class="eyebrow">무료 · 가입 없음 · 명단은 내 브라우저에만 저장</p>
+  <h1>자리 바꾸기</h1>
+  <p class="lead">명단을 넣고 버튼만 누르면 교실 자리를 공정하게 랜덤으로 바꿔 줘요. 짝 책상, 빈 자리, 자리 고정까지 한 번에.</p>
+
+  <section class="panel tool" aria-label="자리 바꾸기 도구">
+    <div class="setup">
+      <div class="row">
+        <div><label for="rows">줄 (앞→뒤)</label><input id="rows" type="number" min="1" max="12" value="5"></div>
+        <div><label for="cols">칸 (왼→오)</label><input id="cols" type="number" min="1" max="12" value="6"></div>
+      </div>
+      <label for="desk">책상 배치</label>
+      <select id="desk"><option value="2">2인 짝 책상</option><option value="1">1인 책상 (한 줄)</option><option value="3">3인 모둠 책상</option></select>
+      <label for="names">학생 명단 <span style="font-weight:600;color:var(--muted)">(한 줄에 한 명, 쉼표도 가능)</span></label>
+      <textarea id="names" placeholder="김민준&#10;이서연&#10;박도윤&#10;…"></textarea>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn small" type="button" id="fillNo">번호로 채우기</button>
+        <button class="btn small" type="button" id="clearNames">명단 비우기</button>
+      </div>
+      <label class="check" style="margin-top:16px"><input type="checkbox" id="avoid" checked> 지난번 자리 피하기</label>
+      <p class="hint">직전 배치와 같은 자리에 앉는 학생이 최대한 없게 섞어요.</p>
+      <button class="btn primary" type="button" id="shuffle">자리 섞기</button>
+    </div>
+
+    <div class="board">
+      <div class="bar">
+        <span class="stat" id="stat"></span>
+        <div class="group">
+          <button class="btn small" type="button" id="editEmpty" aria-pressed="false">빈 자리 지정</button>
+          <button class="btn small" type="button" id="view" aria-pressed="false">교사 시점</button>
+          <button class="btn small" type="button" id="full">크게 보기</button>
+          <button class="btn small" type="button" id="copy">복사</button>
+          <button class="btn small" type="button" id="print">인쇄</button>
+        </div>
+      </div>
+      <div class="room" id="room"><div class="roomin" id="roomin"><div class="front"><span>교 탁</span></div><div class="grid" id="grid"></div></div></div>
+      <p class="legend" id="legend">자리를 누르면 그 학생이 <b>고정</b>돼요. 다시 섞어도 고정한 학생은 그대로예요.</p>
+    </div>
+  </section>
+
+  <article class="panel">
+    <h2>사용 방법</h2>
+    <ol>
+      <li>교실 모양에 맞게 줄과 칸 수, 책상 배치(1인·2인 짝·3인 모둠)를 정해요.</li>
+      <li>학생 명단을 붙여 넣어요. 이름 없이 번호로만 하려면 <b>번호로 채우기</b>를 누르세요.</li>
+      <li>사용하지 않는 자리는 <b>빈 자리 지정</b>을 켜고 눌러서 빼요.</li>
+      <li><b>자리 섞기</b>를 누르면 새 자리표가 나와요. 앞자리가 필요한 학생은 자리를 눌러 고정한 뒤 다시 섞으면 돼요.</li>
+      <li>교실 TV에 띄울 때는 <b>크게 보기</b>, 게시판에 붙일 때는 <b>인쇄</b>를 쓰세요.</li>
+    </ol>
+    <h2>이럴 때 쓰세요</h2>
+    <ul>
+      <li>학기 초, 매달 자리 바꾸는 날 공정하게 자리 정하기</li>
+      <li>시력이 낮거나 배려가 필요한 학생은 앞자리에 고정하고 나머지만 섞기</li>
+      <li>모둠 활동 전에 3인 모둠 책상으로 자리 배치하기</li>
+      <li>학원, 동아리, 연수, 회식 자리 배치</li>
+    </ul>
+    <h2>자주 묻는 질문</h2>
+    <dl>
+      <dt>자리 배치 결과는 정말 무작위인가요?</dt><dd>네. 브라우저의 암호학적 난수로 명단을 섞어 자리를 정해요. 교사도 결과를 미리 알 수 없어요.</dd>
+      <dt>지난번과 같은 자리가 나오지 않게 할 수 있나요?</dt><dd>'지난번 자리 피하기'를 켜면 직전 배치와 같은 자리에 앉는 학생이 최대한 없도록 여러 번 섞어서 가장 겹치지 않는 결과를 보여 줘요.</dd>
+      <dt>특정 학생은 앞자리에 고정할 수 있나요?</dt><dd>자리를 섞은 뒤 그 학생의 자리를 누르면 고정돼요. 원하는 자리에 두려면, 그 학생이 원하는 자리에 나올 때까지 섞은 뒤 고정하거나 명단 순서를 이용하세요.</dd>
+      <dt>학생 이름이 서버에 저장되나요?</dt><dd>아니요. 명단과 배치 결과는 이 브라우저 안에만 저장되고 서버로 보내지 않아요. 공용 컴퓨터라면 사용 후 <b>명단 비우기</b>를 눌러 주세요.</dd>
+    </dl>
+    <h2>다른 뽑기 도구</h2>
+    <ul class="links"><li><a href="/team/">랜덤 팀 나누기</a></li><li><a href="/order/">발표 순서 정하기</a></li><li><a href="/ladder/">사다리타기</a></li><li><a href="/roulette/">룰렛 돌리기</a></li><li><a href="/lots/">제비뽑기</a></li><li><a href="/dice/">주사위 굴리기</a></li></ul>
+  </article>
+  <nav class="foot"><a href="/guide/">사용방법</a><a href="/about/">서비스 소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용약관</a><a href="/contact/">문의</a></nav>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const KEY = 'random-ppobgi-seat-v1';
+  let st = {rows: 5, cols: 6, desk: 2, names: '', empty: [], seats: null, prev: null, locks: {}, teacher: false, avoid: true};
+  let editing = false;
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, Math.round(Number(v) || a)));
+  const names = () => $('names').value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  const total = () => st.rows * st.cols;
+  const emptySet = () => new Set(st.empty.filter(i => i < total()));
+  const usable = () => { const e = emptySet(); return [...Array(total()).keys()].filter(i => !e.has(i)); };
+  function rnd(n) { const a = new Uint32Array(1); const lim = Math.floor(0x100000000 / n) * n; let x; do { crypto.getRandomValues(a); x = a[0]; } while (x >= lim); return x % n; }
+  function shuffled(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function arrange() {
+    const list = names();
+    const seatsIdx = usable();
+    const locks = {};
+    for (const [i, n] of Object.entries(st.locks)) if (seatsIdx.includes(+i) && list.includes(n)) locks[i] = n;
+    const free = seatsIdx.filter(i => !(i in locks));
+    const lockedNames = new Set(Object.values(locks));
+    const pool = list.filter(n => !lockedNames.has(n));
+    const tries = st.avoid && st.prev ? 300 : 1;
+    let best = null, bestScore = Infinity;
+    for (let t = 0; t < tries; t++) {
+      const order = shuffled(free);
+      const map = {};
+      pool.forEach((n, k) => { if (k < order.length) map[order[k]] = n; });
+      let score = 0;
+      if (st.prev) for (const [i, n] of Object.entries(map)) if (st.prev[i] === n) score++;
+      if (score < bestScore) { best = map; bestScore = score; if (!score) break; }
+    }
+    const seats = Object.assign({}, best, locks);
+    st.prev = st.seats; st.seats = seats; st.locks = locks;
+    save();
+    render(true, bestScore);
+  }
+
+  function render(animate, overlap) {
+    const grid = $('grid');
+    const e = emptySet();
+    const groups = st.desk;
+    const rows = [...Array(st.rows).keys()];
+    const cols = [...Array(st.cols).keys()];
+    if (st.teacher) { rows.reverse(); cols.reverse(); }
+    const gapAfter = k => groups > 1 && k < cols.length - 1 && Math.floor(cols[k] / groups) !== Math.floor(cols[k + 1] / groups);
+    const colsTemplate = [];
+    cols.forEach((c, k) => { colsTemplate.push('minmax(0,auto)'); if (gapAfter(k)) colsTemplate.push('10px'); });
+    grid.style.gridTemplateColumns = colsTemplate.join(' ');
+    let html = '', no = 0;
+    const seatNo = {};
+    for (let r = 0; r < st.rows; r++) for (let c = 0; c < st.cols; c++) { const i = r * st.cols + c; if (!e.has(i)) seatNo[i] = ++no; }
+    for (const r of rows) {
+      cols.forEach((c, k) => {
+        const i = r * st.cols + c;
+        const n = st.seats && st.seats[i];
+        const cls = ['seat'];
+        if (e.has(i)) cls.push('empty'); else if (!n) cls.push('blank');
+        if (st.locks[i]) cls.push('locked');
+        if (animate && n) cls.push('flip');
+        const label = e.has(i) ? '빈 자리' : (n || '');
+        html += `<div class="${cls.join(' ')}" data-i="${i}" role="button" tabindex="0" aria-label="${seatNo[i] ? seatNo[i] + '번 자리 ' : ''}${label || '비어 있음'}">${seatNo[i] ? `<span class="no">${seatNo[i]}</span>` : ''}${escapeHtml(label)}</div>`;
+        if (gapAfter(k)) html += '<div class="gap" aria-hidden="true"></div>';
+      });
+    }
+    grid.innerHTML = html;
+    const list = names(), seatCount = usable().length;
+    let s = `자리 <b>${seatCount}</b> · 학생 <b>${list.length}</b>`;
+    if (list.length > seatCount) s += ` <span class="warn">· 자리가 ${list.length - seatCount}개 부족해요</span>`;
+    else if (st.seats && overlap !== undefined && st.prev && st.avoid) s += ` · 지난번과 같은 자리 <b>${overlap}</b>명`;
+    $('stat').innerHTML = s;
+    $('room').classList.toggle('teacher', !!st.teacher);
+    $('room').classList.toggle('editing', editing);
+    $('view').textContent = st.teacher ? '학생 시점' : '교사 시점';
+    $('view').setAttribute('aria-pressed', String(!!st.teacher));
+    $('editEmpty').classList.toggle('on', editing);
+    $('editEmpty').setAttribute('aria-pressed', String(editing));
+    $('legend').innerHTML = editing ? '사용하지 않을 자리를 누르면 <b>빈 자리</b>가 되고, 다시 누르면 돌아와요. 다 고르면 <b>빈 자리 지정</b>을 다시 눌러 끝내세요.'
+      : '자리를 누르면 그 학생이 <b>고정</b>돼요. 다시 섞어도 고정한 학생은 그대로예요.';
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[ch]); }
+
+  function onSeat(el) {
+    const i = +el.dataset.i;
+    if (editing) {
+      const set = emptySet();
+      if (set.has(i)) set.delete(i); else { set.add(i); delete st.locks[i]; if (st.seats) delete st.seats[i]; }
+      st.empty = [...set];
+    } else if (st.seats && st.seats[i]) {
+      if (st.locks[i]) delete st.locks[i]; else st.locks[i] = st.seats[i];
+    }
+    save(); render(false);
+  }
+  $('grid').addEventListener('click', ev => { const el = ev.target.closest('.seat'); if (el) onSeat(el); });
+  $('grid').addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('seat')) { ev.preventDefault(); onSeat(ev.target); } });
+
+  function syncInputs() {
+    st.rows = clamp($('rows').value, 1, 12); st.cols = clamp($('cols').value, 1, 12); st.desk = +$('desk').value;
+    st.names = $('names').value; st.avoid = $('avoid').checked;
+  }
+  ['rows', 'cols', 'desk'].forEach(id => $(id).addEventListener('change', () => { const changed = st.rows !== clamp($('rows').value, 1, 12) || st.cols !== clamp($('cols').value, 1, 12); syncInputs(); if (changed) { st.seats = null; st.prev = null; st.locks = {}; } save(); render(false); }));
+  $('names').addEventListener('input', () => { syncInputs(); save(); render(false); });
+  $('avoid').addEventListener('change', () => { syncInputs(); save(); });
+  $('fillNo').addEventListener('click', () => { const n = usable().length; $('names').value = Array.from({length: n}, (_, k) => `${k + 1}번`).join('\n'); syncInputs(); save(); render(false); });
+  $('clearNames').addEventListener('click', () => { $('names').value = ''; st.seats = null; st.prev = null; st.locks = {}; syncInputs(); save(); render(false); });
+  $('shuffle').addEventListener('click', () => {
+    syncInputs();
+    if (!names().length) { $('names').focus(); $('stat').innerHTML = '<span class="warn">먼저 학생 명단을 넣거나 번호로 채워 주세요.</span>'; return; }
+    editing = false;
+    const btn = $('shuffle'); btn.disabled = true; btn.textContent = '섞는 중…';
+    const list = names(), cells = [...document.querySelectorAll('.seat:not(.empty)')];
+    let k = 0;
+    const timer = setInterval(() => { cells.forEach(c => { c.lastChild.nodeType === 3 ? c.lastChild.textContent = list[rnd(list.length)] : c.append(list[rnd(list.length)]); }); if (++k > 7) { clearInterval(timer); arrange(); btn.disabled = false; btn.textContent = '다시 섞기'; } }, 70);
+  });
+  $('editEmpty').addEventListener('click', () => { editing = !editing; render(false); });
+  $('view').addEventListener('click', () => { st.teacher = !st.teacher; save(); render(false); });
+  $('full').addEventListener('click', () => { const r = $('room'); if (document.fullscreenElement) document.exitFullscreen(); else if (r.requestFullscreen) r.requestFullscreen().catch(() => {}); });
+  $('print').addEventListener('click', () => window.print());
+  $('copy').addEventListener('click', async () => {
+    if (!st.seats) return;
+    const lines = [st.teacher ? '[교사 시점]' : '[교탁]'];
+    const rows = [...Array(st.rows).keys()]; const cols = [...Array(st.cols).keys()];
+    if (st.teacher) { rows.reverse(); cols.reverse(); }
+    const e = emptySet();
+    for (const r of rows) lines.push(cols.map(c => { const i = r * st.cols + c; return e.has(i) ? '(빈 자리)' : (st.seats[i] || '-'); }).join(' | '));
+    if (st.teacher) lines.push('[교탁]');
+    const text = lines.join('\n');
+    try { await navigator.clipboard.writeText(text); $('copy').textContent = '복사됨'; } catch (err) { $('copy').textContent = '복사 실패'; }
+    setTimeout(() => { $('copy').textContent = '복사'; }, 1500);
+  });
+
+  $('rows').value = st.rows; $('cols').value = st.cols; $('desk').value = String(st.desk); $('names').value = st.names || ''; $('avoid').checked = st.avoid !== false;
+  if (st.seats) $('shuffle').textContent = '다시 섞기';
+  render(false);
+})();
+</script>
+</body>
+</html>
