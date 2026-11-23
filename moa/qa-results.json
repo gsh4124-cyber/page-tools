@@ -8,11 +8,11 @@
     "mainMergedOrPushed": false
   },
   "candidate": {
-    "status": "CLOUDFLARE_OWNER_ACCESS_VERIFIED_WITH_LIMITATIONS",
+    "status": "CLOUDFLARE_INTRODUCTION_VERIFIED_WITH_LIMITATIONS",
     "sourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Actual Gmail owner login, cloud activation, reload, calendar and source manifest verified. New-host complete media/backup/isolation/header/mobile regression remains untested or inconclusive; see Cloudflare section.",
-    "codeCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+    "reason": "Service introduction and illustrative preview now appear before optional owner login. Real in-app browser interaction and 304px layout verified; unit 19 and package browser 5 passed. New-dialog real login replay and prior new-host limits remain untested.",
+    "codeCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
     "manifest": {
       "product": "moa",
       "revision": "e42b57aedbd3df331221a78268d175c562fb8f88",
@@ -24,7 +24,7 @@
     "compiledLocally": true,
     "published": false,
     "cloudflareSourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
-    "cloudflareCodeCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+    "cloudflareCodeCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
     "previousFrontendCheckpoint": {
       "commit": "e42b57aedbd3df331221a78268d175c562fb8f88",
       "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b"
@@ -690,7 +690,7 @@
   },
   "cloudflareDeployment": {
     "dateKST": "2026-11-23",
-    "status": "DEPLOYED_OWNER_ACCESS_VERIFIED",
+    "status": "DEPLOYED_INTRODUCTION_VERIFIED",
     "provider": "Cloudflare Pages",
     "accountId": "19564c62ca98f5f006440e6cd33ee072",
     "accountLoginVerified": true,
@@ -707,10 +707,10 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-23T09:11:48.265Z",
+      "preparedAt": "2026-11-23T10:01:26.537Z",
       "manifest": {
         "product": "moa",
-        "revision": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+        "revision": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
         "sourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
         "cloudConfigured": true
       },
@@ -719,11 +719,11 @@
         "index.html": "0611762cbf9e1236b5163fe9885ae5d87d1eafced80d3185afcb112b15de4aff",
         "app.js": "e9483e9568d7e3f47dc1d1df9e4cd0f4ea3304eb50b7578f7be9322135eb7350",
         "service.css": "04604931cb24accd691d1597856cff8314b4e0cfb46990b369a9e27c18e2f7d9",
-        "build-manifest.json": "777a737c78ef24e0c800f7a0499bf6b140c09d01d75948e878cbfcd4eb1095be",
+        "build-manifest.json": "50ceb8870f9487880557837e62af887147cc49f4892c1773f031cd67909ab13b",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "06905245b52a82a5463342f44ecf12a88d4f1e8ca974ee84f802350c9cdfc7bf",
+      "workerSha256": "da75748f1f854f475758957bec9dae98998b0abf41e6b141626af64c670d5dda",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -765,10 +765,10 @@
     "access": "owner-only",
     "ownerGateway": {
       "unitTests": 19,
-      "browserPackageChecks": 4,
+      "browserPackageChecks": 5,
       "authenticationTest": "synthetic JWT / mocked RPC",
-      "actualOwnerLogin": "DONE: Gmail receipt, email link verification, owner gate, real cloud account activation",
-      "liveHostChecks": "DONE: owner login/cloud connection/reload/calendar/manifest plus anonymous alias navigation",
+      "actualOwnerLogin": "DONE on previous fdf069f release; real login in new dialog NOT_TESTED",
+      "liveHostChecks": "DONE: current introduction, example switch, explicit dialog, 304px layout; owner cloud login belongs to previous checkpoint",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -780,18 +780,17 @@
       ]
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
-    "deploymentId": "c72ac756-5bf3-4453-afb0-dfacfbbd9dea",
+    "sourceCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
+    "deploymentId": "4a49d27f-4166-4dbc-a802-47478e35a724",
     "published": true,
     "actualBrowserChecks": {
-      "anonymousRoot": "owner portal redirect observed",
-      "anonymousAppJsDocumentNavigation": "owner portal redirect observed",
-      "ownerEmailRequest": "DONE: received and verified in Gmail with user authorization",
-      "authenticatedApplication": "DONE: owner cloud account, reload persistence, calendar month navigation, manifest matches source",
+      "initialIntroduction": "DONE",
+      "loginInitiallyHidden": "DONE",
+      "calendarExampleSwitch": "DONE",
+      "loginAfterUserChoice": "DONE",
+      "actualNarrowViewport": "DONE: clientWidth=scrollWidth=304",
+      "newDialogRealLoginReplay": "NOT_TESTED",
       "actualResponseHeadersAndStatusCodes": "NOT_TESTED",
-      "responsiveViewport": "INCONCLUSIVE: requested overrides remained actual innerWidth=958; local package portal tests passed at four widths",
-      "diagnosticDownload": "INCONCLUSIVE: browser event wait timed out",
-      "anonymousDeploymentAlias": "owner portal redirect observed for final deployment app.js document navigation",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED"
     },
     "runtimeFixes": [
@@ -836,6 +835,63 @@
         "Mobile layout (webkit)": "success",
         "Combined Quality Gate": "success"
       }
+    },
+    "previousOwnerLoginRelease": {
+      "sourceCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+      "deploymentId": "c72ac756-5bf3-4453-afb0-dfacfbbd9dea",
+      "package": {
+        "preparedAt": "2026-11-23T09:11:48.265Z",
+        "manifest": {
+          "product": "moa",
+          "revision": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+          "sourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
+          "cloudConfigured": true
+        },
+        "files": 3,
+        "hashes": {
+          "index.html": "0611762cbf9e1236b5163fe9885ae5d87d1eafced80d3185afcb112b15de4aff",
+          "app.js": "e9483e9568d7e3f47dc1d1df9e4cd0f4ea3304eb50b7578f7be9322135eb7350",
+          "service.css": "04604931cb24accd691d1597856cff8314b4e0cfb46990b369a9e27c18e2f7d9",
+          "build-manifest.json": "777a737c78ef24e0c800f7a0499bf6b140c09d01d75948e878cbfcd4eb1095be",
+          "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
+          "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+        },
+        "workerSha256": "06905245b52a82a5463342f44ecf12a88d4f1e8ca974ee84f802350c9cdfc7bf",
+        "access": "owner-only",
+        "staticFallback": "setup notice only",
+        "published": true
+      },
+      "actualBrowserChecks": {
+        "anonymousRoot": "owner portal redirect observed",
+        "anonymousAppJsDocumentNavigation": "owner portal redirect observed",
+        "ownerEmailRequest": "DONE: received and verified in Gmail with user authorization",
+        "authenticatedApplication": "DONE: owner cloud account, reload persistence, calendar month navigation, manifest matches source",
+        "actualResponseHeadersAndStatusCodes": "NOT_TESTED",
+        "responsiveViewport": "INCONCLUSIVE: requested overrides remained actual innerWidth=958; local package portal tests passed at four widths",
+        "diagnosticDownload": "INCONCLUSIVE: browser event wait timed out",
+        "anonymousDeploymentAlias": "owner portal redirect observed for final deployment app.js document navigation",
+        "hostedMediaBackupIsolationReplay": "NOT_TESTED"
+      }
+    },
+    "entryExperience": {
+      "introductionBeforeAuthentication": true,
+      "loginDialogByExplicitChoice": true,
+      "illustrativeExamplesNotUserData": true,
+      "exampleCalendarSwitch": "DONE: local and real deployed browser",
+      "localViewportWidths": [
+        304,
+        320,
+        390,
+        768,
+        1280
+      ],
+      "actualClientWidth": 304,
+      "actualScrollWidth": 304,
+      "actualLoginDialogInitiallyOpen": false,
+      "newDialogRealOwnerLoginReplay": "NOT_TESTED; previously verified owner login preserved as historical checkpoint",
+      "authPoliciesChanged": false,
+      "supabaseChanged": false,
+      "newCosts": false
     }
   }
 }
