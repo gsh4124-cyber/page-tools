@@ -11,7 +11,10 @@ export async function ownerSession(token,env,transport=fetch,now=Date.now()){
  const claims=tokenClaims(token);
  if(!claims||claims.sub!==env.MOA_GATE_OWNER_ID||claims.role!=='authenticated'||claims.is_anonymous===true||!Number.isFinite(claims.exp)||claims.exp<=now/1000)return {status:401};
  try{
-  const r=await transport(project+'/rest/v1/rpc/moa_account_status',{method:'POST',headers:{apikey:env.MOA_SUPABASE_PUBLISHABLE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:'{}',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8000)});
+  // Workers does not implement redirect:'error'. Manual mode still prevents
+  // forwarding the bearer token; unexpected redirects fail closed below.
+  const r=await transport(project+'/rest/v1/rpc/moa_account_status',{method:'POST',headers:{apikey:env.MOA_SUPABASE_PUBLISHABLE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:'{}',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(8000)});
+  if(r.status>=300&&r.status<400)return {status:503};
   if(!r.ok)return {status:r.status>=500?503:401};
   const data=await r.json();if(!['active','deleting','withdrawn'].includes(data?.status))return {status:503};
   return {status:200,maxAge:Math.max(1,Math.min(3600,Math.floor(claims.exp-now/1000)))};

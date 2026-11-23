@@ -8,7 +8,7 @@ const token=jwt(),headers={'Content-Security-Policy':"default-src 'self'; script
 const routes=Object.fromEntries([['/','PRIVATE_APP'],['/index.html','PRIVATE_APP'],['/app.js','PRIVATE_JS'],['/build-manifest.json','PRIVATE_MANIFEST'],['/healthz','PRIVATE_HEALTH'],['/404.html','PRIVATE_404'],['/__moa_access','PUBLIC_OWNER_LOGIN'],['/__moa_access.js','PUBLIC_LOGIN_SCRIPT']].map(([path,body])=>[path,{body,type:path.endsWith('.js')?'text/javascript':'text/html'}]));
 const request=(path='/',options={})=>new Request('https://moa.test'+path,options);
 const post=(value,origin='https://moa.test')=>request('/__moa_session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({accessToken:value})});
-const verified=async(url,init)=>{assert.equal(url,env.MOA_SUPABASE_URL+'/rest/v1/rpc/moa_account_status');assert.equal(init.headers.Authorization,'Bearer '+token);assert.equal(init.headers.apikey,env.MOA_SUPABASE_PUBLISHABLE_KEY);assert.equal(init.redirect,'error');return Response.json({status:'active'});};
+const verified=async(url,init)=>{assert.equal(url,env.MOA_SUPABASE_URL+'/rest/v1/rpc/moa_account_status');assert.equal(init.headers.Authorization,'Bearer '+token);assert.equal(init.headers.apikey,env.MOA_SUPABASE_PUBLISHABLE_KEY);assert.equal(init.redirect,'manual');return Response.json({status:'active'});};
 test('owner gateway fails closed before configuration and never serves diary assets anonymously',async()=>{
  const unexpected=()=>{throw Error('Auth service should not be called');};
  for(const path of Object.keys(routes)){const r=await ownerGateway(request(path),{},routes,headers,unexpected);assert.equal(r.status,503);assert.ok(!(await r.text()).includes('PRIVATE_'));}
@@ -23,6 +23,7 @@ test('owner gateway verifies token server-side, cookie security, expiry and revo
  assert.equal((await ownerGateway(request('/app.js',{headers:{Cookie:GATE_COOKIE+'='+token}}),env,routes,headers,denied)).status,401);
  const offline=async()=>{throw Error('offline');};assert.equal((await ownerGateway(post(token),env,routes,headers,offline)).status,503);
  assert.equal((await ownerGateway(post(token),env,routes,headers,async()=>Response.json({unexpected:true}))).status,503);
+ for(const status of [301,302,307,308])assert.equal((await ownerGateway(post(token),env,routes,headers,async()=>new Response(null,{status,headers:{Location:'https://unexpected.test'}}))).status,503);
 });
 test('owner gateway blocks login CSRF, oversized bodies, cookie duplicates and unsupported methods',async()=>{
  assert.equal((await ownerGateway(post(token,'https://evil.test'),env,routes,headers,verified)).status,403);
