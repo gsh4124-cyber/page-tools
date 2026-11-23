@@ -42,15 +42,15 @@ jobs:
         shell: bash
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Trust checked-out workspace in container
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git -C "$GITHUB_WORKSPACE" ls-files > /dev/null
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Build all three candidate products
@@ -80,7 +80,7 @@ jobs:
           node tools/search-entry-smoke.mjs
       - name: Preserve candidate screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: page-tools-search-entry-source-${{ github.run_id }}
           path: qa_evidence/search-entry/
@@ -196,7 +196,7 @@ jobs:
         shell: bash
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Trust checked-out workspace in container
@@ -246,10 +246,10 @@ jobs:
           echo "Require new Cloudflare deployment: ${deploy_projects[*]:-none}"
           echo "projects=${projects[*]}" >> "$GITHUB_OUTPUT"
           echo "deploy_projects=${deploy_projects[*]}" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Build expected production manifests with the same entry points
@@ -297,7 +297,7 @@ jobs:
             rm -f "$tmp"
           done
           echo "Bible Reader production artifact readback matched: HTML, JS and CSS."
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.changed.outputs.projects != ''
         with:
           node-version: 22
@@ -340,7 +340,7 @@ jobs:
         run: node tools/notify-indexnow.mjs
       - name: Preserve production browser screenshots and results
         if: always() && steps.changed.outputs.projects != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: page-tools-production-browser-${{ github.run_id }}
           path: |
