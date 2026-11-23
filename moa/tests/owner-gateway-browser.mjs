@@ -17,7 +17,55 @@ try{
  browser=await chromium.launch({channel:'chrome',headless:true});const cx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await cx.newPage();page.on('pageerror',e=>errors.push(e.message));
  await check('packaged Worker blocks anonymous HTML, assets, manifest and health',async()=>{for(const path of ['/','/index.html','/app.js','/service.css','/build-manifest.json','/healthz','/__moa_session_sync.js']){const r=await cx.request.get(base+path,{maxRedirects:0});assert.ok([303,401].includes(r.status()),path);assert.ok(!(await r.text()).includes('id="entryForm"'));}});
  await check('service introduction renders before login at 304/320/390/768/1280px with protected app assets',async()=>{await page.goto(base);await page.locator('#heroTitle').waitFor();assert.equal(await page.locator('#gateDialog').isVisible(),false);assert.equal(await page.locator('#gateEmail').isVisible(),false);for(const width of [304,320,390,768,1280]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'overflow at '+width);await page.screenshot({path:new URL(`qa-evidence/introduction-${width}.png`,root).pathname.replace(/^\/(.:)/,'$1'),fullPage:true});}await page.setViewportSize({width:390,height:844});assert.match((await cx.request.get(base+'/__moa_access')).headers()['content-security-policy'],/script-src 'self'/);});
- await check('examples work before authentication and owner dialog opens only by choice',async()=>{await page.getByRole('link',{name:'먼저 둘러보기',exact:true}).click();await page.getByRole('button',{name:'달력 예시',exact:true}).click();assert.ok(await page.locator('#calendarExample').isVisible());assert.equal(await page.locator('#recordExample').isVisible(),false);await page.getByRole('button',{name:'기록 예시',exact:true}).click();assert.ok(await page.locator('#recordExample').isVisible());await page.getByRole('button',{name:'내 모아 열기',exact:true}).first().click();assert.ok(await page.locator('#gateDialog').isVisible());assert.ok(await page.locator('#gateEmail').evaluate(el=>el===document.activeElement));assert.equal(await page.locator('#gateVerifyForm').isVisible(),false);await page.getByRole('button',{name:'이미 로그인 메일을 받았어요',exact:true}).click();assert.ok(await page.locator('#gateVerifyForm').isVisible());await page.keyboard.press('Escape');assert.equal(await page.locator('#gateDialog').isVisible(),false);assert.equal((await cx.request.get(base+'/app.js')).status(),401);});
+ await check('photos and calendar dates open the right synthetic record without authentication',async()=>{
+  const requests=[];const capture=request=>requests.push({url:request.url(),method:request.method()});page.on('request',capture);
+  await page.getByRole('link',{name:'화면 체험하기',exact:true}).click();
+  assert.ok(await page.locator('#samplePhoto').evaluate(img=>img.complete&&img.naturalWidth>0));
+  await page.getByRole('button',{name:'사진',exact:true}).click();
+  assert.ok(await page.locator('#photosExample').isVisible());
+  await page.getByRole('button',{name:'11월 21일 바다 예시 기록 보기',exact:true}).click();
+  assert.equal(await page.locator('#sampleTitle').textContent(),'지난 주말, 바다에서');
+  assert.equal(await page.locator('#sampleDate').getAttribute('datetime'),'2026-11-21');
+  await page.getByRole('button',{name:'달력',exact:true}).click();
+  assert.equal(await page.locator('[data-demo-day]').count(),30);
+  await page.getByRole('button',{name:'11월 22일',exact:true}).click();
+  assert.equal(await page.locator('#calendarText').textContent(),'이날에는 예시 기록이 없어요.');
+  assert.equal(await page.locator('#openCalendarRecord').isVisible(),false);
+  await page.getByRole('button',{name:'11월 23일 · 예시 기록 있음',exact:true}).click();
+  await page.getByRole('button',{name:'이날의 예시 기록 보기',exact:true}).click();
+  assert.equal(await page.locator('#sampleTitle').textContent(),'조금 느리게 시작한 아침');
+  assert.equal(await page.locator('#showRecordExample').getAttribute('aria-pressed'),'true');
+  assert.ok(await page.locator('#showRecordExample').evaluate(el=>el===document.activeElement));
+  for(const view of ['달력','사진','기록']){
+   await page.getByRole('button',{name:view,exact:true}).click();
+   for(const width of [304,320,390,768,1280]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),view+' overflow at '+width);}
+  }
+  await page.setViewportSize({width:390,height:844});page.off('request',capture);
+  assert.ok(requests.every(request=>request.method==='GET'&&request.url.startsWith(base)),JSON.stringify(requests));
+ });
+ await check('habit feedback toggles accessibly and resets on reload',async()=>{
+  await page.getByRole('button',{name:'산책 10분',exact:true}).click();
+  assert.equal(await page.locator('#habitCount').textContent(),'1 / 2 완료');
+  await page.getByRole('button',{name:'책 5쪽',exact:true}).focus();await page.keyboard.press('Space');
+  assert.equal(await page.locator('#habitCount').textContent(),'2 / 2 완료');
+  await page.getByRole('button',{name:'산책 10분',exact:true}).click();
+  assert.equal(await page.locator('#habitCount').textContent(),'1 / 2 완료');
+  await page.reload();await page.locator('#showRecordExample').waitFor();
+  assert.equal(await page.locator('#habitCount').textContent(),'0 / 2 완료');
+ });
+ await check('owner dialog opens only by choice and Escape restores the trigger focus',async()=>{
+  assert.equal(await page.locator('#gateDialog').isVisible(),false);
+  await page.getByRole('button',{name:'내 모아 열기',exact:true}).first().click();
+  assert.ok(await page.locator('#gateDialog').isVisible());
+  await page.setViewportSize({width:304,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth));
+  assert.ok(await page.locator('#gateEmail').evaluate(el=>el===document.activeElement));
+  assert.equal(await page.locator('#gateVerifyForm').isVisible(),false);
+  await page.getByRole('button',{name:'이미 로그인 메일을 받았어요',exact:true}).click();
+  assert.ok(await page.locator('#gateVerifyForm').isVisible());
+  await page.keyboard.press('Escape');assert.equal(await page.locator('#gateDialog').isVisible(),false);
+  assert.ok(await page.getByRole('button',{name:'내 모아 열기',exact:true}).first().evaluate(el=>el===document.activeElement));
+  assert.equal((await cx.request.get(base+'/app.js')).status(),401);
+ });
  await check('synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application',async()=>{const r=await cx.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}});assert.equal(r.status(),204);const cookie=(await cx.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');const app=await cx.request.get(base+'/index.html');assert.equal(app.status(),200);assert.match(await app.text(),/id="entryForm"/);assert.equal((await cx.request.get(base+'/app.js')).status(),200);assert.deepEqual(await (await cx.request.get(base+'/build-manifest.json')).json(),manifest);});
  await check('logout removes access immediately; public static fallback contains no application',async()=>{assert.equal((await cx.request.post(base+'/__moa_logout',{headers:{Origin:base}})).status(),204);assert.equal((await cx.request.get(base+'/app.js')).status(),401);assert.ok(!(await readFile(new URL('dist-cloudflare/index.html',root),'utf8')).includes('entryForm'));});
  assert.deepEqual(errors,[]);await cx.close();

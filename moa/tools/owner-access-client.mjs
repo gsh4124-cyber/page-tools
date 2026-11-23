@@ -6,8 +6,27 @@ document.querySelectorAll('[data-open-account]').forEach(button=>button.onclick=
 $('#closeGate').onclick=()=>dialog.close();
 const showVerification=()=>{$('#gateVerifyForm').hidden=false;$('#gateLink').focus();};
 $('#gateHasLink').onclick=showVerification;
-const showExample=calendar=>{for(const [id,selected] of [['showRecordExample',!calendar],['showCalendarExample',calendar]])$('#'+id).setAttribute('aria-pressed',String(selected));$('#recordExample').hidden=calendar;$('#calendarExample').hidden=!calendar;};
-$('#showRecordExample').onclick=()=>showExample(false);$('#showCalendarExample').onclick=()=>showExample(true);
+// The public demonstration is synthetic and stays in memory. It never writes
+// diary data, requests media URLs, or uses the private application's store.
+const views=['Record','Calendar','Photos'];
+const showExample=view=>{for(const name of views){$('#show'+name+'Example').setAttribute('aria-pressed',String(name===view));$('#'+name.toLowerCase()+'Example').hidden=name!==view;}};
+for(const view of views)$('#show'+view+'Example').onclick=()=>showExample(view);
+const entries={
+ 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'조금 느리게 시작한 아침',text:'상큼한 자몽 한 조각. 서두르지 않고 아침을 먹으니, 하루에도 작은 여유가 생겼다.',alt:'자른 자몽의 선명한 단면'},
+ 21:{date:'2026. 11. 21 토요일',weekday:'토요일',title:'지난 주말, 바다에서',text:'파도 소리를 듣고 한참을 앉아 있었다. 바다를 보러 오길 잘했다. 다음에는 조금 더 오래 머물러야지.',alt:'바다에서 파도를 타는 서퍼'}
+};
+for(const day of [21,23])entries[day].photo=$('[data-demo-entry="'+day+'"] img').src;
+const openEntry=day=>{const entry=entries[day];if(!entry)return;$('#sampleDate').textContent=entry.date;$('#sampleDate').dateTime='2026-11-'+day;$('#samplePhoto').src=entry.photo;$('#samplePhoto').alt=entry.alt;$('#sampleTitle').textContent=entry.title;$('#sampleText').textContent=entry.text;showExample('Record');$('#showRecordExample').focus();};
+document.querySelectorAll('[data-demo-entry]').forEach(button=>button.onclick=()=>openEntry(Number(button.dataset.demoEntry)));
+let selectedDay=23;
+const selectDay=day=>{selectedDay=day;document.querySelectorAll('[data-demo-day]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.demoDay)===day)));const entry=entries[day];$('#calendarDate').textContent='11월 '+day+'일 '+['일요일','월요일','화요일','수요일','목요일','금요일','토요일'][(day-1)%7];$('#calendarText').textContent=entry?entry.title:'이날에는 예시 기록이 없어요.';$('#openCalendarRecord').hidden=!entry;};
+for(let day=1;day<=30;day++){
+ const button=document.createElement('button');button.type='button';button.dataset.demoDay=String(day);button.setAttribute('aria-label','11월 '+day+'일'+(entries[day]?' · 예시 기록 있음':''));button.setAttribute('aria-pressed',String(day===selectedDay));
+ if(entries[day]){const photo=document.createElement('img');photo.src=entries[day].photo;photo.alt='';button.append(photo);}
+ const number=document.createElement('span');number.textContent=String(day);button.append(number);button.onclick=()=>selectDay(day);$('#sampleCalendar').append(button);
+}
+$('#openCalendarRecord').onclick=()=>openEntry(selectedDay);
+document.querySelectorAll('[data-demo-habit]').forEach(button=>button.onclick=()=>{button.setAttribute('aria-pressed',String(button.getAttribute('aria-pressed')!=='true'));$('#habitCount').textContent=document.querySelectorAll('[data-demo-habit][aria-pressed="true"]').length+' / 2 완료';});
 const notice=text=>$('#gateNotice').textContent=text;
 const enter=async session=>{
  if(!session?.access_token)throw Error('로그인 정보를 확인해 주세요.');

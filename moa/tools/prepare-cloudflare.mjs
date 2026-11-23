@@ -17,7 +17,13 @@ for(const [name,type] of [['index.html','text/html; charset=utf-8'],['app.js','t
 }
 routes['/index.html'].body=routes['/index.html'].body.replace('</head>','<script type="module" src="/__moa_session_sync.js"></script></head>');routes['/']=routes['/index.html'];
 routes['/healthz']={body:JSON.stringify({status:'ready',product:'moa',revision:manifest.revision,build:manifest.sourceSha256,cloudConfigured:true,access:'owner-only'}),type:'application/json'};
-routes['/__moa_access']={body:await readFile(resolve(root,'ui/owner-access.html'),'utf8'),type:'text/html; charset=utf-8'};
+const demoMedia=JSON.parse(await readFile(resolve(root,'ui/demo-media.json'),'utf8'));
+let introduction=await readFile(resolve(root,'ui/owner-access.html'),'utf8');
+for(const name of ['citrus','surf']){
+ if(!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(demoMedia[name]))throw Error('Invalid embedded demo photo');
+ introduction=introduction.replaceAll(`__MOA_SAMPLE_${name.toUpperCase()}__`,demoMedia[name]);
+}
+routes['/__moa_access']={body:introduction,type:'text/html; charset=utf-8'};
 for(const [name,path] of [['owner-access-client.mjs','/__moa_access.js'],['owner-session-client.mjs','/__moa_session_sync.js']]){
  const result=await build({entryPoints:[resolve(root,'tools',name)],bundle:true,write:false,format:'esm',minify:true,target:['safari15','chrome100'],define:{__MOA_GATE_CONFIG__:JSON.stringify(config)}});routes[path]={body:result.outputFiles[0].text,type:'text/javascript; charset=utf-8'};
 }
