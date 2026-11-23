@@ -32,7 +32,7 @@ finally:
 for name in ['expand_batch2', 'append_cn_ru', 'normalize_generated_structure',
              'normalize_generated_keyboard', 'normalize_display_colors',
              'inject_language_ux', 'localize_korean_ui', 'finalize_keyboard_help',
-             'normalize_navigation_order', 'normalize_search_metadata', 'validate_dist']:
+             'normalize_navigation_order', 'normalize_search_metadata', 'polish_icons', 'validate_dist']:
     subprocess.run([sys.executable, str(TOOLS / (name + '.py'))], check=True)
 
 revision = os.environ.get('CF_PAGES_COMMIT_SHA') or os.environ.get('GITHUB_SHA')
