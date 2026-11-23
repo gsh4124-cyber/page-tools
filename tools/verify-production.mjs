@@ -24,6 +24,11 @@ async function fetchBytes(project, path) {
   if (!response.ok) throw new Error(`${project}/${path}: HTTP ${response.status}`);
   return Buffer.from(await response.arrayBuffer());
 }
+const EDGE_ANALYTICS = /<!-- Cloudflare Pages Analytics --><script defer src='https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js' data-cf-beacon='\{"token": "[0-9a-f]{32}"\}'><\/script><!-- Cloudflare Pages Analytics -->/;
+function withoutEdgeAnalytics(asset, bytes) {
+  if (!asset.endsWith('.html')) return bytes;
+  return Buffer.from(bytes.toString('utf8').replace(EDGE_ANALYTICS, ''), 'utf8');
+}
 async function verify(project) {
   const marker = (await fetchBytes(project, 'build-revision.txt')).toString().trim();
   if (marker !== revision) throw new Error(`${project}: revision ${marker.slice(0, 40)} != ${revision}`);
@@ -35,7 +40,9 @@ async function verify(project) {
     throw new Error(`${project}: production artifact manifest differs from CI build`);
   }
   for (const asset of assets[project]) {
-    const live = await fetchBytes(project, asset);
+    // Cloudflare Web Analytics injects its beacon into served HTML at the edge.
+    // Compare the bytes we built, so drop exactly that marked block first.
+    const live = withoutEdgeAnalytics(asset, await fetchBytes(project, asset));
     const source = await readFile(`${project}/dist/${asset}`);
     if (hash(live) !== hash(source) || manifest.files?.[asset] !== hash(live)) {
       throw new Error(`${project}/${asset}: served bytes differ from source/manifest`);
