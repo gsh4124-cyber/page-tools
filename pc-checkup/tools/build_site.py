@@ -71,6 +71,7 @@ shutil.copytree(ROOT / 'privacy', dist / 'privacy', dirs_exist_ok=True)
 # Keep it outside the translated 117-page app and sitemap validation contract.
 shutil.copyfile(ROOT / '404.html', dist / '404.html')
 # Content-addressed /static/ URLs replace the old per-revision ?v= cache-buster.
-fingerprint_assets(dist)
+# Legacy contest URLs above are kept verbatim (see LEGACY_HOST_BOUNDARY.md).
+fingerprint_assets(dist, verbatim=('refundproof', 'proofrail', 'finalcheck'))
 write_metadata('pc-checkup', dist)
 print(f'Production package ready: {revision}; core 117 pages and legacy URL assets preserved')
