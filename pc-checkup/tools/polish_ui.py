@@ -1,4 +1,6 @@
-"""Replace emoji card icons in generated pages with consistent inline SVG line icons.
+"""Final UI polish for generated pages: SVG icons, one brand name, aligned header and cards.
+
+Icons: replace emoji card icons with consistent inline SVG line icons.
 
 Emoji render differently on every OS and look out of place on the dark UI.
 The icon is chosen by the card's link target first, then by the emoji itself,
@@ -37,6 +39,21 @@ def icon_for(href, emoji):
     page = href.split('#', 1)[0].split('?', 1)[0].rstrip('/').split('/')[-1]
     return BY_PAGE.get(page) or BY_EMOJI.get(emoji.strip())
 
+LAYOUT = """<style id="layout-polish">
+header .nav .brand{order:1}
+header .nav .navlinks{order:2}
+header .nav .language-picker{order:3}
+@media(min-width:601px){header .nav.wrap{width:min(1120px,calc(100% - 32px))!important;gap:14px!important}}
+@media(min-width:981px){header .nav .navlinks{justify-content:flex-end}header .nav .language-picker{flex:0 0 128px!important;margin-left:2px!important}}
+.device-choice{align-items:stretch}
+.device-choice .device-card{align-content:start}
+.device-choice .device-card .go{align-self:end}
+.home-tools .card{display:flex;flex-direction:column}
+.home-tools .card .go{margin-top:auto!important;padding-top:12px}
+</style>"""
+BRAND_OLD = 'class="brand" href="index.html">PC <span>CHECKUP</span>'
+BRAND_NEW = 'class="brand" href="index.html">DEVICE <span>CHECKUP</span>'
+
 changed = 0
 for path in DIST.rglob('*.html'):
     if LEGACY & set(path.relative_to(DIST).parts):
@@ -48,6 +65,9 @@ for path in DIST.rglob('*.html'):
     new = CARD.sub(card, text)
     new = BARE.sub(lambda m: f'<div class="icon" aria-hidden="true">{ICONS[BY_EMOJI[m.group(1).strip()]]}</div>'
                    if m.group(1).strip() in BY_EMOJI else m.group(0), new)
+    new = new.replace(BRAND_OLD, BRAND_NEW)
+    if 'id="layout-polish"' not in new and '</head>' in new:
+        new = new.replace('</head>', LAYOUT + '</head>', 1)
     if new != text:
         path.write_text(new, encoding='utf-8')
         changed += 1
@@ -55,4 +75,4 @@ left = [p for p in DIST.rglob('*.html') if not (LEGACY & set(p.relative_to(DIST)
         and BARE.search(p.read_text(encoding='utf-8'))]
 if left:
     raise RuntimeError(f'emoji icons remain in {len(left)} pages, e.g. {left[0]}')
-print(f'Icons polished: {changed} pages now use inline SVG icons')
+print(f'UI polished: {changed} pages (icons, brand, header and card alignment)')
