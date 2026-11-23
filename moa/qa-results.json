@@ -804,6 +804,38 @@
         "issue": "Owner entry and app must share existing moa-auth-v1 storage key"
       }
     ],
-    "reproducibleWorkerHashMatch": true
+    "reproducibleWorkerHashMatch": true,
+    "otherProductPrIsolation": {
+      "checkedDateKST": "2026-11-23",
+      "pr": 34,
+      "originalHead": "8f4be8eebd6cc5c1a5b1c16cc2ac72f6ed72b277",
+      "refreshHead": "8e5a90762ed6469ad2cd42c79537ad23032d948b",
+      "changedFiles": 0,
+      "tree": "b2c4786e31b6ce58a45a75706b9cff7d50b25d10",
+      "moaPreviewDeployment": "SKIPPED",
+      "moaEventId": "8cf8f745-65ce-489e-9526-6c02fe3a9006",
+      "moaLatestGithubFailureAbsent": true,
+      "biblePreviewDeployment": "success",
+      "bibleQaWorkflow": 45145884177,
+      "bibleQaStatus": "success",
+      "productHealthWorkflow": 45145884209,
+      "productHealthStatus": "success",
+      "branchControls": "Moa production feature branch only; preview automatic builds disabled",
+      "watchPaths": [
+        "moa/*"
+      ],
+      "manualRerunOldFailure": "forced rebuild still fails; not used as final validation",
+      "productionMoaUnchanged": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+      "supabaseModified": false,
+      "existingProductSettingsModified": false,
+      "bibleQaJobs": {
+        "Static Guardrails": "success",
+        "Behavior QA": "success",
+        "Mobile layout (chromium)": "success",
+        "Mobile layout (firefox)": "success",
+        "Mobile layout (webkit)": "success",
+        "Combined Quality Gate": "success"
+      }
+    }
   }
 }
