@@ -11,7 +11,7 @@
     "status": "VERIFIED_NOT_DEPLOYED",
     "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
     "deployment": "BLOCKED",
-    "reason": "User approved existing owner-private Site update on 2026-11-22. Official source workflow stdin was rejected by execution approval policy (AskForApproval::Granular.sandbox_approval=false). No source push, save or deployment call executed.",
+    "reason": "Existing Sites source stdin remains blocked. User authorized alternate hosting; standalone Vercel configuration and allowlisted static package verified, pending confirmed Vercel connection, plan/ownership/protection checks and deployment.",
     "codeCommit": "e42b57aedbd3df331221a78268d175c562fb8f88",
     "manifest": {
       "product": "moa",
@@ -628,5 +628,54 @@
       "syntaxCheck": "DONE",
       "deployedExecution": "NOT_TESTED"
     }
+  },
+  "alternateDeployment": {
+    "dateKST": "2026-11-23",
+    "provider": "Vercel",
+    "status": "PREPARED_PENDING_CONNECTION",
+    "projectCreated": false,
+    "published": false,
+    "userAuthorized": true,
+    "connectionConfirmed": false,
+    "newPaidResourcesCreated": false,
+    "trialStarted": false,
+    "billingPlanVerified": false,
+    "requiredAccessScope": "Owner-only; verify Vercel Authentication All Deployments before first publication",
+    "rootDirectory": "moa",
+    "branch": "feature/moa-integration-20261119",
+    "manifest": {
+      "product": "moa",
+      "revision": "e42b57aedbd3df331221a78268d175c562fb8f88",
+      "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
+      "cloudConfigured": true
+    },
+    "packageFiles": 7,
+    "sourceFilesSha256": {
+      "index.html": "0611762cbf9e1236b5163fe9885ae5d87d1eafced80d3185afcb112b15de4aff",
+      "app.js": "8ef1c3467e27fbc325a0d6e15be239ade3b6d22cdcfb98edb9621b4bf05f0903",
+      "service.css": "04604931cb24accd691d1597856cff8314b4e0cfb46990b369a9e27c18e2f7d9",
+      "build-manifest.json": "8722580c6be3b362af0043cffc093e4067edbda9183a8b3f735f2e6486bd93ed",
+      "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
+      "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+    },
+    "checks": {
+      "byteIdentity": "DONE",
+      "outputAllowlist": "DONE",
+      "securityHeaderParity": "DONE",
+      "scriptSyntax": "DONE",
+      "hostedHeaders": "NOT_TESTED",
+      "hostedAuthAndIsolation": "NOT_TESTED"
+    },
+    "constraints": [
+      "Preserve existing Cloudflare products, DNS, workflows and main",
+      "No paid plan/trial/add-on without approval",
+      "Hobby personal/non-commercial terms require verification before use; commercial rollout may require paid plan",
+      "New origin has separate browser device storage; cloud remains the same Supabase project"
+    ],
+    "references": [
+      "https://vercel.com/docs/deployment-protection#all-deployments",
+      "https://vercel.com/docs/plans/hobby",
+      "https://vercel.com/legal/terms"
+    ]
   }
 }

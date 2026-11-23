@@ -1,0 +1,13 @@
+.git/
+.openai/
+.codex/
+.agents/
+.aws/
+.vercel/
+.env*
+node_modules/
+qa-evidence/
+dist/
+dist-vercel/
+reference/
+tests/
