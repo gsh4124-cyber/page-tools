@@ -34,13 +34,11 @@ const bookSelect=$("#bookSelect"),chapterSelect=$("#chapterSelect"),translationS
 const prevButtons=[$("#prevChapterBottom")].filter(Boolean),nextButtons=[$("#nextChapterBottom")].filter(Boolean);
 const searchForm=$("#searchForm"),searchInput=$("#searchInput"),searchButton=$("#searchButton"),searchPanel=$("#searchPanel"),searchSummary=$("#searchSummary"),searchResults=$("#searchResults");
 const cache=new Map(), pendingBooks=new Map(); const SEARCH_LIMIT=100,SEARCH_BATCH_SIZE=6;
-// The default book is also shipped in the HTML, so the first read does not
-// depend on another request. All default-translation books are shipped on this
-// origin; other translations retain their existing provider.
-try {
-  const initial=document.querySelector('#initial-scripture-data');
-  if(initial){const data=JSON.parse(initial.textContent);if(data.chapters?.length===21)cache.set('krv1961:John',data);}
-} catch (_) { /* A malformed seed must not prevent the normal remote fallback. */ }
+// The default chapter (John 3, KRV) is server-rendered in the HTML and its book is
+// preloaded, so the first read keeps that text on screen instead of a loading state.
+// All default-translation books are shipped on this origin; other translations
+// retain their existing provider.
+let keepServerChapter=true;
 let state=restoreLocation(),currentBookData=null,activeTranslationId=restoreTranslation(),searchRun=0,loadRun=0;
 
 function restoreLocation(){try{const s=JSON.parse(localStorage.getItem("bible-reader-location"));if(s&&Number.isInteger(s.bookIndex)&&Number.isInteger(s.chapter))return{bookIndex:Math.max(0,Math.min(BOOKS.length-1,s.bookIndex)),chapter:Math.max(1,s.chapter)}}catch(_){}return{bookIndex:BOOKS.findIndex(b=>b.file==="John"),chapter:3}}
@@ -94,7 +92,10 @@ async function loadCurrent({scrollTop=true}={}){
   if(translationSelect)translationSelect.value=translationId;
   currentBookData=null;chapterSelect.disabled=true;
   prevButtons.concat(nextButtons).forEach(b=>b.disabled=true);
-  setLoading();
+  // Keep the server-rendered default chapter visible while its book loads.
+  const keep=keepServerChapter&&translationId==="krv1961"&&book.file==="John"&&state.chapter===3&&!!versesEl.querySelector(".verse");
+  keepServerChapter=false;
+  if(!keep)setLoading();
   try{
     const data=await fetchBook(book,translationId);
     // A slower, older request must never replace the book/translation selected last.
