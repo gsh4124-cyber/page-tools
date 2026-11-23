@@ -8,11 +8,11 @@
     "mainMergedOrPushed": false
   },
   "candidate": {
-    "status": "VERIFIED_NOT_DEPLOYED",
-    "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b",
-    "deployment": "BLOCKED",
-    "reason": "Cloudflare GitHub integration and owner-only audience confirmed. Fail-closed Worker prepared; live publication/readback in progress.",
-    "codeCommit": "e42b57aedbd3df331221a78268d175c562fb8f88",
+    "status": "CLOUDFLARE_OWNER_ACCESS_VERIFIED_WITH_LIMITATIONS",
+    "sourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
+    "deployment": "CLOUDFLARE_DEPLOYED",
+    "reason": "Actual Gmail owner login, cloud activation, reload, calendar and source manifest verified. New-host complete media/backup/isolation/header/mobile regression remains untested or inconclusive; see Cloudflare section.",
+    "codeCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
     "manifest": {
       "product": "moa",
       "revision": "e42b57aedbd3df331221a78268d175c562fb8f88",
@@ -22,7 +22,13 @@
     "workerSha256": "3a59a67b21d9d2f3475f3d73a4a885f78e2c97069cd948f57ed57a7d9f7537d8",
     "finalCloudWorkerResponseTest": "DONE",
     "compiledLocally": true,
-    "published": false
+    "published": false,
+    "cloudflareSourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
+    "cloudflareCodeCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+    "previousFrontendCheckpoint": {
+      "commit": "e42b57aedbd3df331221a78268d175c562fb8f88",
+      "sourceSha256": "8c58e3d960535e63cd8780de1906025e5386d868ce3e3bcc0cdc61ed4c06c07b"
+    }
   },
   "unit": {
     "status": "DONE",
@@ -30,7 +36,11 @@
   },
   "audit": {
     "status": "DONE",
-    "vulnerabilities": 0
+    "vulnerabilities": 0,
+    "latestCloudflareReadback": {
+      "dateKST": "2026-11-23",
+      "totalVulnerabilities": 0
+    }
   },
   "browser": {
     "base": "http://127.0.0.1:49196",
@@ -680,7 +690,7 @@
   },
   "cloudflareDeployment": {
     "dateKST": "2026-11-23",
-    "status": "WAITING_USER",
+    "status": "DEPLOYED_OWNER_ACCESS_VERIFIED",
     "provider": "Cloudflare Pages",
     "accountId": "19564c62ca98f5f006440e6cd33ee072",
     "accountLoginVerified": true,
@@ -697,10 +707,10 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-23T08:48:30.609Z",
+      "preparedAt": "2026-11-23T09:11:48.265Z",
       "manifest": {
         "product": "moa",
-        "revision": "a4cd7277c78b33d365eac3d4806b7f8ec9017eb3",
+        "revision": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
         "sourceSha256": "f2d27b2d3ca7582703e26b0040734f2064c394833df9632e221d65fb9719d1a7",
         "cloudConfigured": true
       },
@@ -709,14 +719,14 @@
         "index.html": "0611762cbf9e1236b5163fe9885ae5d87d1eafced80d3185afcb112b15de4aff",
         "app.js": "e9483e9568d7e3f47dc1d1df9e4cd0f4ea3304eb50b7578f7be9322135eb7350",
         "service.css": "04604931cb24accd691d1597856cff8314b4e0cfb46990b369a9e27c18e2f7d9",
-        "build-manifest.json": "85a84cf20fcf4b7d65bbad377ac3e28b3915ed52dabc74543c24a07c1c7fbd5c",
+        "build-manifest.json": "777a737c78ef24e0c800f7a0499bf6b140c09d01d75948e878cbfcd4eb1095be",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "fae6bd90d246c26c74fc0d1be16c57c5465941348b867c292f53aa92e0626e25",
+      "workerSha256": "06905245b52a82a5463342f44ecf12a88d4f1e8ca974ee84f802350c9cdfc7bf",
       "access": "owner-only",
       "staticFallback": "setup notice only",
-      "published": false
+      "published": true
     },
     "directUploadDraft": {
       "name": "moa-diary",
@@ -748,19 +758,52 @@
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
-      "https://developers.cloudflare.com/pages/platform/limits/"
+      "https://developers.cloudflare.com/pages/platform/limits/",
+      "https://developers.cloudflare.com/pages/configuration/git-integration/github-integration/",
+      "https://developers.cloudflare.com/workers/runtime-apis/request/"
     ],
     "access": "owner-only",
     "ownerGateway": {
-      "unitTests": 18,
+      "unitTests": 19,
       "browserPackageChecks": 4,
       "authenticationTest": "synthetic JWT / mocked RPC",
-      "actualOwnerLogin": "NOT_TESTED",
-      "liveHostChecks": "NOT_TESTED",
+      "actualOwnerLogin": "DONE: Gmail receipt, email link verification, owner gate, real cloud account activation",
+      "liveHostChecks": "DONE: owner login/cloud connection/reload/calendar/manifest plus anonymous alias navigation",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
-      "accessSignupCompleted": false
-    }
+      "accessSignupCompleted": false,
+      "providerFailureMode": "closed",
+      "previewBranchDeployments": "disabled",
+      "watchPaths": [
+        "moa/*"
+      ]
+    },
+    "url": "https://moa-diary-web.pages.dev",
+    "sourceCommit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+    "deploymentId": "c72ac756-5bf3-4453-afb0-dfacfbbd9dea",
+    "published": true,
+    "actualBrowserChecks": {
+      "anonymousRoot": "owner portal redirect observed",
+      "anonymousAppJsDocumentNavigation": "owner portal redirect observed",
+      "ownerEmailRequest": "DONE: received and verified in Gmail with user authorization",
+      "authenticatedApplication": "DONE: owner cloud account, reload persistence, calendar month navigation, manifest matches source",
+      "actualResponseHeadersAndStatusCodes": "NOT_TESTED",
+      "responsiveViewport": "INCONCLUSIVE: requested overrides remained actual innerWidth=958; local package portal tests passed at four widths",
+      "diagnosticDownload": "INCONCLUSIVE: browser event wait timed out",
+      "anonymousDeploymentAlias": "owner portal redirect observed for final deployment app.js document navigation",
+      "hostedMediaBackupIsolationReplay": "NOT_TESTED"
+    },
+    "runtimeFixes": [
+      {
+        "commit": "9c68c50d73552956a42a48a4ddc987d55d3dedd2",
+        "issue": "Workers rejects redirect:error before fetch; manual mode rejects 3xx without forwarding credentials"
+      },
+      {
+        "commit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
+        "issue": "Owner entry and app must share existing moa-auth-v1 storage key"
+      }
+    ],
+    "reproducibleWorkerHashMatch": true
   }
 }

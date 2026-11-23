@@ -2,9 +2,9 @@
 
 사용자가 첨부한 v7 원본을 실제 기준으로 만든 모바일 다이어리다. 글·사진·영상, 월간 달력, 다꾸, 습관, 수정·삭제, 로그인, 사용자별 비공개 클라우드, 암호화 전체 백업·복원을 제공한다.
 
-소유자 전용 검토 사이트: [모아 열기](https://moa-diary-20261120.gsh4124.chatgpt.site). 일반 공개는 하지 않았다. 사이트 접근에는 소유자 ChatGPT 계정, 기록 저장에는 모아의 Supabase 계정 로그인이 필요하다.
+현재 소유자 전용 Cloudflare 사이트: [모아 열기](https://moa-diary-web.pages.dev/). 기존 [Sites 검토 주소](https://moa-diary-20261120.gsh4124.chatgpt.site)는 그대로 보존한다. 새 사이트는 기존 Supabase 소유자 계정으로 본인 확인한 뒤 앱과 파일에 접근한다.
 
-기존 세 제품은 Cloudflare Pages에서 운영 중이다. 모아의 이전 검토 배포만 ChatGPT Sites를 사용했다. 사용자가 2026-11-23 Cloudflare를 지정하여 새 모아 전용 Pages 프로젝트로 배포를 준비 중이다. Cloudflare와 GitHub 연결을 확인했고, 사용자는 사이트 전체를 소유자 전용으로 유지하도록 선택했다. Cloudflare 배포 완료로 보고하지 않는다.
+2026-11-23 Cloudflare 프로덕션 배포가 완료됐다. 배포 소스는 `fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c`, 배포 ID는 `c72ac756-5bf3-4453-afb0-dfacfbbd9dea`다. 실제 브라우저에서 루트와 앱 파일 직접 방문이 소유자 입장 화면으로 이동하는 것을 확인했다. 실제 Gmail 수신·소유자 입장·클라우드 연결·새로고침 유지·달력 월 이동과 제공 파일의 빌드 일치를 확인했다. 새 호스트의 전체 미디어/복원 재실행과 실제 HTTP 헤더 검사는 아직 미검증이다. 기존 세 Cloudflare 제품과 공유 Auth 설정은 변경하지 않았다.
 
 ## 원본과 보존 범위
 
@@ -78,9 +78,9 @@ Sites 검토 배포는 공개 설정 빌드 후 `node tools/build-worker.mjs`로
 
 현재 우선 경로는 **Cloudflare Pages**이며 Vercel 연결·프로젝트·요금제 변경은 실행하지 않았다. Cloudflare에는 새 프로젝트만 연결하고, Root Directory `moa`, Production branch `feature/moa-integration-20261119`, Build command `npm run build:cloudflare`, Build output directory `dist-cloudflare`를 사용한다. 환경 변수는 기존 공개 Supabase URL·publishable/anon 키와 `NODE_VERSION=22`다. 기존 세 프로젝트의 root·브랜치·도메인·빌드 명령은 바꾸지 않는다.
 
-`tools/prepare-cloudflare.mjs`는 모든 앱·CSS·상태 파일을 접근 보호 Pages Worker에 내장한다. 출력은 `_worker.js`, 전체 경로를 처리하는 `_routes.json`, 앱이 없는 정적 안내 페이지 3개다. 정적 fallback으로 앱이 공개되지 않는다. 소유자 전용 입장 화면과 인증 코드만 비인증 요청에 제공한다. `MOA_GATE_OWNER_ID`에 설정한 정확한 기존 Auth UUID만 통과하며, 매 요청의 JWT를 기존 `moa_account_status` RPC로 서버 검증한다. payload는 사전 필터일 뿐 서명 검증을 대체하지 않는다. 위조·만료·취소된 세션은 거부하고 RPC 장애는 503으로 차단한다. 모든 응답은 no-store·CSP를 적용한다.
+`tools/prepare-cloudflare.mjs`는 모든 앱·CSS·상태 파일을 접근 보호 Pages Worker에 내장한다. 출력은 `_worker.js`, 전체 경로를 처리하는 `_routes.json`, 앱이 없는 정적 안내 페이지 3개다. 정적 fallback으로 앱이 공개되지 않는다. 제공자 설정도 Fail closed로 저장했고 다른 브랜치의 자동 미리보기 배포를 중지했다. 빌드 감시 경로는 `moa/*`다. 소유자 전용 입장 화면과 인증 코드만 비인증 요청에 제공한다. `MOA_GATE_OWNER_ID`에 설정한 정확한 기존 Auth UUID만 통과하며, 매 요청의 JWT를 기존 `moa_account_status` RPC로 서버 검증한다. payload는 사전 필터일 뿐 서명 검증을 대체하지 않는다. 위조·만료·취소된 세션은 거부하고 RPC 장애는 503으로 차단한다. 모든 응답은 no-store·CSP를 적용한다.
 
-Cloudflare 환경 변수에 기존 공개 URL·anon/publishable 키, `NODE_VERSION=22`, 원래 소유자 UUID의 `MOA_GATE_OWNER_ID`를 설정한다. 보호 쿠키는 Secure·HttpOnly·SameSite=Strict이며 SDK 세션 갱신·로그아웃과 동기화한다. Google 계정으로 생성되어 비밀번호가 없는 소유자는 기존 이메일로 입장 메일을 받고 링크를 붙여 넣는다. 새 회원가입·공유 Auth 리디렉션·비밀번호 변경은 필요하지 않다. 실제 소유자의 메일 수신·입장은 아직 미검증이다.
+Cloudflare 환경 변수에 기존 공개 URL·anon/publishable 키, `NODE_VERSION=22`, 원래 소유자 UUID의 `MOA_GATE_OWNER_ID`를 설정한다. 보호 쿠키는 Secure·HttpOnly·SameSite=Strict이며 SDK 세션 갱신·로그아웃과 동기화한다. Google 계정으로 생성되어 비밀번호가 없는 소유자는 기존 이메일로 입장 메일을 받고 링크를 붙여 넣는다. 새 회원가입·공유 Auth 리디렉션·비밀번호 변경은 필요하지 않다. 실제 소유자의 Gmail 메일 수신과 링크 인증, 클라우드 연결을 확인했다.
 
 기존 Workers Free 한도(계정 공유 100,000회/일)를 사용한다. 한도 도달 시 접속 실패 가능성이 있으며 자동 유료 전환은 신청하지 않았다. Access Free 가입도 카드와 초과 과금 동의를 요구해 완료하지 않았다. 새 유료 요금제·카드·Access 자원은 없다. Direct Upload `moa-diary`는 업로드·배포 없는 초안으로 보존하고 Git 연결 프로젝트 `moa-diary-web`만 사용한다.
 
@@ -92,7 +92,7 @@ Cloudflare 환경 변수에 기존 공개 URL·anon/publishable 키, `NODE_VERSI
 
 ## 검증과 남은 항목
 
-11월 23일 접근 보호 추가 후 단위/DB/Worker 18개와 패키지 브라우저 검사 4개를 통과했다. 새 패키지 검사는 모의 인증이며 실제 소유자 로그인과 구분한다. 이전 체크포인트에서 단위/DB/Worker 15개, 로컬 브라우저 9개 검사군, 가상 Supabase 연결 6개, 실제 Supabase 연결 12개를 통과했다. 추가로 실제 탈퇴·이전 세션 차단·재가입, 수신한 복구 메일로 비밀번호 변경, 전송을 시작한 업로드 취소, 별도 빈 QA 계정으로 암호화 파일 복원, 사진 최적화·진단·기기 삭제 등 6개 기능군과 브라우저 오류 0·시험 자료 정리를 확인했다. 이전 버전의 실제 48/96MiB 한도 검사와 배포 후 검사는 과거 체크포인트이며 이번 후보의 배포 후 검사로 계산하지 않는다.
+11월 23일 접근 보호 추가 후 단위/DB/Worker 19개와 패키지 브라우저 검사 4개를 통과했다. 패키지 검사는 모의 인증이며, 실제 호스트에서는 별도로 원래 소유자의 메일 로그인·클라우드 연결·재접속·달력을 확인했다. 이전 체크포인트에서 단위/DB/Worker 15개, 로컬 브라우저 9개 검사군, 가상 Supabase 연결 6개, 실제 Supabase 연결 12개를 통과했다. 추가로 실제 탈퇴·이전 세션 차단·재가입, 수신한 복구 메일로 비밀번호 변경, 전송을 시작한 업로드 취소, 별도 빈 QA 계정으로 암호화 파일 복원, 사진 최적화·진단·기기 삭제 등 6개 기능군과 브라우저 오류 0·시험 자료 정리를 확인했다. 이전 버전의 실제 48/96MiB 한도 검사와 배포 후 검사는 과거 체크포인트이며 이번 후보의 배포 후 검사로 계산하지 않는다.
 
 실기기 제공 불가로 Android/iOS 실기기는 미검증이다. 자연적인 토큰 만료까지 기다린 검사, 실제 케이블/망 단절·모바일 OS 종료, 모바일 메모리·코덱 전수, ChatGPT 소유자 대화형 로그인, 독립 off-site/PITR 재해복구와 실제 사용자 파일럿은 미검증이다. 탈퇴와 동시에 진행되는 모든 쓰기 순서의 전수 시험도 하지 않았다. 새 유료 자원·별도 SMTP/PITR·요금제 변경은 하지 않았다.
 
