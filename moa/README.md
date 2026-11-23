@@ -4,6 +4,8 @@
 
 소유자 전용 검토 사이트: [모아 열기](https://moa-diary-20261120.gsh4124.chatgpt.site). 일반 공개는 하지 않았다. 사이트 접근에는 소유자 ChatGPT 계정, 기록 저장에는 모아의 Supabase 계정 로그인이 필요하다.
 
+기존 세 제품은 Cloudflare Pages에서 운영 중이다. 모아의 이전 검토 배포만 ChatGPT Sites를 사용했다. 사용자가 2026-11-23 Cloudflare를 지정하여 새 모아 전용 Pages 프로젝트로 배포를 준비 중이다. 현재 Cloudflare 로그인은 확인했고, GitHub 연결의 본인 로그인과 새 주소의 공개 범위 확인을 기다린다. Cloudflare 배포 완료로 보고하지 않는다.
+
 ## 원본과 보존 범위
 
 - 원본 `reference/moa_diary_v7.html`: 33,644바이트, SHA-256 `2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db`.
@@ -73,6 +75,12 @@ Sites 검토 배포는 공개 설정 빌드 후 `node tools/build-worker.mjs`로
 현재 사이트는 이전 버전 2다. 2026-11-22 사용자가 기존 비공개 사이트 업데이트를 승인했다. 소유자 전용·외부 방문자 0을 재확인했지만, 공식 소스 동기화 도구에 숨긴 입력을 전달하는 단계가 실행 승인 정책으로 거부됐다(`AskForApproval::Granular.sandbox_approval=false`). 배포 동의는 확보됐고 실행 권한이 차단된 상태다. 저장소 호스트 `git.chatgpt-team.site`로 이 사이트의 소스를 동기화하는 배포 작업만 허용되어야 한다. 업로드·버전 저장·배포 호출은 실행하지 않았다.
 
 대체 배포는 기존 세 제품과 분리한 새 Vercel 프로젝트로 준비했다. 연결 상태는 아직 미확인이다. 계정 연결 후 요금제·소유권을 확인하고, 첫 배포 전에 Vercel Authentication의 **All Deployments**를 켜야 한다. 이 접근 보호는 현재 모든 요금제에서 별도 유료 추가 기능 없이 제공된다. [현재 보호 범위](https://vercel.com/docs/deployment-protection#all-deployments). Hobby의 개인·비상업 사용 조건을 확인하며 유료 전환·상용 요금이 필요하면 먼저 승인받는다. [요금제](https://vercel.com/docs/plans/hobby), [이용 조건](https://vercel.com/legal/terms).
+
+현재 우선 경로는 **Cloudflare Pages**이며 Vercel 연결·프로젝트·요금제 변경은 실행하지 않았다. Cloudflare에는 새 프로젝트만 연결하고, Root Directory `moa`, Production branch `feature/moa-integration-20261119`, Build command `npm run build:cloudflare`, Build output directory `dist-cloudflare`를 사용한다. 환경 변수는 기존 공개 Supabase URL·publishable/anon 키와 `NODE_VERSION=22`다. 기존 세 프로젝트의 root·브랜치·도메인·빌드 명령은 바꾸지 않는다.
+
+`tools/prepare-cloudflare.mjs`는 같은 cloud 빌드의 공개 앱 파일·`_headers`·상태 파일·상태 경로 규칙만 9개 출력한다. 소스·시험 자료·Sites 신원·Worker 서버를 포함하지 않는다. 파일 해시는 기존 검증본과 일치했다. 정적 Pages이므로 새 유료 Worker·DB·버킷을 만들지 않는다. 배포 후에는 실제 헤더·404·로그인·사용자 격리·미디어·복원을 다시 확인해야 한다. [Cloudflare 직접 업로드](https://developers.cloudflare.com/pages/get-started/direct-upload/), [정적 응답 헤더](https://developers.cloudflare.com/pages/configuration/headers/).
+
+브라우저의 직접 파일 업로드는 Chrome 확장의 file URL 접근 미허용으로 실패했고 전송되지 않았다. 계정에 배포가 없는 `moa-diary` Direct Upload 초안이 만들어졌다. 이 프로젝트는 나중에 Git 연결로 전환할 수 없으므로, 자동 빌드 경로는 별도 새 이름으로 만들어야 한다. 초안은 기존 제품 데이터가 없으며 아직 삭제하지 않았다. 현재 Chrome은 GitHub에서 Cloudflare Workers and Pages로 돌아가기 위한 본인 로그인 화면에 있다.
 
 새 프로젝트만 저장소 `gsh4124-cyber/page-tools`, Root Directory `moa`, 대상 브랜치 `feature/moa-integration-20261119`를 사용한다. 공개 설정 변수 `MOA_SUPABASE_URL`, `MOA_SUPABASE_PUBLISHABLE_KEY`는 같은 기존 Supabase를 가리켜야 한다. `vercel.json`이 빌드와 출력 폴더 `dist-vercel`을 지정한다. `node tools/prepare-vercel.mjs`는 검증된 cloud 빌드를 요구하고 보안 헤더를 기존 빌드와 비교한 뒤 공개 파일 7개만 복사한다. 기기 모드 빌드·헤더 불일치는 배포 준비를 실패시킨다. 로컬 실행에서 기존 후보와 파일 해시·헤더가 일치했다. Vercel의 실제 응답·로그인·데이터 격리 검사는 연결·배포 후 실행해야 하며 아직 미검증이다.
 

@@ -35,7 +35,11 @@
 
 11월 23일 사용자가 다른 배포 방법을 승인했다. 별도 Vercel 프로젝트용 설정·공개 출력 분리 도구를 준비했다. 공개 출력 7개만 포함하고, 앱 파일 6개의 SHA-256이 기존 검증 후보와 동일하며 상태 파일의 빌드 해시도 일치함을 확인했다. 보안 헤더는 기존 `_headers`와 전부 일치한다. 이 결과는 로컬 패키지 검사이며 Vercel의 실제 응답 검사가 아니다. 기존 제품·Cloudflare·DNS·공통 워크플로는 변경하지 않았다.
 
-Vercel은 검색 가능한 대체 연결이며 아직 설치·계정 연결이 확인되지 않았다. 연결 후 실제 요금제·프로젝트 소유권·All Deployments 접근 보호를 확인한 다음 배포해야 한다. 보호 기능은 현재 모든 요금제에서 별도 유료 추가 기능 없이 제공된다. Hobby의 개인·비상업 조건과 상용 요금은 구분한다. 유료 전환·체험판·새 프로젝트·결제는 실행하지 않았다. [보호 기능](https://vercel.com/docs/deployment-protection#all-deployments), [이용 조건](https://vercel.com/legal/terms).
+Vercel은 검색 가능한 대체 연결이며 설치·계정 연결·프로젝트 생성·결제는 실행하지 않았다. 사용자가 기존 제품과 같은 Cloudflare를 지정해 Vercel 준비 파일은 사용하지 않고 보관한다.
+
+Cloudflare의 로그인된 계정에서 기존 `random-ppobgi`, `pc-checkup`, `bible-reader` Pages 프로젝트를 확인했다. 기존 세 제품의 모아 작업 diff는 0이다. Direct Upload 프로젝트 `moa-diary` 초안은 생성됐지만 Chrome 확장의 file URL 접근 제한으로 파일 업로드가 전송되지 않았다. 배포도 없다. 기존 제품과 같은 GitHub 연결 방식으로 전환하는 중이며, Chrome의 GitHub 본인 로그인 화면에서 기다린다. Direct Upload 프로젝트는 Git 연결로 전환할 수 없어 Git 연결용 새 이름을 사용해야 한다. 초안은 삭제하지 않았다.
+
+Cloudflare 출력은 앱·헤더·상태 파일·경로 규칙 9개다. 원본 v7 해시는 다시 일치했고, 기존 후보의 앱 파일과 헤더를 그대로 복사했다. 서버의 모아 테이블 3개 RLS·FORCE RLS, 비공개 버킷·25MiB 한도, health ready/protocol 2를 다시 확인했다. 모아의 Cloudflare 사이트 전체 공개 범위는 사용자 답변을 기다린다. 실제 게시·새 호스트의 헤더·로그인·격리는 미검증이며 비용·요금제·기존 프로젝트 설정 변경은 실행하지 않았다.
 
 추가 기능군은 다음과 같다.
 
@@ -66,6 +70,7 @@ Vercel은 검색 가능한 대체 연결이며 아직 설치·계정 연결이 �
 |---|---|
 | 이번 후보의 사이트 반영·배포 후 검사 | BLOCKED · 배포 동의 확보, 공식 도구의 숨긴 입력·Git 동기화 실행 승인 필요 |
 | 대체 Vercel 게시·접근 보호·실제 응답 검사 | BLOCKED · 배포 파일 준비 완료, Vercel 설치·계정 연결 미확인 |
+| Cloudflare 모아 게시·배포 후 검사 | WAITING_USER · 본인 GitHub 로그인 및 접근 범위 확인, 패키지 준비 완료 |
 | Android/iOS 실기기·네이티브 선택기·터치·키보드·코덱/메모리 | NOT_TESTED · 사용자가 실기기 제공 불가 응답 |
 | 자연적인 access token 만료 대기 | NOT_TESTED · 강제 갱신·폐기와 구분 |
 | 물리적 망 단절·모바일 OS 종료 | NOT_TESTED · 실제 스트림 중간 취소와 구분 |
