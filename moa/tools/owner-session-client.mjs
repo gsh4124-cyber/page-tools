@@ -1,6 +1,6 @@
 // Keep the HttpOnly site gate aligned with the existing SDK session, without
 // creating another Auth client or changing the diary's persistence behavior.
-const storageKey='sb-afiqaibosavbjzkffggr-auth-token';let lastToken,working=false;
+const storageKey='moa-auth-v1';let lastToken,working=false;
 async function synchronize(){
  if(working||document.hidden)return;working=true;
  try{

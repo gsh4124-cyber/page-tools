@@ -1,5 +1,5 @@
 import {createClient} from '@supabase/supabase-js';
-const config=__MOA_GATE_CONFIG__,client=createClient(config.url,config.key,{auth:{detectSessionInUrl:false}}),$=s=>document.querySelector(s);
+const config=__MOA_GATE_CONFIG__,client=createClient(config.url,config.key,{auth:{storageKey:'moa-auth-v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}),$=s=>document.querySelector(s);
 let busy=false;
 const notice=text=>$('#gateNotice').textContent=text;
 const enter=async session=>{

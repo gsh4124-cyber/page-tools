@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {ownerGateway,GATE_COOKIE} from '../tools/owner-gateway.mjs';
 const owner='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222';
 const env={MOA_GATE_OWNER_ID:owner,MOA_SUPABASE_URL:'https://afiqaibosavbjzkffggr.supabase.co',MOA_SUPABASE_PUBLISHABLE_KEY:'public-anon-fixture'};
@@ -9,6 +10,13 @@ const routes=Object.fromEntries([['/','PRIVATE_APP'],['/index.html','PRIVATE_APP
 const request=(path='/',options={})=>new Request('https://moa.test'+path,options);
 const post=(value,origin='https://moa.test')=>request('/__moa_session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({accessToken:value})});
 const verified=async(url,init)=>{assert.equal(url,env.MOA_SUPABASE_URL+'/rest/v1/rpc/moa_account_status');assert.equal(init.headers.Authorization,'Bearer '+token);assert.equal(init.headers.apikey,env.MOA_SUPABASE_PUBLISHABLE_KEY);assert.equal(init.redirect,'manual');return Response.json({status:'active'});};
+
+test('owner portal and cookie synchronization share the diary Auth storage key',async()=>{
+ const read=p=>readFile(new URL('../'+p,import.meta.url),'utf8');
+ const repo=await read('repository.mjs'),portal=await read('tools/owner-access-client.mjs'),sync=await read('tools/owner-session-client.mjs');
+ const key=repo.match(/storageKey:'([^']+)'/)[1];
+ assert.ok(portal.includes("storageKey:'"+key+"'"));assert.ok(sync.includes("storageKey='"+key+"'"));
+});
 test('owner gateway fails closed before configuration and never serves diary assets anonymously',async()=>{
  const unexpected=()=>{throw Error('Auth service should not be called');};
  for(const path of Object.keys(routes)){const r=await ownerGateway(request(path),{},routes,headers,unexpected);assert.equal(r.status,503);assert.ok(!(await r.text()).includes('PRIVATE_'));}
