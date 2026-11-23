@@ -12,7 +12,13 @@ import hashlib
 import re
 
 STATIC_DIR = 'static'
-HEADERS = f"""/{STATIC_DIR}/*
+# Only these sites and Google (AdSense previews) may show the pages inside a frame;
+# other sites cannot overlay them to trick clicks.
+FRAME_ANCESTORS = "frame-ancestors 'self' https://*.google.com https://*.googlesyndication.com"
+HEADERS = f"""/*
+  Content-Security-Policy: {FRAME_ANCESTORS}
+
+/{STATIC_DIR}/*
   Cache-Control: public, max-age=31536000, immutable
 """
 # src="..." / href="..." pointing at a local .js/.css file with no query or fragment.
