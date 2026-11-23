@@ -9,7 +9,7 @@ const origins = {
 const assets = {
   // Pages Functions intentionally rewrite Random Picker HTML at request time.
   'random-ppobgi': ['full-app-loader.js', 'experience.js', 'i18n-v2.js'],
-  'bible-reader': ['index.html', 'reader-experience.js', 'topbar-polish.css'],
+  'bible-reader': ['index.html', 'reader-experience.js', 'i18n-layout.css'],
   'pc-checkup': ['device-experience.js', 'app.js', 'mobile.js'],
 };
 const projects = (process.env.PROJECTS || '').split(/\s+/).filter(Boolean);
