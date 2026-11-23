@@ -4,7 +4,7 @@
 
 소유자 전용 검토 사이트: [모아 열기](https://moa-diary-20261120.gsh4124.chatgpt.site). 일반 공개는 하지 않았다. 사이트 접근에는 소유자 ChatGPT 계정, 기록 저장에는 모아의 Supabase 계정 로그인이 필요하다.
 
-기존 세 제품은 Cloudflare Pages에서 운영 중이다. 모아의 이전 검토 배포만 ChatGPT Sites를 사용했다. 사용자가 2026-11-23 Cloudflare를 지정하여 새 모아 전용 Pages 프로젝트로 배포를 준비 중이다. 현재 Cloudflare 로그인은 확인했고, GitHub 연결의 본인 로그인과 새 주소의 공개 범위 확인을 기다린다. Cloudflare 배포 완료로 보고하지 않는다.
+기존 세 제품은 Cloudflare Pages에서 운영 중이다. 모아의 이전 검토 배포만 ChatGPT Sites를 사용했다. 사용자가 2026-11-23 Cloudflare를 지정하여 새 모아 전용 Pages 프로젝트로 배포를 준비 중이다. Cloudflare와 GitHub 연결을 확인했고, 사용자는 사이트 전체를 소유자 전용으로 유지하도록 선택했다. Cloudflare 배포 완료로 보고하지 않는다.
 
 ## 원본과 보존 범위
 
@@ -78,9 +78,11 @@ Sites 검토 배포는 공개 설정 빌드 후 `node tools/build-worker.mjs`로
 
 현재 우선 경로는 **Cloudflare Pages**이며 Vercel 연결·프로젝트·요금제 변경은 실행하지 않았다. Cloudflare에는 새 프로젝트만 연결하고, Root Directory `moa`, Production branch `feature/moa-integration-20261119`, Build command `npm run build:cloudflare`, Build output directory `dist-cloudflare`를 사용한다. 환경 변수는 기존 공개 Supabase URL·publishable/anon 키와 `NODE_VERSION=22`다. 기존 세 프로젝트의 root·브랜치·도메인·빌드 명령은 바꾸지 않는다.
 
-`tools/prepare-cloudflare.mjs`는 같은 cloud 빌드의 공개 앱 파일·`_headers`·상태 파일·상태 경로 규칙만 9개 출력한다. 소스·시험 자료·Sites 신원·Worker 서버를 포함하지 않는다. 파일 해시는 기존 검증본과 일치했다. 정적 Pages이므로 새 유료 Worker·DB·버킷을 만들지 않는다. 배포 후에는 실제 헤더·404·로그인·사용자 격리·미디어·복원을 다시 확인해야 한다. [Cloudflare 직접 업로드](https://developers.cloudflare.com/pages/get-started/direct-upload/), [정적 응답 헤더](https://developers.cloudflare.com/pages/configuration/headers/).
+`tools/prepare-cloudflare.mjs`는 모든 앱·CSS·상태 파일을 접근 보호 Pages Worker에 내장한다. 출력은 `_worker.js`, 전체 경로를 처리하는 `_routes.json`, 앱이 없는 정적 안내 페이지 3개다. 정적 fallback으로 앱이 공개되지 않는다. 소유자 전용 입장 화면과 인증 코드만 비인증 요청에 제공한다. `MOA_GATE_OWNER_ID`에 설정한 정확한 기존 Auth UUID만 통과하며, 매 요청의 JWT를 기존 `moa_account_status` RPC로 서버 검증한다. payload는 사전 필터일 뿐 서명 검증을 대체하지 않는다. 위조·만료·취소된 세션은 거부하고 RPC 장애는 503으로 차단한다. 모든 응답은 no-store·CSP를 적용한다.
 
-브라우저의 직접 파일 업로드는 Chrome 확장의 file URL 접근 미허용으로 실패했고 전송되지 않았다. 계정에 배포가 없는 `moa-diary` Direct Upload 초안이 만들어졌다. 이 프로젝트는 나중에 Git 연결로 전환할 수 없으므로, 자동 빌드 경로는 별도 새 이름으로 만들어야 한다. 초안은 기존 제품 데이터가 없으며 아직 삭제하지 않았다. 현재 Chrome은 GitHub에서 Cloudflare Workers and Pages로 돌아가기 위한 본인 로그인 화면에 있다.
+Cloudflare 환경 변수에 기존 공개 URL·anon/publishable 키, `NODE_VERSION=22`, 원래 소유자 UUID의 `MOA_GATE_OWNER_ID`를 설정한다. 보호 쿠키는 Secure·HttpOnly·SameSite=Strict이며 SDK 세션 갱신·로그아웃과 동기화한다. Google 계정으로 생성되어 비밀번호가 없는 소유자는 기존 이메일로 입장 메일을 받고 링크를 붙여 넣는다. 새 회원가입·공유 Auth 리디렉션·비밀번호 변경은 필요하지 않다. 실제 소유자의 메일 수신·입장은 아직 미검증이다.
+
+기존 Workers Free 한도(계정 공유 100,000회/일)를 사용한다. 한도 도달 시 접속 실패 가능성이 있으며 자동 유료 전환은 신청하지 않았다. Access Free 가입도 카드와 초과 과금 동의를 요구해 완료하지 않았다. 새 유료 요금제·카드·Access 자원은 없다. Direct Upload `moa-diary`는 업로드·배포 없는 초안으로 보존하고 Git 연결 프로젝트 `moa-diary-web`만 사용한다.
 
 새 프로젝트만 저장소 `gsh4124-cyber/page-tools`, Root Directory `moa`, 대상 브랜치 `feature/moa-integration-20261119`를 사용한다. 공개 설정 변수 `MOA_SUPABASE_URL`, `MOA_SUPABASE_PUBLISHABLE_KEY`는 같은 기존 Supabase를 가리켜야 한다. `vercel.json`이 빌드와 출력 폴더 `dist-vercel`을 지정한다. `node tools/prepare-vercel.mjs`는 검증된 cloud 빌드를 요구하고 보안 헤더를 기존 빌드와 비교한 뒤 공개 파일 7개만 복사한다. 기기 모드 빌드·헤더 불일치는 배포 준비를 실패시킨다. 로컬 실행에서 기존 후보와 파일 해시·헤더가 일치했다. Vercel의 실제 응답·로그인·데이터 격리 검사는 연결·배포 후 실행해야 하며 아직 미검증이다.
 
@@ -90,7 +92,7 @@ Sites 검토 배포는 공개 설정 빌드 후 `node tools/build-worker.mjs`로
 
 ## 검증과 남은 항목
 
-이번 변경 후 단위/DB/Worker 15개, 로컬 브라우저 9개 검사군, 가상 Supabase 연결 6개, 실제 Supabase 연결 12개를 통과했다. 추가로 실제 탈퇴·이전 세션 차단·재가입, 수신한 복구 메일로 비밀번호 변경, 전송을 시작한 업로드 취소, 별도 빈 QA 계정으로 암호화 파일 복원, 사진 최적화·진단·기기 삭제 등 6개 기능군과 브라우저 오류 0·시험 자료 정리를 확인했다. 이전 버전의 실제 48/96MiB 한도 검사와 배포 후 검사는 과거 체크포인트이며 이번 후보의 배포 후 검사로 계산하지 않는다.
+11월 23일 접근 보호 추가 후 단위/DB/Worker 18개와 패키지 브라우저 검사 4개를 통과했다. 새 패키지 검사는 모의 인증이며 실제 소유자 로그인과 구분한다. 이전 체크포인트에서 단위/DB/Worker 15개, 로컬 브라우저 9개 검사군, 가상 Supabase 연결 6개, 실제 Supabase 연결 12개를 통과했다. 추가로 실제 탈퇴·이전 세션 차단·재가입, 수신한 복구 메일로 비밀번호 변경, 전송을 시작한 업로드 취소, 별도 빈 QA 계정으로 암호화 파일 복원, 사진 최적화·진단·기기 삭제 등 6개 기능군과 브라우저 오류 0·시험 자료 정리를 확인했다. 이전 버전의 실제 48/96MiB 한도 검사와 배포 후 검사는 과거 체크포인트이며 이번 후보의 배포 후 검사로 계산하지 않는다.
 
 실기기 제공 불가로 Android/iOS 실기기는 미검증이다. 자연적인 토큰 만료까지 기다린 검사, 실제 케이블/망 단절·모바일 OS 종료, 모바일 메모리·코덱 전수, ChatGPT 소유자 대화형 로그인, 독립 off-site/PITR 재해복구와 실제 사용자 파일럿은 미검증이다. 탈퇴와 동시에 진행되는 모든 쓰기 순서의 전수 시험도 하지 않았다. 새 유료 자원·별도 SMTP/PITR·요금제 변경은 하지 않았다.
 

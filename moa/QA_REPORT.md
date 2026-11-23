@@ -22,7 +22,7 @@
 
 | 검사 | 결과와 범위 |
 |---|---|
-| 단위·PostgreSQL 엔진·Worker | DONE · 15개 통과, 마지막 잠금 후 권한 검사 포함 |
+| 단위·PostgreSQL 엔진·Worker | DONE · 11월 23일 18개 통과, 소유자 접근 보호 포함 |
 | 로컬 Chrome 브라우저 | DONE · 9개 검사군, 320/390/768/1280px |
 | 가상 Supabase 연결 계약 | DONE · 6개, 실제 서버 검사와 구분 |
 | 실제 Supabase Auth/REST/RPC/GraphQL/Storage | DONE · 최신 DB 반영 후 12개, 브라우저 오류 0 |
@@ -37,9 +37,13 @@
 
 Vercel은 검색 가능한 대체 연결이며 설치·계정 연결·프로젝트 생성·결제는 실행하지 않았다. 사용자가 기존 제품과 같은 Cloudflare를 지정해 Vercel 준비 파일은 사용하지 않고 보관한다.
 
-Cloudflare의 로그인된 계정에서 기존 `random-ppobgi`, `pc-checkup`, `bible-reader` Pages 프로젝트를 확인했다. 기존 세 제품의 모아 작업 diff는 0이다. Direct Upload 프로젝트 `moa-diary` 초안은 생성됐지만 Chrome 확장의 file URL 접근 제한으로 파일 업로드가 전송되지 않았다. 배포도 없다. 기존 제품과 같은 GitHub 연결 방식으로 전환하는 중이며, Chrome의 GitHub 본인 로그인 화면에서 기다린다. Direct Upload 프로젝트는 Git 연결로 전환할 수 없어 Git 연결용 새 이름을 사용해야 한다. 초안은 삭제하지 않았다.
+Cloudflare의 로그인된 계정에서 기존 `random-ppobgi`, `pc-checkup`, `bible-reader` Pages를 확인했다. 모아 외 코드 diff는 0이다. GitHub 연결을 완료했고 사이트 전체 소유자 전용으로 유지한다는 사용자 답변을 반영했다. 유료 자원과 카드 등록은 하지 않았다. Access Free 결제 단계는 카드·초과 과금 동의가 필요해 완료하지 않았다.
 
-Cloudflare 출력은 앱·헤더·상태 파일·경로 규칙 9개다. 원본 v7 해시는 다시 일치했고, 기존 후보의 앱 파일과 헤더를 그대로 복사했다. 서버의 모아 테이블 3개 RLS·FORCE RLS, 비공개 버킷·25MiB 한도, health ready/protocol 2를 다시 확인했다. 모아의 Cloudflare 사이트 전체 공개 범위는 사용자 답변을 기다린다. 실제 게시·새 호스트의 헤더·로그인·격리는 미검증이며 비용·요금제·기존 프로젝트 설정 변경은 실행하지 않았다.
+별도 `moa-diary-web`용 Pages Worker는 모든 앱 파일을 내장하고 정적 fallback에는 안내 페이지만 둔다. 소유자 UUID + 실제 Supabase 세션을 기존 RPC로 확인한다. 비인증·다른 사용자·위조·만료·취소된 세션은 차단하며 backend 장애도 503으로 닫힌다. 세션 쿠키는 Secure/HttpOnly/SameSite=Strict, CSRF Origin 검사, 5000바이트 요청 제한을 적용한다. 공유 Auth 설정과 기존 제품은 변경하지 않는다.
+
+11월 23일 새 접근 보호를 포함한 단위/DB/Worker 테스트 18개가 통과했다. 배포 패키지 브라우저 검사 4개(비인증 앱·CSS·manifest·health 차단, 320/390/768/1280px 입장 화면/CSP, 합성 로그인 후 HttpOnly 쿠키·앱 파일, 로그아웃 후 차단)도 통과했다. 이 검사는 모의 RPC/합성 JWT를 사용했으며 실제 Supabase 소유자 로그인 성공으로 계산하지 않는다. 원래 소유자는 Google 공급자로 가입했고 비밀번호가 없어 이메일 링크 입장 기능을 제공한다. 메일 발송·수신·최종 소유자 입장은 배포 후 미검증이다. 기존 실제 로그인·미디어·격리·복구 결과는 아래 과거 체크포인트로 구분한다.
+
+현재 새 Worker 패키지 3개를 준비했고 실제 Cloudflare 게시·호스트 응답 검사는 다음 단계다. 이전 정적 9파일 archive는 현재 소유자 전용 배포에 사용하지 않는다.
 
 추가 기능군은 다음과 같다.
 
@@ -70,7 +74,7 @@ Cloudflare 출력은 앱·헤더·상태 파일·경로 규칙 9개다. 원본 v
 |---|---|
 | 이번 후보의 사이트 반영·배포 후 검사 | BLOCKED · 배포 동의 확보, 공식 도구의 숨긴 입력·Git 동기화 실행 승인 필요 |
 | 대체 Vercel 게시·접근 보호·실제 응답 검사 | BLOCKED · 배포 파일 준비 완료, Vercel 설치·계정 연결 미확인 |
-| Cloudflare 모아 게시·배포 후 검사 | WAITING_USER · 본인 GitHub 로그인 및 접근 범위 확인, 패키지 준비 완료 |
+| Cloudflare 모아 게시·배포 후 검사 | IN_PROGRESS · 로그인·소유자 전용 답변 확보, 보호 Worker 준비 |
 | Android/iOS 실기기·네이티브 선택기·터치·키보드·코덱/메모리 | NOT_TESTED · 사용자가 실기기 제공 불가 응답 |
 | 자연적인 access token 만료 대기 | NOT_TESTED · 강제 갱신·폐기와 구분 |
 | 물리적 망 단절·모바일 OS 종료 | NOT_TESTED · 실제 스트림 중간 취소와 구분 |

@@ -1,0 +1,23 @@
+// Packaged Worker/browser integration. Synthetic authentication is mocked here;
+// this does not claim a successful real owner sign-in on Cloudflare.
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFile,writeFile} from 'node:fs/promises';
+import {chromium} from 'playwright';
+const root=new URL('../',import.meta.url),manifest=JSON.parse(await readFile(new URL('dist/build-manifest.json',root),'utf8'));
+const owner='851fc863-0e90-442c-8f6f-34367d185429',exp=Math.floor(Date.now()/1000)+3600;
+const token=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:owner,role:'authenticated',exp,is_anonymous:false})).toString('base64url'),'synthetic'].join('.');
+const realFetch=globalThis.fetch;globalThis.fetch=async(url,opts)=>String(url).endsWith('/rest/v1/rpc/moa_account_status')?new Response(JSON.stringify({status:'active'}),{headers:{'Content-Type':'application/json'}}):realFetch(url,opts);
+const worker=(await import('../dist-cloudflare/_worker.js')).default;
+const env={MOA_SUPABASE_URL:'https://afiqaibosavbjzkffggr.supabase.co',MOA_SUPABASE_PUBLISHABLE_KEY:'synthetic-public-key',MOA_GATE_OWNER_ID:owner};
+const server=createServer(async(req,res)=>{try{const chunks=[];for await(const c of req)chunks.push(c);const r=await worker.fetch(new Request('http://127.0.0.1:'+server.address().port+req.url,{method:req.method,headers:req.headers,...(['GET','HEAD'].includes(req.method)?{}:{body:Buffer.concat(chunks)})}),env);res.writeHead(r.status,Object.fromEntries(r.headers));res.end(Buffer.from(await r.arrayBuffer()));}catch{res.writeHead(500);res.end('Test adapter failure');}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port,results=[],errors=[];let browser;
+const check=async(name,fn)=>{await fn();results.push({name,status:'DONE'});console.log('DONE',name);};
+try{
+ browser=await chromium.launch({channel:'chrome',headless:true});const cx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await cx.newPage();page.on('pageerror',e=>errors.push(e.message));
+ await check('packaged Worker blocks anonymous HTML, assets, manifest and health',async()=>{for(const path of ['/','/index.html','/app.js','/service.css','/build-manifest.json','/healthz','/__moa_session_sync.js']){const r=await cx.request.get(base+path,{maxRedirects:0});assert.ok([303,401].includes(r.status()),path);assert.ok(!(await r.text()).includes('id="entryForm"'));}});
+ await check('owner portal renders without overflow at 320/390/768/1280px and CSP',async()=>{await page.goto(base);await page.getByRole('heading',{name:'모아 · 소유자 입장'}).waitFor();for(const width of [320,390,768,1280]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}await page.setViewportSize({width:390,height:844});await page.screenshot({path:new URL('qa-evidence/owner-portal-mobile.png',root).pathname.replace(/^\/(.:)/,'$1')});assert.match((await cx.request.get(base+'/__moa_access')).headers()['content-security-policy'],/script-src 'self'/);});
+ await check('synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application',async()=>{const r=await cx.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}});assert.equal(r.status(),204);const cookie=(await cx.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');const app=await cx.request.get(base+'/index.html');assert.equal(app.status(),200);assert.match(await app.text(),/id="entryForm"/);assert.equal((await cx.request.get(base+'/app.js')).status(),200);assert.deepEqual(await (await cx.request.get(base+'/build-manifest.json')).json(),manifest);});
+ await check('logout removes access immediately; public static fallback contains no application',async()=>{assert.equal((await cx.request.post(base+'/__moa_logout',{headers:{Origin:base}})).status(),204);assert.equal((await cx.request.get(base+'/app.js')).status(),401);assert.ok(!(await readFile(new URL('dist-cloudflare/index.html',root),'utf8')).includes('entryForm'));});
+ assert.deepEqual(errors,[]);await cx.close();
+}finally{await browser?.close();await new Promise(r=>server.close(r));globalThis.fetch=realFetch;await writeFile(new URL('qa-evidence/owner-gateway-browser-results.json',root),JSON.stringify({checkedAt:new Date().toISOString(),manifest,authentication:'mocked RPC / synthetic JWT; not real Supabase login',results,errors},null,2));}

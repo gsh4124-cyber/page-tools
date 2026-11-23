@@ -9,3 +9,4 @@ if(!cfg.url||!cfg.key)throw Error('Both public configuration values required');
 process.env.MOA_SUPABASE_URL=cfg.url;
 process.env.MOA_SUPABASE_PUBLISHABLE_KEY=cfg.key;
 await import('./build.mjs');
+if(process.argv.includes('--cloudflare'))await import('./prepare-cloudflare.mjs');
