@@ -56,7 +56,7 @@ function cleanEscapedNewline(text){
 function localizedApp(response,lang){
   const canonical=hrefFor(lang);
   const locale=lang==='zh'?'zh_CN':lang==='pt'?'pt_BR':lang==='ar'?'ar_AR':lang;
-  const init=`<script>window.__RANDOM_PICKER_LANG__=${JSON.stringify(lang)};<\/script><script src="/locales.js"><\/script>`;
+  const init=`<script>window.__RANDOM_PICKER_LANG__=${JSON.stringify(lang)};<\/script><script src="/locales/${lang}.js"><\/script>`;
   const runtime='<script src="/i18n-v2.js"><\/script><script src="/language-switch.js"><\/script><script src="/experience.js"><\/script>';
   return new HTMLRewriter()
     .on('#koKeywordNav',{element(el){el.remove();}})

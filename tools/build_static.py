@@ -54,5 +54,7 @@ for path in root.rglob('*'):
         target = dist / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)
+if product == 'random-ppobgi':
+    run('node', 'tools/split-locales.mjs', str(dist))
 fingerprint_assets(dist)
 write_metadata(product, dist)
