@@ -1,7 +1,7 @@
 // These are public ownership files, not account credentials.
 import { mkdir, writeFile } from 'node:fs/promises';
 const sites = {
-  'random-ppobgi': { host: 'random-ppobgi.pages.dev', key: '5e2e0b34361f1bec6589eecf94582b9f', count: 22 },
+  'random-ppobgi': { host: 'random-ppobgi.pages.dev', key: '5e2e0b34361f1bec6589eecf94582b9f', count: 30 },
   'bible-reader': { host: 'bible-reader-1iz.pages.dev', key: '193977ee04feba4a99f471a555a2aa54', count: 10 },
   'pc-checkup': { host: 'pc-checkup.pages.dev', key: 'b3399cb87eb74ba9bb8315bfbeda117f', count: 117 },
 };
