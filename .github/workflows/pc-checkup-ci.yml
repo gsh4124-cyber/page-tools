@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: pc-checkup-monorepo-qa
+  group: pc-checkup-monorepo-qa-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
