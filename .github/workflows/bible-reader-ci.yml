@@ -7,6 +7,7 @@ on:
       - 'bible-reader/**'
       - 'tools/build_static.py'
       - 'tools/release_metadata.py'
+      - 'tools/asset_cache.py'
       - '.github/workflows/bible-reader-ci.yml'
   pull_request:
     branches: ["main"]
@@ -14,6 +15,7 @@ on:
       - 'bible-reader/**'
       - 'tools/build_static.py'
       - 'tools/release_metadata.py'
+      - 'tools/asset_cache.py'
       - '.github/workflows/bible-reader-ci.yml'
   workflow_dispatch:
 
