@@ -35,7 +35,7 @@ jobs:
     name: Static Guardrails
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build and validate production artifact
         run: python3 ../tools/build_static.py random-ppobgi
       - name: Security guardrails
@@ -79,8 +79,8 @@ jobs:
     # Playwright 1.55.0 does not support the current ubuntu-latest (26.04).
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Prefer canonical HTTPS Ubuntu archive
@@ -129,7 +129,7 @@ jobs:
         run: node tests/live-browser-proof.mjs
       - name: Preserve browser results and screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: random-picker-browser-proof-${{ github.run_id }}
           path: random-ppobgi/qa_evidence/live/
@@ -151,13 +151,13 @@ jobs:
         shell: bash
         working-directory: random-ppobgi
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Trust this checked-out workspace in the test container
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Build exact production artifact
@@ -169,7 +169,7 @@ jobs:
           HOME: /root
           GAME_CONTRACT_ENGINES: ${{ matrix.engine }}
         run: node tests/game-contract-browser.mjs --local
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: game-contract-${{ matrix.engine }}
