@@ -1012,7 +1012,7 @@ header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
   #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)) > *{grid-column:1 / -1}
   #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)) > #totalField{grid-column:1}
   #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)) > #pickField{grid-column:2}
-  #pickerArea:has(> #stage.show){display:grid;grid-template-columns:minmax(0,600px) minmax(0,1fr);gap:24px;align-items:start;width:min(1180px,calc(100vw - 48px));margin-left:calc((100% - min(1180px,100vw - 48px))/2)}
+  #pickerArea:has(> #stage.show){display:grid;grid-template-columns:minmax(0,600px) minmax(0,1fr);gap:24px;align-items:start;width:min(1180px,calc(100vw - 48px));position:relative;left:calc(325px - min(590px,50vw - 24px))}
   #pickerArea:has(> #stage.show) > #mainCard{grid-column:1}
   #pickerArea:has(> #stage.show) > :not(#mainCard){grid-column:2;margin-top:0}
 }
