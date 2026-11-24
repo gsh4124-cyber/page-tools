@@ -12,11 +12,11 @@ const views=['Record','Calendar','Photos'];
 const showExample=view=>{for(const name of views){$('#show'+name+'Example').setAttribute('aria-pressed',String(name===view));$('#'+name.toLowerCase()+'Example').hidden=name!==view;}};
 for(const view of views)$('#show'+view+'Example').onclick=()=>showExample(view);
 const entries={
- 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'조금 느리게 시작한 아침',text:'상큼한 자몽 한 조각. 서두르지 않고 아침을 먹으니, 하루에도 작은 여유가 생겼다.',alt:'자른 자몽의 선명한 단면'},
- 21:{date:'2026. 11. 21 토요일',weekday:'토요일',title:'지난 주말, 바다에서',text:'파도 소리를 듣고 한참을 앉아 있었다. 바다를 보러 오길 잘했다. 다음에는 조금 더 오래 머물러야지.',alt:'바다에서 파도를 타는 서퍼'}
+ 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'늦은 아침',text:'알람을 두 번 미뤘다. 자몽을 꺼내 늦은 아침을 먹었다. 해야 할 일은 잠깐 접어 두고, 창가에 앉아 있었다.',alt:'자른 자몽의 선명한 단면'},
+ 21:{date:'2026. 11. 21 토요일',weekday:'토요일',title:'주말의 바다',text:'파도 소리를 듣고 한참을 앉아 있었다. 바다를 보러 오길 잘했다. 다음에는 조금 더 오래 머물러야지.',alt:'바다에서 파도를 타는 서퍼'}
 };
-for(const day of [21,23])entries[day].photo=$('[data-demo-entry="'+day+'"] img').src;
-const openEntry=day=>{const entry=entries[day];if(!entry)return;$('#sampleDate').textContent=entry.date;$('#sampleDate').dateTime='2026-11-'+day;$('#samplePhoto').src=entry.photo;$('#samplePhoto').alt=entry.alt;$('#sampleTitle').textContent=entry.title;$('#sampleText').textContent=entry.text;showExample('Record');$('#showRecordExample').focus();};
+for(const day of [21,23])entries[day].photo=$('#photosExample [data-demo-entry="'+day+'"] img').src;
+const openEntry=day=>{document.querySelectorAll('.index-entry').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.demoEntry)===day)));const entry=entries[day];if(!entry)return;selectDay(day);$('#sampleDate').textContent=entry.date;$('#sampleDate').dateTime='2026-11-'+day;$('#samplePhoto').src=entry.photo;$('#samplePhoto').alt=entry.alt;$('#sampleTitle').textContent=entry.title;$('#sampleText').textContent=entry.text;showExample('Record');$('#showRecordExample').focus();};
 document.querySelectorAll('[data-demo-entry]').forEach(button=>button.onclick=()=>openEntry(Number(button.dataset.demoEntry)));
 let selectedDay=23;
 const selectDay=day=>{selectedDay=day;document.querySelectorAll('[data-demo-day]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.demoDay)===day)));const entry=entries[day];$('#calendarDate').textContent='11월 '+day+'일 '+['일요일','월요일','화요일','수요일','목요일','금요일','토요일'][(day-1)%7];$('#calendarText').textContent=entry?entry.title:'이날에는 예시 기록이 없어요.';$('#openCalendarRecord').hidden=!entry;};

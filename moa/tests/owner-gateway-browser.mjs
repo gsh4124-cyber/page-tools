@@ -19,21 +19,21 @@ try{
  await check('service introduction renders before login at 304/320/390/768/1280px with protected app assets',async()=>{await page.goto(base);await page.locator('#heroTitle').waitFor();assert.equal(await page.locator('#gateDialog').isVisible(),false);assert.equal(await page.locator('#gateEmail').isVisible(),false);for(const width of [304,320,390,768,1280]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'overflow at '+width);await page.screenshot({path:new URL(`qa-evidence/introduction-${width}.png`,root).pathname.replace(/^\/(.:)/,'$1'),fullPage:true});}await page.setViewportSize({width:390,height:844});assert.match((await cx.request.get(base+'/__moa_access')).headers()['content-security-policy'],/script-src 'self'/);});
  await check('photos and calendar dates open the right synthetic record without authentication',async()=>{
   const requests=[];const capture=request=>requests.push({url:request.url(),method:request.method()});page.on('request',capture);
-  await page.getByRole('link',{name:'화면 체험하기',exact:true}).click();
+  await page.locator('#previewTitle').waitFor();
   assert.ok(await page.locator('#samplePhoto').evaluate(img=>img.complete&&img.naturalWidth>0));
   await page.getByRole('button',{name:'사진',exact:true}).click();
   assert.ok(await page.locator('#photosExample').isVisible());
   await page.getByRole('button',{name:'11월 21일 바다 예시 기록 보기',exact:true}).click();
-  assert.equal(await page.locator('#sampleTitle').textContent(),'지난 주말, 바다에서');
+  assert.equal(await page.locator('#sampleTitle').textContent(),'주말의 바다');
   assert.equal(await page.locator('#sampleDate').getAttribute('datetime'),'2026-11-21');
   await page.getByRole('button',{name:'달력',exact:true}).click();
-  assert.equal(await page.locator('[data-demo-day]').count(),30);
+  assert.equal(await page.locator('[data-demo-day]').count(),30);assert.equal(await page.locator('[data-demo-day="21"]').getAttribute('aria-pressed'),'true');
   await page.getByRole('button',{name:'11월 22일',exact:true}).click();
   assert.equal(await page.locator('#calendarText').textContent(),'이날에는 예시 기록이 없어요.');
   assert.equal(await page.locator('#openCalendarRecord').isVisible(),false);
   await page.getByRole('button',{name:'11월 23일 · 예시 기록 있음',exact:true}).click();
   await page.getByRole('button',{name:'이날의 예시 기록 보기',exact:true}).click();
-  assert.equal(await page.locator('#sampleTitle').textContent(),'조금 느리게 시작한 아침');
+  assert.equal(await page.locator('#sampleTitle').textContent(),'늦은 아침');
   assert.equal(await page.locator('#showRecordExample').getAttribute('aria-pressed'),'true');
   assert.ok(await page.locator('#showRecordExample').evaluate(el=>el===document.activeElement));
   for(const view of ['달력','사진','기록']){

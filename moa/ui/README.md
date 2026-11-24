@@ -4,9 +4,33 @@
 
 기록·달력·사진 전환, 날짜 선택, 사진에서 일기로 이동, 습관 체크는 합성 예시로 동작한다. 체크와 선택은 메모리에만 있고 새로고침하면 초기화된다. 예시는 Supabase에 저장하지 않는다. 기존 소유자 인증, 비공개 앱 파일 게이트와 계정의 기록은 그대로 보존한다.
 
-## 스크랩북 스타일
+## 설계 기준과 Impeccable 적용
 
-사용자가 선택한 색감 있는 다이어리 방향을 반영했다. 베이지·초록 대신 흰 종이 격자, 코랄·노랑·파랑 포인트, 사진 인화지와 테이프를 사용한다. 실제 앱의 `service.css`도 같은 팔레트와 읽기 쉬운 제목으로 맞췄다. 최근 사용자 피드백으로 보라색을 빼고 사진보다 이야기가 먼저 보이게 정리했다. 실제 앱 홈에는 오늘 기록하기와 최근 3개 기록을 두고, 작성·달력·기록·습관·백업은 해당 메뉴에서 연다. 메뉴 이동으로 입력 초안을 지우지 않는다. 저장·인증 동작과 원본 v7 파일은 보존한다.
+사용자는 보라색과 정형적인 AI 화면을 거절했고 사진의 테이프는 유지해 달라고 했다. 기존 다이어리의 읽기·쓰기 목적과 테이프를 보존하면서 [Impeccable](https://github.com/pbakaus/impeccable)의 [distill](https://github.com/pbakaus/impeccable/blob/main/skill/reference/distill.md), [layout](https://github.com/pbakaus/impeccable/blob/main/skill/reference/layout.md), [typeset](https://github.com/pbakaus/impeccable/blob/main/skill/reference/typeset.md), [craft floor](https://github.com/pbakaus/impeccable/blob/main/skill/reference/craft-floor.md)를 수동 적용했다. 원저작자는 Paul Bakaus, 저장소 라이선스는 Apache-2.0이다. 해당 소프트웨어 코드를 앱에 포함하거나 전용 CLI의 통과를 주장하지 않는다.
+
+`impeccable@4.10.0`을 격리된 `qa-evidence/impeccable-tools`에 설치하려 했으나 npm registry DNS `ENOTFOUND`로 실패했다. context 실행기는 없어 실행되지 않았고, skill 지침의 수동 context 대체 경로로 기존 README·실행 코드·사용자 피드백을 읽었다. 전용 detector/context 명령은 NOT_TESTED다. 전역 설치, hook, live 모드, 권한 우회, 추가 API 비용은 사용하지 않았다.
+
+### 목표와 구조
+
+- 모드: Operate/Read. 처음 방문한 사람은 공개 예시로 일기장을 이해하고, 소유자는 오늘의 기록을 쓰거나 날짜별 기록을 찾는다.
+- 공개 화면: 큰 감성 헤드라인과 카드 안의 카드를 없앴다. 월별 기록 색인·기록/달력/사진 탭·날짜/제목/본문/사진 순으로 읽는다. 공개 예시와 소유자 전용 범위를 명시한다.
+- 실제 앱: 큰 노란 배너·격자·별 장식을 없앴다. 오늘/날짜/기록 쓰기를 한 줄의 작업 헤더에 두고, 이번 주 날짜에서 해당 기록을 연다. 최근 기록은 테두리로 나누는 목록이며 사진이 있을 때만 테이프가 붙은 썸네일을 보인다.
+- 이동: PC는 왼쪽 메뉴, 모바일은 하단 메뉴다. 동일한 SVG 선 아이콘과 글자 레이블을 쓴다. 작성·달력·습관·보관함 기능과 입력 초안은 유지한다.
+- 빈 상태에 실제 기록처럼 보이는 데이터를 넣지 않는다. 사진/긴 제목이 있는 상태는 로컬 임시 IndexedDB에만 합성 기록을 만들어 검증한다.
+
+### 토큰과 품질 기준
+
+| 역할 | 기준 |
+|---|---|
+| 바탕/본문 | 흰색 `#fff` / 잉크색 `#26383f` |
+| 보조 글/주 행동 | `#687278` / 코랄 `#bd483c` |
+| 테이프 | 사진에만 연노랑 `#efd98ac9`; 격자·반복 줄무늬 배경 없음 |
+| 글자 | 시스템 한국어 고딕 한 계열. 본문 16px, 보조 13~14px, 기록 제목 23~28px, wordmark 28~32px. tracking -0.03em 이상 |
+| 간격/형태 | 4px 기반 간격. 버튼/입력 6px, dialog 12px. 목록에 큰 둥근 카드·강한 offset shadow 없음 |
+| 대비 | 소스 색 대비: 본문/흰색 12.21, 보조/흰색 4.92, 코랄/흰색 5.05, 코랄/선택 배경 4.52. 전체 WCAG 인증을 의미하지 않음 |
+| 동작 | 44px 이상 주요 조작, SVG+텍스트, aria-current/pressed, 제목 포커스, 메뉴 이동 시 초안 보존. 저장 알림은 제목을 가리지 않도록 하단에 배치 |
+
+파생 `index.html`의 중복 inline style을 없애고 실제 앱 스타일은 `service.css`로 모았다. 사용자 스스로 고른 핑크·라벤더·민트·옐로·나이트·종이 꾸미기 데이터와 원본 v7 파일은 보존한다. 기본 UI가 보라색을 사용하지 않는 것과 과거 기록의 선택한 꾸미기를 지우는 것은 구분한다.
 
 ## 참고한 공식 제품 화면
 
@@ -22,4 +46,4 @@
 
 Cloudflare 패키징 시 검증한 data URI를 HTML에 삽입한다. 외부 이미지 요청, 추적 스크립트, 새 공개 자산 경로나 CSP 완화 없이 기존 게이트를 유지한다. `demo-media.json` 자체는 공개 라우트에 올리지 않는다.
 
-검증: `npm test`와 클라우드 구성 빌드 후 `node tests/owner-gateway-browser.mjs`. 후자는 실제 패키지의 게이트와 공개 예시 동작을 검사하지만, 인증 RPC는 모의 처리한다. 실제 호스트 검증과 실기기 검증 범위는 `QA_REPORT.md`를 따른다.
+검증: 기기 모드 빌드 뒤 `node tests/visual-diary.mjs`는 합성 글과 실제 CC0 사진으로 긴 제목·사진·키보드·5개 폭을 검사한다. `npm test`와 클라우드 구성 빌드 후 `node tests/owner-gateway-browser.mjs`. 후자는 실제 패키지의 게이트와 공개 예시 동작을 검사하지만, 인증 RPC는 모의 처리한다. 실제 호스트 검증과 실기기 검증 범위는 `QA_REPORT.md`를 따른다.
