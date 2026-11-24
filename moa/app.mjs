@@ -130,14 +130,14 @@ $('#backupDialog').addEventListener('close',()=>{$('#backupPassword').value='';r
 
 async function accountTask(fn){if(busy)return;busy=true;authHold++;controls();try{await fn();}catch(e){notice(errorMessage(e),true);}finally{if(repo?.user&&repo.status!=='active')await activate(repo.user);authHold--;busy=false;controls();}}
 accountUI=setupAccountUI({client,origin:__MOA_CONFIG__.url,getRepo:()=>repo,activate,notice,task:accountTask});
-function renderUploadEstimate(){const files=[...$('#media').files],bytes=files.reduce((n,f)=>n+f.size,0);$('#uploadEstimate').textContent=files.length?files.length+'개 선택 · '+mib(bytes)+' · 저장 가능 '+mib(Math.max(0,50331648-usageState.active))+(bytes+usageState.active>50331648?' · 용량 줄이기 또는 첨부 정리가 필요해요.':''):'사진·영상 파일당 25MiB · 기록당 6개';}
+function renderUploadEstimate(){const files=[...$('#media').files],bytes=files.reduce((n,f)=>n+f.size,0);$('#uploadEstimate').textContent=files.length?files.length+'개 선택 · '+mib(bytes)+(files.length>6?' · 최대 6개까지 골라 주세요.':'')+' · 저장 가능 '+mib(Math.max(0,50331648-usageState.active))+(bytes+usageState.active>50331648?' · 용량 줄이기 또는 첨부 정리가 필요해요.':''):'사진·영상 파일당 25MiB · 기록당 6개';}
 $('#media').addEventListener('change',renderUploadEstimate);
 function renderDraftMedia(){
  for(const url of draftUrls)URL.revokeObjectURL(url);draftUrls=[];
  const out=$('#draftMedia'),files=[...$('#media').files];out.replaceChildren();
  $('#chooseMedia').textContent=files.length?'사진·영상 다시 고르기':'사진·영상 고르기';
  $('#photoHint').hidden=Boolean(files.length);
- for(const [i,file] of files.entries()){
+ for(const [i,file] of files.slice(0,6).entries()){
   const card=el('figure');card.className='draft-attachment';const preview=el('div');preview.className='draft-preview';
   let valid=true;try{validateFile(file);}catch{valid=false;}
   if(valid&&file.type.startsWith('image/')){const img=el('img');const url=URL.createObjectURL(file);draftUrls.push(url);img.src=url;img.alt=`선택한 사진 ${i+1}`;img.loading='lazy';img.decoding='async';preview.append(img);}else preview.append(el('span',valid?'영상':'지원하지 않는 첨부'));
