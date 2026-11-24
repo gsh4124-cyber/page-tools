@@ -317,7 +317,10 @@
       if(scrollTick)return;
       scrollTick=true;
       requestAnimationFrame(()=>{
-        topbar.classList.toggle('topbar-scrolled',window.scrollY>80);
+        // The scrolled state shrinks the bar a few pixels; a dead band keeps that shift
+        // from flipping the state back and forth around a single threshold.
+        const scrolled=topbar.classList.contains('topbar-scrolled');
+        topbar.classList.toggle('topbar-scrolled',scrolled?window.scrollY>64:window.scrollY>96);
         scrollTick=false;
       });
     },{passive:true});
