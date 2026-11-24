@@ -11,25 +11,25 @@
     "status": "DONE",
     "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Warmth on white: small synchronized date badge, pale yellow date marks, warm white print edges and small notebook motif. Exact tape rules preserved. Unit19/app11/populated3/package7 passed; actual public date switch/private home/full hosted manifest verified.",
-    "codeCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
+    "reason": "Public CSS only: quieter noninteractive date badge and responsive text/photo spacing. White surfaces/exact tape rule retained. Final package7 passed; live public23→21→23 and visual update verified. Private app fingerprint unchanged; unit19/app11/populated3 are historical.",
+    "codeCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
     "manifest": {
       "product": "moa",
-      "revision": "bad917be2e6c7549e917fc094ba64b094a096639",
+      "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
       "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
       "cloudConfigured": true
     },
-    "workerSha256": "81d76db4b5a9025fccbf6e7a603f7ad3dc1f44dfc36f8cde50bf6e9e21490321",
+    "workerSha256": "080706bc4325f2704a39416c9c70c988433b4507c8bf6d0c1990137cc6c5ba3f",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
+    "cloudflareCodeCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
     "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
   },
   "unit": {
     "status": "DONE",
     "passed": 19,
     "dateKST": "2026-11-24",
-    "scope": "Rerun after warm diary details; 19 passed. Local PostgreSQL engine, not hosted database replay."
+    "scope": "Historical previous warm-details release19; not rerun for current public CSS-only change."
   },
   "audit": {
     "status": "DONE",
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Current warm diary source, precommit03c0051 metadata. Local isolated IndexedDB, no hosted writes. Final committed Worker package7 also passed."
+    "scope": "Historical previous warm-details app11; not rerun for current public CSS-only change."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -740,10 +740,10 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T05:28:06.798Z",
+      "preparedAt": "2026-11-24T05:39:38.832Z",
       "manifest": {
         "product": "moa",
-        "revision": "bad917be2e6c7549e917fc094ba64b094a096639",
+        "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
         "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
         "cloudConfigured": true
       },
@@ -752,11 +752,11 @@
         "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
         "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
         "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
-        "build-manifest.json": "7c1dec79402c155ee1b7b8546e07e800828c1990bf6b92386bb7fe35dec74ce3",
+        "build-manifest.json": "ea45bf2a21688e09319c3d7b9f05eda5f4876b6276151ca74082403211834c10",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "81d76db4b5a9025fccbf6e7a603f7ad3dc1f44dfc36f8cde50bf6e9e21490321",
+      "workerSha256": "080706bc4325f2704a39416c9c70c988433b4507c8bf6d0c1990137cc6c5ba3f",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -801,7 +801,7 @@
       "browserPackageChecks": 7,
       "authenticationTest": "synthetic JWT / mocked RPC",
       "actualOwnerLogin": "DONE on previous fdf069f release; real login in new dialog NOT_TESTED",
-      "liveHostChecks": "Actual public white/tape/date badge/print edge and index23→21 with day/weekday sync; owner date marks/notebook motif. Full manifest matched.",
+      "liveHostChecks": "Current public quiet date/white/tape/spacing and index23→21→23 verified. Private home/hosted manifest checks remain historical.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -811,25 +811,19 @@
       "watchPaths": [
         "moa/*"
       ],
-      "actualOwnerSessionReconnect": "DONE: current private home via existing session, pale yellow date marks/notebook motif, count0; fresh email sign-in NOT_TESTED."
+      "actualOwnerSessionReconnect": "Historicalbad917b warm-details release; not replayed this public CSS-only turn."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
-    "deploymentId": "2d94b2b3-eff4-4104-b815-54b96fe390cc",
+    "sourceCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+    "deploymentId": "57322add-b7bf-4310-9842-1f4632bd6b05",
     "published": true,
     "actualBrowserChecks": {
       "method": "Supported Windows Computer Use / actual desktop Chrome",
-      "publicWarmth": "DONE: white surfaces/tape retained; compact calendar date, print edge and subtle shadow visible",
-      "publicIndexDateSwitch": "DONE: index23→21, visible21 and Saturday with matching sea text/photo",
-      "existingOwnerSession": "DONE: current private home, pale yellow date underline/current day and small notebook drawing, records0",
-      "actualManifest": {
-        "revision": "bad917be2e6c7549e917fc094ba64b094a096639",
-        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
-        "cloudConfigured": true,
-        "localMatch": true
-      },
-      "publicHabitAndGalleryThisTurn": "Not replayed live this turn; current final package passed and prior live checkpoint retained separately",
-      "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px passed",
+      "publicQuietDateSpacing": "DONE: quieter fill/no border-shadow, adjusted text/photo spacing, white surfaces/tape retained",
+      "publicIndexDateSwitch": "DONE:23→21→23 with matching day/weekday/title/photo",
+      "existingOwnerSession": "NOT_REPLAYED; previous warm-details checkpoint retained",
+      "actualManifest": "NOT_REPLAYED; local package manifest recorded; prior warm-details hosted manifest matched unchanged app source hash",
+      "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px package passed",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
@@ -837,8 +831,7 @@
       "actualWindowScreenshots": "Displayed and visually reviewed in tool; not re-saved",
       "localPreviewScreenshots": [
         "qa-evidence/introduction-390.png",
-        "qa-evidence/introduction-1280.png",
-        "qa-evidence/home-390.png"
+        "qa-evidence/introduction-1280.png"
       ]
     },
     "runtimeFixes": [
@@ -940,7 +933,7 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "White everyday diary with small warm date/paper details; pale yellow date badge and home marks, small empty notebook motif. Practical copy and exact tape retained.",
+      "style": "White warm diary retained. Public noninteractive date is quieter and lighter; mobile24px/desktop28px text-to-photo spacing. Private app unchanged.",
       "previewViews": [
         "record",
         "calendar",
@@ -1252,8 +1245,8 @@
         "actualDesktopScrollWidth": 943
       }
     },
-    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success forbad917b and deployment2d94b2b3.",
-    "currentProviderWorkerHashReadback": "NOT_TESTED: local final Worker SHA recorded; no separate provider-log hash readback."
+    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for8f5de98 and deployment57322add.",
+    "currentProviderWorkerHashReadback": "NOT_TESTED: local final Worker SHA recorded; no provider-log hash readback."
   },
   "previousIntroductionCandidate": {
     "status": "CLOUDFLARE_INTRODUCTION_VERIFIED_WITH_LIMITATIONS",
@@ -1330,10 +1323,10 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T05:28:09.102Z",
+    "checkedAt": "2026-11-24T05:39:41.225Z",
     "manifest": {
       "product": "moa",
-      "revision": "bad917be2e6c7549e917fc094ba64b094a096639",
+      "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
       "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
       "cloudConfigured": true
     },
@@ -1489,7 +1482,8 @@
       "Populated/long-title home and all five workspaces fit 304/320/390/768/1280px",
       "Keyboard opens the real fixture record date from the recent list"
     ],
-    "errors": []
+    "errors": [],
+    "scope": "Historical previous warm-details populated3; not rerun for current public CSS-only change."
   },
   "impeccable": {
     "status": "PARTIAL",
@@ -1598,12 +1592,12 @@
     "shellGitFetch": "ENOTFOUND github.com",
     "remoteSaved": true,
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved.",
-    "lineEndings": "Changed source follows repository LF policy; full source hash matched actual hosted manifest."
+    "lineEndings": "Repository LF policy preserved. Prior warm release full hosted app source matched; this public CSS-only turn did not refetch manifest."
   },
   "previousTypographyRelease": {
-    "codeCommit": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
-    "deploymentId": "24da45c4-b2ab-4c22-9a51-2cf3190334d7",
-    "meaning": "Previous restrained everyday-diary design; current release restores warmth through small date/paper details."
+    "codeCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
+    "deploymentId": "2d94b2b3-eff4-4104-b815-54b96fe390cc",
+    "meaning": "Previous warm date/paper release; unit19/app11/populated3 and actual owner/manifest checks belong to that checkpoint."
   },
   "currentPalette": {
     "accent": "#45647f",
@@ -1624,16 +1618,35 @@
     "roundingRetained": true,
     "photoTapeRulesByteIdenticalToPrevious": true,
     "warmDetails": {
-      "dateFill": "#fcf3d9",
-      "dateText": "#665638",
+      "dateFill": "#fffaf2",
+      "dateText": "#71634c",
       "dateHighlight": "#f6e8b4",
       "paperEdge": "#eee9e1",
       "surfaces": "#ffffff",
       "contrast": {
-        "dateTextOnFill": 6.42,
-        "mutedOnFill": 4.53
+        "publicDateTextOnFill": 5.63,
+        "homeDateTextOnFill": 6.42,
+        "homeMutedOnFill": 4.53
       },
-      "photoTapeRulesByteIdenticalToPrevious": true
+      "photoTapeRulesByteIdenticalToPrevious": true,
+      "homeDateFill": "#fcf3d9",
+      "homeDateText": "#665638"
     }
+  },
+  "currentPublicSpacing": {
+    "mobileTabletPhotoMarginTop": 24,
+    "desktopPhotoMarginTop": 28,
+    "mobileBodyLineHeight": 1.9,
+    "mobilePhotoMarginBottom": 14,
+    "mobileHabitsMarginTop": 36,
+    "dateBadgeSize": [
+      42,
+      44
+    ],
+    "dateNumberSize": 22,
+    "dateNumberWeight": 400,
+    "dateBorder": "transparent",
+    "dateShadow": "none",
+    "whiteAndTapePreserved": true
   }
 }
