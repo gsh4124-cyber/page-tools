@@ -2,6 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>모아 | 일기·습관·추억 기록</title>
 
 <meta name="referrer" content="no-referrer"><meta name="color-scheme" content="light"><link rel="stylesheet" href="./service.css"></head><body><p id="connectionNotice" role="status" hidden>연결이 끊겼어요. 클라우드 저장과 미디어 불러오기를 확인해 주세요.</p><div id="notice" role="status" aria-live="polite" hidden></div>
+<dialog id="changeDialog" aria-labelledby="changeTitle" aria-describedby="changeDescription"><h2 id="changeTitle"></h2><p id="changeDescription" class="muted"></p><dl id="changeSummary" class="change-summary"></dl><div class="change-actions"><button type="button" class="secondary" id="changeCancel">취소</button><button type="button" id="changeConfirm">확인</button></div></dialog>
 <dialog id="accountDialog" aria-labelledby="accountTitle"><h2 id="accountTitle">나의 모아</h2><p id="accountStatus"></p>
 <form id="loginForm"><label for="email">이메일</label><input id="email" type="email" autocomplete="username" required>
 <label for="password">비밀번호</label><input id="password" type="password" autocomplete="current-password" minlength="12" required>
