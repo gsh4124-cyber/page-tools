@@ -9,27 +9,27 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
+    "sourceSha256": "00cd720f438bb22eb3e47b1fa5dec0d9fb8b9eaa2c7433803202653dbb4b7112",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Natural date/title/text/photo vertical reading flow; public desktop article max600px/photo max380px. Real entry date now above title. White backgrounds/rounding/tape retained. Current app11/populated3/package7 passed and live943px vertical order verified; no backend/data/cost changes.",
-    "codeCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+    "reason": "Replaced dominant red grapefruit with licensed notebook photo; muted blue defaults, white/rounding/tape/chronological flow retained. Unit19/app11/populated3/package7 passed. Live public/private screenshots verified. No backend/data/cost changes.",
+    "codeCommit": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
     "manifest": {
       "product": "moa",
-      "revision": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
-      "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
+      "revision": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
+      "sourceSha256": "00cd720f438bb22eb3e47b1fa5dec0d9fb8b9eaa2c7433803202653dbb4b7112",
       "cloudConfigured": true
     },
-    "workerSha256": "a564534f050f536c3ddcba70f1e4ba01287da5b704055ecede9a243f1597efec",
+    "workerSha256": "293a09e00cfa2c472bb0eb1cd3619d4e76a7ffe34e11af43eeb60be8fa2c5389",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
-    "cloudflareSourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd"
+    "cloudflareCodeCommit": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
+    "cloudflareSourceSha256": "00cd720f438bb22eb3e47b1fa5dec0d9fb8b9eaa2c7433803202653dbb4b7112"
   },
   "unit": {
     "status": "DONE",
     "passed": 19,
     "dateKST": "2026-11-24",
-    "scope": "Historical unit19 from previous rounded release; not rerun for pure background color change."
+    "scope": "Rerun after current palette/photo change; 19 passed. Local PostgreSQL engine, not hosted database replay."
   },
   "audit": {
     "status": "DONE",
@@ -40,12 +40,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:51574",
+    "base": "http://127.0.0.1:59572",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "031c80431ef7b34ca80f996c7de248dd911be277",
-      "sourceSha256": "d31005c216ee8470330df2d89cf23a72465ae7de6d0bfd3384e4277d3e66b2a9",
+      "revision": "dd05b16f011da1c6146c2f3477e7de7a7d1ac920",
+      "sourceSha256": "47adf556514a285fd07494041c227907a1ddfe50e88a1ab4486905f333b7f742",
       "cloudConfigured": false
     },
     "results": [
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Current reading-flow source; precommit031c804 metadata retained, isolated local IndexedDB, no hosted writes."
+    "scope": "Current palette/photo source; precommit dd05b16 metadata retained. Isolated IndexedDB, no hosted writes."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -740,23 +740,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T03:42:31.369Z",
+      "preparedAt": "2026-11-24T04:07:46.325Z",
       "manifest": {
         "product": "moa",
-        "revision": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
-        "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
+        "revision": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
+        "sourceSha256": "00cd720f438bb22eb3e47b1fa5dec0d9fb8b9eaa2c7433803202653dbb4b7112",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
-        "index.html": "72ce277cabc8cff03175cc481174f5b259f4753a4e51a6ba63dc33a1889e1d16",
-        "app.js": "1aa5940a3aae3b1399dfb4c7d44cd3c8600de93ed4c3e66e6cb12aaa3347e0fb",
-        "service.css": "752a79ba31c7dcf029e57c907c3c9cadb7230a8cb8841acaeb54bcd0eed6e14e",
-        "build-manifest.json": "d0be6acb8bb3ac7aaa74f241f66c8c09b2f540f6ad1d1197100753bb34e9c655",
+        "index.html": "82723023627e0e89481038953030d077bca6d0c28a826ad2f7e91b6aaad81b39",
+        "app.js": "01518013dd88b71ca450f21140a060ed71c1abf8e3fecafd5246d0803c44d000",
+        "service.css": "65ebe7a756c4d1d5b10b9ecef6ff27c53045ed38a69d4bfe6bddff112a71f1f7",
+        "build-manifest.json": "a538f184e01618d9eff69d34f294a6dda6a70ebac420811f15e7d3cd31a8e24d",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "a564534f050f536c3ddcba70f1e4ba01287da5b704055ecede9a243f1597efec",
+      "workerSha256": "293a09e00cfa2c472bb0eb1cd3619d4e76a7ffe34e11af43eeb60be8fa2c5389",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -801,7 +801,7 @@
       "browserPackageChecks": 7,
       "authenticationTest": "synthetic JWT / mocked RPC",
       "actualOwnerLogin": "DONE on previous fdf069f release; real login in new dialog NOT_TESTED",
-      "liveHostChecks": "DONE: public 304px blue/tape layout, photo/calendar choice and explicit login; real owner compact home, draft retention, month navigation and archive readback; no saved records changed",
+      "liveHostChecks": "Current public notebook/blue/white/tape and owner blue/white home captured. Older month/draft/archive behavior remains historical.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -811,24 +811,26 @@
       "watchPaths": [
         "moa/*"
       ],
-      "actualOwnerSessionReconnect": "DONE on f50aadf: existing owner session re-established; not fresh email sign-in replay"
+      "actualOwnerSessionReconnect": "DONE: current ec75 private home screenshot after existing-session reload; fresh email sign-in NOT_TESTED."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
-    "deploymentId": "2dd1d8d3-bdbb-4fbf-aa27-2cc922b8885a",
+    "sourceCommit": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
+    "deploymentId": "0a09d45e-f8a7-4d8f-a228-32811014cab3",
     "published": true,
     "actualBrowserChecks": {
-      "publicReadingFlow": "DONE: final alias width=scrollWidth943; date/title/body/photo top307.09/343.19/402.69/480.95px; block layout, white body and tape62px",
-      "currentPrivateRecordOrder": "NOT_TESTED on production records: local synthetic entries verified; no production writes",
-      "currentLiveMobile": "NOT_TESTED: final package5 widths passed",
+      "publicNotebookPhoto": "DONE: actual final-alias screenshot, matching title/prose/photo; photo gallery opens day23 example",
+      "publicPalette": "DONE: muted blue selections, white background, yellow tape visible",
+      "existingOwnerSession": "DONE: current private home with blue write/date controls and 0 records; fresh login not replayed",
+      "currentPreciseDomMetrics": "INCONCLUSIVE: final browser output truncated by desktop update",
+      "currentLiveMobile": "NOT_TESTED; local five widths passed",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
       "productionDataWrites": false,
       "screenshots": [
-        "qa-evidence/hosted-reading-flow-wide.jpg"
-      ],
-      "fullPageCapture": "Timed out; supported viewport capture saved successfully"
+        "qa-evidence/hosted-calm-notebook-wide.jpg",
+        "qa-evidence/hosted-calm-owner-home.jpg"
+      ]
     },
     "runtimeFixes": [
       {
@@ -840,7 +842,7 @@
         "issue": "Owner entry and app must share existing moa-auth-v1 storage key"
       }
     ],
-    "reproducibleWorkerHashMatch": true,
+    "reproducibleWorkerHashMatch": null,
     "otherProductPrIsolation": {
       "checkedDateKST": "2026-11-23",
       "pr": 34,
@@ -929,19 +931,20 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "White rounded diary retained; date/title/body/photo in one vertical reading flow; real entry dates placed before titles.",
+      "style": "Muted blue default accents on white; round geometry/yellow tape/date-title-text-photo flow preserved.",
       "previewViews": [
         "record",
         "calendar",
         "photos"
       ],
       "habits": "ephemeral toggle and count; resets on reload",
-      "examplePhotos": "2 CC0 MDN photos embedded as data URIs; source/license in ui/README.md; no external image requests",
+      "examplePhotos": "2H Media notebook under Unsplash License + MDN CC0 surfer. Embedded JPEGs; attribution per image; no runtime external image request.",
       "privateHome": "today/week selector/recent rows; PC sidebar/mobile bottom nav with SVG+labels",
       "draftNavigation": "retained in memory across menus; account changes still clear private drafts",
-      "examplePhotoLayout": "smaller print beside diary text with title first",
+      "examplePhotoLayout": "Date/title/text then notebook photo16:9, max380px desktop.",
       "actualDesktopClientWidth": 958,
-      "actualDesktopScrollWidth": 958
+      "actualDesktopScrollWidth": 958,
+      "historicalViewportMetrics": "actualClientWidth/ScrollWidth fields are earlier checkpoints; current precise DOM output truncated."
     },
     "previousIntroductionRelease": {
       "sourceCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
@@ -1238,7 +1241,9 @@
         "actualDesktopClientWidth": 943,
         "actualDesktopScrollWidth": 943
       }
-    }
+    },
+    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for ec75eb1 and deployment0a09d45e.",
+    "currentProviderWorkerHashReadback": "NOT_CONFIRMED: final browser output truncated at desktop update; local package SHA retained separately."
   },
   "previousIntroductionCandidate": {
     "status": "CLOUDFLARE_INTRODUCTION_VERIFIED_WITH_LIMITATIONS",
@@ -1315,11 +1320,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T03:42:34.229Z",
+    "checkedAt": "2026-11-24T04:07:49.153Z",
     "manifest": {
       "product": "moa",
-      "revision": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
-      "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
+      "revision": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
+      "sourceSha256": "00cd720f438bb22eb3e47b1fa5dec0d9fb8b9eaa2c7433803202653dbb4b7112",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1464,17 +1469,18 @@
   "populatedVisualBrowser": {
     "manifest": {
       "product": "moa",
-      "revision": "031c80431ef7b34ca80f996c7de248dd911be277",
-      "sourceSha256": "d31005c216ee8470330df2d89cf23a72465ae7de6d0bfd3384e4277d3e66b2a9",
+      "revision": "dd05b16f011da1c6146c2f3477e7de7a7d1ac920",
+      "sourceSha256": "47adf556514a285fd07494041c227907a1ddfe50e88a1ab4486905f333b7f742",
       "cloudConfigured": false
     },
-    "type": "local synthetic fixtures and CC0 media; no hosted writes",
+    "type": "local synthetic fixtures; notebook Unsplash License + surfer MDN CC0; no hosted writes",
     "checks": [
       "Two real local fixture photos appear in recent records",
       "Populated/long-title home and all five workspaces fit 304/320/390/768/1280px",
       "Keyboard opens the real fixture record date from the recent list"
     ],
-    "errors": []
+    "errors": [],
+    "artifactLabelCorrection": "Raw artifact retains old CC0 type label; actual current photo licenses recorded in ui/demo-media.json and ui/README.md."
   },
   "impeccable": {
     "status": "PARTIAL",
@@ -1585,8 +1591,26 @@
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved."
   },
   "previousTypographyRelease": {
-    "codeCommit": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
-    "deploymentId": "9c2de845-2cb4-434b-a684-d40f71b38c06",
-    "meaning": "Previous white-background release; previous live owner checks kept distinct."
+    "codeCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+    "deploymentId": "2dd1d8d3-bdbb-4fbf-aa27-2cc922b8885a",
+    "meaning": "Previous natural reading-flow release; precise DOM measurements belong to that historical checkpoint."
+  },
+  "currentPalette": {
+    "accent": "#45647f",
+    "buttonFill": "#e4edf5",
+    "buttonText": "#3e5c76",
+    "ink": "#374653",
+    "muted": "#65727e",
+    "contrast": {
+      "inkOnWhite": 9.71,
+      "mutedOnWhite": 4.93,
+      "buttonTextOnFill": 5.92,
+      "accentOnWhite": 6.21
+    },
+    "allRadiusAndTapeRulesUnchanged": true,
+    "userDecorationsAndMediaPreserved": true,
+    "photoSource": "https://unsplash.com/photos/X5a-EyXsl6w",
+    "photoLicense": "https://unsplash.com/license",
+    "note": "Contrast checks are not full accessibility certification."
   }
 }
