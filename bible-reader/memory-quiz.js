@@ -555,6 +555,10 @@
         }else{text=practiceChecked[practiceIndex]?l.nextVerse:l.checkAnswer;action=practiceChecked[practiceIndex]?'practice-next':'check';}
         if(primary.textContent!==text)primary.textContent=text;if(primary.dataset.action!==action)primary.dataset.action=action;
       }
+      function revealPracticePair(index){
+        const body=practiceSources[index]?.parentElement;
+        if(dialog.classList.contains('memory-practice-wide')&&body&&body.getBoundingClientRect().height<=content.clientHeight)body.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+      }
       function activatePractice(index,{scroll=true}={}){
         const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
         if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index].parentElement);
@@ -563,7 +567,7 @@
         fitAnswer(inputs[index]);syncPracticePrimary();
         if(scroll)practiceCards[index].scrollIntoView({block:'nearest',behavior:'instant'});
       }
-      function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});}
+      function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});if(practice)revealPracticePair(index);}
       const answerLabel=row=>`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${practice&&practiceShown?l.practiceAnswer:l.answer}`;
       const inputs=items.map(({row,index},position)=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
@@ -581,7 +585,7 @@
           input.addEventListener('focus',()=>activatePractice(position,{scroll:false}));
         }else form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();});
+        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();if(practice)revealPracticePair(position);});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
@@ -630,7 +634,7 @@
           const index=practiceIndex,input=inputs[index];input.value='';draftAnswers[items[index].index]='';practiceChecked[index]=false;practiceConfirmed.delete(items[index].index);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);
         },'memory-practice-repeat'));
       }
-      content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
+      content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();if(practice)revealPracticePair(0);
     }
     function results(answers){
       phase='results';attemptActive=false;suspendedAttempt=null;moveClose(header);
