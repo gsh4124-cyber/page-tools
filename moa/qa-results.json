@@ -9,27 +9,27 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+    "sourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Primary Google PKCE login deployed; actual Google chooser verified, user subsequently confirmed it works (USER_REPORTED_DONE). Unit26/package13 passed. Detailed real selection/consent/return and new Google Auth session not independently verified.",
-    "codeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+    "reason": "Photo-first diary deployed. Title optional via first sentence/media fallback; private previews/removal and draft retention. Unit27/app11/photo5/SDK6/final Worker13 passed. Live owner home/editor/build/native PC chooser+cancel verified; production media writes and real phones not replayed.",
+    "codeCommit": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
     "manifest": {
       "product": "moa",
-      "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
-      "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+      "revision": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+      "sourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4",
       "cloudConfigured": true
     },
-    "workerSha256": "678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe",
+    "workerSha256": "ddc6de83ace20cc260b2a447a9fe30906182dc28df61fda53ca6c30c01dc3bdc",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
-    "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
+    "cloudflareCodeCommit": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+    "cloudflareSourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4"
   },
   "unit": {
     "status": "DONE",
-    "passed": 26,
+    "passed": 27,
     "dateKST": "2026-11-24",
-    "scope": "Current Google PKCE repair; local PostgreSQL and Worker. Not hosted DB regression."
+    "scope": "Current photo diary change; local PostgreSQL/Worker and title fallback boundaries. Not hosted DB regression."
   },
   "audit": {
     "status": "DONE",
@@ -40,12 +40,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:62590",
+    "base": "http://127.0.0.1:57402",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "03c005126ed7d23d0ef37a65c4bb22acfadd0e84",
-      "sourceSha256": "fb27baa07048de44b8bdcf51bab174469e41b97a17dc46f704fb547babccefbd",
+      "revision": "3a32579f82a1075ed5c375c36aacc102f283a012",
+      "sourceSha256": "d7aecf72e56f75ff40114aa51986982bfbcbea4d19e33d495f49d2b3244da81a",
       "cloudConfigured": false
     },
     "results": [
@@ -96,15 +96,15 @@
       }
     ],
     "errors": [],
-    "scope": "Historical previous warm-details app11; not rerun for current public CSS-only change."
+    "scope": "Final source saved inf33d59e; precommit3a32579 metadata, device buildd7aecf72e56f. Temporary local IndexedDB, no hosted writes."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
     "manifest": {
       "product": "moa",
-      "revision": "9ca6b8399bfff8a1152e0c0d0454b601be224194",
-      "sourceSha256": "d573a17353605037b5e0812004bb78c430270421b0e16193c16e274b034570d2",
-      "cloudConfigured": false
+      "revision": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+      "sourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4",
+      "cloudConfigured": true
     },
     "results": [
       "guest records are not automatically uploaded; A saved through supabase-js RPC",
@@ -407,6 +407,15 @@
       "existingGoogleProviderReused": true,
       "existingCallbackReused": true,
       "existingProductsDataSchemaRlsStorageChanged": false,
+      "newCosts": false,
+      "historical": true
+    },
+    "currentPhotoQuick": {
+      "codeScope": "moa/ private photo composer, title fallback, tests and documentation only",
+      "databaseSchemaAuthRlsStorageSettingsChanged": false,
+      "productionDiaryHabitMediaWrites": false,
+      "originalV7Sha256": "2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db",
+      "existingProductsCodeAndSettingsChanged": false,
       "newCosts": false
     }
   },
@@ -454,7 +463,7 @@
     {
       "item": "Full media write / restore / different-user replay on current Cloudflare host",
       "status": "NOT_TESTED",
-      "verifiedAlternative": "Current unit23/mock SDK6/packaged gateway10; historical app11/populated3 and hosted checkpoints separate."
+      "verifiedAlternative": "Current unit27/app11/photo5/mock SDK6/packaged Worker13; historical hosted checkpoints separate."
     },
     {
       "item": "Exact HTTP status and security headers on real Cloudflare network",
@@ -774,23 +783,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T08:43:55.134Z",
+      "preparedAt": "2026-11-24T10:40:03.654Z",
       "manifest": {
         "product": "moa",
-        "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
-        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "revision": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+        "sourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
-        "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
-        "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
-        "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
-        "build-manifest.json": "26b39e75f54d4fe7fdc8c64c8fe4ba565371ae75c6b024f94b7562c25527f380",
+        "index.html": "20309636fedc05510d29d4b82a22628fe8791b7a951edb6f0c422f37ae128f55",
+        "app.js": "16ac186417748c8d2926ca86ded31ee1fcfd611aa0a7be795203577773aeae85",
+        "service.css": "5221151825c54ba87c9b9a77d59123eb30079d3a6e10069b981b3ffac3e393f3",
+        "build-manifest.json": "72080102fa962ab38e6cdc4099060d2114fc89f6421face9cf53129919723536",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe",
+      "workerSha256": "ddc6de83ace20cc260b2a447a9fe30906182dc28df61fda53ca6c30c01dc3bdc",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -821,7 +830,7 @@
       "bucketPrivate": true,
       "fileLimit": 26214400
     },
-    "hostedMoaChecks": "PARTIAL: real Google chooser DONE, subsequent operation USER_REPORTED_DONE; independent full callback and media/restore/isolation replay not performed",
+    "hostedMoaChecks": "PARTIAL: owner reconnect, current home/editor/build and PC chooser+cancel DONE; photo-save/restore/isolation not replayed against production",
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
@@ -831,11 +840,11 @@
     ],
     "access": "owner-only",
     "ownerGateway": {
-      "unitTests": 26,
+      "unitTests": 27,
       "browserPackageChecks": 13,
       "authenticationTest": "synthetic JWT / mocked RPC",
       "actualOwnerLogin": "User reported working (DONE / USER_REPORTED_DONE); actual Google chooser independently observed, detailed completion not independently observed.",
-      "liveHostChecks": "Production Google chooser DONE; subsequent operation USER_REPORTED_DONE; new Google session not independently confirmed.",
+      "liveHostChecks": "Current existing owner reconnect/home/buildaca827e75f4e DONE; earlier photo release editor/native PC chooser+cancel DONE; no production writes.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -845,31 +854,32 @@
       "watchPaths": [
         "moa/*"
       ],
-      "actualOwnerSessionReconnect": "Current Google flow NOT_TESTED; previous actual email reload retained as historical."
+      "actualOwnerSessionReconnect": "DONE current production reload remains owner cloud account; fresh Google sign-in not replayed."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
-    "deploymentId": "943e0fbe-699f-421c-8d72-c890178fd120",
+    "sourceCommit": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+    "deploymentId": "1afd223a-2201-42cd-accf-2c3d3b8358ee",
     "published": true,
     "actualBrowserChecks": {
       "method": "Supported Windows Computer Use / actual Chrome",
-      "productionGoogleButton": "DONE",
-      "googleAccountChooser": "DONE",
-      "googleAccountSelectionReturn": "User reported working (DONE / USER_REPORTED_DONE); exact flow not independently observed",
+      "existingOwnerSessionReconnect": "DONE: production reload, owner cloud home, record count0",
+      "currentShortBuild": "aca827e75f4e",
       "currentPrivateManifest": "NOT_REPLAYED",
-      "freshEmailLogin": "Historical previous96490 release; not replayed",
-      "currentLiveMobile": "NOT_TESTED; packaged five widths passed",
+      "homePhotoAction": "DONE: new photo and write buttons visible",
+      "photoComposer": "DONE on initial3a32579 photo release: date/photo choice/story/save and collapsed extras; final bounded-preview release current short build and owner reconnect observed",
+      "nativePcFileChooser": "DONE on initial3a32579 photo release: opened/cancelled with no file chosen. Final bounded-preview release did not change picker handler.",
+      "productionPhotoSaveAndReload": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
+      "currentLiveMobile": "NOT_TESTED; local five widths passed",
       "productionDiaryHabitMediaWrites": false,
       "actualWindowScreenshots": "Displayed/reviewed in tool, not re-saved",
       "localPreviewScreenshots": [
-        "qa-evidence/google-login-304.png",
-        "qa-evidence/google-login-390.png",
-        "qa-evidence/google-login-1280.png"
-      ],
-      "userReportedOperational": "DONE / USER_REPORTED_DONE",
-      "newGoogleAuthSessionIndependentReadback": "NOT_TESTED: last_sign_in_at unchanged from earlier email authentication"
+        "qa-evidence/photo-quick-304.png",
+        "qa-evidence/photo-quick-390.png",
+        "qa-evidence/photo-quick-1280.png",
+        "qa-evidence/home-390.png"
+      ]
     },
     "runtimeFixes": [
       {
@@ -982,7 +992,7 @@
       ],
       "habits": "Ephemeral plain check rows with aria-pressed and accessible live count; resets on reload.",
       "examplePhotos": "2H Media notebook under Unsplash License + MDN CC0 surfer. Embedded JPEGs; attribution per image; no runtime external image request.",
-      "privateHome": "today/week selector/recent rows; PC sidebar/mobile bottom nav with SVG+labels",
+      "privateHome": "today/week/recent rows plus direct photo picker and writing actions; existing sidebar/mobile navigation retained",
       "draftNavigation": "retained in memory across menus; account changes still clear private drafts",
       "examplePhotoLayout": "Date/title/text then left-aligned taped photo, max300px mobile/max380px desktop, -1deg tilt.",
       "actualDesktopClientWidth": 958,
@@ -1288,7 +1298,7 @@
         "actualDesktopScrollWidth": 943
       }
     },
-    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success fore716e90dfbdfd78d1f685ed5addaacf46b733e7c, deployment943e0fbe-699f-421c-8d72-c890178fd120.",
+    "currentProviderStatusEvidence": "GitHub Cloudflare completed/success forf33d59ef5bcacaeb23d59601415e0439dbb39745, deployment1afd223a-2201-42cd-accf-2c3d3b8358ee.",
     "currentProviderWorkerHashReadback": "NOT_TESTED: local final Worker SHA recorded; no provider-log hash readback."
   },
   "previousIntroductionCandidate": {
@@ -1366,11 +1376,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T08:44:00.569Z",
+    "checkedAt": "2026-11-24T10:40:09.504Z",
     "manifest": {
       "product": "moa",
-      "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
-      "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+      "revision": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+      "sourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1458,13 +1468,13 @@
   "currentCloudContract": {
     "status": "DONE",
     "passed": 6,
-    "scope": "Previous email repair6; unchanged private-app fingerprint, not rerun for current Google change.",
+    "scope": "Finalf33d59e cloud build. Intercepted SDK, no hosted writes; clears previews on cross-tab logout.",
     "evidence": {
       "type": "local intercepted Supabase API contract, not live hosted test",
       "manifest": {
         "product": "moa",
-        "revision": "07837137ea515a6008268003b2559f7c8d90d5cf",
-        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "revision": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+        "sourceSha256": "aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4",
         "cloudConfigured": true
       },
       "results": [
@@ -1476,8 +1486,7 @@
         "second browser reopens the same A cloud record"
       ],
       "errors": []
-    },
-    "historical": true
+    }
   },
   "previousCompactHomeCandidate": {
     "status": "CLOUDFLARE_SIMPLIFIED_HOME_VERIFIED_WITH_LIMITATIONS",
@@ -1679,7 +1688,7 @@
     "shellGitFetch": "ENOTFOUND github.com",
     "remoteSaved": true,
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved.",
-    "lineEndings": "LF preserved. Current provider commit and real Google UI verified. Current protected manifest not reread; prior email release match historical."
+    "lineEndings": "LF preserved. Cloud/device configurations differ. Final providerf33d59e and actual short buildaca827e75f4e verified; full production manifest not reread."
   },
   "previousTypographyRelease": {
     "codeCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
@@ -2050,6 +2059,314 @@
       "evidenceType": "USER_REPORTED_DONE",
       "dateKST": "2026-11-24",
       "scope": "User corrected the failure report and confirmed it works; detailed account selection/consent/return sequence was not independently observed."
+    },
+    "historical": true
+  },
+  "previousGoogleLoginRelease": {
+    "candidate": {
+      "status": "DONE",
+      "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+      "deployment": "CLOUDFLARE_DEPLOYED",
+      "reason": "Primary Google PKCE login deployed; actual Google chooser verified, user subsequently confirmed it works (USER_REPORTED_DONE). Unit26/package13 passed. Detailed real selection/consent/return and new Google Auth session not independently verified.",
+      "codeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+      "manifest": {
+        "product": "moa",
+        "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "workerSha256": "678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe",
+      "compiledLocally": true,
+      "published": true,
+      "cloudflareCodeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+      "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
+    },
+    "googleLogin": {
+      "status": "PARTIAL",
+      "codeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+      "deploymentId": "943e0fbe-699f-421c-8d72-c890178fd120",
+      "primaryButton": "Google로 계속하기",
+      "secondaryMethods": "다른 방법으로 로그인: email/password",
+      "googleProviderEnabledReadback": true,
+      "existingOwnerGoogleIdentityCount": 1,
+      "newProviderKeysOrSharedAuthSettingsChanged": false,
+      "callbackURL": "https://moa-diary-web.pages.dev/__moa_auth_callback",
+      "flow": "PKCE S256 using actual pinned SDK",
+      "proofStorage": "tab sessionStorage, code-verifier keys only; candidate session writes discarded",
+      "providerTokensPersisted": false,
+      "serverOwnerCheckBeforeAppPersistence": true,
+      "rejectCallbackPreservesOwnerSession": "DONE in mocked packaged browser",
+      "actualGoogleAccountChooser": "DONE: production button reached real Google account selection",
+      "actualGoogleAccountSelectionAndReturn": "User-reported working; exact selection/consent/return sequence NOT_INDEPENDENTLY_VERIFIED",
+      "actualNewAuthSession": "NOT_TESTED: readonly last_sign_in_at remains previous email timestamp 2026-11-24 08:18:59.006305+00; not independent proof of a new Google sign-in. Does not negate user-reported operation.",
+      "realDevice": "NOT_TESTED",
+      "newCosts": false,
+      "references": [
+        "https://supabase.com/docs/guides/auth/social-sign-in/auth-google",
+        "https://supabase.com/docs/guides/auth/sessions/pkce-flow"
+      ],
+      "userReportedOperational": {
+        "status": "DONE",
+        "evidenceType": "USER_REPORTED_DONE",
+        "dateKST": "2026-11-24",
+        "scope": "User corrected the failure report and confirmed it works; detailed account selection/consent/return sequence was not independently observed."
+      }
+    },
+    "unit": {
+      "status": "DONE",
+      "passed": 26,
+      "dateKST": "2026-11-24",
+      "scope": "Current Google PKCE repair; local PostgreSQL and Worker. Not hosted DB regression."
+    },
+    "browser": {
+      "base": "http://127.0.0.1:62590",
+      "engine": "Google Chrome Chromium",
+      "manifest": {
+        "product": "moa",
+        "revision": "03c005126ed7d23d0ef37a65c4bb22acfadd0e84",
+        "sourceSha256": "fb27baa07048de44b8bdcf51bab174469e41b97a17dc46f704fb547babccefbd",
+        "cloudConfigured": false
+      },
+      "results": [
+        {
+          "name": "mobile layout, 304/320/390/768/1280px and CSP",
+          "status": "DONE"
+        },
+        {
+          "name": "home hides tools until chosen and preserves a draft across navigation",
+          "status": "DONE"
+        },
+        {
+          "name": "habit create, check, duplicate refusal, persistence",
+          "status": "DONE"
+        },
+        {
+          "name": "create text, photo, video, decoration and XSS remains plain text",
+          "status": "DONE"
+        },
+        {
+          "name": "edit title/date/category and attachment removal, reload, calendar/filter/search",
+          "status": "DONE"
+        },
+        {
+          "name": "home recent record opens the matching diary without exposing the editor",
+          "status": "DONE"
+        },
+        {
+          "name": "full encrypted backup download, delete and restore including video and habits",
+          "status": "DONE"
+        },
+        {
+          "name": "invalid backup and unsupported upload keep current records",
+          "status": "DONE"
+        },
+        {
+          "name": "two tabs reject stale writes without losing editor input",
+          "status": "DONE"
+        },
+        {
+          "name": "keyboard navigation and account configuration fallback",
+          "status": "DONE"
+        },
+        {
+          "name": "browser console uncaught errors",
+          "status": "DONE",
+          "count": 0
+        }
+      ],
+      "errors": [],
+      "scope": "Historical previous warm-details app11; not rerun for current public CSS-only change."
+    },
+    "currentCloudContract": {
+      "status": "DONE",
+      "passed": 6,
+      "scope": "Previous email repair6; unchanged private-app fingerprint, not rerun for current Google change.",
+      "evidence": {
+        "type": "local intercepted Supabase API contract, not live hosted test",
+        "manifest": {
+          "product": "moa",
+          "revision": "07837137ea515a6008268003b2559f7c8d90d5cf",
+          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+          "cloudConfigured": true
+        },
+        "results": [
+          "guest records are not automatically uploaded; A saved through supabase-js RPC",
+          "authenticated session reload and cloud readback",
+          "cross-tab logout clears private title/body/files, backup password and selected restore file",
+          "B sees only B data after account switch; guest data preserved",
+          "network failure does not report saved or discard draft",
+          "second browser reopens the same A cloud record"
+        ],
+        "errors": []
+      },
+      "historical": true
+    },
+    "packagedWorkerBrowser": {
+      "checkedAt": "2026-11-24T08:44:00.569Z",
+      "manifest": {
+        "product": "moa",
+        "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
+      "results": [
+        {
+          "name": "packaged Worker blocks anonymous HTML, assets, manifest and health",
+          "status": "DONE"
+        },
+        {
+          "name": "service introduction renders before login at 304/320/390/768/1280px with protected app assets",
+          "status": "DONE"
+        },
+        {
+          "name": "photos and calendar dates open the right synthetic record without authentication",
+          "status": "DONE"
+        },
+        {
+          "name": "habit feedback toggles accessibly and resets on reload",
+          "status": "DONE"
+        },
+        {
+          "name": "owner dialog opens only by choice and Escape restores the trigger focus",
+          "status": "DONE"
+        },
+        {
+          "name": "email request uses exact Moa callback without signup or automatic link-paste form",
+          "status": "DONE"
+        },
+        {
+          "name": "Google PKCE account selection returns to protected app without persisting provider credentials",
+          "status": "DONE"
+        },
+        {
+          "name": "Google missing proof and denied consent clean URL without exchanging or clearing existing login",
+          "status": "DONE"
+        },
+        {
+          "name": "Google foreign identity cannot replace an existing owner session after code exchange",
+          "status": "DONE"
+        },
+        {
+          "name": "email callback cleans credentials and establishes SDK session plus private gate",
+          "status": "DONE"
+        },
+        {
+          "name": "expired and non-owner callbacks clean URL, show retry and keep private app locked",
+          "status": "DONE"
+        },
+        {
+          "name": "synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application",
+          "status": "DONE"
+        },
+        {
+          "name": "logout removes access immediately; public static fallback contains no application",
+          "status": "DONE"
+        }
+      ],
+      "errors": []
+    },
+    "deployment": {
+      "sourceCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+      "deploymentId": "943e0fbe-699f-421c-8d72-c890178fd120",
+      "package": {
+        "preparedAt": "2026-11-24T08:43:55.134Z",
+        "manifest": {
+          "product": "moa",
+          "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+          "cloudConfigured": true
+        },
+        "files": 3,
+        "hashes": {
+          "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
+          "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
+          "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
+          "build-manifest.json": "26b39e75f54d4fe7fdc8c64c8fe4ba565371ae75c6b024f94b7562c25527f380",
+          "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
+          "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+        },
+        "workerSha256": "678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe",
+        "access": "owner-only",
+        "staticFallback": "setup notice only",
+        "published": true
+      },
+      "actualBrowserChecks": {
+        "method": "Supported Windows Computer Use / actual Chrome",
+        "productionGoogleButton": "DONE",
+        "googleAccountChooser": "DONE",
+        "googleAccountSelectionReturn": "User reported working (DONE / USER_REPORTED_DONE); exact flow not independently observed",
+        "currentPrivateManifest": "NOT_REPLAYED",
+        "freshEmailLogin": "Historical previous96490 release; not replayed",
+        "currentLiveMobile": "NOT_TESTED; packaged five widths passed",
+        "hostedMediaBackupIsolationReplay": "NOT_TESTED",
+        "realDevices": "NOT_TESTED",
+        "productionDiaryHabitMediaWrites": false,
+        "actualWindowScreenshots": "Displayed/reviewed in tool, not re-saved",
+        "localPreviewScreenshots": [
+          "qa-evidence/google-login-304.png",
+          "qa-evidence/google-login-390.png",
+          "qa-evidence/google-login-1280.png"
+        ],
+        "userReportedOperational": "DONE / USER_REPORTED_DONE",
+        "newGoogleAuthSessionIndependentReadback": "NOT_TESTED: last_sign_in_at unchanged from earlier email authentication"
+      }
     }
-  }
+  },
+  "photoQuick": {
+    "manifest": {
+      "product": "moa",
+      "revision": "3a32579f82a1075ed5c375c36aacc102f283a012",
+      "sourceSha256": "d7aecf72e56f75ff40114aa51986982bfbcbea4d19e33d495f49d2b3244da81a",
+      "cloudConfigured": false
+    },
+    "authentication": "isolated local IndexedDB, no hosted Supabase writes",
+    "results": [
+      {
+        "name": "home photo action opens chooser; draft previews stay private with optional details collapsed",
+        "status": "DONE"
+      },
+      {
+        "name": "one-sentence photo entry saves without a title and reopens after reload",
+        "status": "DONE"
+      },
+      {
+        "name": "individual attachment removal preserves other files and draft across menus; photo-only entry works",
+        "status": "DONE"
+      },
+      {
+        "name": "empty draft and unsupported files cannot save; failed save preserves caption/files and exposes no executable preview",
+        "status": "DONE"
+      },
+      {
+        "name": "seven attachments are refused with draft and records intact",
+        "status": "DONE"
+      }
+    ],
+    "errors": [],
+    "status": "DONE",
+    "scope": "Final source saved inf33d59e; precommit3a32579 device build, five local groups; preview capped at6; no hosted writes."
+  },
+  "photoQuickExperience": {
+    "status": "DONE",
+    "codeCommit": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
+    "primaryAction": "사진으로 기록",
+    "titleRequiredInForm": false,
+    "titleContractInDocument": "unchanged; explicit title or first story line <=100 UTF16 units, then photo/video fallback",
+    "previewUploadsBeforeSave": false,
+    "perFileRemoval": true,
+    "draftPreservedAcrossMenusAndFailure": true,
+    "draftClearedAfterSaveOrAccountChange": true,
+    "unsafeSvgPreviewBlocked": true,
+    "mediaLimitsChanged": false,
+    "authChanged": false,
+    "backupFormatChanged": false,
+    "realProductionPhotoWrite": "NOT_TESTED",
+    "realDevices": "NOT_TESTED",
+    "maxRenderedDraftPreviews": 6
+  },
+  "validationNotes": [
+    "Initial generic app QA used cloud-configured output and failed its device-only login-disabled expectation. Proper device build rerun passed all11; no product change for that condition.",
+    "Initial photo preview test checked image.complete before decode; explicit load/decode completion wait fixed test race. Final5 passed."
+  ]
 }

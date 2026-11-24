@@ -1,44 +1,48 @@
 # 모아 검증 보고서
 
-2026-11-24 KST. **주 로그인 방법을 Google로 계속하기로 변경·배포했다. 실제 Google 계정 선택 화면 연결을 확인했고, 이후 사용자가 정상 동작을 확인했다(DONE, USER_REPORTED_DONE). 선택·동의 후 복귀의 도구 독립 확인과 구분한다.** 흰 배경·테이프·실제 앱 기록 기능·기존 세 제품과 데이터를 보존했다.
+2026-11-24 KST. **사진을 고르고 한 줄만 적어도 저장할 수 있도록 개선·배포했다.** 기존 Google 로그인·흰 배경·테이프·비공개 앱·기존 세 제품과 사용자 데이터는 보존했다.
 
 ## 현재 배포
 
 - 운영 주소: https://moa-diary-web.pages.dev/
 - 저장소/브랜치: `gsh4124-cyber/page-tools` / `feature/moa-integration-20261119`
-- 실제 배포 코드: `e716e90dfbdfd78d1f685ed5addaacf46b733e7c`
-- Cloudflare 배포 ID: `943e0fbe-699f-421c-8d72-c890178fd120` / completed, success
-- 비공개 앱 source SHA-256: `0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291`
-- 로컬 최종 Worker SHA-256: `678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe`
+- 배포 코드: `f33d59ef5bcacaeb23d59601415e0439dbb39745`
+- Cloudflare 배포 ID: `1afd223a-2201-42cd-accf-2c3d3b8358ee` / completed, success
+- cloud 앱 source SHA-256: `aca827e75f4e2ab150fe3b65cda1942137536bbb3f5ad5c594865a0ab33665c4`
+- 기기 모드 앱 source SHA-256: `d7aecf72e56f75ff40114aa51986982bfbcbea4d19e33d495f49d2b3244da81a`
+- 로컬 최종 Worker SHA-256: `ddc6de83ace20cc260b2a447a9fe30906182dc28df61fda53ca6c30c01dc3bdc`
 
-GitHub 제공자 검사 completed/success와 실제 운영 Google 버튼/구글 계정 선택 화면을 확인했다. 앱 fingerprint는 공개 로그인 코드를 포함하지 않으므로 이전과 같고 전체 Worker 해시는 변경됐다. 이번 운영 manifest 재조회·제공자 Worker 해시 독립 대조는 아직 하지 않았다. 보고서 커밋은 `[CF-Pages-Skip]`으로 재배포하지 않는다.
+GitHub 제공자 검사 completed/success와 실제 운영의 짧은 build `aca827e75f4e`·새 홈/작성 UI를 확인했다. cloud/device 해시는 공개 연결 설정이 달라 구분한다. 이번 운영 전체 manifest 재조회·제공자 Worker 해시 독립 대조는 하지 않았다. 보고서 커밋은 `[CF-Pages-Skip]`으로 재배포하지 않는다.
 
-## 이번 변경과 실제 검증
+## 이번 실제 검증 결과
 
 | 검사 | 결과 / 범위 |
 |---|---|
-| 기존 설정·계정 | DONE · 관리자 페이지 Google 제공자 활성, readonly auth.identities에서 기존 소유자 Google identity1개. 기존 정확한 콜백 `https://moa-diary-web.pages.dev/__moa_auth_callback` 재사용. 공유 설정/키/제공자/비밀번호 추가 변경 없음 |
-| 단위·로컬 PostgreSQL·Worker | DONE · 26개, 실패0. 기존 보안/백업/소유권 회귀와 Google 코드의 중복/크기/토큰 혼합 거부, 정확한 제공자 URL·S256, PKCE 증명 전용 저장 어댑터 검사. hosted DB 재시험 아님 |
-| 최종 패키지 Chrome | DONE · `e716e90dfbdfd78d1f685ed5addaacf46b733e7c`의 Worker13개 검사군, 오류0. 304/320/390/768/1280px. Google 버튼 우선/포커스·이메일 접힘·키보드·흰 배경/테이프와 기존 공개 예시 회귀. 합성 인증/RPC |
-| PKCE 성공·세션 | DONE · 실제 Supabase SDK가 만든 challenge와 교환 verifier의 SHA-256 일치. 모의 Google 시작→코드 교환→서버 소유자 확인→기존 SDK 저장 키/HttpOnly 쿠키→정확한 비공개 앱, 새로고침 접근 유지 |
-| 인증 거부·정보 보존 | DONE · 모의 증명 누락/동의 거부/다른 Google 사용자에서 비공개 앱 차단, 코드/query 제거, 오류 원문 비반영. 거부된 콜백이 기존 소유자 쿠키/세션/비공개 접근을 지우지 않음 |
-| Google 토큰 저장 제한 | DONE · 별도 임시 클라이언트의 후보 세션/Google provider_token은 localStorage/sessionStorage에 저장하지 않음. 탭 저장소는 PKCE 증명만 허용하며, 서버 통과 후 앱 토큰 쌍만 기존 앱 SDK에 저장 |
-| 실제 운영 버튼 | DONE · 지원되는 Windows Computer Use Chrome에서 운영의 Google로 계속하기 버튼 클릭→실제 Google ‘계정을 선택하세요’ 화면. 메일을 거치지 않음 |
-| 사용자 정상 동작 확인 | DONE · USER_REPORTED_DONE. 사용자가 ‘아니 된다’로 정상 동작을 확인. 사용 기기·계정 선택·동의/복귀 세부 단계를 도구로 독립 관찰한 결과와 구분 |
-| 새 Google 인증 세션의 독립 확인 | NOT_TESTED · 이번 readonly Auth 조회의 last_sign_in_at는 이전 이메일 인증의 2026-11-24 08:18:59.006305+00와 같음. 새 Google 인증의 독립 성공 근거로 계산하지 않으며, 이를 사용자 동작 실패로 추정하지도 않음 |
-| 기존 코드/데이터 보존 | DONE · 이번 변경은 moa/ 로그인 코드/UI/시험/문서만. 기존 세 제품/공통 tools/workflows diff0. 실제 기록·습관·미디어 쓰기/삭제 없음. 추가 비용 없음 |
+| 단위·로컬 PostgreSQL·Worker | DONE · 27개 통과. 첫 줄 자동 제목/사진·영상만 저장/빈 기록 거부/100자/이모지 경계와 기존 보안·백업·문서·DB 회귀. hosted DB 재시험 아님 |
+| 기기 모드 전체 앱 | DONE · 11개 검사군, 오류0. 304/320/390/768/1280px, 모든 메뉴·초안 유지·글/사진/영상·XSS·다꾸·수정/삭제/검색·달력·영상 자동 재생·암호화 미디어 백업/복원·잘못된 파일·충돌·키보드. 임시 IndexedDB |
+| 사진 빠른 기록 | DONE · 5개 검사군, 오류0. 기본 파일 선택기 이벤트, 첫 줄 제목/사진 저장→새로고침 재조회, 사진만 저장, 개별 첨부 빼기/나머지 보존, 메뉴 이동 초안·미리보기 유지, 빈 기록/불허 SVG/7개 첨부 거부와 초안 유지. 사진 선택 중 외부 업로드 요청 없음 |
+| 사진 화면 폭·시각 검수 | DONE · 로컬 304/320/390/768/1280px 가로 넘침 없음. 390px 사진 미리보기와 홈, 304px 작은 화면을 검수. 원래 사진 테이프와 흰 배경 유지 |
+| SDK 모의 클라우드 계약 | DONE · 6개, 오류0. 기기/계정 분리, 재접속·탭 로그아웃 후 글/파일/사진 미리보기/복원 암호 제거, 다른 사용자 분리, 네트워크 오류 시 초안 유지. 실제 SDK/가로챈 API이며 hosted 서버 아님 |
+| 최종 Worker 브라우저 | DONE · `f33d59ef5bcacaeb23d59601415e0439dbb39745`의 패키지13개 검사군, 오류0. 공개 예시·5개 폭·로그인/PKCE·서버 소유자 검사·쿠키/로그아웃·거부 콜백의 기존 소유자 보존. RPC/JWT/Auth API는 합성 |
+| 실제 운영 소유자 재접속 | DONE · Chrome 새로고침 후 ‘내 계정’, 새 홈의 사진으로 기록/기록 쓰기, buildaca827e75f4e, 기존 기록0 표시. 새 Google 인증 전체 재실행을 의미하지 않음 |
+| 실제 운영 작성·파일 선택기 | DONE · 운영 기록 쓰기→날짜/사진 선택/오늘의 이야기/저장/접힌 제목·꾸미기와 글 포커스 확인. Windows 파일 선택기 열림→취소 후 작성 화면 유지. 실제 파일 선택/업로드·저장은 실행하지 않음 |
+| 원본·기존 제품 보존 | DONE · v7 SHA-256 일치. 이번 변경은 moa/만, 기존 세 제품/공통 tools/workflows diff0. DB/RLS/Storage/Auth 설정·요금제 변경 없음. 실제 소유자 기록/습관/미디어 쓰기·삭제 없음 |
 
-사용자 목적은 메일 없이 기존 구글 계정으로 일기장을 여는 것이다. 대화상자는 Google 버튼을 먼저 보여주고 포커스를 두며 이메일/비밀번호는 다른 방법으로 로그인 안에 둔다. 기본 방문자는 이전처럼 공개 예시부터 보며, 실제 기록과 파일은 여전히 기존 소유자만 접근한다. 구글 비밀번호는 모아가 받지 않는다.
+## 변경 동작
 
-Google OAuth는 SDK PKCE를 사용한다. 정확한 운영 콜백만 요청하고 이 탭에 일시 검증 증명만 둔다. 복귀 코드/query는 SDK 요청 전 주소에서 지운다. 세션 교환은 기존 앱과 다른 임시 저장 키로 수행하고 후보 인증 세션을 영구 저장하지 않는다. 서버의 기존 소유자/서명/현재 Auth 세션 검증 후에만 앱 저장 키로 옮긴다. 실패·동의 거부·증명 누락·다른 계정은 기존 정상 소유자 세션을 보존한다. 이메일 호환 경로도 유지한다. [Google 인증 지침](https://supabase.com/docs/guides/auth/social-sign-in/auth-google), [PKCE](https://supabase.com/docs/guides/auth/sessions/pkce-flow).
+홈의 사진으로 기록은 작성 화면으로 이동하며 기본 파일 선택기를 바로 연다. 선택한 사진은 저장 전 최대6개만 미리보기로 보이고, 개별 빼기와 다시 고르기를 제공한다. 사진 미리보기/이야기/저장이 먼저 나오고 제목·분류·스티커·꾸미기는 접힌 보조 메뉴로 옮겼다. 기입한 제목이 있으면 우선하고, 비우면 본문 첫 줄을 100자 이내 제목으로 쓴다. 사진만 선택하면 사진 기록, 영상만 선택하면 영상 기록으로 저장하며 빈 기록은 거부한다. 서버·백업의 기존 필수 제목 계약은 변경하지 않는다.
 
-최신 vault main START_HERE·페이지 작업 Index·UI/UX·보안·실행상태 원칙과 `hwangje_ops.context_packet`의 vibecoding 실행 상태를 읽었다. 실행 상태는 view이며 함수가 아니었고, 함수형 첫 조회 실패 후 실제 view로 회수했다. DB 실행 행·스키마·정책을 변경하지 않았다. Supabase ACTIVE_HEALTHY를 확인했다.
+미리보기는 허용된 사진만 기기 파일의 blob URL로 그린다. 파일명/글/제목은 textContent로 표현하며 SVG 등 불허 파일은 실행/렌더링하지 않는다. 선택·삭제·교체 때 이전 미리보기 URL을 해제하고 메뉴 이동에서는 파일/글/선택 날짜를 유지한다. 저장 성공/계정 변경 때만 초안을 비우며 저장 실패에서는 선택 파일과 글을 유지한다. 기존6개·파일당25MiB·전체48MiB, 용량 줄이기 선택, 비공개 저장·동시 쓰기 방어·미디어 백업/복원 계약을 보존한다. [FileList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/files), [DataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/DataTransfer).
 
-## 이전 검증과 이번 결과의 구분
+기기 앱11개와 사진5개는 직전3a32579 메타데이터에서 최종 소스의 device 빌드d7aecf72e56f로 실행했다. 최종 SDK6개와 Worker13개는 실제 배포 커밋f33d59e의 cloud 빌드aca827e75f4e에서 실행했다. 최초 앱 검사에서 cloud 빌드로 기기 모드의 로그인 비활성 조건을 검사해 실패했고, 올바른 device 빌드로 재실행해11개 모두 통과했다. 사진 검사의 초기 이미지 완료 대기 경합은 디코드 완료를 기다리도록 고쳐 최종5개를 통과했다. 제품 실패로 확정하지 않고 검사 준비/동기화 문제로 구분한다.
 
-직전96490d7 이메일 수정에서는 실제 기존 메일이 `localhost:3000`으로 향하던 원인을 확인하고 사용자가 승인한 정확한 모아 콜백 한 줄만 허용 목록에 추가했다. 실제 새 메일 Log In 클릭→내 계정 복귀→새로고침 유지와 당시 운영 manifest 일치를 확인했고, last_sign_in_at=2026-11-24 08:18:59.006305+00를 readonly 조회했다. 이 결과를 이번 Google 로그인 성공으로 계산하지 않는다.
+실제 운영 PC 화면은 지원되는 Windows Computer Use로 검수하고 도구 표시 캡처를 재저장하지 않았다. qa-evidence/photo-quick-304/320/390/768/1280.png 및 home-390.png는 로컬 화면이다. 실제 Android/iOS 선택기·터치·사진 메모리·코덱, 현재 운영에서 사진+한 줄 저장/새로고침·미디어 백업/복원·다른 사용자 전체 재시험은 미검증이다. 실제 계정에는 시험 자료를 쓰지 않았다.
 
-이전 SDK 모의 계약6개·앱11개·사진/긴 제목3개와 날짜/간격 UI 검수는 과거 체크포인트이며 이번에 재실행하지 않았다. 실제 Android/iOS·새 빈 프로필의 Google 로그인·실서버 다른 사용자/거부된 인증·미디어/백업/복원/격리 전체 재시험은 미검증이다. 캡처는 로컬 google-login-304/390/1280.png와 실제 도구 표시 화면을 구분하며, 실제 Chrome 캡처를 파일에 재저장하지 않았다.
+## 이전 인증 검증과 구분
+
+Google 제공자·기존 소유자 identity와 정확한 모아 콜백은 이전 작업에서 확인/연결됐다. 실제 Google 계정 선택 화면은 도구로 확인했고 이후 정상 동작은 사용자가 확인했다(DONE, USER_REPORTED_DONE). 전체 선택/동의/복귀·새 Google 인증 세션을 독립 관찰한 결과로 바꾸지 않는다. 이번 실제 기존 소유자 재접속은 별도로 확인했다.
+
+직전 이메일 수정96490d7에서는 실제 localhost 복귀 오류를 수정하고 새 메일 클릭→내 계정 복귀→새로고침 유지·당시 운영 manifest를 확인했다. last_sign_in_at=2026-11-24 08:18:59.006305+00는 그 과거 결과이며 이번 사진 변경의 새 인증 근거가 아니다. 이전 사진/긴 제목3개는 과거 체크포인트다.
 
 ## 접근 보호·비용·보존
 
