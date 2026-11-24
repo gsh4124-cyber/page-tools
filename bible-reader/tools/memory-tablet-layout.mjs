@@ -74,7 +74,7 @@ try{
     await answer.fill(expected);await dialog.locator('.memory-primary').click();
     assert.equal(await answer.getAttribute('aria-invalid'),'false','Corrected answers still pass');
     assert.deepEqual(errors,[]);results.push({engine,...profile,pass:true,checked:g});
-   }catch(error){await page.screenshot({path:path.join(output,id+'-failure.png')}).catch(()=>{});results.push({engine,...profile,pass:false,error:String(error)});console.error(id,String(error));}
+   }catch(error){const detail=await geometry(page).catch(()=>null);await page.screenshot({path:path.join(output,id+'-failure.png')}).catch(()=>{});results.push({engine,...profile,pass:false,error:String(error),geometry:detail});console.error(id,String(error),JSON.stringify(detail));}
    finally{await context.close();}
   }}finally{await browser.close();}
  }

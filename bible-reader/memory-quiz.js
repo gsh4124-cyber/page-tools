@@ -557,7 +557,7 @@
       }
       function activatePractice(index,{scroll=true}={}){
         const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
-        if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index]);
+        if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index].parentElement);
         if(changed){feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;}
         if(config.view==='chapter'){const text=`${index+1} / ${items.length}`;if(unitProgress.textContent!==text)unitProgress.textContent=text;}
         fitAnswer(inputs[index]);syncPracticePrimary();
@@ -576,7 +576,8 @@
           const card=el('details','memory-practice-row'),summary=el('summary'),stateLabel=el('span','memory-practice-state');summary.hidden=items.length===1;
           summary.append(el('span','',rowReference(row)),stateLabel);summary.addEventListener('click',event=>{event.preventDefault();activatePractice(position);});
           const text=el('p','memory-practice-text',row.text);text.id=`memoryPracticeText${index}`;text.setAttribute('dir','auto');text.hidden=!practiceShown;
-          caption.hidden=true;practiceSources.push(text);practiceCards.push(card);practiceStates.push(stateLabel);card.append(summary,text,rowFeedback,label);form.append(card);
+          const body=el('div','memory-practice-body');body.append(text,rowFeedback,label);
+          caption.hidden=true;practiceSources.push(text);practiceCards.push(card);practiceStates.push(stateLabel);card.append(summary,body);form.append(card);
           input.addEventListener('focus',()=>activatePractice(position,{scroll:false}));
         }else form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
