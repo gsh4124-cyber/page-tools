@@ -312,7 +312,7 @@
     function placeNotices(){
       if(dock.hidden||!shortNotices)return;
       // On very short screens keep the two actions pinned; guidance stays in the scrollable input area.
-      if(dialog.classList.contains('memory-tight-height'))shortNotices.append(...[...dock.children].filter(n=>n.matches('.memory-error,.memory-feedback,.memory-dock-status')));
+      if(dialog.classList.contains('memory-tight-height')||dialog.classList.contains('memory-practice-wide'))shortNotices.append(...[...dock.children].filter(n=>n.matches('.memory-error,.memory-feedback,.memory-dock-status')));
       else dock.prepend(...shortNotices.children);
     }
     // Measure outside layout: collapsing the focused field resets scrolling and
@@ -343,6 +343,7 @@
       if(leaveDialog)for(const property of ['--memory-view-height','--memory-view-width','--memory-center-x','--memory-center-y'])leaveDialog.style.setProperty(property,dialog.style.getPropertyValue(property));
       dialog.classList.toggle('memory-compact-height',height<500);
       dialog.classList.toggle('memory-tight-height',height<400);
+      dialog.classList.toggle('memory-practice-wide',phase==='attempt'&&config.mode==='practice'&&width>=900);
       dialog.classList.toggle('memory-minimal-header',height<320&&width<500);
       const ultraShort=height<320&&!dock.hidden,stacked=ultraShort&&width<500&&parseFloat(getComputedStyle(dock.querySelector('.memory-primary')).fontSize)>20;
       dialog.classList.toggle('memory-ultra-short',ultraShort);dialog.classList.toggle('memory-stacked-controls',stacked);moveClose(ultraShort?dock:header,stacked?dock.querySelector('.memory-aids'):null);

@@ -118,6 +118,11 @@ jobs:
       - name: Test typing practice and recoverable collection deletion
         if: matrix.engine == 'chromium'
         run: node tools/memory-practice-smoke.mjs --local
+      - name: Keep long practice passages and input visible on tablets
+        env:
+          HOME: /root
+          MEMORY_TABLET_ENGINES: ${{ matrix.engine }}
+        run: node tools/memory-tablet-layout.mjs --local
       - name: Audit detailed practice accessibility and keyboard flows
         env:
           HOME: /root
@@ -143,6 +148,11 @@ jobs:
       - name: Test collected passages and persistent exam dialog
         if: matrix.engine == 'chromium'
         run: node tools/memory-collection-smoke.mjs --local
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: memory-tablet-${{ matrix.engine }}
+          path: bible-reader/qa_evidence/live/memory-tablet/
       - uses: actions/upload-artifact@v6
         if: always()
         with:
