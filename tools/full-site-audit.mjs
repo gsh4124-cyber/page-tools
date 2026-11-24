@@ -55,7 +55,7 @@ for(const engine of (process.env.FULL_AUDIT_ENGINES||'chromium').split(',')){
     const before=await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));await page.locator('#fontUp').click();assert((await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)))>before,'Text size action must change the displayed text');await page.locator('#toolbarMoreToggle').click();await page.locator('#widthToggle').click();
     if(!(await page.locator('#themeToggle').isVisible()))await page.locator('#toolbarMoreToggle').click();await page.locator('#themeToggle').click();
     if(await page.locator('#toolbarMoreMenu').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('#compareToggle').click();assert(await page.locator('#comparePanel').isVisible());
-    if(storage==='blocked')await page.locator('#readerStorageNotice').waitFor();
+    if(storage==='blocked'){await page.locator('#readerStorageNotice').waitFor();assert(['light','dark'].includes(await page.locator('html').getAttribute('data-theme')));}
    }else if(site==='random'){
     await page.goto('https://random-ppobgi.pages.dev/?qa=1',{waitUntil:'domcontentloaded'});await page.locator('#showTools').click();await page.locator('[data-tool="dice"]').click();await page.locator('#rollDice').click();await page.locator('#diceResult[aria-busy="false"]').waitFor();assert.equal(await page.locator('#diceResult .die').count(),1);
    }else{
