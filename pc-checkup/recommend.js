@@ -5,47 +5,47 @@
 (() => {
   'use strict';
   if ((document.documentElement.lang || '').slice(0, 2) !== 'ko') return;
-  const DISCLOSURE = '이 추천에는 쿠팡 파트너스 링크가 포함돼 있으며, 구매 시 이에 따른 일정액의 수수료를 제공받습니다. 가격·배송 조건은 판매처에서 최신 정보를 확인하세요.';
+  const DISCLOSURE = '이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다. 가격·배송 조건은 판매처에서 최신 정보를 확인하세요.';
   const DATA = {
     keyboard: {
       label: '키보드',
       fixes: ['다른 USB 포트에 꽂아 보세요. 허브를 쓰고 있다면 본체에 바로 연결해 보세요.', '무선이라면 배터리를 새것으로 바꾸고 수신기를 다시 꽂아 보세요.', '키 사이 먼지를 털어내거나 에어 스프레이로 불어 보세요.', '다른 컴퓨터에 연결해도 같은 키가 안 되면 키보드 문제일 가능성이 높아요.'],
       picks: [
-        {tag: '가성비', name: '유선 기본 키보드', note: '사무·학습용', url: null},
-        {tag: '무선', name: '무선 키보드·마우스 세트', note: '선 정리가 편해요', url: null},
-        {tag: '타자·게임', name: '기계식 키보드', note: '내구성이 좋아요', url: null}]
+        {tag: '가성비', name: '로지텍 유선 키보드 K120', note: '사무·학습용 기본형', url: 'https://link.coupang.com/a/iVBE2FiWnQ'},
+        {tag: '무선', name: '로지텍 무선 키보드·마우스 MK275', note: '선 정리가 편해요', url: 'https://link.coupang.com/a/iVBHtbd3hA'},
+        {tag: '타자·게임', name: '한성 기계식 키보드 GK204 적축', note: '부드러운 타건감', url: 'https://link.coupang.com/a/iVBLeAlyTY'}]
     },
     mouse: {
       label: '마우스',
       fixes: ['다른 USB 포트에 꽂아 보세요.', '무선이라면 배터리를 바꾸고 수신기를 마우스 가까이 두세요.', '유리나 반짝이는 책상에서는 센서가 잘 안 읽혀요. 마우스 패드를 깔아 보세요.', '휠이나 클릭이 가끔 두 번 눌리면 스위치 노후일 수 있어요.'],
       picks: [
-        {tag: '가성비', name: '유선 기본 마우스', note: '고장 걱정이 적어요', url: null},
-        {tag: '조용함', name: '무선 저소음 마우스', note: '사무실·도서관용', url: null},
-        {tag: '손목', name: '버티컬 마우스', note: '손목 부담을 줄여요', url: null}]
+        {tag: '가성비', name: '로지텍 유선 마우스 M100R', note: '고장 걱정이 적어요', url: 'https://link.coupang.com/a/iVBLN1mPFk'},
+        {tag: '조용함', name: '로지텍 무소음 무선 마우스 M331', note: '사무실·도서관용', url: 'https://link.coupang.com/a/iVBMn9mpie'},
+        {tag: '손목', name: '로지텍 리프트 버티컬 마우스', note: '손목 부담을 줄여요', url: 'https://link.coupang.com/a/iVBMXAgNPM'}]
     },
     mic: {
       label: '마이크',
       fixes: ['브라우저 주소창 왼쪽 자물쇠에서 마이크 권한이 허용돼 있는지 확인하세요.', 'Windows 설정 → 개인 정보 → 마이크에서 앱 접근이 켜져 있는지 확인하세요.', '이어폰 마이크라면 단자를 끝까지 꽂고, 4극 단자를 지원하는지 확인하세요.', '소리 설정에서 입력 장치가 올바른 마이크로 선택돼 있는지 확인하세요.'],
       picks: [
-        {tag: '화상회의', name: 'USB 마이크', note: '꽂으면 바로 인식', url: null},
-        {tag: '강의·녹음', name: '클립형 핀 마이크', note: '옷깃에 달아요', url: null},
-        {tag: '통화', name: '마이크 달린 헤드셋', note: '소리와 마이크를 한 번에', url: null}]
+        {tag: '화상회의', name: '필라 USB 콘덴서 마이크 CM-700USB', note: '꽂으면 바로 인식', url: 'https://link.coupang.com/a/iVBSnN6XSu'},
+        {tag: '강의·녹음', name: '조이트론 USB 핀마이크 P5U', note: '옷깃에 달아요', url: 'https://link.coupang.com/a/iVBSXSTuea'},
+        {tag: '통화', name: '앱코 노이즈캔슬링 헤드셋 H58', note: '소리와 마이크를 한 번에', url: 'https://link.coupang.com/a/iVBTxvyjka'}]
     },
     webcam: {
       label: '웹캠',
       fixes: ['브라우저 카메라 권한이 허용돼 있는지 확인하세요.', '노트북에 카메라 가림막이나 단축키(F키) 끄기 기능이 있는지 확인하세요.', '줌·팀즈처럼 카메라를 쓰는 다른 프로그램을 모두 닫고 다시 시도하세요.', '외장 웹캠은 다른 USB 포트에 꽂아 보세요.'],
       picks: [
-        {tag: '기본', name: 'FHD 1080p 웹캠', note: '화상회의에 충분해요', url: null},
-        {tag: '선명함', name: 'QHD 2K 웹캠', note: '방송·강의용', url: null},
-        {tag: '조명', name: '모니터 링라이트', note: '어두운 방에서 얼굴을 밝게', url: null}]
+        {tag: '기본', name: '로지텍 BRIO 100 웹캠', note: 'FHD 화상회의용', url: 'https://link.coupang.com/a/iVBT775GMe'},
+        {tag: '선명함', name: '홈플래닛 QHD 웹캠 LX-V11', note: '오토포커스·마이크 내장', url: 'https://link.coupang.com/a/iVBUGiLFDM'},
+        {tag: '조명', name: '모니터 거치형 6인치 링라이트', note: '어두운 방에서 얼굴을 밝게', url: 'https://link.coupang.com/a/iVBVY8RPyK'}]
     },
     speaker: {
       label: '스피커',
       fixes: ['볼륨과 음소거 상태를 먼저 확인하세요. 작업 표시줄 스피커 아이콘을 눌러 보세요.', '소리 설정에서 출력 장치가 올바르게 선택돼 있는지 확인하세요.', '이어폰은 단자를 끝까지 꽂고, 블루투스는 연결을 끊었다가 다시 연결해 보세요.', '한쪽만 안 들리면 소리 설정의 좌우 균형(밸런스)을 확인하세요.'],
       picks: [
-        {tag: '책상용', name: 'USB PC 스피커', note: '전원 어댑터 없이', url: null},
-        {tag: '가성비', name: '유선 이어폰', note: '지연 없이 바로', url: null},
-        {tag: '무선', name: '블루투스 스피커', note: '휴대폰과 함께', url: null}]
+        {tag: '책상용', name: '브리츠 USB 사운드바 BA-R9', note: 'USB 전원으로 간단하게', url: 'https://link.coupang.com/a/iVBWynXWRo'},
+        {tag: '가성비', name: '아이리버 3.5mm 유선 이어폰', note: '지연 없이 바로', url: 'https://link.coupang.com/a/iVBW7MGr2O'},
+        {tag: '무선', name: '오아 아이브릭 블루투스 스피커', note: '휴대폰과 함께', url: 'https://link.coupang.com/a/iVBXGZf9Ii'}]
     }
   };
   const PAGE = {'keyboard': 'keyboard', 'mouse': 'mouse', 'mic': 'mic', 'webcam': 'webcam', 'speaker': 'speaker'};
