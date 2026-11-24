@@ -75,4 +75,17 @@ left = [p for p in DIST.rglob('*.html') if not (LEGACY & set(p.relative_to(DIST)
         and BARE.search(p.read_text(encoding='utf-8'))]
 if left:
     raise RuntimeError(f'emoji icons remain in {len(left)} pages, e.g. {left[0]}')
+
+# Korean repair tips + replacement picks (Coupang Partners), root (ko) pages only.
+import shutil as _sh
+_REC = DIST.parent / 'recommend.js'
+if _REC.exists():
+    _sh.copyfile(_REC, DIST / 'recommend.js')
+    for _name in ('checkup.html', 'keyboard.html', 'mouse.html', 'mic.html', 'webcam.html', 'speaker.html'):
+        _p = DIST / _name
+        if not _p.exists():
+            continue
+        _t = _p.read_text(encoding='utf-8')
+        if 'recommend.js' not in _t and '</body>' in _t:
+            _p.write_text(_t.replace('</body>', '<script src="recommend.js" defer></script></body>', 1), encoding='utf-8')
 print(f'UI polished: {changed} pages (icons, brand, header and card alignment)')
