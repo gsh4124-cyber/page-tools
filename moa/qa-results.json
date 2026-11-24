@@ -11,25 +11,25 @@
     "status": "DONE",
     "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Public CSS only: quieter noninteractive date badge and responsive text/photo spacing. White surfaces/exact tape rule retained. Final package7 passed; live public23→21→23 and visual update verified. Private app fingerprint unchanged; unit19/app11/populated3 are historical.",
-    "codeCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+    "reason": "Email redirect repair deployed and verified by fresh actual email click, owner home, reload and protected hosted manifest. Local unit23/package10/mock SDK6 passed; app11/populated3 historical; hosted writes/media/restore/isolation not replayed.",
+    "codeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
     "manifest": {
       "product": "moa",
-      "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+      "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
       "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
       "cloudConfigured": true
     },
-    "workerSha256": "080706bc4325f2704a39416c9c70c988433b4507c8bf6d0c1990137cc6c5ba3f",
+    "workerSha256": "7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+    "cloudflareCodeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
     "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
   },
   "unit": {
     "status": "DONE",
-    "passed": 19,
+    "passed": 23,
     "dateKST": "2026-11-24",
-    "scope": "Historical previous warm-details release19; not rerun for current public CSS-only change."
+    "scope": "Rerun for email callback repair; local PostgreSQL engine and Worker security, not hosted DB test."
   },
   "audit": {
     "status": "DONE",
@@ -378,6 +378,26 @@
       "codeScope": "moa/ layout CSS and entry date DOM order plus docs; public radii/tape unchanged; saved data/backend/auth/products preserved",
       "backendSchemaAuthDataWrites": false,
       "originalV7Unchanged": true,
+      "newCosts": false,
+      "historical": true
+    },
+    "currentAuthRepair": {
+      "dateKST": "2026-11-24",
+      "codeScope": "moa/ public owner entry/callback, tests and documentation only",
+      "sharedAuthConfigurationChanged": true,
+      "configurationChange": {
+        "addedRedirectURL": "https://moa-diary-web.pages.dev/__moa_auth_callback",
+        "previousCount": 0,
+        "currentCount": 1,
+        "siteURL": "http://localhost:3000",
+        "siteURLChanged": false,
+        "reloadedReadback": true
+      },
+      "authorization": "User logged in to admin and explicitly asked agent to perform the requested one-URL addition.",
+      "databaseSchemaRlsStorageDataChanged": false,
+      "authSessionsChanged": "Normal new owner sign-in/last_sign_in_at update",
+      "originalV7Unchanged": true,
+      "existingProductSettingsChanged": false,
       "newCosts": false
     }
   },
@@ -423,14 +443,9 @@
       "verifiedAlternative": "Three scripts syntax-checked; no hosted operations executed. Current local app 11 and mock contract 6 passed."
     },
     {
-      "item": "Fresh email sign-in through redesigned login dialog",
-      "status": "NOT_TESTED",
-      "verifiedAlternative": "Earlier real sign-in and current existing-owner session reconnect; dialog UI only"
-    },
-    {
       "item": "Full media write / restore / different-user replay on current Cloudflare host",
       "status": "NOT_TESTED",
-      "verifiedAlternative": "Current local app 11, populated visual 3, mock contract 6, packaged gateway 7; historical hosted Supabase checkpoints separate"
+      "verifiedAlternative": "Current unit23/mock SDK6/packaged gateway10; historical app11/populated3 and hosted checkpoints separate."
     },
     {
       "item": "Exact HTTP status and security headers on real Cloudflare network",
@@ -473,6 +488,11 @@
       "item": "Impeccable CLI/context/detector and full accessibility certification",
       "status": "NOT_TESTED",
       "reason": "npm DNS installation failure; manual official guidance and product tests are separate"
+    },
+    {
+      "item": "Clean-profile live email authentication and live expired/foreign-user callback rejection",
+      "status": "NOT_TESTED",
+      "verifiedAlternative": "Fresh actual mail reauthentication in existing Chrome profile; empty-context and negative cases covered by mocked packaged Worker tests."
     }
   ],
   "costs": {
@@ -740,10 +760,10 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T05:39:38.832Z",
+      "preparedAt": "2026-11-24T08:13:46.356Z",
       "manifest": {
         "product": "moa",
-        "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+        "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
         "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
         "cloudConfigured": true
       },
@@ -752,11 +772,11 @@
         "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
         "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
         "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
-        "build-manifest.json": "ea45bf2a21688e09319c3d7b9f05eda5f4876b6276151ca74082403211834c10",
+        "build-manifest.json": "72a470f89281c133273b9bc8c956b1cf39eeec494ba0100f3f52a0b6b170febb",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "080706bc4325f2704a39416c9c70c988433b4507c8bf6d0c1990137cc6c5ba3f",
+      "workerSha256": "7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -787,7 +807,7 @@
       "bucketPrivate": true,
       "fileLimit": 26214400
     },
-    "hostedMoaChecks": "NOT_TESTED",
+    "hostedMoaChecks": "PARTIAL: current live email authentication/reload/manifest DONE; full media/restore/isolation not replayed",
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
@@ -797,11 +817,11 @@
     ],
     "access": "owner-only",
     "ownerGateway": {
-      "unitTests": 19,
-      "browserPackageChecks": 7,
+      "unitTests": 23,
+      "browserPackageChecks": 10,
       "authenticationTest": "synthetic JWT / mocked RPC",
-      "actualOwnerLogin": "DONE on previous fdf069f release; real login in new dialog NOT_TESTED",
-      "liveHostChecks": "Current public quiet date/white/tape/spacing and index23→21→23 verified. Private home/hosted manifest checks remain historical.",
+      "actualOwnerLogin": "DONE: actual new mail button click returned to owner cloud home; current release",
+      "liveHostChecks": "New mail login, owner home, clean credential URL, reload and exact protected hosted manifest verified.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -811,28 +831,37 @@
       "watchPaths": [
         "moa/*"
       ],
-      "actualOwnerSessionReconnect": "Historicalbad917b warm-details release; not replayed this public CSS-only turn."
+      "actualOwnerSessionReconnect": "DONE: reload after fresh actual email authentication"
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
-    "deploymentId": "57322add-b7bf-4310-9842-1f4632bd6b05",
+    "sourceCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+    "deploymentId": "d8ce9768-1edf-42e5-8986-2378adac5e02",
     "published": true,
     "actualBrowserChecks": {
       "method": "Supported Windows Computer Use / actual desktop Chrome",
-      "publicQuietDateSpacing": "DONE: quieter fill/no border-shadow, adjusted text/photo spacing, white surfaces/tape retained",
-      "publicIndexDateSwitch": "DONE:23→21→23 with matching day/weekday/title/photo",
-      "existingOwnerSession": "NOT_REPLAYED; previous warm-details checkpoint retained",
-      "actualManifest": "NOT_REPLAYED; local package manifest recorded; prior warm-details hosted manifest matched unchanged app source hash",
+      "freshEmailLogin": "DONE: actual deployed UI request, received new mail, clicked actual Gmail Log In link, returned to canonical root with owner cloud account and records0",
+      "emailReceivedAtUTC": "2026-11-24 08:15:48",
+      "lastSignInAtUTC": "2026-11-24 08:18:59.006305+00",
+      "lastSignInEvidence": "Read-only query of existing owner auth.users.last_sign_in_at",
+      "existingOwnerSession": "DONE: reload after fresh email login remains authenticated",
+      "cleanCredentialURL": "DONE: root URL without credential fragment after handoff",
+      "actualManifest": {
+        "status": "DONE",
+        "manifest": {
+          "product": "moa",
+          "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+          "cloudConfigured": true
+        },
+        "method": "Authenticated Chrome document read at production /build-manifest.json"
+      },
+      "cleanProfileLiveLogin": "NOT_TESTED; actual fresh mail reauthentication used existing regular Chrome profile",
       "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px package passed",
-      "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
-      "productionDataWrites": false,
-      "actualWindowScreenshots": "Displayed and visually reviewed in tool; not re-saved",
-      "localPreviewScreenshots": [
-        "qa-evidence/introduction-390.png",
-        "qa-evidence/introduction-1280.png"
-      ]
+      "productionDiaryHabitMediaWrites": false,
+      "normalAuthSignIn": true,
+      "actualWindowScreenshots": "Displayed/reviewed in tool; not re-saved"
     },
     "runtimeFixes": [
       {
@@ -842,6 +871,10 @@
       {
         "commit": "fdf069f5a01f61c98b6f9bcb2eac160fcc28c74c",
         "issue": "Owner entry and app must share existing moa-auth-v1 storage key"
+      },
+      {
+        "commit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+        "issue": "Explicit exact emailRedirectTo, token-scrubbed public callback with server owner/session verification before persistence, and preserve valid owner session when rejecting foreign callback."
       }
     ],
     "reproducibleWorkerHashMatch": null,
@@ -929,9 +962,9 @@
       "actualClientWidth": 304,
       "actualScrollWidth": 304,
       "actualLoginDialogInitiallyOpen": false,
-      "newDialogRealOwnerLoginReplay": "NOT_TESTED; previously verified owner login preserved as historical checkpoint",
+      "newDialogRealOwnerLoginReplay": "DONE: actual new mail link clicked in Gmail, owner app and reload verified",
       "authPoliciesChanged": false,
-      "supabaseChanged": false,
+      "supabaseChanged": true,
       "newCosts": false,
       "style": "White warm diary retained. Public noninteractive date is quieter and lighter; mobile24px/desktop28px text-to-photo spacing. Private app unchanged.",
       "previewViews": [
@@ -947,7 +980,8 @@
       "actualDesktopClientWidth": 958,
       "actualDesktopScrollWidth": 958,
       "historicalViewportMetrics": "actualClientWidth/ScrollWidth fields are earlier checkpoints. Current hosted desktop verified visually; no exact DOM viewport measurement.",
-      "dateBadge": "Visible day/month/weekday and ISO/accessible full date stay synchronized; local21/23 and live23→21 checked."
+      "dateBadge": "Visible day/month/weekday and ISO/accessible full date stay synchronized; local21/23 and live23→21 checked.",
+      "authConfigurationChange": "One exact Moa callback allowed URL added; Site URL/providers/templates preserved"
     },
     "previousIntroductionRelease": {
       "sourceCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
@@ -1245,7 +1279,7 @@
         "actualDesktopScrollWidth": 943
       }
     },
-    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for8f5de98 and deployment57322add.",
+    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for96490d7a48cc6f87dd654acf13248a3ad4336046, deploymentd8ce9768-1edf-42e5-8986-2378adac5e02.",
     "currentProviderWorkerHashReadback": "NOT_TESTED: local final Worker SHA recorded; no provider-log hash readback."
   },
   "previousIntroductionCandidate": {
@@ -1323,10 +1357,10 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T05:39:41.225Z",
+    "checkedAt": "2026-11-24T08:13:50.182Z",
     "manifest": {
       "product": "moa",
-      "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+      "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
       "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
       "cloudConfigured": true
     },
@@ -1350,6 +1384,18 @@
       },
       {
         "name": "owner dialog opens only by choice and Escape restores the trigger focus",
+        "status": "DONE"
+      },
+      {
+        "name": "email request uses exact Moa callback without signup or automatic link-paste form",
+        "status": "DONE"
+      },
+      {
+        "name": "email callback cleans credentials and establishes SDK session plus private gate",
+        "status": "DONE"
+      },
+      {
+        "name": "expired and non-owner callbacks clean URL, show retry and keep private app locked",
         "status": "DONE"
       },
       {
@@ -1389,8 +1435,27 @@
     "cloudflareSourceSha256": "6be81de8f52f51e6416ce32071f5dfe10b706bec8501d8e265947adc70bb95e2"
   },
   "currentCloudContract": {
-    "status": "NOT_TESTED",
-    "reason": "CSS-only refinement; prior 334b312 intercepted SDK 6 groups retained separately."
+    "status": "DONE",
+    "passed": 6,
+    "scope": "Current auth task; intercepted API. Built at starting07837137; unchanged private-app fingerprint.",
+    "evidence": {
+      "type": "local intercepted Supabase API contract, not live hosted test",
+      "manifest": {
+        "product": "moa",
+        "revision": "07837137ea515a6008268003b2559f7c8d90d5cf",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "results": [
+        "guest records are not automatically uploaded; A saved through supabase-js RPC",
+        "authenticated session reload and cloud readback",
+        "cross-tab logout clears private title/body/files, backup password and selected restore file",
+        "B sees only B data after account switch; guest data preserved",
+        "network failure does not report saved or discard draft",
+        "second browser reopens the same A cloud record"
+      ],
+      "errors": []
+    }
   },
   "previousCompactHomeCandidate": {
     "status": "CLOUDFLARE_SIMPLIFIED_HOME_VERIFIED_WITH_LIMITATIONS",
@@ -1592,7 +1657,7 @@
     "shellGitFetch": "ENOTFOUND github.com",
     "remoteSaved": true,
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved.",
-    "lineEndings": "Repository LF policy preserved. Prior warm release full hosted app source matched; this public CSS-only turn did not refetch manifest."
+    "lineEndings": "Repository LF policy preserved; authenticated production manifest matches current96490 commit and unchanged private-app source hash."
   },
   "previousTypographyRelease": {
     "codeCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
@@ -1648,5 +1713,135 @@
     "dateBorder": "transparent",
     "dateShadow": "none",
     "whiteAndTapePreserved": true
+  },
+  "previousQuietDateRelease": {
+    "candidate": {
+      "status": "DONE",
+      "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+      "deployment": "CLOUDFLARE_DEPLOYED",
+      "reason": "Public CSS only: quieter noninteractive date badge and responsive text/photo spacing. White surfaces/exact tape rule retained. Final package7 passed; live public23→21→23 and visual update verified. Private app fingerprint unchanged; unit19/app11/populated3 are historical.",
+      "codeCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+      "manifest": {
+        "product": "moa",
+        "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "workerSha256": "080706bc4325f2704a39416c9c70c988433b4507c8bf6d0c1990137cc6c5ba3f",
+      "compiledLocally": true,
+      "published": true,
+      "cloudflareCodeCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+      "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
+    },
+    "packagedWorkerBrowser": {
+      "checkedAt": "2026-11-24T05:39:41.225Z",
+      "manifest": {
+        "product": "moa",
+        "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
+      "results": [
+        {
+          "name": "packaged Worker blocks anonymous HTML, assets, manifest and health",
+          "status": "DONE"
+        },
+        {
+          "name": "service introduction renders before login at 304/320/390/768/1280px with protected app assets",
+          "status": "DONE"
+        },
+        {
+          "name": "photos and calendar dates open the right synthetic record without authentication",
+          "status": "DONE"
+        },
+        {
+          "name": "habit feedback toggles accessibly and resets on reload",
+          "status": "DONE"
+        },
+        {
+          "name": "owner dialog opens only by choice and Escape restores the trigger focus",
+          "status": "DONE"
+        },
+        {
+          "name": "synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application",
+          "status": "DONE"
+        },
+        {
+          "name": "logout removes access immediately; public static fallback contains no application",
+          "status": "DONE"
+        }
+      ],
+      "errors": []
+    },
+    "deployment": {
+      "sourceCommit": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+      "deploymentId": "57322add-b7bf-4310-9842-1f4632bd6b05",
+      "package": {
+        "preparedAt": "2026-11-24T05:39:38.832Z",
+        "manifest": {
+          "product": "moa",
+          "revision": "8f5de98df2b056d79dfb6dddad373fad6b17f09f",
+          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+          "cloudConfigured": true
+        },
+        "files": 3,
+        "hashes": {
+          "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
+          "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
+          "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
+          "build-manifest.json": "ea45bf2a21688e09319c3d7b9f05eda5f4876b6276151ca74082403211834c10",
+          "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
+          "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+        },
+        "workerSha256": "080706bc4325f2704a39416c9c70c988433b4507c8bf6d0c1990137cc6c5ba3f",
+        "access": "owner-only",
+        "staticFallback": "setup notice only",
+        "published": true
+      },
+      "actualBrowserChecks": {
+        "method": "Supported Windows Computer Use / actual desktop Chrome",
+        "publicQuietDateSpacing": "DONE: quieter fill/no border-shadow, adjusted text/photo spacing, white surfaces/tape retained",
+        "publicIndexDateSwitch": "DONE:23→21→23 with matching day/weekday/title/photo",
+        "existingOwnerSession": "NOT_REPLAYED; previous warm-details checkpoint retained",
+        "actualManifest": "NOT_REPLAYED; local package manifest recorded; prior warm-details hosted manifest matched unchanged app source hash",
+        "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px package passed",
+        "freshEmailLogin": "NOT_TESTED",
+        "hostedMediaBackupIsolationReplay": "NOT_TESTED",
+        "realDevices": "NOT_TESTED",
+        "productionDataWrites": false,
+        "actualWindowScreenshots": "Displayed and visually reviewed in tool; not re-saved",
+        "localPreviewScreenshots": [
+          "qa-evidence/introduction-390.png",
+          "qa-evidence/introduction-1280.png"
+        ]
+      }
+    },
+    "meaning": "Historical quiet-date/spacing release; local app11/populated3 remain earlier warm-release results."
+  },
+  "emailLoginRepair": {
+    "status": "DONE",
+    "dateKST": "2026-11-24",
+    "codeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+    "deploymentId": "d8ce9768-1edf-42e5-8986-2378adac5e02",
+    "confirmedCause": {
+      "oldMailRedirectTo": "http://localhost:3000",
+      "requestOmittedEmailRedirectTo": true,
+      "existingSiteURL": "http://localhost:3000",
+      "previousRedirectURLs": []
+    },
+    "callbackURL": "https://moa-diary-web.pages.dev/__moa_auth_callback",
+    "signupEnabled": false,
+    "serverVerifiesBeforeSdkPersistence": true,
+    "callbackScrubsCredentialURL": true,
+    "foreignCallbackPreservesExistingOwnerSession": "DONE: mocked packaged browser regression",
+    "automaticLinkPastePrompt": false,
+    "manualFallback": "Optional only after user chooses troubleshooting",
+    "oldMailBehavior": "Old mail keeps its old redirect; refresh Moa and request a new message.",
+    "secretsSavedToRepositoryOrEvidence": false,
+    "references": [
+      "https://supabase.com/docs/guides/auth/redirect-urls",
+      "https://supabase.com/docs/guides/auth/auth-email-passwordless"
+    ]
   }
 }
