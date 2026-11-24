@@ -9,27 +9,27 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "5d5f477b1156b516b08c0e0128ba1fa38deb3cb07dc714c996b5ec453c632de1",
+    "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Refined local serif headings, cool paper surfaces, rounded controls and subtle photo shadows; equal five-button mobile navigation and narrow preview tab line-height guards. Current unit 19, app 11, populated 3, packaged 7 passed; actual public 304/943px and owner session/design readback. Hosted writes and devices untested.",
-    "codeCommit": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
+    "reason": "System sans throughout wordmark/headings/body; moderate sizes/weights. Tape CSS rules unchanged. Current app11/populated3/package7 passed, actual public304 and owner958 computed sans/600 plus screenshots. No backend/data/cost change.",
+    "codeCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
     "manifest": {
       "product": "moa",
-      "revision": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
-      "sourceSha256": "5d5f477b1156b516b08c0e0128ba1fa38deb3cb07dc714c996b5ec453c632de1",
+      "revision": "6c32df14dc0fe403920db6be242a46645a657e78",
+      "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
       "cloudConfigured": true
     },
-    "workerSha256": "739a17e7c7eb40347ab0931b40073e367d068a56ec8e2172668b64c1dc81c8aa",
+    "workerSha256": "1b0b8c42057576450acfa7267a80b084d234114a837a5d610e569a1a674a930c",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
-    "cloudflareSourceSha256": "5d5f477b1156b516b08c0e0128ba1fa38deb3cb07dc714c996b5ec453c632de1"
+    "cloudflareCodeCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
+    "cloudflareSourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd"
   },
   "unit": {
     "status": "DONE",
     "passed": 19,
     "dateKST": "2026-11-24",
-    "scope": "Unit / local PostgreSQL engine / Worker; not hosted DB replay"
+    "scope": "Historical preceding polish release unit/local PostgreSQL/Worker19; not rerun for sans-only CSS change."
   },
   "audit": {
     "status": "DONE",
@@ -40,12 +40,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:58299",
+    "base": "http://127.0.0.1:51439",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "b62fd02046230e20dc211a116b9713b4d466d396",
-      "sourceSha256": "851ded6c8a6b3510125a6d32a87df5c27a47720143f61f3cf5e07261e00f1e75",
+      "revision": "80723d0647a6b5446920dd96901dcb77ea5a126e",
+      "sourceSha256": "9ce572063bad1067ef0c488833ae1f8ba126c871e41a4d3bd95f45bb55b199f6",
       "cloudConfigured": false
     },
     "results": [
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Isolated local IndexedDB; private CSS saved in 502d525, precommit b62fd02 metadata retained. No hosted writes."
+    "scope": "Current private source, precommit80723d0 metadata, isolated local IndexedDB. Saved as6c32df1."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -375,7 +375,7 @@
     "currentCountObservationIsHistorical": true,
     "currentUiRefinement": {
       "dateKST": "2026-11-24",
-      "codeScope": "moa/ CSS and regression tests/docs only; auth/backend unchanged",
+      "codeScope": "moa/ typography CSS and docs only; both photo tape rules byte-identical; backend/auth/data unchanged",
       "backendSchemaAuthDataWrites": false,
       "originalV7Unchanged": true,
       "newCosts": false
@@ -740,23 +740,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T01:56:10.145Z",
+      "preparedAt": "2026-11-24T02:03:28.183Z",
       "manifest": {
         "product": "moa",
-        "revision": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
-        "sourceSha256": "5d5f477b1156b516b08c0e0128ba1fa38deb3cb07dc714c996b5ec453c632de1",
+        "revision": "6c32df14dc0fe403920db6be242a46645a657e78",
+        "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
         "index.html": "6b488618dffc96f36248bb9f7b0006ae9d416d01a7209d558ad46b8b7c187270",
-        "app.js": "7bd36526a951ffa5db7c1f98e0f798b61b0993d8e296bfe9d07d3dba13eeed27",
-        "service.css": "758ee77d1e7fc015d5fbf02d9e84e67f96b3b3ec95a6a722a87e651b544e8d10",
-        "build-manifest.json": "b67a5fb5116fd1cbc83647fe40f227e94786a98b88eae54956d55e3a4d09e06f",
+        "app.js": "450629d8711dbc1ae4b3a089ccfc13b1372641baed381cfd15cac637f715b5f9",
+        "service.css": "5e937cf04deba5e13685c9a95d5161395c0dcd528de1582f544f56f7ca2c0d22",
+        "build-manifest.json": "e0a16a16bf5d4b39d01615e2286902ecc8e81e0cf4660de2fb7dabaf8e202605",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "739a17e7c7eb40347ab0931b40073e367d068a56ec8e2172668b64c1dc81c8aa",
+      "workerSha256": "1b0b8c42057576450acfa7267a80b084d234114a837a5d610e569a1a674a930c",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -814,24 +814,20 @@
       "actualOwnerSessionReconnect": "DONE on f50aadf: existing owner session re-established; not fresh email sign-in replay"
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
-    "deploymentId": "68b52764-a240-4ef1-9bd7-996990219d98",
+    "sourceCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
+    "deploymentId": "448d059c-90be-4a7c-8956-f70d66e28d4f",
     "published": true,
     "actualBrowserChecks": {
-      "publicMobile": "DONE: production IAB width=scrollWidth=304, all three preview tabs height44",
-      "publicDesktop": "DONE: final deployment alias width=scrollWidth=943, polished typography/paper/photo visually checked",
-      "publicPhotoNavigation": "DONE: gallery to day21 sea and day23 morning records",
-      "ownerFinalSessionReconnect": "DONE: final reload returned current private home, account, today/week and empty record count0",
-      "ownerWriteView": "DONE: 502d525 private CSS identical to final; editor and private-cloud notice visible, no writes",
+      "publicMobile": "DONE: production304 no overflow, title sans/27px/600; tape rgba239,217,138,.79 width62px",
+      "publicDesktop": "DONE: final alias visually shows sans titles and retained photo tape",
+      "ownerSessionAndFont": "DONE: current build6f4f9d8af559, existing session, home sans/600, width=scrollWidth958, zero records",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
-      "liveFullDraftCalendarHabitReplay": "NOT_TESTED: local current tests and previous hosted checkpoints separate",
       "productionDataWrites": false,
       "screenshots": [
-        "qa-evidence/hosted-polish-preview-wide.jpg",
-        "qa-evidence/hosted-polish-preview-304.jpg",
-        "qa-evidence/hosted-polish-owner-home.jpg"
+        "qa-evidence/hosted-sans-preview-wide.jpg",
+        "qa-evidence/hosted-sans-preview-304.jpg"
       ]
     },
     "runtimeFixes": [
@@ -933,7 +929,7 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "Cool #f7f8fa ground and white paper, local serif diary titles, rounded10px controls, subtle photo shadows, coral accent and yellow tape retained.",
+      "style": "Shared system sans stack throughout, headings24-32px/600, wordmark28-30px/700. Photo tape byte-identical; previous paper surfaces retained.",
       "previewViews": [
         "record",
         "calendar",
@@ -944,8 +940,8 @@
       "privateHome": "today/week selector/recent rows; PC sidebar/mobile bottom nav with SVG+labels",
       "draftNavigation": "retained in memory across menus; account changes still clear private drafts",
       "examplePhotoLayout": "smaller print beside diary text with title first",
-      "actualDesktopClientWidth": 943,
-      "actualDesktopScrollWidth": 943
+      "actualDesktopClientWidth": 958,
+      "actualDesktopScrollWidth": 958
     },
     "previousIntroductionRelease": {
       "sourceCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
@@ -1319,11 +1315,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T01:56:13.074Z",
+    "checkedAt": "2026-11-24T02:03:30.977Z",
     "manifest": {
       "product": "moa",
-      "revision": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
-      "sourceSha256": "5d5f477b1156b516b08c0e0128ba1fa38deb3cb07dc714c996b5ec453c632de1",
+      "revision": "6c32df14dc0fe403920db6be242a46645a657e78",
+      "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1468,8 +1464,8 @@
   "populatedVisualBrowser": {
     "manifest": {
       "product": "moa",
-      "revision": "b62fd02046230e20dc211a116b9713b4d466d396",
-      "sourceSha256": "851ded6c8a6b3510125a6d32a87df5c27a47720143f61f3cf5e07261e00f1e75",
+      "revision": "80723d0647a6b5446920dd96901dcb77ea5a126e",
+      "sourceSha256": "9ce572063bad1067ef0c488833ae1f8ba126c871e41a4d3bd95f45bb55b199f6",
       "cloudConfigured": false
     },
     "type": "local synthetic fixtures and CC0 media; no hosted writes",
@@ -1587,5 +1583,10 @@
     "shellGitFetch": "ENOTFOUND github.com",
     "remoteSaved": true,
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved."
+  },
+  "previousTypographyRelease": {
+    "codeCommit": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
+    "deploymentId": "68b52764-a240-4ef1-9bd7-996990219d98",
+    "meaning": "Earlier serif polish release; historical results are distinguished from current sans-only change."
   }
 }
