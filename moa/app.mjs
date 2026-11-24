@@ -79,7 +79,7 @@ function renderCalendar(){
 function action(label,run){const b=el('button',label);b.type='button';b.className='secondary small';b.onclick=run;return b;}
 function entryCard(e){
   const card=el('article');card.className='entry deco-'+e.decoration;card.dataset.entryId=e.id;
-  const head=el('div');head.className='feed-header';const info=el('div');info.className='feed-info';const date=el('div',e.recordDate);date.className='feed-date';info.append(el('strong',e.title),date);const tag=el('span',e.category);tag.className='tag';head.append(info,tag);card.append(head);
+  const head=el('div');head.className='feed-header';const info=el('div');info.className='feed-info';const date=el('div',e.recordDate);date.className='feed-date';info.append(date,el('strong',e.title));const tag=el('span',e.category);tag.className='tag';head.append(info,tag);card.append(head);
   if(e.sticker){const s=el('div',e.sticker);s.className='sticker';s.tabIndex=0;s.setAttribute('role','button');s.setAttribute('aria-label','스티커 위치 조절 · 방향키 또는 드래그');s.style.transform=`translate(${e.stickerX}px,${e.stickerY}px)`;let drag;
     const clamp=(x,y)=>[Math.max(-15,Math.min(Math.min(230,Math.max(0,card.clientWidth-s.offsetWidth-30)),x)),Math.max(-15,Math.min(200,y))];
     const move=(x,y)=>task(()=>mutate(next=>Object.assign(next.entries.find(x=>x.id===e.id),{stickerX:x,stickerY:y})));
