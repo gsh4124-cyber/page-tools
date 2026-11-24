@@ -173,7 +173,7 @@
   }
   function ensureMultiSelectEnhancements(){
     const actions=document.querySelector('.verse-multi-actions');if(!actions)return;
-    if(!actions.querySelector('.verse-multi-color')){const color=document.createElement('button');color.type='button';color.className='verse-multi-color';color.textContent=labels().color;color.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();colorPopover?closeColorPopover():openColorPopover(color)});actions.insertBefore(color,actions.querySelector('.verse-multi-done'))}
+    if(!actions.querySelector('.verse-multi-color')){const color=document.createElement('button');color.type='button';color.className='verse-multi-color';color.textContent=labels().color;color.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();colorPopover?closeColorPopover():openColorPopover(color)});actions.insertBefore(color,actions.querySelector('.verse-multi-highlight')||actions.querySelector('.verse-multi-done'))}
     if(!actions.querySelector('.verse-multi-share')){const share=document.createElement('button');share.type='button';share.className='verse-multi-share';share.textContent=labels().share;share.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();shareSelection()});actions.insertBefore(share,actions.querySelector('.verse-multi-done'))}
   }
 
@@ -242,15 +242,25 @@
 
     const otherTools=[
       ['#widthToggle','읽기 폭'],['#pageViewToggle','양면 보기'],
-      ['#themeToggle','테마'],['.reader-history-back','이전 위치'],
-      ['.reader-history-forward','다음 위치'],['.reader-focus-toggle','집중 읽기']
+      ['#themeToggle','테마'],['.reader-focus-toggle','집중 읽기'],
+      ['.reader-history-back','이전 위치'],['.reader-history-forward','다음 위치']
     ];
     otherTools.forEach(([selector,fallback])=>{
       const button=toolbar.querySelector(selector);
       if(!button)return;
       if(!button.title)button.title=button.getAttribute('aria-label')||fallback;
+      // View settings first, then a divider before moving between reading positions.
+      if(selector==='.reader-history-back'&&!moreMenu.querySelector('.toolbar-more-sep-history')){const sep=document.createElement('div');sep.className='toolbar-more-sep toolbar-more-sep-history';sep.setAttribute('role','separator');moreMenu.append(sep);}
       moreMenu.append(button);
     });
+    // 6) The interface language is a rare setting; keep it in the overflow menu so the
+    // first row is not read as a second Bible-version picker.
+    function moveLanguageSelector(){
+      const wrap=topbar.querySelector('.location-controls > .language-selector-wrap');
+      if(!wrap)return false;
+      wrap.classList.add('toolbar-more-language');moreMenu.prepend(wrap);return true;
+    }
+    if(!moveLanguageSelector()){const watch=new MutationObserver(()=>{if(moveLanguageSelector())watch.disconnect()});watch.observe(topbar,{childList:true,subtree:true});}
     const notebook=toolbar.querySelector('.notebook-button');
     if(notebook)toolbar.insertBefore(notebook,moreWrap);
 
@@ -278,6 +288,8 @@
       moreToggle.setAttribute('aria-expanded',String(open));
       if(!open&&moreMenu.contains(document.activeElement))moreToggle.focus();
     }
+    // Search handlers run in document capture and stop propagation, so watch from window capture.
+    window.addEventListener('submit',event=>{if(event.target===searchForm)requestAnimationFrame(()=>showSearch(false))},true);
     searchToggle.addEventListener('click',()=>{
       const open=!topbar.classList.contains('search-open');
       showMore(false);showSearch(open);
