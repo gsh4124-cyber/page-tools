@@ -1,4 +1,4 @@
-import {empty,today,validateDocument,validateFile,encodeBackup,decodeBackup,MAX_BACKUP,DECOR,CATEGORIES} from './core.mjs';
+import {empty,today,draftTitle,validateDocument,validateFile,encodeBackup,decodeBackup,MAX_BACKUP,DECOR,CATEGORIES} from './core.mjs';
 import {prepareMedia,mib} from './media.mjs';
 import {setupAccountUI} from './account-ui.mjs';
 import {LocalRepository,CloudRepository,makeClient,preflight} from './repository.mjs';
@@ -10,6 +10,7 @@ let accountUI,authHold=0,lastProblem='',usageState={active:0,reserved:0,count:0}
 let repo,db=empty(),busy=false,ready=false,generation=0,epoch=0,urls=[],noticeTimer;
 let month=new Date(new Date().getFullYear(),new Date().getMonth(),1),selection=null,feedMode='all';
 let backupMode='export',restoreFile=null;
+let draftUrls=[];
 const monthKey=()=>`${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`;
 const notice=(message,error=false)=>{if(error)lastProblem=/연결|fetch|Network/.test(message)?'NETWORK':/로그인|AUTH|인증/.test(message)?'AUTH':/다른 창|STALE/.test(message)?'STALE':'OPERATION';clearTimeout(noticeTimer);$('#notice').textContent=message;$('#notice').classList.toggle('error',error);$('#notice').hidden=false;noticeTimer=setTimeout(()=>$('#notice').hidden=true,error?14000:6000);};
 const errorMessage=e=>/MOA_ACCOUNT_CLOSED/.test(e.message||'')?'모아 이용 상태가 바뀌었어요. 계정 화면에서 다시 확인해 주세요.':/AUTH_REQUIRED|REAUTH_REQUIRED|NEW_LOGIN_REQUIRED/.test(e.message||'')?'로그인을 다시 확인해 주세요. 중요한 작업은 비밀번호를 다시 입력해야 해요.':/DELETION_INCOMPLETE/.test(e.message||'')?'첨부 정리가 남았어요. 계정에서 탈퇴를 이어서 실행해 주세요.':/MOA_ACTIVE_LIMIT/.test(e.message||'')?'기록에 연결된 미디어 한도는 48MiB예요. 먼저 백업하고 첨부를 정리해 주세요.':/MOA_STAGING_LIMIT/.test(e.message||'')?'임시 첨부 한도(96MiB·500개)에 도달했어요. 하루 지난 미사용 첨부를 정리해 주세요.':/STALE_WRITE|다른 창/.test(e.message||'')?'다른 창이나 기기에서 기록이 바뀌었어요. 입력한 내용은 유지됩니다. 새로고침 후 다시 저장해 주세요.':/Failed to fetch|NetworkError|fetch failed/.test(e.message||'')?'연결이 끊겼어요. 저장 결과를 확인한 뒤 다시 시도해 주세요. 입력한 내용은 유지됩니다.':e.message||'작업을 완료하지 못했어요.';
@@ -20,7 +21,7 @@ function account(){const user=repo?.user;$('#accountStatus').textContent=user?`�
 async function activate(user){
   const token=++epoch;ready=false;db=empty();clearMedia();
   $('#backupPassword').value='';restoreFile=null;$('#backupDialog').close();$('#password').value='';$('#confirmEmailLink').value='';
-  $('#entryForm').reset();$('#recordDate').value=today();$('#searchRecords').value='';$('#filter').value='전체';selection=null;feedMode='all';showView('home',false);render();
+  $('#entryForm').reset();$('#entryExtras').open=false;renderDraftMedia();$('#recordDate').value=today();$('#searchRecords').value='';$('#filter').value='전체';selection=null;feedMode='all';showView('home',false);render();
   const target=user?new CloudRepository(client,user):new LocalRepository();repo=target;account();
   try{const loaded=await target.load();if(token!==epoch)return;db=loaded;ready=true;render();account();}
   catch(e){if(token!==epoch)return;if(client&&/AUTH_REQUIRED/.test(e.message||'')){await client.auth.signOut({scope:'local'});await activate(null);notice('로그인이 만료됐어요. 다시 로그인해 주세요.',true);return;}notice('기록을 불러오지 못했어요. '+errorMessage(e),true);$('#privacyNotice').textContent='저장소 연결 실패 · 새로고침하여 다시 연결해 주세요.';controls();}
@@ -99,13 +100,15 @@ function openEdit(card,e){
   form.onsubmit=p=>{p.preventDefault();task(async()=>{const target=repo,token=epoch,retained=keep.filter(([,n])=>n.checked).map(([k])=>k),added=await prepareMedia([...files.files],$('#optimizePhotos').checked);if(retained.length+added.length>6)throw Error('첨부 파일은 최대 6개예요.');added.forEach(validateFile);const nextEntry={...e,title:title.value,recordDate:date.value,content:content.value,category:category.value,sticker:sticker.value,decoration:decor.value,mediaKeys:retained};validateDocument({...db,entries:db.entries.map(x=>x.id===e.id?nextEntry:x)},target.user?.id);await preflight(target,{...db,entries:db.entries.map(x=>x.id===e.id?nextEntry:x)},added,e.mediaKeys.filter(k=>!retained.includes(k)));for(const file of added)nextEntry.mediaKeys.push(await target.put(file));if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');await mutate(next=>next.entries=next.entries.map(x=>x.id===e.id?nextEntry:x));try{await target.remove(e.mediaKeys.filter(k=>!retained.includes(k)));}catch{notice('수정은 저장됐지만 제거한 첨부 파일 정리가 실패했어요.',true);return;}notice('변경을 저장했어요.');});};card.append(form);title.focus();
 }
 
-$('#entryForm').onsubmit=p=>{p.preventDefault();task(async()=>{const target=repo,token=epoch,files=await prepareMedia([...$('#media').files],$('#optimizePhotos').checked);if(files.length>6)throw Error('첨부 파일은 최대 6개예요.');files.forEach(validateFile);const entry={id:crypto.randomUUID(),title:$('#title').value,category:$('#category').value,recordDate:$('#recordDate').value,content:$('#content').value,decoration:$('#decoration').value,sticker:$('#sticker').value,stickerX:0,stickerY:0,visibility:'private',created:new Date().toISOString(),mediaKeys:[]};validateDocument({...db,entries:[entry,...db.entries]},target.user?.id);await preflight(target,db,files);for(const f of files)entry.mediaKeys.push(await target.put(f));if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');await mutate(next=>next.entries.unshift(entry));if(token!==epoch)return;p.target.reset();$('#recordDate').value=today();selection=null;feedMode='all';render();notice('기록을 저장했어요.');showView('feed');});};
+$('#entryForm').onsubmit=p=>{p.preventDefault();task(async()=>{const target=repo,token=epoch,files=await prepareMedia([...$('#media').files],$('#optimizePhotos').checked);if(files.length>6)throw Error('첨부 파일은 최대 6개예요.');files.forEach(validateFile);const entry={id:crypto.randomUUID(),title:draftTitle($('#title').value,$('#content').value,files),category:$('#category').value,recordDate:$('#recordDate').value,content:$('#content').value,decoration:$('#decoration').value,sticker:$('#sticker').value,stickerX:0,stickerY:0,visibility:'private',created:new Date().toISOString(),mediaKeys:[]};validateDocument({...db,entries:[entry,...db.entries]},target.user?.id);await preflight(target,db,files);for(const f of files)entry.mediaKeys.push(await target.put(f));if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');await mutate(next=>next.entries.unshift(entry));if(token!==epoch)return;p.target.reset();$('#entryExtras').open=false;renderDraftMedia();$('#recordDate').value=today();selection=null;feedMode='all';render();notice('기록을 저장했어요.');showView('feed');});};
 $('#addHabit').onclick=()=>task(async()=>{const name=$('#habitName').value.trim();if(!name)throw Error('습관 이름을 입력해 주세요.');if(db.habits.includes(name))throw Error('같은 이름의 습관이 있어요.');await mutate(next=>next.habits.push(name));$('#habitName').value='';});
 $('#habitName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#addHabit').click();}};
 function moveMonth(delta){month.setMonth(month.getMonth()+delta);selection=null;if(feedMode==='day')feedMode='month';render();}
 $('#prevMonth').onclick=()=>moveMonth(-1);$('#nextMonth').onclick=()=>moveMonth(1);
 $('#showMonth').onclick=()=>{selection=null;feedMode='month';render();};$('#showAll').onclick=()=>{selection=null;feedMode='all';render();};$('#searchRecords').oninput=render;$('#filter').onchange=render;
-$('#writeNow').onclick=()=>{$('#recordDate').value=today();showView('write');$('#title').focus({preventScroll:true});};$('#recordDate').value=today();
+$('#writeNow').onclick=()=>{showView('write');$('#content').focus({preventScroll:true});};$('#recordDate').value=today();
+$('#photoNow').onclick=()=>{showView('write',false);$('#media').click();};
+$('#chooseMedia').onclick=()=>$('#media').click();
 document.querySelectorAll('[data-sticker]').forEach(b=>b.onclick=()=>{$('#sticker').value=($('#sticker').value+b.dataset.sticker).slice(0,12);});
 document.querySelectorAll('.bottom-nav button').forEach(button=>button.onclick=()=>showView(button.dataset.go));
 document.querySelectorAll('[data-home-view]').forEach(button=>button.onclick=()=>{if(button.dataset.homeView==='habits'){selection=null;feedMode='all';render();}showView(button.dataset.homeView);});
@@ -129,6 +132,23 @@ async function accountTask(fn){if(busy)return;busy=true;authHold++;controls();tr
 accountUI=setupAccountUI({client,origin:__MOA_CONFIG__.url,getRepo:()=>repo,activate,notice,task:accountTask});
 function renderUploadEstimate(){const files=[...$('#media').files],bytes=files.reduce((n,f)=>n+f.size,0);$('#uploadEstimate').textContent=files.length?files.length+'개 선택 · '+mib(bytes)+' · 저장 가능 '+mib(Math.max(0,50331648-usageState.active))+(bytes+usageState.active>50331648?' · 용량 줄이기 또는 첨부 정리가 필요해요.':''):'사진·영상 파일당 25MiB · 기록당 6개';}
 $('#media').addEventListener('change',renderUploadEstimate);
+function renderDraftMedia(){
+ for(const url of draftUrls)URL.revokeObjectURL(url);draftUrls=[];
+ const out=$('#draftMedia'),files=[...$('#media').files];out.replaceChildren();
+ $('#chooseMedia').textContent=files.length?'사진·영상 다시 고르기':'사진·영상 고르기';
+ $('#photoHint').hidden=Boolean(files.length);
+ for(const [i,file] of files.entries()){
+  const card=el('figure');card.className='draft-attachment';const preview=el('div');preview.className='draft-preview';
+  let valid=true;try{validateFile(file);}catch{valid=false;}
+  if(valid&&file.type.startsWith('image/')){const img=el('img');const url=URL.createObjectURL(file);draftUrls.push(url);img.src=url;img.alt=`선택한 사진 ${i+1}`;img.loading='lazy';img.decoding='async';preview.append(img);}else preview.append(el('span',valid?'영상':'지원하지 않는 첨부'));
+  const caption=el('figcaption',file.name);caption.title=file.name;const remove=action('빼기',()=>{
+   const transfer=new DataTransfer();files.forEach((f,n)=>{if(n!==i)transfer.items.add(f);});$('#media').files=transfer.files;renderDraftMedia();renderUploadEstimate();
+   const next=$('#draftMedia button')||$('#chooseMedia');next.focus({preventScroll:true});
+  });remove.setAttribute('aria-label',`첨부 ${i+1} 빼기`);card.append(preview,caption,remove);out.append(card);
+ }
+ renderUploadEstimate();controls();
+}
+$('#media').addEventListener('change',renderDraftMedia);
 const networkState=()=>{$('#connectionNotice').hidden=navigator.onLine;};window.addEventListener('online',networkState);window.addEventListener('offline',networkState);networkState();
 $('#diagnosticBtn').onclick=()=>accountTask(async()=>{let cloud='not-configured';if(client){const health=await client.rpc('moa_health');if(health.error||!health.data?.ready)throw Error('클라우드 연결 점검에 실패했어요. 연결을 확인한 뒤 다시 실행해 주세요.');cloud='ready';}const report={product:'moa',build:__MOA_BUILD__,checkedAt:new Date().toISOString(),online:navigator.onLine,cloud,viewport:{width:innerWidth,height:innerHeight},storage:repo?.user?'cloud':'device',lastErrorCode:lastProblem};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='moa-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('연결을 점검하고 개인정보가 없는 진단 파일을 만들었어요.');});
 const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('moa-account-events'):null;channel?.addEventListener('message',e=>{if(e.data?.user===repo?.user?.id)activate(repo.user);});

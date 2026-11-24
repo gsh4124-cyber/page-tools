@@ -9,6 +9,13 @@ export const today = () => {const d=new Date();return `${d.getFullYear()}-${Stri
 export function validDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s)||s<'1900-01-01'||s>'2200-12-31')return false;const d=new Date(s+'T12:00:00Z');return Number.isFinite(+d)&&d.toISOString().slice(0,10)===s;}
 const text = (s,n) => typeof s==='string' && s.length<=n;
 const fail = s => {throw new Error(s);};
+export function draftTitle(title,content,files=[]){
+ const explicit=title.trim();if(explicit)return explicit;
+ const first=content.trim().split(/\r?\n/,1)[0].trim();
+ if(first)return first.slice(0,100).replace(/[\uD800-\uDBFF]$/,'');
+ if(files.length)return files.some(f=>f.type.startsWith('image/'))?'사진 기록':'영상 기록';
+ fail('사진이나 이야기를 먼저 남겨 주세요.');
+}
 export function validateFile(f){if(!MIME.includes(f.type))fail('JPEG·PNG·WebP·GIF 사진 또는 MP4·WebM·MOV 영상만 첨부할 수 있어요.');if(!f.size||f.size>MAX_FILE)fail('첨부 파일은 각각 25MB 이하여야 해요.');}
 export function validateDocument(input, owner){
   if(!input||!Array.isArray(input.entries)||input.entries.length>2000||!Array.isArray(input.habits)||input.habits.length>100||!input.checks||Array.isArray(input.checks)||typeof input.checks!=='object')fail('기록 형식이 올바르지 않아요.');

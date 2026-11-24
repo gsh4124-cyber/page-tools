@@ -4,4 +4,5 @@ export async function openView(page,view){
   await page.locator('.bottom-nav [data-go="home"]').click();
   await page.locator('[data-home-view="archive"]').click();
  }else await page.locator('.bottom-nav [data-go="'+view+'"]').click();
+ if(view==='write'&&!await page.locator('#title').isVisible())await page.locator('#entryExtras>summary').click();
 }
