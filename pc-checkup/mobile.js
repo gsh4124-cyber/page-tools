@@ -48,7 +48,7 @@ document.querySelectorAll('.mobile-result-actions').forEach(group=>{
     setResult(group.dataset.test,b.dataset.result);
   });
 });
-$('#resetMobileResults').onclick=()=>{results={};try{window.DeviceStorage.removeItem(resultKey);}catch{}renderResults();};
+$('#resetMobileResults').onclick=()=>{stopCamera();stopMic();closeTouchTest();navigator.vibrate?.(0);frontCameraOk=false;backCameraOk=false;frontDeviceId='';backDeviceId='';$('#cameraAutoStatus').textContent='';$('#micAutoStatus').textContent='';results={};try{window.DeviceStorage.removeItem(resultKey);}catch{}renderResults();};
 renderResults();
 
 const touchLayer=$('#touchTestLayer'),touchGrid=$('#touchGrid');
