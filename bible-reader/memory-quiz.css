@@ -169,6 +169,24 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-practice-row .memory-result{margin:0;padding:0;border:0}
 .memory-practice-row .memory-result h4{display:none}
 .memory-practice-row .memory-diff{margin-bottom:0}
+/* Tablet practice keeps the passage and the answer on the same row. */
+.memory-practice-wide{width:min(1100px,calc(var(--memory-view-width,100vw) - 2 * var(--memory-edge-x)))}
+.memory-practice-wide .memory-header{padding:8px 18px}
+.memory-practice-wide .memory-context{margin:6px 18px 0}
+.memory-practice-wide .memory-content{padding:0 18px 12px}
+.memory-practice-wide .memory-unit-heading p{margin-block:6px}
+.memory-practice-wide .memory-unit-nav{margin:4px 0}
+.memory-practice-wide .memory-short-notices{display:flex;align-items:center;flex-wrap:wrap;gap:4px 16px}
+.memory-practice-wide .memory-short-notices .memory-dock-status{flex:1 1 160px}
+.memory-practice-wide .memory-practice-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.memory-practice-wide .memory-practice-body>.memory-practice-text,.memory-practice-wide .memory-practice-body>.memory-row-feedback{grid-column:1;grid-row:1;border-bottom:0}
+.memory-practice-wide .memory-practice-body>.memory-row-feedback:empty{display:none}
+.memory-practice-wide .memory-practice-body>.memory-answer-label{grid-column:2;grid-row:1;min-width:0;align-self:stretch;border-inline-start:1px solid var(--line)}
+.memory-practice-wide .memory-practice-row .memory-answer{min-height:108px}
+.memory-practice-wide .memory-dock{grid-template-columns:minmax(0,1fr) minmax(160px,.38fr);gap:8px;padding:8px 18px max(8px,env(safe-area-inset-bottom))}
+.memory-practice-wide .memory-dock>.memory-primary,.memory-practice-wide .memory-dock>.memory-aids{min-width:0;grid-row:1}
+.memory-practice-wide.memory-ultra-short .memory-dock{grid-template-columns:minmax(0,1fr) minmax(160px,.38fr) 44px}
+.memory-practice-wide.memory-ultra-short .memory-close{grid-row:1}
 .memory-practice-review{margin-block:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .memory-practice-review>summary{min-height:44px;padding:10px 12px;font-size:14px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
 .memory-practice-review .memory-result{margin:0;padding:12px}

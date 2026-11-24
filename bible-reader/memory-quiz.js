@@ -312,7 +312,7 @@
     function placeNotices(){
       if(dock.hidden||!shortNotices)return;
       // On very short screens keep the two actions pinned; guidance stays in the scrollable input area.
-      if(dialog.classList.contains('memory-tight-height'))shortNotices.append(...[...dock.children].filter(n=>n.matches('.memory-error,.memory-feedback,.memory-dock-status')));
+      if(dialog.classList.contains('memory-tight-height')||dialog.classList.contains('memory-practice-wide'))shortNotices.append(...[...dock.children].filter(n=>n.matches('.memory-error,.memory-feedback,.memory-dock-status')));
       else dock.prepend(...shortNotices.children);
     }
     // Measure outside layout: collapsing the focused field resets scrolling and
@@ -343,6 +343,7 @@
       if(leaveDialog)for(const property of ['--memory-view-height','--memory-view-width','--memory-center-x','--memory-center-y'])leaveDialog.style.setProperty(property,dialog.style.getPropertyValue(property));
       dialog.classList.toggle('memory-compact-height',height<500);
       dialog.classList.toggle('memory-tight-height',height<400);
+      dialog.classList.toggle('memory-practice-wide',phase==='attempt'&&config.mode==='practice'&&width>=900);
       dialog.classList.toggle('memory-minimal-header',height<320&&width<500);
       const ultraShort=height<320&&!dock.hidden,stacked=ultraShort&&width<500&&parseFloat(getComputedStyle(dock.querySelector('.memory-primary')).fontSize)>20;
       dialog.classList.toggle('memory-ultra-short',ultraShort);dialog.classList.toggle('memory-stacked-controls',stacked);moveClose(ultraShort?dock:header,stacked?dock.querySelector('.memory-aids'):null);
@@ -554,15 +555,26 @@
         }else{text=practiceChecked[practiceIndex]?l.nextVerse:l.checkAnswer;action=practiceChecked[practiceIndex]?'practice-next':'check';}
         if(primary.textContent!==text)primary.textContent=text;if(primary.dataset.action!==action)primary.dataset.action=action;
       }
+      function revealPracticePair(index){
+        const body=practiceSources[index]?.parentElement;
+        if(!dialog.classList.contains('memory-practice-wide')||!body)return;
+        let target=body.getBoundingClientRect();if(target.height>content.clientHeight)return;
+        const card=practiceCards[index].getBoundingClientRect();if(card.height<=content.clientHeight)target=card;
+        let top=target.top,bottom=target.bottom;
+        const notice=shortNotices.getBoundingClientRect();
+        if(notice.height&&Math.max(bottom,notice.bottom)-Math.min(top,notice.top)<=content.clientHeight){top=Math.min(top,notice.top);bottom=Math.max(bottom,notice.bottom);}
+        const viewport=content.getBoundingClientRect();
+        if(top<viewport.top)content.scrollTop+=top-viewport.top;else if(bottom>viewport.bottom)content.scrollTop+=bottom-viewport.bottom;
+      }
       function activatePractice(index,{scroll=true}={}){
         const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
-        if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index]);
+        if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index].parentElement);
         if(changed){feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;}
         if(config.view==='chapter'){const text=`${index+1} / ${items.length}`;if(unitProgress.textContent!==text)unitProgress.textContent=text;}
         fitAnswer(inputs[index]);syncPracticePrimary();
         if(scroll)practiceCards[index].scrollIntoView({block:'nearest',behavior:'instant'});
       }
-      function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});}
+      function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});if(practice)revealPracticePair(index);}
       const answerLabel=row=>`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${practice&&practiceShown?l.practiceAnswer:l.answer}`;
       const inputs=items.map(({row,index},position)=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
@@ -575,11 +587,12 @@
           const card=el('details','memory-practice-row'),summary=el('summary'),stateLabel=el('span','memory-practice-state');summary.hidden=items.length===1;
           summary.append(el('span','',rowReference(row)),stateLabel);summary.addEventListener('click',event=>{event.preventDefault();activatePractice(position);});
           const text=el('p','memory-practice-text',row.text);text.id=`memoryPracticeText${index}`;text.setAttribute('dir','auto');text.hidden=!practiceShown;
-          caption.hidden=true;practiceSources.push(text);practiceCards.push(card);practiceStates.push(stateLabel);card.append(summary,text,rowFeedback,label);form.append(card);
+          const body=el('div','memory-practice-body');body.append(text,rowFeedback,label);
+          caption.hidden=true;practiceSources.push(text);practiceCards.push(card);practiceStates.push(stateLabel);card.append(summary,body);form.append(card);
           input.addEventListener('focus',()=>activatePractice(position,{scroll:false}));
         }else form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();});
+        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();if(practice)revealPracticePair(position);});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
@@ -628,7 +641,7 @@
           const index=practiceIndex,input=inputs[index];input.value='';draftAnswers[items[index].index]='';practiceChecked[index]=false;practiceConfirmed.delete(items[index].index);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);
         },'memory-practice-repeat'));
       }
-      content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();
+      content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();if(practice)revealPracticePair(0);
     }
     function results(answers){
       phase='results';attemptActive=false;suspendedAttempt=null;moveClose(header);
