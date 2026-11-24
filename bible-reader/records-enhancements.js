@@ -2,7 +2,8 @@
   const MARKS_KEY = 'bible-reader-verse-marks-v1';
   const CHAPTERS_KEY = 'bible-reader-chapter-bookmarks-v1';
   const RECORD_NOTES_KEY = 'bible-reader-record-notes-v1';
-  const BACKUP_VERSION = 2;
+  const BACKUP_VERSION = 3;
+  const COLLECTION_KEY = 'bible-reader-memory-passages-v1';
   const readJson = key => { try { return JSON.parse(window.BibleStorage.getItem(key)) || {}; } catch (_) { return {}; } };
   const writeJson = (key, value) => window.BibleStorage.setItem(key, JSON.stringify(value));
   const notifyRecordsChanged = () => window.dispatchEvent(new CustomEvent('bible-reader-records-changed'));
@@ -178,24 +179,41 @@
     if(active==='saved')renderSaved(panel); else if(active==='chapters')renderChapters(panel); else renderHighlights(panel);
   }
 
+  const BACKUP_COPY={
+    ko:['백업 복원 미리보기','강조·저장 구절','저장한 장','기록 메모','암기용 성구 모음','기존 기록과 합치기','중복된 기록은 현재 내용을 유지합니다.','백업 내용으로 바꾸기','현재 기록을 바꿉니다. 예전 백업에 없는 성구 모음은 유지합니다.','복원하기','취소','백업을 복원했습니다.','이 백업에는 성구 모음이 없습니다. 현재 모음은 유지합니다.'],
+    en:['Restore backup preview','Highlighted / saved verses','Saved chapters','Record notes','Memory verse collection','Merge with current records','Current records win when an item exists in both.','Replace with backup','Replaces records. Collections absent from older backups are kept.','Restore','Cancel','Backup restored.','This backup has no verse collection. Your collection will be kept.'],
+    fr:['Aperçu de restauration','Versets marqués / enregistrés','Chapitres enregistrés','Notes','Versets à mémoriser','Fusionner avec les notes actuelles','Les éléments actuels sont conservés en cas de doublon.','Remplacer par la sauvegarde','Remplace les notes. Les collections absentes des anciennes sauvegardes sont conservées.','Restaurer','Annuler','Sauvegarde restaurée.','Cette sauvegarde ne contient pas de collection. La vôtre sera conservée.'],
+    de:['Wiederherstellung prüfen','Markierte / gespeicherte Verse','Gespeicherte Kapitel','Notizen','Lernverssammlung','Mit aktuellen Einträgen verbinden','Bei Duplikaten bleiben aktuelle Einträge erhalten.','Durch Sicherung ersetzen','Ersetzt Einträge. In alten Sicherungen fehlende Sammlungen bleiben erhalten.','Wiederherstellen','Abbrechen','Sicherung wiederhergestellt.','Diese Sicherung enthält keine Sammlung. Ihre Sammlung bleibt erhalten.'],
+    zh:['备份恢复预览','标记／保存的经文','保存的章节','笔记','背诵经文集','与现有记录合并','重复项目保留当前内容。','替换为备份内容','替换记录。旧备份不含经文集时保留当前经文集。','恢复','取消','备份已恢复。','此备份不含经文集，将保留当前经文集。'],
+    ru:['Предпросмотр восстановления','Отмеченные / сохранённые стихи','Сохранённые главы','Заметки','Стихи для запоминания','Объединить с текущими записями','При совпадении сохраняются текущие записи.','Заменить резервной копией','Заменяет записи. Коллекции, отсутствующие в старой копии, сохраняются.','Восстановить','Отмена','Копия восстановлена.','В копии нет коллекции стихов. Текущая коллекция сохранится.'],
+    la:['Restitutionem inspice','Versus notati / servati','Capita servata','Commentaria','Versus memoriae','Cum scriptis praesentibus coniunge','In duplicatis scripta praesentia servantur.','Ex exemplo restitue','Scripta mutantur. Collectiones in antiquis exemplis absentes servantur.','Restitue','Claude','Exemplum restitutum est.','Collectio versuum abest. Collectio praesens servatur.'],
+    pt:['Prévia da restauração','Versículos marcados / salvos','Capítulos salvos','Notas','Versículos para memorizar','Mesclar com registros atuais','Em duplicatas, o conteúdo atual é mantido.','Substituir pelo backup','Substitui registros. Coleções ausentes em backups antigos são mantidas.','Restaurar','Cancelar','Backup restaurado.','Este backup não contém coleção. A coleção atual será mantida.'],
+    ar:['معاينة الاستعادة','آيات مميزة / محفوظة','أصحاحات محفوظة','ملاحظات','آيات للحفظ','دمج مع السجلات الحالية','تُحفظ السجلات الحالية عند التكرار.','استبدال بالنسخة الاحتياطية','يستبدل السجلات ويحفظ المجموعات الغائبة عن النسخ القديمة.','استعادة','إلغاء','تمت استعادة النسخة.','لا تحتوي النسخة على مجموعة آيات. ستُحفظ المجموعة الحالية.']
+  };
+  const backupCopy=()=>BACKUP_COPY[(window.BibleI18n?.lang?.()||'ko').split('-')[0]]||BACKUP_COPY.en;
+  function backupSnapshot(){return {app:'bible-reader',version:BACKUP_VERSION,exportedAt:new Date().toISOString(),verseMarks:readJson(MARKS_KEY),chapterBookmarks:readJson(CHAPTERS_KEY),recordNotes:readJson(RECORD_NOTES_KEY),memoryPassages:(()=>{try{return JSON.parse(window.BibleStorage.getItem(COLLECTION_KEY)||'[]');}catch{return [];}})()};}
   function exportData(){
-    const payload={app:'bible-reader',version:BACKUP_VERSION,exportedAt:new Date().toISOString(),verseMarks:readJson(MARKS_KEY),chapterBookmarks:readJson(CHAPTERS_KEY),recordNotes:readJson(RECORD_NOTES_KEY)};
+    const payload=backupSnapshot();
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=`bible-reader-backup-${new Date().toISOString().slice(0,10)}.json`;
     document.body.append(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
-
+  function previewBackup(data){
+    document.querySelector('.backup-preview')?.remove();
+    const l=backupCopy(),opener=document.activeElement,dialog=document.createElement('dialog');dialog.className='backup-preview';dialog.setAttribute('aria-labelledby','backupPreviewTitle');
+    const heading=document.createElement('h2');heading.id='backupPreviewTitle';heading.textContent=l[0];dialog.append(heading);
+    const counts=document.createElement('dl');counts.className='backup-counts';
+    ['verseMarks','chapterBookmarks','recordNotes','memoryPassages'].forEach((key,i)=>{const row=document.createElement('div'),term=document.createElement('dt'),count=document.createElement('dd');term.textContent=l[i+1];count.textContent=key==='memoryPassages'?String(data[key]?.length||0):String(Object.keys(data[key]).length);row.append(term,count);counts.append(row);});dialog.append(counts);
+    if(data.memoryPassages===undefined){const note=document.createElement('p');note.textContent=l[12];dialog.append(note);}
+    for(const [value,title,description] of [['merge',l[5],l[6]],['replace',l[7],l[8]]]){const label=document.createElement('label'),radio=document.createElement('input'),text=document.createElement('span'),hint=document.createElement('small');radio.type='radio';radio.name='backupRestoreMode';radio.value=value;radio.checked=value==='merge';text.textContent=title;hint.textContent=description;text.append(hint);label.append(radio,text);dialog.append(label);}
+    const close=()=>{dialog.close();dialog.remove();if(opener?.isConnected)opener.focus({preventScroll:true});};
+    const actions=document.createElement('div');actions.className='backup-preview-actions';
+    actions.append(button(l[10],close),button(l[9],()=>{try{const mode=dialog.querySelector('input:checked').value,result=window.BibleRecordBackup.combine(backupSnapshot(),data,mode);writeJson(MARKS_KEY,result.verseMarks);writeJson(CHAPTERS_KEY,result.chapterBookmarks);writeJson(RECORD_NOTES_KEY,result.recordNotes);writeJson(COLLECTION_KEY,result.memoryPassages);notifyRecordsChanged();rerenderOpenPanel();close();const notice=document.querySelector('.notebook-backup-status');if(notice)notice.textContent=l[11];}catch{alert('올바른 성경 읽기 백업 파일이 아닙니다.');}}));dialog.append(actions);
+    dialog.addEventListener('cancel',event=>{event.preventDefault();close();});document.body.append(dialog);dialog.showModal();actions.firstElementChild.focus();
+  }
   function importData(file){
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        const data=JSON.parse(reader.result);
-        if(data?.app!=='bible-reader'||typeof data.verseMarks!=='object'||typeof data.chapterBookmarks!=='object') throw new Error('invalid');
-        if(!confirm('현재 기록을 백업 파일의 기록으로 바꿀까요?')) return;
-        writeJson(MARKS_KEY,data.verseMarks||{}); writeJson(CHAPTERS_KEY,data.chapterBookmarks||{}); writeJson(RECORD_NOTES_KEY,data.recordNotes||{}); location.reload();
-      }catch(_){alert('올바른 성경 읽기 백업 파일이 아닙니다.');}
-    };
-    reader.readAsText(file);
+    if(file.size>20*1024*1024){alert('올바른 성경 읽기 백업 파일이 아닙니다.');return;}
+    const reader=new FileReader();reader.onload=()=>{try{previewBackup(window.BibleRecordBackup.normalize(JSON.parse(reader.result)));}catch{alert('올바른 성경 읽기 백업 파일이 아닙니다.');}};reader.onerror=()=>alert('올바른 성경 읽기 백업 파일이 아닙니다.');reader.readAsText(file);
   }
 
   function removeStandaloneMemoAction(){
@@ -255,7 +273,7 @@
     const out=button('기록 백업',exportData);
     const input=document.createElement('input'); input.type='file'; input.accept='application/json,.json'; input.hidden=true;
     input.addEventListener('change',()=>{if(input.files?.[0]) importData(input.files[0]);input.value='';});
-    const into=button('백업 복원',()=>input.click()); tools.append(out,into,input); tabs.insertAdjacentElement('afterend',tools);
+    const into=button('백업 복원',()=>input.click()); const status=document.createElement('p');status.className='notebook-backup-status';status.setAttribute('role','status');tools.append(out,into,input,status); tabs.insertAdjacentElement('afterend',tools);
 
     setTimeout(()=>highlightTab?.click(),0);
   }

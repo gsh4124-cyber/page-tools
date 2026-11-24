@@ -17,7 +17,7 @@ const friendly=(e,k)=>{
 
 function saveResults(){try{window.DeviceStorage.setItem(resultKey,JSON.stringify(results));}catch{}}
 function setResult(test,state){
-  results[test]=state;
+  results[test]=state;results._inspection={updatedAt:Date.now()};
   saveResults();renderResults();
 }
 function renderResults(){

@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const ctx={};vm.runInNewContext(fs.readFileSync('backup-data.js','utf8'),ctx);const api=ctx.BibleRecordBackup,plain=v=>JSON.parse(JSON.stringify(v));
+const ref={bookIndex:42,chapter:3,verse:16},other={bookIndex:18,chapter:23,verse:1},key='krv1961:42:3:16';
+const old={app:'bible-reader',version:2,verseMarks:{[key]:{note:'backup',bookmark:true}},chapterBookmarks:{},recordNotes:{a:'backup'}};
+const current={app:'bible-reader',version:3,verseMarks:{[key]:{note:'current',highlight:true}},chapterBookmarks:{},recordNotes:{a:'current'},memoryPassages:[ref]};
+const incoming={...old,version:3,memoryPassages:[ref,other,ref]};
+const merged=plain(api.combine(current,incoming));assert.equal(merged.verseMarks[key].note,'current');assert.equal(merged.recordNotes.a,'current');assert.deepEqual(merged.memoryPassages,[ref,other]);
+const replaced=plain(api.combine(current,incoming,'replace'));assert.equal(replaced.verseMarks[key].note,'backup');assert.equal(replaced.recordNotes.a,'backup');
+assert.deepEqual(plain(api.combine(current,old,'replace')).memoryPassages,[ref],'Old backup never erases a collection it cannot contain');
+assert.deepEqual(plain(api.combine(current,{...incoming,memoryPassages:[]},'replace')).memoryPassages,[]);
+assert.equal(plain(api.normalize({...old,version:1})).version,3);
+for(const bad of [{...old,version:999},{...old,verseMarks:null},{...old,chapterBookmarks:[]},{...old,recordNotes:{a:42}},{...incoming,memoryPassages:[{...ref,bookIndex:99}]},{...old,verseMarks:{[key]:{note:{}}}},JSON.parse('{"app":"bible-reader","verseMarks":{"__proto__":{}},"chapterBookmarks":{}}')])assert.throws(()=>api.normalize(bad));
+assert.equal(current.verseMarks[key].note,'current');assert.equal(current.memoryPassages.length,1);
+console.log('Backup data PASS: collection union, conflicts, replacement, v1/v2 compatibility, empty collection, malformed data and unsafe keys.');

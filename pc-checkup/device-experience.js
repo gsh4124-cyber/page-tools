@@ -92,7 +92,7 @@ function summaryText(kind,state,manual){
     const status=state[id]==='ok'?t.ok:state[id]==='bad'?t.bad:t.unknown;
     return `${label}: ${status}`;
   });
-  return [title,`${t.ok} ${stats.ok} · ${t.bad} ${stats.bad} · ${t.unknown} ${stats.unknown}`,'',...details,'',statusGuidance(stats),`${t.manual} ${checked}/${manualLabels[kind].length}`,new Date().toLocaleString(language)].join('\n');
+  return [title,`${t.ok} ${stats.ok} · ${t.bad} ${stats.bad} · ${t.unknown} ${stats.unknown}`,'',...details,'',statusGuidance(stats),`${t.manual} ${checked}/${manualLabels[kind].length}`,(Number.isFinite(state._inspection?.updatedAt)&&state._inspection.updatedAt>0?new Date(state._inspection.updatedAt).toLocaleString(language):'—')].join('\n');
 }
 function buildCard(kind,getState,tests,anchor){
   if(document.querySelector(`[data-device-experience="${kind}"]`))return ()=>{};
@@ -118,6 +118,7 @@ function buildCard(kind,getState,tests,anchor){
   card.querySelector('[data-share]').addEventListener('click',async()=>{render();const text=summaryText(kind,getState(),manual);if(navigator.share){try{await navigator.share({title:t.resultTitle,text,url:location.href});return;}catch(e){if(e?.name==='AbortError')return;}}await copyWithFeedback(`${text}\n${location.href}`);});
   anchor.parentNode.insertBefore(card,anchor);
   document.addEventListener('click',e=>{if(e.target.closest('.pill,[data-result]'))setTimeout(render,0);});
+  document.getElementById(kind==='pc'?'resetCheckup':'resetMobileResults')?.addEventListener('click',()=>{for(const key of Object.keys(manual))delete manual[key];try{window.DeviceStorage.removeItem(`device-checkup-manual-${kind}-v1`);}catch{}for(const input of list.querySelectorAll('input'))input.checked=false;});
   render();
   return render;
 }
@@ -144,6 +145,28 @@ function watchCompletion(kind,getState,tests,target){
   }[language]||['{n} / {total} items reviewed','Finish and view results','{n} items left. Choose Unchecked if necessary.','Unchecked items are not counted as OK.'];
   const chosen=state=>tests.filter(id=>Object.hasOwn(state,id)&&['ok','bad','unknown'].includes(state[id]));
   const card=document.querySelector(`[data-device-experience="${kind}"]`),reset=document.getElementById(kind==='pc'?'resetCheckup':'resetMobileResults'),next=document.getElementById(kind==='pc'?'nextCheck':'nextMobileCheck');
+  const historyCopy={
+   ko:['이전 점검 결과를 불러왔습니다.','마지막 기록','기록 시각 알 수 없음','이어서 확인하거나 새 점검을 시작하세요. 새 점검은 이전 선택과 수동 점검 표시를 비웁니다.','새 점검 시작','이번 점검'],
+   en:['Previous check results loaded.','Last recorded','Recording time unknown','Continue checking, or start a new check to clear previous selections and manual checks.','Start new check','Current check'],
+   ja:['前回の検査結果を読み込みました。','最終記録','記録日時不明','続行するか、新しい検査で前の選択と手動確認を消去します。','新しい検査を開始','今回の検査'],
+   es:['Se cargaron resultados anteriores.','Último registro','Fecha desconocida','Continúa o inicia una nueva revisión para borrar selecciones y controles manuales.','Iniciar nueva revisión','Revisión actual'],
+   de:['Vorherige Ergebnisse geladen.','Zuletzt erfasst','Zeitpunkt unbekannt','Fortsetzen oder eine neue Prüfung starten, um Auswahl und manuelle Prüfungen zu löschen.','Neue Prüfung starten','Aktuelle Prüfung'],
+   fr:['Résultats précédents chargés.','Dernier enregistrement','Date inconnue','Continuez ou démarrez un nouveau contrôle pour effacer les choix et vérifications manuelles.','Nouveau contrôle','Contrôle actuel'],
+   pt:['Resultados anteriores carregados.','Último registro','Data desconhecida','Continue ou inicie uma nova verificação para limpar escolhas e verificações manuais.','Nova verificação','Verificação atual'],
+   it:['Risultati precedenti caricati.','Ultima registrazione','Data sconosciuta','Continua o inizia un nuovo controllo per cancellare scelte e verifiche manuali.','Nuovo controllo','Controllo attuale'],
+   nl:['Vorige resultaten geladen.','Laatst vastgelegd','Tijdstip onbekend','Ga verder of start een nieuwe controle om keuzes en handmatige controles te wissen.','Nieuwe controle starten','Huidige controle'],
+   id:['Hasil pemeriksaan sebelumnya dimuat.','Terakhir dicatat','Waktu tidak diketahui','Lanjutkan atau mulai pemeriksaan baru untuk menghapus pilihan dan pemeriksaan manual.','Mulai pemeriksaan baru','Pemeriksaan saat ini'],
+   vi:['Đã tải kết quả kiểm tra trước.','Ghi nhận lần cuối','Không rõ thời gian','Tiếp tục hoặc bắt đầu kiểm tra mới để xóa lựa chọn và kiểm tra thủ công.','Bắt đầu kiểm tra mới','Kiểm tra hiện tại'],
+   'zh-CN':['已载入上次检测结果。','最后记录','记录时间未知','继续检查，或开始新检测以清除之前的选择和手动检查标记。','开始新检测','本次检测'],
+   ru:['Загружены прежние результаты.','Последняя запись','Время неизвестно','Продолжите или начните новую проверку, чтобы очистить выбор и ручные отметки.','Начать новую проверку','Текущая проверка']
+  }[language];
+  reset.textContent=historyCopy[4];
+  let restored=tests.some(id=>['ok','bad','unknown'].includes(getState()[id]));
+  const history=document.createElement('aside');history.className='device-experience-card device-inspection-history';history.dataset.inspectionHistory=kind;
+  const historyTitle=document.createElement('strong'),historyDate=document.createElement('p'),historyHint=document.createElement('p'),newCheck=document.createElement('button');newCheck.type='button';newCheck.className='btn';newCheck.textContent=historyCopy[4];newCheck.addEventListener('click',()=>reset.click());history.append(historyTitle,historyDate,historyHint,newCheck);
+  const progress=target?.closest('.progress-card,.mobile-progress-card');if(progress)progress.before(history);
+  function renderHistory(){const state=getState(),recorded=state._inspection?.updatedAt,hasResults=tests.some(id=>['ok','bad','unknown'].includes(state[id]));history.hidden=!hasResults;history.dataset.restored=String(restored);historyTitle.textContent=restored?historyCopy[0]:historyCopy[5];historyDate.textContent=Number.isFinite(recorded)&&recorded>0?`${historyCopy[1]}: ${new Date(recorded).toLocaleString(language)}`:historyCopy[2];historyHint.textContent=historyCopy[3];}
+  watchText(target,renderHistory);document.addEventListener('click',event=>{if(event.target.closest('.pill,[data-result]'))setTimeout(renderHistory,0);});renderHistory();
   const actions=reset.closest(kind==='pc'?'.controls':'.mobile-finish-controls')||reset.parentElement;
   const finish=document.createElement('button');finish.type='button';finish.className='btn primary';finish.dataset.finishCheckup=kind;finish.textContent=copy[1];actions.insertBefore(finish,reset);
   const note=document.createElement('p');note.className='device-flow-note';note.setAttribute('role','status');actions.before(note);
@@ -167,7 +190,7 @@ function watchCompletion(kind,getState,tests,target){
   document.addEventListener('click',event=>{if(event.target.closest('.pill,[data-result]'))setTimeout(refresh,0);});
   reset.addEventListener('click',()=>{
    try{sessionStorage.removeItem(`device-checkup-event:${kind}_start`);sessionStorage.removeItem(`device-checkup-event:${kind}_complete`);}catch{}
-   finished=false;delete card.dataset.flowComplete;
+   finished=false;restored=false;delete card.dataset.flowComplete;setTimeout(renderHistory,0);
    if(kind==='mobile')setTimeout(()=>{track('mobile_start');refresh();},0);
   },true);
   refresh();
