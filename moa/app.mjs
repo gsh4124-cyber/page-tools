@@ -49,7 +49,7 @@ function renderRecent(){
   $('#homeCount').textContent=ready?`${db.entries.length}개의 기록`:'불러오는 중';
   const out=$('#recentEntries');out.replaceChildren();
   const recent=[...db.entries].sort((a,b)=>b.recordDate.localeCompare(a.recordDate)||b.created.localeCompare(a.created)).slice(0,3);
-  if(!recent.length){const empty=el('div');empty.className='home-empty';empty.append(el('h3',ready?'아직 기록이 없습니다.':'기록을 불러오고 있습니다.'),el('p',ready?'위의 ‘기록 쓰기’에서 첫 일기를 남겨 보세요.':'잠시만 기다려 주세요.'));out.append(empty);return;}
+  if(!recent.length){const empty=el('div');empty.className='home-empty';empty.append(el('h3',ready?'아직 남긴 기록이 없어요.':'기록을 불러오고 있습니다.'),el('p',ready?'‘기록 쓰기’를 눌러 오늘의 이야기를 남겨 보세요.':'잠시만 기다려 주세요.'));out.append(empty);return;}
   for(const entry of recent){const button=el('button');button.type='button';button.className='recent-card';button.dataset.recentId=entry.id;button.setAttribute('aria-label',entry.title+' 기록 열기');const cover=el('span');cover.className='recent-cover';cover.hidden=true;cover.setAttribute('aria-hidden','true');const copy=el('span');copy.className='recent-copy';const date=el('time',entry.recordDate);date.dateTime=entry.recordDate;copy.append(date,el('strong',entry.title),el('span',entry.content.slice(0,65)||entry.category));button.append(cover,copy);button.onclick=()=>{selection=entry.recordDate;feedMode='day';$('#searchRecords').value='';$('#filter').value='전체';render();showView('feed');};out.append(button);}
 }
 

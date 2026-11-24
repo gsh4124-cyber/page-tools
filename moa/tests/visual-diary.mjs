@@ -1,4 +1,4 @@
-// Populated visual QA uses only an isolated local IndexedDB and CC0 sample media.
+// Populated visual QA uses only an isolated local IndexedDB and licensed sample media.
 // Refuse a cloud-configured build; never seed the owner's actual diary.
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
@@ -50,5 +50,5 @@ try{
  console.log('DONE populated diary visual QA:',checks.length);
 }finally{
  await browser?.close();await new Promise(resolve=>server.close(resolve));
- await writeFile(new URL('../qa-evidence/visual-diary-results.json',import.meta.url),JSON.stringify({manifest,type:'local synthetic fixtures and CC0 media; no hosted writes',checks,errors},null,2));
+ await writeFile(new URL('../qa-evidence/visual-diary-results.json',import.meta.url),JSON.stringify({manifest,type:'local synthetic fixtures; notebook Unsplash License + surfer MDN CC0; no hosted writes',checks,errors},null,2));
 }
