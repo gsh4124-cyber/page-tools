@@ -9,21 +9,21 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "c62f878d15736cfd4f9cb5b968bc59829fa26f2c53f30042cdeeaf238db8d84d",
+    "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "White page/index/card surfaces and neutral borders/shadows. All border-radius declarations and tape rules unchanged. Current local app11/populated3/packaged7 passed; live public and owner backgrounds rgb255/255/255 with rounded geometry retained. Existing data/backend/products/costs unchanged.",
-    "codeCommit": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
+    "reason": "Natural date/title/text/photo vertical reading flow; public desktop article max600px/photo max380px. Real entry date now above title. White backgrounds/rounding/tape retained. Current app11/populated3/package7 passed and live943px vertical order verified; no backend/data/cost changes.",
+    "codeCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
     "manifest": {
       "product": "moa",
-      "revision": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
-      "sourceSha256": "c62f878d15736cfd4f9cb5b968bc59829fa26f2c53f30042cdeeaf238db8d84d",
+      "revision": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+      "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
       "cloudConfigured": true
     },
-    "workerSha256": "387cea569c0572d23653df241282c21bda9b3b1604f180851bd84adeadf64f1a",
+    "workerSha256": "a564534f050f536c3ddcba70f1e4ba01287da5b704055ecede9a243f1597efec",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
-    "cloudflareSourceSha256": "c62f878d15736cfd4f9cb5b968bc59829fa26f2c53f30042cdeeaf238db8d84d"
+    "cloudflareCodeCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+    "cloudflareSourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd"
   },
   "unit": {
     "status": "DONE",
@@ -40,12 +40,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:56846",
+    "base": "http://127.0.0.1:51574",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "23caa01db59fdb94ff198f4222e6a86a4eed0a4c",
-      "sourceSha256": "187d4423f7ebed1e1b4eb75402eb45cc51b58408bbcdbb0dec7eca13476bd408",
+      "revision": "031c80431ef7b34ca80f996c7de248dd911be277",
+      "sourceSha256": "d31005c216ee8470330df2d89cf23a72465ae7de6d0bfd3384e4277d3e66b2a9",
       "cloudConfigured": false
     },
     "results": [
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Current white-background source; precommit23caa01 metadata retained, isolated local IndexedDB; no hosted writes."
+    "scope": "Current reading-flow source; precommit031c804 metadata retained, isolated local IndexedDB, no hosted writes."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -375,7 +375,7 @@
     "currentCountObservationIsHistorical": true,
     "currentUiRefinement": {
       "dateKST": "2026-11-24",
-      "codeScope": "moa/ presentation colors and docs only; every border-radius declaration and both tape rules unchanged; backend/auth/data/products preserved",
+      "codeScope": "moa/ layout CSS and entry date DOM order plus docs; public radii/tape unchanged; saved data/backend/auth/products preserved",
       "backendSchemaAuthDataWrites": false,
       "originalV7Unchanged": true,
       "newCosts": false
@@ -740,23 +740,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T03:35:39.073Z",
+      "preparedAt": "2026-11-24T03:42:31.369Z",
       "manifest": {
         "product": "moa",
-        "revision": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
-        "sourceSha256": "c62f878d15736cfd4f9cb5b968bc59829fa26f2c53f30042cdeeaf238db8d84d",
+        "revision": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+        "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
         "index.html": "72ce277cabc8cff03175cc481174f5b259f4753a4e51a6ba63dc33a1889e1d16",
-        "app.js": "dbbd6e1fb05815fe11356ce05f26950e813632a93be3d265901c3999e72cb99e",
-        "service.css": "3fa9b9640a8f6d90682183f291808837bc2e1c8798d816e7211dc4a9d68515dc",
-        "build-manifest.json": "cad52b2f944b3145d01c686de5e13be83ad83190c6f97e896b141f98b372b753",
+        "app.js": "1aa5940a3aae3b1399dfb4c7d44cd3c8600de93ed4c3e66e6cb12aaa3347e0fb",
+        "service.css": "752a79ba31c7dcf029e57c907c3c9cadb7230a8cb8841acaeb54bcd0eed6e14e",
+        "build-manifest.json": "d0be6acb8bb3ac7aaa74f241f66c8c09b2f540f6ad1d1197100753bb34e9c655",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "387cea569c0572d23653df241282c21bda9b3b1604f180851bd84adeadf64f1a",
+      "workerSha256": "a564534f050f536c3ddcba70f1e4ba01287da5b704055ecede9a243f1597efec",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -814,21 +814,21 @@
       "actualOwnerSessionReconnect": "DONE on f50aadf: existing owner session re-established; not fresh email sign-in replay"
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
-    "deploymentId": "9c2de845-2cb4-434b-a684-d40f71b38c06",
+    "sourceCommit": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+    "deploymentId": "2dd1d8d3-bdbb-4fbf-aa27-2cc922b8885a",
     "published": true,
     "actualBrowserChecks": {
-      "publicBackground": "DONE: final alias body/journal/index rgb255/255/255, journal radius34px, tape width62px and screenshot",
-      "ownerBackgroundAndSession": "DONE: currentc62f878d1573 existing owner session/account/records0, body/home rgb255/255/255, home radius30px",
-      "currentLiveMobile": "NOT_TESTED: final local package five widths passed",
+      "publicReadingFlow": "DONE: final alias width=scrollWidth943; date/title/body/photo top307.09/343.19/402.69/480.95px; block layout, white body and tape62px",
+      "currentPrivateRecordOrder": "NOT_TESTED on production records: local synthetic entries verified; no production writes",
+      "currentLiveMobile": "NOT_TESTED: final package5 widths passed",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
       "productionDataWrites": false,
       "screenshots": [
-        "qa-evidence/hosted-white-preview-wide.jpg",
-        "qa-evidence/hosted-white-owner-home.jpg"
-      ]
+        "qa-evidence/hosted-reading-flow-wide.jpg"
+      ],
+      "fullPageCapture": "Timed out; supported viewport capture saved successfully"
     },
     "runtimeFixes": [
       {
@@ -929,7 +929,7 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "White backgrounds and neutral large borders/shadows. Small selection/button color accents only; all rounded geometry, flower and tape unchanged.",
+      "style": "White rounded diary retained; date/title/body/photo in one vertical reading flow; real entry dates placed before titles.",
       "previewViews": [
         "record",
         "calendar",
@@ -1315,11 +1315,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T03:35:42.011Z",
+    "checkedAt": "2026-11-24T03:42:34.229Z",
     "manifest": {
       "product": "moa",
-      "revision": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
-      "sourceSha256": "c62f878d15736cfd4f9cb5b968bc59829fa26f2c53f30042cdeeaf238db8d84d",
+      "revision": "e4ed43f2aa5c706b11931e53bc7abdbe835e3ee5",
+      "sourceSha256": "11e69da519bf7423b9096e5f0db1165a57a9ea5ecd33e5295d878d238c9c55bd",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1464,8 +1464,8 @@
   "populatedVisualBrowser": {
     "manifest": {
       "product": "moa",
-      "revision": "23caa01db59fdb94ff198f4222e6a86a4eed0a4c",
-      "sourceSha256": "187d4423f7ebed1e1b4eb75402eb45cc51b58408bbcdbb0dec7eca13476bd408",
+      "revision": "031c80431ef7b34ca80f996c7de248dd911be277",
+      "sourceSha256": "d31005c216ee8470330df2d89cf23a72465ae7de6d0bfd3384e4277d3e66b2a9",
       "cloudConfigured": false
     },
     "type": "local synthetic fixtures and CC0 media; no hosted writes",
@@ -1585,8 +1585,8 @@
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved."
   },
   "previousTypographyRelease": {
-    "codeCommit": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
-    "deploymentId": "bd1000a0-74d4-4314-a351-ac04ae878d4a",
-    "meaning": "Previous desktop photo spacing release; earlier checks kept distinct."
+    "codeCommit": "d7c823e39b50ef8b778681dfce1a44e8b18b41f3",
+    "deploymentId": "9c2de845-2cb4-434b-a684-d40f71b38c06",
+    "meaning": "Previous white-background release; previous live owner checks kept distinct."
   }
 }
