@@ -18,7 +18,7 @@ try{
  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
  await page.goto(base);await page.waitForFunction(()=>!document.querySelector('#writeNow').disabled);
  const examples=[
-  {title:'노트를 펼친 아침',text:'노트를 펴고 오늘 기억하고 싶은 일부터 적어 보기로 했다.',photo:'notebook'},
+  {title:'월요일 메모',text:'우체국 들르기, 책 반납하기. 일단 책부터 가방에 넣었다.',photo:'notebook'},
   {title:'비가 그치고, 다시 걷기 시작한 주말의 해변 산책',text:'비가 그친 뒤 해변을 걸었다. 돌아오는 길에 사진을 한 장 남겼다.\n\n사진을 보니 파도 소리도 다시 생각난다.',photo:'surf'}
  ];
  for(const example of examples){

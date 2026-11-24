@@ -12,8 +12,8 @@ const views=['Record','Calendar','Photos'];
 const showExample=view=>{for(const name of views){$('#show'+name+'Example').setAttribute('aria-pressed',String(name===view));$('#'+name.toLowerCase()+'Example').hidden=name!==view;}};
 for(const view of views)$('#show'+view+'Example').onclick=()=>showExample(view);
 const entries={
- 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'노트를 펼친 아침',text:'책상에 노트를 펴고 펜 두 자루를 꺼냈다. 오늘은 해야 할 일보다, 기억하고 싶은 일부터 적어 보기로 했다.',alt:'흰 노트 위에 놓인 파란 펜 두 자루'},
- 21:{date:'2026. 11. 21 토요일',weekday:'토요일',title:'주말의 바다',text:'파도 소리를 듣고 한참을 앉아 있었다. 바다를 보러 오길 잘했다. 다음에는 조금 더 오래 머물러야지.',alt:'바다에서 파도를 타는 서퍼'}
+ 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'월요일 메모',text:'새 노트를 꺼냈다. 이번 주에 할 일은 세 가지.\n우체국 들르기, 책 반납하기, 미뤄 둔 약속 잡기.\n일단 책부터 가방에 넣었다.',alt:'흰 노트 위에 놓인 파란 펜 두 자루'},
+ 21:{date:'2026. 11. 21 토요일',weekday:'토요일',title:'주말의 바다',text:'바람이 생각보다 차가웠다.\n서핑하는 사람들을 한참 구경했다. 돌아오는 길에는 따뜻한 국수를 먹었다.',alt:'바다에서 파도를 타는 서퍼'}
 };
 for(const day of [21,23])entries[day].photo=$('#photosExample [data-demo-entry="'+day+'"] img').src;
 const openEntry=day=>{document.querySelectorAll('.index-entry').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.demoEntry)===day)));const entry=entries[day];if(!entry)return;selectDay(day);$('#sampleDate').textContent=entry.date;$('#sampleDate').dateTime='2026-11-'+day;$('#samplePhoto').src=entry.photo;$('#samplePhoto').alt=entry.alt;$('#sampleTitle').textContent=entry.title;$('#sampleText').textContent=entry.text;showExample('Record');$('#showRecordExample').focus();};

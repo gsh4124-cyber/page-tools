@@ -33,7 +33,7 @@ try{
   assert.equal(await page.locator('#openCalendarRecord').isVisible(),false);
   await page.getByRole('button',{name:'11월 23일 · 예시 기록 있음',exact:true}).click();
   await page.getByRole('button',{name:'이날의 예시 기록 보기',exact:true}).click();
-  assert.equal(await page.locator('#sampleTitle').textContent(),'노트를 펼친 아침');
+  assert.equal(await page.locator('#sampleTitle').textContent(),'월요일 메모');
   assert.equal(await page.locator('#showRecordExample').getAttribute('aria-pressed'),'true');
   assert.ok(await page.locator('#showRecordExample').evaluate(el=>el===document.activeElement));
   for(const view of ['달력','사진','기록']){
