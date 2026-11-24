@@ -41,6 +41,24 @@ def reorder_nav(text: str, path: Path) -> str:
     return text[:m.start(2)] + ordered + text[m.end(2):]
 
 
+CARD_RE = re.compile(r'<a class="card" href="([^"]+)"[^>]*>[\s\S]*?</a>', re.I)
+
+
+def reorder_cards(text: str) -> str:
+    """Home pages list one card per test; keep them in the checkup order."""
+    cards = list(CARD_RE.finditer(text))
+    wanted = ORDER[1:]
+    if len(cards) != len(wanted) or {basename(c.group(1)) for c in cards} != set(wanted):
+        return text
+    start, end = cards[0].start(), cards[-1].end()
+    gaps = [text[a.end():b.start()] for a, b in zip(cards, cards[1:])]
+    if any(g.strip() for g in gaps):
+        return text
+    by_base = {basename(c.group(1)): c.group(0) for c in cards}
+    joiner = gaps[0] if gaps else ''
+    return text[:start] + joiner.join(by_base[name] for name in wanted) + text[end:]
+
+
 changed = 0
 full_nav_pages = 0
 for path in sorted(ROOT.rglob('*.html')):
@@ -53,6 +71,7 @@ for path in sorted(ROOT.rglob('*.html')):
             if all(name in found for name in ORDER):
                 full_nav_pages += 1
     text = reorder_nav(text, path)
+    text = reorder_cards(text)
     if text != before:
         path.write_text(text, encoding='utf-8')
         changed += 1
