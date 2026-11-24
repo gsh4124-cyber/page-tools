@@ -120,10 +120,50 @@ function watchText(target,callback){
   const observer=new MutationObserver(()=>callback());observer.observe(target,{childList:true,characterData:true,subtree:true});
 }
 function watchCompletion(kind,getState,tests,target){
-  const check=()=>{const stats=count(getState(),tests);if(stats.done===stats.total)track(kind==='pc'?'pc_complete':'mobile_complete');};
-  watchText(target,check);
-  document.addEventListener('click',e=>{if(e.target.closest('.pill,[data-result]'))setTimeout(check,0);});
-  check();
+  const copy={
+   ko:['{n} / {total}개 항목 확인','점검 마치고 결과 보기','남은 항목 {n}개 · 판단이 어려우면 미확인을 선택하세요.','모든 항목에 응답했습니다. 미확인은 정상 판정에 포함하지 않습니다.'],
+   en:['{n} / {total} items reviewed','Finish and view results','{n} items left. Choose Unchecked if you cannot assess one.','All items reviewed. Unchecked items are not counted as OK.'],
+   ja:['{n} / {total}項目を確認','検査を終えて結果を見る','残り{n}項目。判断できない場合は未確認を選んでください。','全項目に回答済みです。未確認は正常に含めません。'],
+   es:['{n} / {total} elementos revisados','Finalizar y ver resultados','Quedan {n} elementos. Elige Sin revisar si no puedes evaluarlos.','Todos revisados. Sin revisar no cuenta como correcto.'],
+   de:['{n} / {total} Punkte geprüft','Beenden und Ergebnisse ansehen','Noch {n} Punkte. Bei Unsicherheit Ungeprüft wählen.','Alle Punkte beantwortet. Ungeprüft zählt nicht als OK.'],
+   fr:['{n} / {total} éléments examinés','Terminer et voir les résultats','Encore {n} éléments. Choisissez Non vérifié si nécessaire.','Tous les éléments sont renseignés. Non vérifié ne signifie pas normal.'],
+   pt:['{n} / {total} itens revisados','Concluir e ver resultados','Faltam {n} itens. Escolha Não verificado se não puder avaliar.','Todos respondidos. Não verificado não conta como normal.'],
+   it:['{n} / {total} elementi esaminati','Termina e mostra risultati','Restano {n} elementi. Scegli Da verificare se non puoi valutarli.','Tutti esaminati. Da verificare non conta come OK.'],
+   nl:['{n} / {total} onderdelen bekeken','Afronden en resultaten bekijken','Nog {n} onderdelen. Kies Niet getest als beoordeling niet lukt.','Alles beantwoord. Niet getest telt niet als OK.'],
+   id:['{n} / {total} item ditinjau','Selesai dan lihat hasil','Tersisa {n} item. Pilih Belum diperiksa jika tidak dapat menilai.','Semua dijawab. Belum diperiksa tidak dihitung normal.'],
+   vi:['Đã xem {n} / {total} mục','Hoàn tất và xem kết quả','Còn {n} mục. Chọn Chưa kiểm tra nếu không thể đánh giá.','Đã trả lời mọi mục. Chưa kiểm tra không được tính là bình thường.'],
+   'zh-CN':['已确认 {n} / {total} 项','结束检测并查看结果','还剩{n}项。无法判断时请选择未检查。','已回答所有项目。未检查不计为正常。'],
+   ru:['Рассмотрено {n} / {total}','Завершить и посмотреть результаты','Осталось {n}. Выберите Не проверено, если оценить нельзя.','Все пункты рассмотрены. Не проверено не считается нормой.']
+  }[language]||['{n} / {total} items reviewed','Finish and view results','{n} items left. Choose Unchecked if necessary.','Unchecked items are not counted as OK.'];
+  const chosen=state=>tests.filter(id=>Object.hasOwn(state,id)&&['ok','bad','unknown'].includes(state[id]));
+  const card=document.querySelector(`[data-device-experience="${kind}"]`),reset=document.getElementById(kind==='pc'?'resetCheckup':'resetMobileResults'),next=document.getElementById(kind==='pc'?'nextCheck':'nextMobileCheck');
+  const actions=reset.closest(kind==='pc'?'.controls':'.mobile-finish-controls')||reset.parentElement;
+  const finish=document.createElement('button');finish.type='button';finish.className='btn primary';finish.dataset.finishCheckup=kind;finish.textContent=copy[1];actions.insertBefore(finish,reset);
+  const note=document.createElement('p');note.className='device-flow-note';note.setAttribute('role','status');actions.before(note);
+  const refresh=()=>{
+   const state=getState(),reviewed=chosen(state),pending=tests.find(id=>!reviewed.includes(id)),text=copy[0].replace('{n}',reviewed.length).replace('{total}',tests.length);
+   if(target&&target.textContent!==text)target.textContent=text;
+   const bar=document.getElementById(kind==='pc'?'checkProgressBar':'mobileProgressBar');if(bar)bar.style.width=`${reviewed.length/tests.length*100}%`;
+   finish.disabled=!!pending;
+   const hint=pending?copy[2].replace('{n}',tests.length-reviewed.length):copy[3];if(note.textContent!==hint)note.textContent=hint;
+   if(next){next.disabled=false;next.textContent=pending?t.next:copy[1];next.dataset.target=pending||'';if(kind==='pc')next.dataset.href=pending?document.querySelector(`[data-id="${pending}"] a`)?.getAttribute('href')||'':'';}
+   return !pending;
+  };
+  finish.addEventListener('click',()=>{
+   if(!refresh())return;
+   // Completion means reviewing results, including explicit unavailable items; never a pass.
+   track(kind==='pc'?'pc_complete':'mobile_complete');card.dataset.flowComplete='true';
+   const heading=card.querySelector('h3');heading.tabIndex=-1;card.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});heading.focus({preventScroll:true});
+  });
+  next?.addEventListener('click',event=>{if(refresh()){event.preventDefault();event.stopImmediatePropagation();finish.click();}},true);
+  watchText(target,refresh);
+  document.addEventListener('click',event=>{if(event.target.closest('.pill,[data-result]'))setTimeout(refresh,0);});
+  reset.addEventListener('click',()=>{
+   try{sessionStorage.removeItem(`device-checkup-event:${kind}_start`);sessionStorage.removeItem(`device-checkup-event:${kind}_complete`);}catch{}
+   delete card.dataset.flowComplete;
+   if(kind==='mobile')setTimeout(()=>{track('mobile_start');refresh();},0);
+  },true);
+  refresh();
 }
 function enhanceMobile(){
   const reset=document.getElementById('resetMobileResults');if(!reset)return;

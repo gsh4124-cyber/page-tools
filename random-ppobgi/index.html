@@ -145,7 +145,13 @@
   const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
   const namesOf=id=>{const a=document.getElementById(id).value.split(/[\n,]+/).map(v=>v.trim()).filter(Boolean);return a.length?a:Array.from({length:8},(_,i)=>String(i+1)+'번')};
   root.querySelectorAll('.tool-tab').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.tool-tab').forEach(b=>{const on=b===btn;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});root.querySelectorAll('.tool-panel').forEach(p=>p.hidden=p.dataset.panel!==btn.dataset.tool)}));
-  document.getElementById('rollDice').addEventListener('click',()=>{const n=+document.getElementById('diceCount').value,out=document.getElementById('diceResult');const preview=Array.from({length:n},()=>rand(6)+1);out.className='tool-result rolling';out.innerHTML=preview.map(x=>'<span class="die" data-n="'+x+'" aria-label="'+x+'"></span>').join('');setTimeout(()=>{const v=Array.from({length:n},()=>rand(6)+1);out.className='tool-result landed';out.innerHTML=v.map(x=>'<span class="die" data-n="'+x+'" aria-label="'+x+'"></span>').join('')+(n>1?'<div class="tool-total">합계 '+v.reduce((a,b)=>a+b,0)+'</div>':'');setTimeout(()=>out.classList.remove('landed'),260)},900)});
+  let diceBusy=false;
+  document.getElementById('rollDice').addEventListener('click',()=>{
+    if(diceBusy)return;diceBusy=true;const button=document.getElementById('rollDice'),out=document.getElementById('diceResult'),n=+document.getElementById('diceCount').value;
+    button.disabled=true;out.setAttribute('aria-busy','true');const values=Array.from({length:n},()=>rand(6)+1);
+    out.className='tool-result rolling';out.innerHTML=values.map(x=>'<span class="die" data-n="'+x+'" aria-label="'+x+'"></span>').join('');
+    setTimeout(()=>{out.className='tool-result landed';out.innerHTML=values.map(x=>'<span class="die" data-n="'+x+'" aria-label="'+x+'"></span>').join('')+(n>1?'<div class="tool-total">합계 '+values.reduce((a,b)=>a+b,0)+'</div>':'');out.setAttribute('aria-busy','false');window.RandomPickerToolMetrics?.record('dice');diceBusy=false;button.disabled=false;},matchMedia('(prefers-reduced-motion: reduce)').matches?120:900);
+  });
 
   document.getElementById('flipCoin').addEventListener('click',()=>{const out=document.getElementById('coinResult');out.className='tool-result rolling';out.innerHTML='<div class="coin-face">●</div>';setTimeout(()=>{out.className='tool-result landed';out.innerHTML='<div class="coin-face">'+(rand(2)?'앞면':'뒷면')+'</div>';setTimeout(()=>out.classList.remove('landed'),280)},1020)});
   document.getElementById('makeOrder').addEventListener('click',()=>{const a=shuffle(namesOf('orderNames'));document.getElementById('orderResult').innerHTML='<div class="order-list">'+a.map((v,i)=>'<div class="order-item"><b>'+(i+1)+'</b>'+v.replace(/[&<>"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]))+'</div>').join('')+'</div>'});
@@ -169,5 +175,6 @@
 })();
 </script>
 <script src="/tool-entry.js" defer></script>
+<script src="/tool-metrics.js"></script>
 <script type="module" src="/yut.js"></script>
 </body></html>

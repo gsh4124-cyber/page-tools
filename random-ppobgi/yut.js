@@ -49,7 +49,7 @@ function mountYut(){
    out.querySelector('.yut-pieces').removeAttribute('aria-hidden');
    out.querySelectorAll('.yut-piece').forEach((piece,i)=>{piece.setAttribute('role','img');piece.setAttribute('aria-label',`${i+1} · ${result.faces[i]?text[0]:text[1]}`);});
    out.insertAdjacentHTML('beforeend',`<div class="yut-outcome"><strong id="yutOutcome">${escape(pack?.yut[result.code]||result.name)}</strong><span id="yutSteps">${escape(text[2].replace('{n}',result.steps))}</span></div><p class="yut-count">${escape(text[0])} <b>${result.flat} / 4</b></p>${result.again?`<p class="yut-again">${escape(text[3])}</p>`:''}${legend()}`);
-   out.setAttribute('aria-busy','false');busy=false;button.disabled=false;
+   out.setAttribute('aria-busy','false');window.RandomPickerToolMetrics?.record('yut');busy=false;button.disabled=false;
   },reduced?120:1000);
  });
 }
