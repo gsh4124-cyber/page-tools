@@ -11,7 +11,7 @@
     "status": "DONE",
     "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Primary Google PKCE login deployed; actual Google account chooser reached. Final package13/unit26 passed. Live user selection/consent/return pending; historical email login is separate.",
+    "reason": "Primary Google PKCE login deployed; actual Google chooser verified, user subsequently confirmed it works (USER_REPORTED_DONE). Unit26/package13 passed. Detailed real selection/consent/return and new Google Auth session not independently verified.",
     "codeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
     "manifest": {
       "product": "moa",
@@ -504,9 +504,9 @@
       "verifiedAlternative": "Fresh actual mail reauthentication in existing Chrome profile; empty-context and negative cases covered by mocked packaged Worker tests."
     },
     {
-      "item": "Current actual Google account selection/consent and return",
+      "item": "Independent observation of complete real Google selection/consent/return sequence",
       "status": "NOT_TESTED",
-      "reason": "Real Google chooser reached; user handoff requested. Current actual success not yet observed."
+      "reason": "User confirmed it works (USER_REPORTED_DONE). Real chooser independently observed. Detailed completion not observed; last_sign_in_at remains historical email timestamp."
     }
   ],
   "costs": {
@@ -821,7 +821,7 @@
       "bucketPrivate": true,
       "fileLimit": 26214400
     },
-    "hostedMoaChecks": "PARTIAL: actual Google account chooser reached; Google return pending; hosted media/restore/isolation not replayed",
+    "hostedMoaChecks": "PARTIAL: real Google chooser DONE, subsequent operation USER_REPORTED_DONE; independent full callback and media/restore/isolation replay not performed",
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
@@ -834,8 +834,8 @@
       "unitTests": 26,
       "browserPackageChecks": 13,
       "authenticationTest": "synthetic JWT / mocked RPC",
-      "actualOwnerLogin": "Google account chooser DONE; current Google selection/return pending. Previous actual email login historical.",
-      "liveHostChecks": "Production Google button and real account chooser DONE; Google return pending.",
+      "actualOwnerLogin": "User reported working (DONE / USER_REPORTED_DONE); actual Google chooser independently observed, detailed completion not independently observed.",
+      "liveHostChecks": "Production Google chooser DONE; subsequent operation USER_REPORTED_DONE; new Google session not independently confirmed.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -855,7 +855,7 @@
       "method": "Supported Windows Computer Use / actual Chrome",
       "productionGoogleButton": "DONE",
       "googleAccountChooser": "DONE",
-      "googleAccountSelectionReturn": "NOT_TESTED: user handoff pending",
+      "googleAccountSelectionReturn": "User reported working (DONE / USER_REPORTED_DONE); exact flow not independently observed",
       "currentPrivateManifest": "NOT_REPLAYED",
       "freshEmailLogin": "Historical previous96490 release; not replayed",
       "currentLiveMobile": "NOT_TESTED; packaged five widths passed",
@@ -867,7 +867,9 @@
         "qa-evidence/google-login-304.png",
         "qa-evidence/google-login-390.png",
         "qa-evidence/google-login-1280.png"
-      ]
+      ],
+      "userReportedOperational": "DONE / USER_REPORTED_DONE",
+      "newGoogleAuthSessionIndependentReadback": "NOT_TESTED: last_sign_in_at unchanged from earlier email authentication"
     },
     "runtimeFixes": [
       {
@@ -968,7 +970,7 @@
       "actualClientWidth": 304,
       "actualScrollWidth": 304,
       "actualLoginDialogInitiallyOpen": false,
-      "newDialogRealOwnerLoginReplay": "Google account chooser DONE, selection/return pending; previous email success historical",
+      "newDialogRealOwnerLoginReplay": "User reported working (USER_REPORTED_DONE); real Google chooser independently verified, full return sequence not independently observed",
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
@@ -2035,13 +2037,19 @@
     "serverOwnerCheckBeforeAppPersistence": true,
     "rejectCallbackPreservesOwnerSession": "DONE in mocked packaged browser",
     "actualGoogleAccountChooser": "DONE: production button reached real Google account selection",
-    "actualGoogleAccountSelectionAndReturn": "NOT_TESTED: user account selection/consent handoff pending",
-    "actualNewAuthSession": "NOT_TESTED: previous 08:18:59 timestamp predates current Google test",
+    "actualGoogleAccountSelectionAndReturn": "User-reported working; exact selection/consent/return sequence NOT_INDEPENDENTLY_VERIFIED",
+    "actualNewAuthSession": "NOT_TESTED: readonly last_sign_in_at remains previous email timestamp 2026-11-24 08:18:59.006305+00; not independent proof of a new Google sign-in. Does not negate user-reported operation.",
     "realDevice": "NOT_TESTED",
     "newCosts": false,
     "references": [
       "https://supabase.com/docs/guides/auth/social-sign-in/auth-google",
       "https://supabase.com/docs/guides/auth/sessions/pkce-flow"
-    ]
+    ],
+    "userReportedOperational": {
+      "status": "DONE",
+      "evidenceType": "USER_REPORTED_DONE",
+      "dateKST": "2026-11-24",
+      "scope": "User corrected the failure report and confirmed it works; detailed account selection/consent/return sequence was not independently observed."
+    }
   }
 }
