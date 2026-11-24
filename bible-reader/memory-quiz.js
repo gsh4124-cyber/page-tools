@@ -557,7 +557,14 @@
       }
       function revealPracticePair(index){
         const body=practiceSources[index]?.parentElement;
-        if(dialog.classList.contains('memory-practice-wide')&&body&&body.getBoundingClientRect().height<=content.clientHeight)body.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+        if(!dialog.classList.contains('memory-practice-wide')||!body)return;
+        let target=body.getBoundingClientRect();if(target.height>content.clientHeight)return;
+        const card=practiceCards[index].getBoundingClientRect();if(card.height<=content.clientHeight)target=card;
+        let top=target.top,bottom=target.bottom;
+        const notice=shortNotices.getBoundingClientRect();
+        if(notice.height&&Math.max(bottom,notice.bottom)-Math.min(top,notice.top)<=content.clientHeight){top=Math.min(top,notice.top);bottom=Math.max(bottom,notice.bottom);}
+        const viewport=content.getBoundingClientRect();
+        if(top<viewport.top)content.scrollTop+=top-viewport.top;else if(bottom>viewport.bottom)content.scrollTop+=bottom-viewport.bottom;
       }
       function activatePractice(index,{scroll=true}={}){
         const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
