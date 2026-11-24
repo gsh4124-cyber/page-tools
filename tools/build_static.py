@@ -34,7 +34,7 @@ if product == 'random-ppobgi':
     require('locales.js', 'window.RandomPickerLocales=P')
     require('functions/_middleware.js', 'hreflang', 'x-default', 'canonical')
 else:
-    for name in ['validate-i18n', 'validate-navigation', 'validate-search-progress', 'validate-scripture', 'validate-storage']:
+    for name in ['validate-i18n', 'validate-navigation', 'validate-search-progress', 'validate-scripture', 'validate-storage', 'validate-backup']:
         run('node', f'tools/{name}.mjs')
     for lang in 'en fr de zh ru la pt ar'.split():
         require(f'{lang}/index.html', f'hreflang="{lang}"',

@@ -221,7 +221,7 @@ function initCheckup(){
       btn.setAttribute("aria-pressed",String(state[id]===btn.dataset.value));
       btn.addEventListener("click",()=>{
         $$(".pill",item).forEach(x=>{const active=x===btn;x.classList.toggle("active",active);x.setAttribute("aria-pressed",String(active));});
-        state[id]=btn.dataset.value;update();
+        state[id]=btn.dataset.value;state._inspection={updatedAt:Date.now()};update();
       });
     });
   });

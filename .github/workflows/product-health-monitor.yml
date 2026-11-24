@@ -90,6 +90,7 @@ jobs:
         run: |
           python3 tools/audit_static.py
           node tools/full-site-audit.mjs --local
+          CONTINUITY_ENGINES=chromium,firefox,webkit node tools/continuity-smoke.mjs --local
       - name: Preserve candidate screenshots
         if: always()
         uses: actions/upload-artifact@v6
@@ -99,6 +100,7 @@ jobs:
             qa_evidence/search-entry/
             qa_evidence/site-flow/
             qa_evidence/full-audit/
+            qa_evidence/continuity/
           retention-days: 7
 
   health:
@@ -349,6 +351,8 @@ jobs:
         run: node tools/site-flow-smoke.mjs
       - name: Audit live layouts, blocked storage and recovery
         run: node tools/full-site-audit.mjs
+      - name: Verify live backup and previous inspection flows
+        run: node tools/continuity-smoke.mjs
       - name: Verify search guide entry and destination behavior
         if: steps.changed.outputs.projects != ''
         run: node tools/search-entry-smoke.mjs
@@ -370,5 +374,6 @@ jobs:
             qa_evidence/search-discovery/
             qa_evidence/site-flow/
             qa_evidence/full-audit/
+            qa_evidence/continuity/
           if-no-files-found: warn
           retention-days: 7
