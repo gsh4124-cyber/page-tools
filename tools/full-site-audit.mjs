@@ -40,6 +40,9 @@ for(const engine of (process.env.FULL_AUDIT_ENGINES||'chromium').split(',')){
    const unnamed=await page.evaluate(()=>[...document.querySelectorAll('button,input[type=button],input[type=submit]')].filter(n=>n.getClientRects().length&&getComputedStyle(n).visibility!=='hidden').filter(n=>![n.getAttribute('aria-label'),n.title,n.textContent,n.value,(n.getAttribute('aria-labelledby')||'').split(/\s+/).map(id=>document.getElementById(id)?.textContent||'').join(' ')].some(v=>String(v||'').trim())).map(n=>n.id||n.outerHTML.slice(0,100)));
    assert.deepEqual(unnamed,[],'Visible controls without an accessible name');
   });
+  for(const language of ['en','fr','de','zh','ru','la','pt','ar'])await scenario(browser,{engine,width:390,height:844,language,site:'bible',flow:'language-entry-reader-controls'},async page=>{
+   await page.goto(`https://bible-reader-1iz.pages.dev/${language}/?qa=1`,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>typeof currentBookData!=='undefined'&&!!currentBookData&&document.querySelector('#status').hidden);assert(await page.locator('#verses .verse').count()>0);assert.equal(await page.locator('#reloadChapter').count(),1);assert(await page.locator('#reloadChapter').isHidden());await fit(page);
+  });
   for(const language of ['ko','ar'])await scenario(browser,{engine,width:390,height:844,language,site:'random',flow:'tools-keyboard-coin-teams-safe-content'},async page=>{
    await page.goto(`https://random-ppobgi.pages.dev/${language==='ko'?'':language+'/'}?qa=1`,{waitUntil:'domcontentloaded'});await page.locator('#showTools').click();
    const dice=page.locator('[data-tool="dice"]');await dice.click();await dice.press(language==='ar'?'ArrowLeft':'ArrowRight');assert.equal(await page.locator('.tool-tab[aria-selected="true"]').getAttribute('data-tool'),'yut');
