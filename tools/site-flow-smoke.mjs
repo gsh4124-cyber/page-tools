@@ -39,7 +39,7 @@ for(const engine of (process.env.SITE_FLOW_ENGINES||'chromium').split(',')){
     // A delayed book switch must retain reading space without showing the old chapter.
     let allowBook;const bookGate=new Promise(resolve=>allowBook=resolve);
     await page.route('**/scripture/krv1961/Genesis.json',async route=>{await bookGate;await route.fallback();});
-    await page.locator('#bookSelect').selectOption('0');await page.locator('#singleReader[aria-busy="true"]').waitFor();
+    await page.locator('#bookSelect').selectOption('0',{force:true});await page.locator('#singleReader[aria-busy="true"]').waitFor();
     assert.equal(await page.locator('#verses .verse').count(),0);
     assert(await page.locator('#singleReader').evaluate(n=>n.getBoundingClientRect().height>=320));allowBook();
     await page.waitForFunction(()=>typeof currentBookData!=='undefined'&&currentBookData&&document.querySelector('#bookSelect').value==='0'&&document.querySelector('#singleReader').getAttribute('aria-busy')!=='true');
