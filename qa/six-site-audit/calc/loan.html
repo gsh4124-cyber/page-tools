@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>대출이자 계산기 - 원리금균등·원금균등·만기일시 월 상환액 | 계산모아</title>
+<meta name="description" content="대출금액, 금리, 기간만 넣으면 원리금균등·원금균등·만기일시상환 방식별 월 상환액과 총이자, 회차별 상환 스케줄을 바로 보여드려요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/loan.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "대출이자 계산기", "url": "https://gsh4124-cyber.github.io/loan.html", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "원리금균등과 원금균등 중 무엇이 유리한가요?", "acceptedAnswer": {"@type": "Answer", "text": "원금균등은 처음 상환액이 크지만 원금이 빨리 줄어 총이자가 적어요. 원리금균등은 매달 같은 금액이라 계획 세우기가 쉬워요. 초반 부담을 감당할 수 있으면 원금균등이 이자 면에서 유리해요."}}, {"@type": "Question", "name": "만기일시상환은 어떤 방식인가요?", "acceptedAnswer": {"@type": "Answer", "text": "매달 이자만 내다가 만기에 원금 전체를 한 번에 갚는 방식이에요. 월 부담은 가장 적지만 총이자는 가장 많아요."}}, {"@type": "Question", "name": "중도상환수수료도 계산되나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요. 중도상환수수료, 보증료, 인지세 같은 부대비용은 포함하지 않았어요. 대출 상품 설명서에서 따로 확인하세요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>대출이자 계산기</h1>
+  <p class="lead">매달 얼마씩 갚아야 하는지, 이자는 총 얼마인지 바로 확인하세요.</p>
+  <div class="card">
+    <label for="p">대출 금액 (원)</label>
+    <input id="p" class="money" value="100,000,000">
+    <div class="row">
+      <div><label for="r">연 금리 (%)</label><input id="r" type="number" min="0" step="0.01" value="4.5"></div>
+      <div><label for="n">대출 기간 (개월)</label><input id="n" type="number" min="1" max="1200" value="360"></div>
+    </div>
+    <label for="m">상환 방식</label>
+    <select id="m">
+      <option value="eq">원리금균등상환 (매달 같은 금액)</option>
+      <option value="pr">원금균등상환 (원금을 똑같이)</option>
+      <option value="bl">만기일시상환 (이자만 내다 마지막에 원금)</option>
+    </select>
+    <button onclick="calc()">계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>상환 방식별 차이</h2>
+    <p><b>원리금균등상환</b>은 원금과 이자를 합친 금액을 매달 똑같이 갚아요. 처음엔 이자 비중이 크고 갈수록 원금 비중이 커져요. 매달 나가는 돈이 일정해서 계획 세우기가 쉬워요.</p>
+    <p><b>원금균등상환</b>은 원금을 기간으로 똑같이 나눠 갚고, 남은 원금에 대한 이자를 더해요. 첫 달 부담이 가장 크지만 총이자는 원리금균등보다 적어요.</p>
+    <p><b>만기일시상환</b>은 기간 동안 이자만 내다가 만기에 원금을 한 번에 갚아요. 월 부담은 가장 적지만 총이자는 가장 많아요.</p>
+    <h2>계산 방법</h2>
+    <p>월 금리는 연 금리 ÷ 12로 계산해요. 원리금균등 월 상환액 = 대출금 × 월금리 × (1+월금리)<sup>개월</sup> ÷ ((1+월금리)<sup>개월</sup> − 1). 실제 은행 금액은 일할 계산이나 중도상환수수료 때문에 조금 다를 수 있어요.</p>
+      <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">원리금균등과 원금균등 중 무엇이 유리한가요?</h3><p>원금균등은 처음 상환액이 크지만 원금이 빨리 줄어 총이자가 적어요. 원리금균등은 매달 같은 금액이라 계획 세우기가 쉬워요. 초반 부담을 감당할 수 있으면 원금균등이 이자 면에서 유리해요.</p><h3 style="font-size:15px;margin:16px 0 4px">만기일시상환은 어떤 방식인가요?</h3><p>매달 이자만 내다가 만기에 원금 전체를 한 번에 갚는 방식이에요. 월 부담은 가장 적지만 총이자는 가장 많아요.</p><h3 style="font-size:15px;margin:16px 0 4px">중도상환수수료도 계산되나요?</h3><p>아니요. 중도상환수수료, 보증료, 인지세 같은 부대비용은 포함하지 않았어요. 대출 상품 설명서에서 따로 확인하세요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function calc(){
+  const P=num("p"), R=num("r")/100/12, N=Math.round(num("n")), M=document.getElementById("m").value;
+  if(!P||N<1){alert("대출 금액과 기간을 입력해 주세요.");return;}
+  let bal=P, rows=[], total=0, first=0, last=0;
+  const pmt = R===0 ? P/N : P*R/(-Math.expm1(-N*Math.log1p(R)));
+  for(let i=1;i<=N;i++){
+    const it=bal*R; let pr;
+    if(M==="eq") pr=pmt-it; else if(M==="pr") pr=P/N; else pr=(i===N?bal:0);
+    if(i===N) pr=bal;
+    const pay=pr+it; bal-=pr; total+=it;
+    if(i===1) first=pay; if(i===N) last=pay;
+    rows.push(`<tr><td>${i}</td><td>${won(pay)}</td><td>${won(pr)}</td><td>${won(it)}</td><td>${won(Math.max(bal,0))}</td></tr>`);
+  }
+  const head = M==="eq" ? kv("매달 상환액", won(first)) : kv("첫 달 상환액", won(first))+kv("마지막 달 상환액", won(last));
+  show("out",`<div class="big">총 이자 ${won(total)}</div>${head}${kv("총 상환액",won(P+total))}
+   <div class="tablewrap"><table><tr><th>회차</th><th>상환액</th><th>원금</th><th>이자</th><th>잔액</th></tr>${rows.join("")}</table></div>`);
+}
+</script>
+</body>
+</html>

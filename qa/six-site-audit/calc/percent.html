@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>퍼센트 계산기 - 몇 퍼센트, 증가율·감소율 계산 | 계산모아</title>
+<meta name="description" content="A의 B%는 얼마인지, A는 B의 몇 %인지, A에서 B로 몇 % 올랐는지 한 번에 계산해요. 할인·성적·매출 증감률 계산에 바로 쓰세요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/percent.html">
+<meta property="og:title" content="퍼센트 계산기 - 몇 퍼센트, 증가율·감소율 계산 | 계산모아"><meta property="og:description" content="A의 B%는 얼마인지, A는 B의 몇 %인지, A에서 B로 몇 % 올랐는지 한 번에 계산해요. 할인·성적·매출 증감률 계산에 바로 쓰세요."><meta property="og:url" content="https://gsh4124-cyber.github.io/percent.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "퍼센트 계산기", "url": "https://gsh4124-cyber.github.io/percent.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "30% 할인된 가격은 어떻게 구하나요?", "acceptedAnswer": {"@type": "Answer", "text": "원래 가격 × (1 − 0.3)으로 구해요. 할인율 계산기를 쓰면 할인 금액과 최종 가격을 함께 볼 수 있어요."}}, {"@type": "Question", "name": "증가율이 음수로 나오면요?", "acceptedAnswer": {"@type": "Answer", "text": "나중 값이 처음 값보다 작다는 뜻으로, 그만큼 감소한 거예요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>퍼센트 계산기</h1>
+  <p class="lead">자주 쓰는 퍼센트 계산 세 가지를 한 화면에서 해요.</p>
+  <div class="card">
+    <label>① A의 B%는?</label><div class="row"><div><input id="a1" aria-label="비율을 적용할 값 A" class="money" placeholder="A (예: 50,000)"></div><div><input id="b1" aria-label="적용할 비율 B (%)" type="number" step="any" placeholder="B % (예: 15)"></div></div>
+    <label>② A는 B의 몇 %?</label><div class="row"><div><input id="a2" aria-label="비교할 값 A" class="money" placeholder="A (예: 30)"></div><div><input id="b2" aria-label="비율의 기준값 B" class="money" placeholder="B (예: 120)"></div></div>
+    <label>③ A에서 B로 변하면 몇 % 증감?</label><div class="row"><div><input id="a3" aria-label="증감률의 처음 값 A" class="money" placeholder="처음 값 A"></div><div><input id="b3" aria-label="증감률의 나중 값 B" class="money" placeholder="나중 값 B"></div></div>
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>퍼센트 계산 공식</h2><ul><li>A의 B% = A × B ÷ 100</li><li>A는 B의 몇 % = A ÷ B × 100</li><li>증감률 = (B − A) ÷ A × 100</li></ul>
+    <h2>퍼센트(%)와 퍼센트포인트(%p)는 달라요</h2><p>금리가 3%에서 4%로 오르면 1%p(퍼센트포인트) 오른 것이고, 증가율로는 33.3% 오른 거예요. 뉴스에서 비율끼리의 차이를 말할 때는 %p를 써요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">30% 할인된 가격은 어떻게 구하나요?</h3><p>원래 가격 × (1 − 0.3)으로 구해요. 할인율 계산기를 쓰면 할인 금액과 최종 가격을 함께 볼 수 있어요.</p><h3 style="font-size:15px;margin:16px 0 4px">증가율이 음수로 나오면요?</h3><p>나중 값이 처음 값보다 작다는 뜻으로, 그만큼 감소한 거예요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function calc(){
+ const raw=id=>document.getElementById(id).value.trim().replace(/,/g,"");
+ const has=id=>raw(id)!=='';
+ const val=id=>Number(raw(id));
+ let h="";
+ if(has('a1')&&has('b1'))h+=kv(`${val('a1').toLocaleString()}의 ${val('b1')}%`,(val('a1')*val('b1')/100).toLocaleString('ko-KR',{maximumFractionDigits:4}));
+ if(has('a2')&&has('b2')){if(val('b2')===0)h+=kv('비율 계산','기준값 B에는 0을 사용할 수 없어요.');else h+=kv(`${val('a2').toLocaleString()}는 ${val('b2').toLocaleString()}의`,(val('a2')/val('b2')*100).toFixed(2)+'%');}
+ if(has('a3')&&has('b3')){if(val('a3')===0)h+=kv('증감률 계산','처음 값 A에는 0을 사용할 수 없어요.');else{const r=(val('b3')-val('a3'))/val('a3')*100;h+=kv(`${val('a3').toLocaleString()} → ${val('b3').toLocaleString()}`,(r>=0?'+':'')+r.toFixed(2)+'% '+(r>=0?'증가':'감소'));}}
+ if(!h){alert('계산할 값을 입력해 주세요.');return;}show('out',h);
+}
+</script>
+</body>
+</html>

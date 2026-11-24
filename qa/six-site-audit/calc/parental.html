@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>육아휴직 급여 계산기 2026 - 첫 3개월 최대 250만 원 | 계산모아</title>
+<meta name="description" content="월급(통상임금)과 쉬는 기간만 넣으면 2026년 기준 육아휴직 급여를 달마다, 모두 합쳐서 계산해요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/parental.html">
+<meta property="og:title" content="육아휴직 급여 계산기 2026 - 첫 3개월 최대 250만 원 | 계산모아"><meta property="og:description" content="월급(통상임금)과 쉬는 기간만 넣으면 2026년 기준 육아휴직 급여를 달마다, 모두 합쳐서 계산해요."><meta property="og:url" content="https://gsh4124-cyber.github.io/parental.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "육아휴직 급여 계산기", "url": "https://gsh4124-cyber.github.io/parental.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "통상임금이 뭔가요?", "acceptedAnswer": {"@type": "Answer", "text": "매달 정해서 똑같이 받는 돈이에요. 기본급과 고정 수당은 들어가고, 성과급이나 야근 수당처럼 달마다 바뀌는 돈은 빠져요."}}, {"@type": "Question", "name": "어디서 신청하나요?", "acceptedAnswer": {"@type": "Answer", "text": "육아휴직을 시작한 뒤 1개월이 지나면 고용24에서 매달 또는 몇 달 치를 모아 신청할 수 있어요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>육아휴직 급여 계산기</h1>
+  <p class="lead">월급과 몇 달 쉴지만 고르면 달마다 받는 돈과 모두 합친 금액을 보여 줘요.</p>
+  <div class="card">
+    <label for="wage">월 통상임금 (세전)</label><input id="wage" class="money" value="3,000,000">
+    <p class="hint">기본급에 매달 고정으로 받는 수당을 더한 금액이에요. 모르면 세전 월급을 넣어 보세요.</p>
+    <label>몇 달 쉴 건가요?</label>
+    <div class="chips" id="mon" role="group"><button type="button" data-v="3" aria-pressed="false">3개월</button><button type="button" data-v="6" aria-pressed="false">6개월</button><button type="button" data-v="12" aria-pressed="true">1년</button><button type="button" data-v="18" aria-pressed="false">1년 6개월</button></div>
+    <p class="hint">1년 6개월은 엄마·아빠가 각각 3개월 이상 육아휴직을 쓸 때 가능해요.</p>
+    <button onclick="calc(true)">계산하기</button><div class="result" id="out"></div>
+  </div>
+  <section class="card article">
+    <h2>2026년 육아휴직 급여</h2>
+    <ul><li>1~3개월: 통상임금의 100%, 최대 월 250만 원</li>
+    <li>4~6개월: 통상임금의 100%, 최대 월 200만 원</li>
+    <li>7개월부터: 통상임금의 80%, 최대 월 160만 원</li>
+    <li>최소 금액은 월 70만 원이에요.</li></ul>
+    <p>예전에는 25%를 복직 후에 줬지만, 지금은 휴직 중에 매달 전부 받아요. 엄마·아빠가 생후 18개월 안에 함께 쓰는 ‘6+6 부모육아휴직제’는 첫 6개월 상한이 더 높아요.</p>
+<h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">통상임금이 뭔가요?</h3><p>매달 정해서 똑같이 받는 돈이에요. 기본급과 고정 수당은 들어가고, 성과급이나 야근 수당처럼 달마다 바뀌는 돈은 빠져요.</p><h3 style="font-size:15px;margin:16px 0 4px">어디서 신청하나요?</h3><p>육아휴직을 시작한 뒤 1개월이 지나면 고용24에서 매달 또는 몇 달 치를 모아 신청할 수 있어요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+LIVE=1;
+function calc(force){const w=num("wage");if(!w){if(force)alert("통상임금을 넣어 주세요.");return;}
+const n=Number(chip("mon"));let sum=0,rows=[];
+const seg=[[1,3,1,2500000],[4,6,1,2000000],[7,18,0.8,1600000]];
+for(const [a,b,r,cap] of seg){if(a>n)break;const to=Math.min(b,n),cnt=to-a+1;const m=Math.floor(Math.max(Math.min(w*r,cap),700000));sum+=m*cnt;rows.push(kv(`${a}~${to}개월 (${cnt}달)`,`월 ${won(m)}`));}
+show("out",`<div class="big">모두 ${won(sum)}</div>${rows.join("")}${kv("한 달 평균",won(sum/n))}`);}
+</script>
+</body>
+</html>

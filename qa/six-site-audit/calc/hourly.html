@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>주휴수당 계산기 2026 - 시급·주급·월급 환산 (최저시급 10,320원) | 계산모아</title>
+<meta name="description" content="2026년 최저시급 10,320원 기준으로 주휴수당, 주급, 월급을 계산해요. 아르바이트 근무시간과 시급만 넣으면 바로 나와요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/hourly.html">
+<meta property="og:title" content="주휴수당 계산기 2026 - 시급·주급·월급 환산 (최저시급 10,320원) | 계산모아"><meta property="og:description" content="2026년 최저시급 10,320원 기준으로 주휴수당, 주급, 월급을 계산해요. 아르바이트 근무시간과 시급만 넣으면 바로 나와요."><meta property="og:url" content="https://gsh4124-cyber.github.io/hourly.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "시급·주휴수당 계산기", "url": "https://gsh4124-cyber.github.io/hourly.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "주 14시간 일하면 주휴수당이 없나요?", "acceptedAnswer": {"@type": "Answer", "text": "네. 1주 소정근로시간이 15시간 미만이면 주휴수당 대상이 아니에요."}}, {"@type": "Question", "name": "세금은 빠지나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산은 세전 금액이에요. 4대보험이나 3.3% 사업소득세가 빠지면 실수령액은 줄어요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>시급·주휴수당 계산기</h1>
+  <p class="lead">알바 시급과 일주일 근무시간으로 주휴수당과 월급을 계산해요.</p>
+  <div class="card">
+    <label>최저시급으로 바로 넣기</label>
+    <div class="chips" id="mw"><button type="button" data-v="10,320" aria-pressed="true">2026년 10,320원</button><button type="button" data-v="10,700" aria-pressed="false">2027년 10,700원</button></div>
+    <div class="row"><div><label for="p">시급 (원)</label><input id="p" class="money" value="10,320"></div><div><label for="hw">1주 근무시간</label><input id="hw" type="number" step="any" value="20"></div></div>
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>2026년·2027년 최저임금</h2><p>2026년 최저시급은 10,320원이에요. 주 40시간 일하면 주휴시간을 포함해 월 209시간으로 보고 월 2,156,880원이 돼요.</p><p>2027년 최저시급은 10,700원으로 확정됐어요(3.7% 인상). 월 209시간 기준 2,236,300원이에요.</p>
+    <h2>주휴수당 계산 방법</h2><ul><li>1주 소정근로시간이 15시간 이상이고, 정해진 날을 모두 출근하면 받을 수 있어요.</li><li>주휴수당 = (1주 근무시간 ÷ 40) × 8시간 × 시급. 근무시간이 40시간을 넘어도 40시간까지만 반영해요.</li><li>월급 환산은 1주 급여 × (365 ÷ 7 ÷ 12) ≈ 4.345주로 계산해요.</li></ul>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">주 14시간 일하면 주휴수당이 없나요?</h3><p>네. 1주 소정근로시간이 15시간 미만이면 주휴수당 대상이 아니에요.</p><h3 style="font-size:15px;margin:16px 0 4px">세금은 빠지나요?</h3><p>이 계산은 세전 금액이에요. 4대보험이나 3.3% 사업소득세가 빠지면 실수령액은 줄어요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function calc(){const p=num("p"),hw=Number(document.getElementById("hw").value)||0;if(!p||!hw){alert("시급과 근무시간을 입력해 주세요.");return;}
+const hol=hw>=15?Math.min(hw,40)/40*8*p:0;const wk=hw*p+hol;const mo=wk*365/7/12;
+show("out",`<div class="big">월 ${won(mo)} (세전)</div>${kv("주휴수당 (1주)",hw>=15?won(hol):"해당 없음 (주 15시간 미만)")}${kv("기본 주급",won(hw*p))}${kv("주급 합계",won(wk))}${kv("월급 환산",won(mo))}${p<10320?kv("확인","2026년 최저시급 10,320원보다 낮아요"):""}`);}
+document.addEventListener("click",e=>{const b=e.target.closest("#mw button");if(b){document.getElementById("p").value=b.dataset.v;}},true);
+</script>
+</body>
+</html>

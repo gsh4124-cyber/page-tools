@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연말정산 계산기 2026 - 환급금 미리 계산 (2025년 귀속) | 계산모아</title>
+<meta name="description" content="2025년 귀속 연말정산 환급금을 미리 계산해 보세요. 신용카드·체크카드 소득공제, 자녀세액공제(1명 25만원), 연금저축·IRP, 월세, 의료비, 교육비, 기부금을 반영해 돌려받을 돈과 더 낼 돈을 보여 드려요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/yearend.html">
+<meta property="og:title" content="연말정산 계산기 2026 - 환급금 미리 계산 (2025년 귀속)"><meta property="og:description" content="카드 사용액과 공제 항목을 넣으면 연말정산 환급금을 미리 계산해요."><meta property="og:url" content="https://gsh4124-cyber.github.io/yearend.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"연말정산 계산기","url":"https://gsh4124-cyber.github.io/yearend.html","applicationCategory":"FinanceApplication","operatingSystem":"Any","inLanguage":"ko","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"기납부세액은 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"매달 급여명세서의 소득세를 1년 치 더한 금액이에요. 회사에서 받는 근로소득 원천징수영수증이나 홈택스 지급명세서에서도 확인할 수 있어요. 모르면 비워 두면 연봉으로 추정해요."}},{"@type":"Question","name":"신용카드와 체크카드 중 무엇을 써야 유리한가요?","acceptedAnswer":{"@type":"Answer","text":"총급여의 25%까지는 공제가 없으니 혜택이 많은 신용카드를 쓰고, 25%를 넘는 부분은 공제율이 두 배인 체크카드나 현금영수증을 쓰는 것이 일반적으로 유리해요."}},{"@type":"Question","name":"계산 결과가 실제와 다를 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 부양가족의 나이·소득 요건, 공제 항목별 세부 한도, 감면 등은 단순화했어요. 실제 금액은 홈택스 연말정산 간소화 자료와 회사 정산 결과를 확인하세요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>연말정산 계산기 <small style="font-size:14px;color:var(--muted)">2025년 귀속 · 2026년 1월 정산</small></h1>
+  <p class="lead">올해 쓴 돈과 공제 항목을 넣으면 내년 1월 연말정산에서 돌려받을 돈을 미리 계산해요.</p>
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 8px">① 연봉</h2>
+    <div class="row">
+      <div><label for="g">연봉 (세전)</label><input id="g" class="money" value="45,000,000"></div>
+      <div><label for="kid">8세 이상 자녀 수</label><input id="kid" type="number" min="0" value="0"></div>
+    </div>
+    <h2 style="font-size:16px;margin:16px 0 8px">② 올해 카드로 쓴 돈</h2>
+    <div class="row">
+      <div><label for="cc">신용카드</label><input id="cc" class="money" value="12,000,000"></div>
+      <div><label for="dc">체크카드·현금영수증</label><input id="dc" class="money" value="5,000,000"></div>
+    </div>
+    <p class="hint">카드 앱이나 홈택스에서 올해 쓴 금액을 볼 수 있어요. 대충 넣어도 괜찮아요.</p>
+    <details class="more-in"><summary>더 정확하게 계산하기 (해당하는 것만 넣으세요)</summary>
+    <div class="row">
+      <div><label for="paid">올해 낸 소득세 합계 (모르면 비워 두기)</label><input id="paid" class="money" placeholder="급여명세서 소득세 × 12"></div>
+      <div><label for="fam">부양가족 수 (본인 포함)</label><input id="fam" type="number" min="1" value="1"></div>
+    </div>
+    <div class="row">
+      <div><label for="mk">전통시장에서 쓴 돈</label><input id="mk" class="money" value="0"></div>
+      <div><label for="tr">대중교통에 쓴 돈</label><input id="tr" class="money" value="600,000"></div>
+    </div>
+    <div class="row">
+      <div><label for="pen">연금저축·IRP 납입액</label><input id="pen" class="money" value="0"></div>
+      <div><label for="rent">월세 낸 금액 (무주택 세대주)</label><input id="rent" class="money" value="0"></div>
+    </div>
+    <div class="row">
+      <div><label for="med">의료비</label><input id="med" class="money" value="0"></div>
+      <div><label for="edu">교육비</label><input id="edu" class="money" value="0"></div>
+    </div>
+    <div class="row">
+      <div><label for="ins">보장성 보험료</label><input id="ins" class="money" value="0"></div>
+      <div><label for="don">기부금</label><input id="don" class="money" value="0"></div>
+    </div>
+    <label><input id="wed" type="checkbox" style="width:auto"> 2025년에 혼인신고를 했어요 (결혼세액공제 50만원)</label>
+    </details>
+    <button onclick="calc()">환급금 계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+  <section class="card article">
+    <h2>연말정산 계산 순서</h2>
+    <ol>
+      <li>총급여에서 근로소득공제를 빼 근로소득금액을 구해요.</li>
+      <li>인적공제(1명당 150만원), 국민연금, 건강·고용보험료, 신용카드 소득공제를 빼 과세표준을 구해요.</li>
+      <li>과세표준에 기본세율(6~45%)을 곱해 산출세액을 구해요.</li>
+      <li>근로소득·자녀·연금계좌·월세·의료비·교육비·보험료·기부금 세액공제를 빼면 결정세액이에요.</li>
+      <li>올해 이미 낸 세금(기납부세액)이 결정세액보다 많으면 그 차이만큼 돌려받고, 적으면 더 내요. 지방소득세 10%도 함께 정산돼요.</li>
+    </ol>
+    <h2>신용카드 소득공제 (2025년 귀속)</h2>
+    <ul>
+      <li>총급여의 25%를 넘게 쓴 금액부터 공제돼요.</li>
+      <li>공제율: 신용카드 15%, 체크카드·현금영수증 30%, 전통시장·대중교통 40%</li>
+      <li>기본 한도: 총급여 7천만원 이하 300만원, 초과 250만원. 전통시장·대중교통은 추가 한도가 있어요.</li>
+    </ul>
+    <h2>주요 세액공제</h2>
+    <ul>
+      <li>자녀세액공제(8세 이상): 1명 25만원, 2명 55만원, 3명 이상은 1명당 40만원 추가 (2025년 귀속부터 상향)</li>
+      <li>연금저축·IRP: 합산 900만원 한도, 총급여 5,500만원 이하 15%, 초과 12% (지방세 포함 16.5%, 13.2%)</li>
+      <li>월세: 총급여 8천만원 이하 무주택 세대주, 연 1,000만원 한도, 5,500만원 이하 17%, 초과 15%</li>
+      <li>의료비: 총급여 3% 넘는 금액의 15%, 교육비 15%, 보장성 보험료 100만원 한도 12%</li>
+      <li>보험료·의료비·교육비·기부금·월세 공제를 받지 않으면 대신 표준세액공제 13만원을 받아요. 계산기는 둘 중 유리한 쪽을 골라요.</li>
+    </ul>
+    <h2>자주 묻는 질문</h2>
+    <h3 style="font-size:15px;margin:16px 0 4px">기납부세액은 어디서 확인하나요?</h3><p>매달 급여명세서의 소득세를 1년 치 더한 금액이에요. 모르면 비워 두면 연봉으로 추정해요. 추정값은 실제와 차이가 클 수 있어요.</p>
+    <h3 style="font-size:15px;margin:16px 0 4px">신용카드와 체크카드 중 무엇이 유리한가요?</h3><p>총급여의 25%까지는 공제가 없으니 혜택이 많은 신용카드를 쓰고, 그 이상은 공제율이 두 배인 체크카드·현금영수증이 일반적으로 유리해요.</p>
+    <h3 style="font-size:15px;margin:16px 0 4px">계산 결과가 실제와 다를 수 있나요?</h3><p>네. 부양가족 요건, 항목별 세부 한도, 감면, 중도 입·퇴사 등은 단순화했어요. 정확한 금액은 홈택스 연말정산 간소화 자료와 회사 정산 결과로 확인하세요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function earnDed(g){let d;if(g<=5e6)d=g*0.7;else if(g<=15e6)d=3.5e6+(g-5e6)*0.4;else if(g<=45e6)d=7.5e6+(g-15e6)*0.15;else if(g<=1e8)d=12e6+(g-45e6)*0.05;else d=14.75e6+(g-1e8)*0.02;return Math.min(d,2e7);}
+function baseTax(t){const B=[[14e6,.06,0],[50e6,.15,1.26e6],[88e6,.24,5.76e6],[150e6,.35,15.44e6],[300e6,.38,19.94e6],[500e6,.40,25.94e6],[1e9,.42,35.94e6],[Infinity,.45,65.94e6]];for(const [lim,r,d] of B)if(t<=lim)return Math.max(t*r-d,0);}
+function earnCredit(tax,g){let c=tax<=1.3e6?tax*0.55:715000+(tax-1.3e6)*0.3;let lim;if(g<=33e6)lim=740000;else if(g<=70e6)lim=Math.max(660000,740000-(g-33e6)*0.008);else if(g<=120e6)lim=Math.max(500000,660000-(g-70e6)/2);else lim=Math.max(200000,500000-(g-120e6)/2);return Math.min(c,lim);}
+function childCredit(n){return n<=0?0:n===1?250000:n===2?550000:550000+(n-2)*400000;}
+function cardDeduction(g,cc,dc,mk,tr){
+  let rem=g*0.25;const ccEx=Math.max(cc-rem,0);rem=Math.max(rem-cc,0);const dcEx=Math.max(dc-rem,0);rem=Math.max(rem-dc,0);const mtEx=Math.max(mk+tr-rem,0);
+  const ded=ccEx*0.15+dcEx*0.30+mtEx*0.40;const basicLim=g<=7e7?3e6:2.5e6,extraLim=g<=7e7?3e6:2e6;
+  const basic=Math.min(ded,basicLim);const extra=Math.min(ded-basic,mtEx*0.40,extraLim);return basic+extra;}
+function calc(){
+  const g=num("g");if(!g){alert("총급여를 입력해 주세요.");return;}
+  const fam=Math.max(1,Math.round(num("fam"))),kid=Math.max(0,Math.round(num("kid")));
+  const m=g/12;
+  // 2025년 근로자 부담 요율: 국민연금 4.5%, 건강 3.545%, 장기요양 12.95%(건강보험료 대비), 고용 0.9%
+  const np=Math.min(Math.max(m,400000),6370000)*0.045*12;const hi=m*0.03545*12,ltc=hi*0.1295,ei=m*0.009*12;
+  const earnIncome=g-earnDed(g),person=1.5e6*fam,special=hi+ltc+ei;
+  const card=cardDeduction(g,num("cc"),num("dc"),num("mk"),num("tr"));
+  const child=childCredit(kid),wed=document.getElementById("wed").checked?500000:0;
+  const pen=Math.min(num("pen"),9e6)*(g<=5.5e7?0.15:0.12);
+  const ins=Math.min(num("ins"),1e6)*0.12;
+  const med=Math.min(Math.max(num("med")-g*0.03,0),7e6)*0.15;
+  const edu=num("edu")*0.15;const d=num("don");const don=d<=1e7?d*0.15:1.5e6+(d-1e7)*0.30;
+  const rentOk=g<=8e7;const rent=rentOk?Math.min(num("rent"),1e7)*(g<=5.5e7?0.17:0.15):0;
+  function decided(itemized){
+    const base=Math.max(earnIncome-person-np-(itemized?special:0)-card,0);const t=baseTax(base);
+    const credits=earnCredit(t,g)+child+pen+wed+(itemized?ins+med+edu+don+rent:130000);
+    return {base,t,tax:Math.max(Math.floor(t-credits),0)};}
+  const A=decided(true),B=decided(false);const best=A.tax<=B.tax?A:B,useItem=A.tax<=B.tax;
+  let paid=num("paid"),est=false;
+  if(!document.getElementById("paid").value.trim()){est=true;const b0=Math.max(earnIncome-person-np-special,0);const t0=baseTax(b0);paid=Math.max(Math.floor(t0-earnCredit(t0,g)-childCredit(kid)-130000),0);}
+  const diff=(paid-best.tax)*1.1;
+  show("out",`<div class="big">${diff>=0?"돌려받을 돈 약 "+won(diff):"더 낼 돈 약 "+won(-diff)}</div>
+    ${kv("과세표준",won(best.base))}${kv("산출세액",won(best.t))}${kv("결정세액 (소득세)",won(best.tax))}
+    ${kv("올해 낸 소득세"+(est?" (추정)":""),won(paid))}${kv("신용카드 소득공제",won(card))}
+    ${kv("공제 방식",useItem?"항목별 공제 (보험료·의료비 등)":"표준세액공제 13만원")}
+    ${!rentOk&&num("rent")?kv("월세 세액공제","총급여 8천만원 초과로 제외"):""}
+    <p style="font-size:13px;color:var(--muted);margin:8px 0 0">지방소득세(10%)를 포함한 금액이에요. 4대보험료는 2025년 요율로 추정했어요.${est?" 올해 낸 세금을 넣으면 더 정확해요.":""}</p>`);
+}
+</script>
+</body>
+</html>

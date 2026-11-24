@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전월세 전환 계산기 - 전세를 월세로, 월세를 전세로 | 계산모아</title>
+<meta name="description" content="전월세 전환율로 전세 보증금을 월세로, 월세를 전세 보증금으로 바로 환산해 보세요. 보증금 일부 전환도 계산돼요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/rent.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "전월세 전환 계산기", "url": "https://gsh4124-cyber.github.io/rent.html", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "전월세 전환율 상한은 언제 적용되나요?", "acceptedAnswer": {"@type": "Answer", "text": "계약 기간 중이나 갱신할 때 기존 전세를 월세로 바꾸는 경우에 적용돼요. 새로 계약하는 경우에는 집주인과 세입자가 자유롭게 정할 수 있어요."}}, {"@type": "Question", "name": "월세를 전세로 바꾸면 보증금은 얼마나 올려야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "월세 × 12 ÷ 전환율만큼 보증금을 올리면 같은 조건이에요. 예를 들어 월세 50만 원, 전환율 5%면 보증금 1억 2천만 원이에요."}}, {"@type": "Question", "name": "전세와 월세 중 무엇이 유리한가요?", "acceptedAnswer": {"@type": "Answer", "text": "전환율이 내 예금 금리나 대출 금리보다 높으면 전세가, 낮으면 월세가 대체로 유리해요. 보증금을 돌려받지 못할 위험도 함께 따져 보세요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>전월세 전환 계산기</h1>
+  <p class="lead">전세와 월세, 어느 쪽이 나은지 같은 기준으로 비교해 보세요.</p>
+  <div class="card">
+    <label for="d">계산 방향</label>
+    <select id="d" onchange="mode()">
+      <option value="j2w">전세 → 월세</option>
+      <option value="w2j">월세 → 전세</option>
+    </select>
+    <div id="j2w">
+      <label for="j">현재 전세 보증금 (원)</label><input id="j" class="money" value="300,000,000">
+      <label for="nb">바꿀 월세 보증금 (원)</label><input id="nb" class="money" value="50,000,000">
+    </div>
+    <div id="w2j" style="display:none">
+      <label for="wb">월세 보증금 (원)</label><input id="wb" class="money" value="50,000,000">
+      <label for="wm">월세 (원)</label><input id="wm" class="money" value="1,000,000">
+    </div>
+    <label for="r">전월세 전환율 (연 %)</label><input id="r" type="number" step="0.1" value="4.5">
+    <button onclick="calc()">계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>전월세 전환율이란?</h2>
+    <p>전세 보증금을 월세로 바꿀 때 적용하는 연 이율이에요. 예를 들어 전환율이 4.5%면 보증금 1억 원을 빼는 대신 연 450만 원, 월 37만 5천 원을 월세로 내요.</p>
+    <h2>계산 공식</h2>
+    <p>월세 = (전세 보증금 − 월세 보증금) × 전환율 ÷ 12</p>
+    <p>전세 환산 보증금 = 월세 보증금 + 월세 × 12 ÷ 전환율</p>
+    <h2>법정 상한</h2>
+    <p>주택임대차보호법에 따라 계약 기간 중 전세를 월세로 바꿀 때는 전환율 상한이 있어요. 상한은 한국은행 기준금리에 2%p를 더한 값이에요. 기준금리는 바뀌니 계약 전에 최신 금리를 확인하세요.</p>
+      <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">전월세 전환율 상한은 언제 적용되나요?</h3><p>계약 기간 중이나 갱신할 때 기존 전세를 월세로 바꾸는 경우에 적용돼요. 새로 계약하는 경우에는 집주인과 세입자가 자유롭게 정할 수 있어요.</p><h3 style="font-size:15px;margin:16px 0 4px">월세를 전세로 바꾸면 보증금은 얼마나 올려야 하나요?</h3><p>월세 × 12 ÷ 전환율만큼 보증금을 올리면 같은 조건이에요. 예를 들어 월세 50만 원, 전환율 5%면 보증금 1억 2천만 원이에요.</p><h3 style="font-size:15px;margin:16px 0 4px">전세와 월세 중 무엇이 유리한가요?</h3><p>전환율이 내 예금 금리나 대출 금리보다 높으면 전세가, 낮으면 월세가 대체로 유리해요. 보증금을 돌려받지 못할 위험도 함께 따져 보세요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function mode(){const v=document.getElementById("d").value;document.getElementById("j2w").style.display=v==="j2w"?"":"none";document.getElementById("w2j").style.display=v==="w2j"?"":"none";}
+function calc(){
+  const r=num("r")/100; if(!r){alert("전환율을 입력해 주세요.");return;}
+  if(document.getElementById("d").value==="j2w"){
+    const J=num("j"), B=num("nb");
+    if(B>=J){alert("월세 보증금이 전세 보증금보다 작아야 해요.");return;}
+    const m=(J-B)*r/12;
+    show("out",`<div class="big">월세 ${won(m)}</div>${kv("보증금",won(B))}${kv("전환되는 금액",won(J-B))}${kv("연간 월세 합계",won(m*12))}`);
+  } else {
+    const B=num("wb"), M=num("wm");
+    const j=B+M*12/r;
+    show("out",`<div class="big">전세 환산 ${won(j)}</div>${kv("월세 보증금",won(B))}${kv("월세를 보증금으로 환산",won(M*12/r))}`);
+  }
+}
+</script>
+</body>
+</html>

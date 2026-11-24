@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연차 계산기 - 입사일로 연차 일수 계산 (근로기준법) | 계산모아</title>
+<meta name="description" content="입사일과 기준일을 넣으면 근로기준법에 따라 올해 생기는 연차휴가 일수를 계산해요. 1년 미만 월차, 3년 이상 가산 연차까지 반영했어요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/leave.html">
+<meta property="og:title" content="연차 계산기 - 입사일로 연차 일수 계산 (근로기준법) | 계산모아"><meta property="og:description" content="입사일과 기준일을 넣으면 근로기준법에 따라 올해 생기는 연차휴가 일수를 계산해요. 1년 미만 월차, 3년 이상 가산 연차까지 반영했어요."><meta property="og:url" content="https://gsh4124-cyber.github.io/leave.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "연차 계산기", "url": "https://gsh4124-cyber.github.io/leave.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "입사 2년차는 연차가 며칠인가요?", "acceptedAnswer": {"@type": "Answer", "text": "1년을 채우면 15일이 생겨요. 첫해 매월 생긴 최대 11일은 별도로, 입사일로부터 1년 안에 써야 해요."}}, {"@type": "Question", "name": "연차는 최대 며칠까지 늘어나나요?", "acceptedAnswer": {"@type": "Answer", "text": "가산 연차를 포함해 최대 25일이에요. 근속 21년 이후 25일이 돼요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>연차 계산기</h1>
+  <p class="lead">입사일로 내 연차가 며칠인지 근로기준법 기준으로 계산해요.</p>
+  <div class="card">
+    <div class="row"><div><label for="j">입사일</label><input id="j" type="date" value="2023-03-02"></div><div><label for="b">기준일 (오늘)</label><input id="b" type="date"></div></div>
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>근로기준법 연차 기준 (제60조)</h2><ul><li>입사 1년 미만: 1개월 개근할 때마다 1일, 최대 11일</li><li>1년 이상, 출근율 80% 이상: 15일</li><li>3년 이상: 처음 1년을 넘는 2년마다 1일씩 더해 최대 25일</li></ul>
+    <p>상시 근로자 5인 미만 사업장은 연차휴가 규정이 적용되지 않아요. 회사가 회계연도(1월 1일) 기준으로 연차를 주는 경우, 입사일 기준과 일수가 다를 수 있어요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">입사 2년차는 연차가 며칠인가요?</h3><p>1년을 채우면 15일이 생겨요. 첫해 매월 생긴 최대 11일은 별도로, 입사일로부터 1년 안에 써야 해요.</p><h3 style="font-size:15px;margin:16px 0 4px">연차는 최대 며칠까지 늘어나나요?</h3><p>가산 연차를 포함해 최대 25일이에요. 근속 21년 이후 25일이 돼요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+{const t=new Date();document.getElementById("b").value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;}
+function calc(){const j=new Date(document.getElementById("j").value),b=new Date(document.getElementById("b").value);if(isNaN(j)||isNaN(b)||b<j){alert("입사일과 기준일을 확인해 주세요.");return;}
+let m=(b.getFullYear()-j.getFullYear())*12+(b.getMonth()-j.getMonth());if(b.getDate()<j.getDate())m--;const y=Math.floor(m/12);
+if(y<1){show("out",`<div class="big">${Math.min(m,11)}일 (월 개근 기준)</div>${kv("근속",m+"개월")}${kv("안내","1년 미만은 1개월 개근마다 1일, 최대 11일")}`);return;}
+const d=Math.min(25,15+Math.floor((y-1)/2));show("out",`<div class="big">연 ${d}일</div>${kv("근속",y+"년 "+(m%12)+"개월")}${kv("기본 연차","15일")}${kv("가산 연차",(d-15)+"일")}`);}
+</script>
+</body>
+</html>

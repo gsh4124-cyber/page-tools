@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자동차세 계산기 2027 - 1월 연납 할인·차령 경감 한 번에 | 계산모아</title>
+<meta name="description" content="배기량과 처음 등록한 해만 고르면 2027년 자동차세와 1월 연납 할인액을 바로 계산해요. 경차·전기차·하이브리드도 돼요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/cartax.html">
+<meta property="og:title" content="자동차세 계산기 2027 - 1월 연납 할인·차령 경감 한 번에 | 계산모아"><meta property="og:description" content="배기량과 처음 등록한 해만 고르면 2027년 자동차세와 1월 연납 할인액을 바로 계산해요. 경차·전기차·하이브리드도 돼요."><meta property="og:url" content="https://gsh4124-cyber.github.io/cartax.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "자동차세 계산기", "url": "https://gsh4124-cyber.github.io/cartax.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "하이브리드차도 배기량으로 내나요?", "acceptedAnswer": {"@type": "Answer", "text": "네. 하이브리드차는 일반 차처럼 배기량에 따라 세금을 내요."}}, {"@type": "Question", "name": "연납하고 차를 팔면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "판 날 이후 남은 기간만큼 세금을 돌려받아요. 따로 신청하지 않아도 지자체에서 환급 안내가 와요."}}, {"@type": "Question", "name": "영업용·화물차도 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 개인 비영업용 승용차 기준이에요. 영업용·승합·화물차는 세율이 달라요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>자동차세 계산기</h1>
+  <p class="lead">배기량과 처음 등록한 해만 고르면 1년 자동차세와 연납으로 아끼는 돈을 보여 줘요.</p>
+  <div class="card">
+    <label>어떤 차인가요?</label>
+    <div class="chips" id="kind" role="group"><button type="button" data-v="gas" aria-pressed="true">휘발유·경유·LPG·하이브리드</button><button type="button" data-v="ev" aria-pressed="false">전기차·수소차</button></div>
+    <div id="ccbox"><label for="cc">배기량 (cc)</label><input id="cc" type="number" inputmode="numeric" value="1598">
+    <p class="hint">자동차등록증의 ‘배기량’ 칸에 있어요. 모르면 아래에서 골라도 돼요.</p>
+    <div class="chips" id="ccq" role="group"><button type="button" data-v="998" aria-pressed="false">경차 1,000cc</button><button type="button" data-v="1598" aria-pressed="true">소형 1,600cc</button><button type="button" data-v="1999" aria-pressed="false">중형 2,000cc</button><button type="button" data-v="2497" aria-pressed="false">대형 2,500cc</button><button type="button" data-v="3342" aria-pressed="false">3,300cc 이상</button></div></div>
+    <label for="year">처음 등록한 해</label><select id="year"><option value="2027">2027년</option><option value="2026">2026년</option><option value="2025">2025년</option><option value="2024">2024년</option><option value="2023">2023년</option><option value="2022" selected>2022년</option><option value="2021">2021년</option><option value="2020">2020년</option><option value="2019">2019년</option><option value="2018">2018년</option><option value="2017">2017년</option><option value="2016">2016년</option><option value="2015">2015년 이전</option></select>
+    <p class="hint">오래된 차일수록 세금이 줄어요. 3년째부터 해마다 5%씩, 최대 50%까지요.</p>
+    <label>연납은 언제 할까요?</label>
+    <div class="chips" id="when" role="group"><button type="button" data-v="334" aria-pressed="true">1월</button><button type="button" data-v="275" aria-pressed="false">3월</button><button type="button" data-v="184" aria-pressed="false">6월</button><button type="button" data-v="92" aria-pressed="false">9월</button><button type="button" data-v="0" aria-pressed="false">연납 안 함</button></div>
+    <button onclick="calc(true)">계산하기</button><div class="result" id="out"></div>
+  </div>
+  <section class="card article">
+    <h2>자동차세는 이렇게 정해져요</h2>
+    <ul><li>승용차는 배기량 1cc마다 1,000cc 이하 80원, 1,600cc 이하 140원, 1,600cc 초과 200원이에요.</li>
+    <li>여기에 지방교육세 30%가 더 붙어요. 전기·수소차는 10만 원에 교육세를 더해 13만 원이에요.</li>
+    <li>차를 산 지 3년째부터 해마다 5%씩 줄고, 12년째부터는 50%로 고정돼요.</li>
+    <li>원래는 6월과 12월에 반씩 내요.</li></ul>
+    <h2>연납하면 얼마나 아끼나요</h2>
+    <p>1월에 1년 치를 한 번에 내면 남은 기간에 대해 5%를 깎아 줘요. 1월에 내면 1년 세금의 약 4.6%를 아껴요. 3월·6월·9월에도 낼 수 있지만 늦을수록 할인이 줄어요. 2026년 기준 공제율이며, 2027년 공제율은 발표되면 바로 반영할게요.</p>
+    <p>신청은 위택스(서울은 이택스), 지자체 ARS, 가까운 주민센터에서 할 수 있어요.</p>
+<h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">하이브리드차도 배기량으로 내나요?</h3><p>네. 하이브리드차는 일반 차처럼 배기량에 따라 세금을 내요.</p><h3 style="font-size:15px;margin:16px 0 4px">연납하고 차를 팔면 어떻게 되나요?</h3><p>판 날 이후 남은 기간만큼 세금을 돌려받아요. 따로 신청하지 않아도 지자체에서 환급 안내가 와요.</p><h3 style="font-size:15px;margin:16px 0 4px">영업용·화물차도 되나요?</h3><p>이 계산기는 개인 비영업용 승용차 기준이에요. 영업용·승합·화물차는 세율이 달라요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+LIVE=1;
+const RATE=cc=>cc<=1000?80:cc<=1600?140:200;
+function calc(force){const ev=chip("kind")==="ev";document.getElementById("ccbox").style.display=ev?"none":"";
+const cc=Number(document.getElementById("cc").value)||0,yr=Number(document.getElementById("year").value),days=Number(chip("when"));
+if(!ev&&!cc){if(force)alert("배기량을 넣어 주세요.");return;}
+const age=2027-yr+1,cut=ev?0:(age>=3?Math.min((age-2)*5,50):0);
+const base=ev?100000:Math.floor(cc*RATE(cc)*(100-cut)/100/10)*10;const edu=Math.floor(base*0.3/10)*10;const total=base+edu;
+const disc=Math.floor(total*0.05*days/365/10)*10;
+show("out",`<div class="big">${days?`연납하면 ${won(total-disc)}`:`1년 ${won(total)}`}</div>${kv("1년 자동차세 (교육세 포함)",won(total))}${kv("6월·12월에 낼 돈",won(total/2)+"씩")}${days?kv("연납으로 아끼는 돈",won(disc)):""}${!ev?kv("차령 경감",cut?`${age}년째 차 · ${cut}% 할인`:"아직 없음 (3년째부터)"):""}<p style="font-size:13px;color:var(--muted)">2027년 1월 기준 예상액이에요. 연납 공제율은 2026년 기준(5%)으로 계산했어요.</p>`);}
+document.addEventListener("click",ev=>{const b=ev.target.closest("#ccq button");if(b){document.getElementById("cc").value=b.dataset.v;calc();}});
+</script>
+</body>
+</html>

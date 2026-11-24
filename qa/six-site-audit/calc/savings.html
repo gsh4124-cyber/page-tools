@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>적금 이자 계산기 · 예금 이자 계산기 - 세후 만기 수령액 | 계산모아</title>
+<meta name="description" content="적금·예금 이자를 단리와 월복리로 계산하고, 일반과세(15.4%)·세금우대·비과세별 세후 만기 수령액을 바로 확인하세요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/savings.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "적금·예금 이자 계산기", "url": "https://gsh4124-cyber.github.io/savings.html", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "예금과 적금 중 무엇이 이자를 더 받나요?", "acceptedAnswer": {"@type": "Answer", "text": "같은 금리라면 목돈을 한 번에 넣는 예금이 이자를 더 받아요. 적금은 나중에 넣은 돈일수록 이자 붙는 기간이 짧기 때문이에요."}}, {"@type": "Question", "name": "만기 전에 해지하면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "중도해지 이율이 적용돼 약정 금리보다 훨씬 낮은 이자를 받아요. 해지 이율은 상품마다 다르니 가입 전에 확인하세요."}}, {"@type": "Question", "name": "세금을 덜 내는 방법이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "비과세종합저축(만 65세 이상 등 대상 제한)이나 조합 예탁금 같은 세금우대 상품을 쓰면 15.4%보다 낮은 세율이 적용돼요. 가입 요건은 금융기관에서 확인하세요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>적금·예금 이자 계산기</h1>
+  <p class="lead">만기에 세금 떼고 실제로 받는 돈을 계산해요.</p>
+  <div class="card">
+    <div class="row">
+      <div><label for="k">상품 종류</label><select id="k" onchange="lbl()"><option value="s">적금 (매달 넣기)</option><option value="d">예금 (한 번에 넣기)</option></select></div>
+      <div><label for="t">이자 방식</label><select id="t"><option value="s">단리</option><option value="c">월복리</option></select></div>
+    </div>
+    <label for="a" id="al">월 납입액 (원)</label>
+    <input id="a" class="money" value="500,000">
+    <div class="row">
+      <div><label for="r">연 이율 (%)</label><input id="r" type="number" min="0" step="0.01" value="3.5"></div>
+      <div><label for="n">기간 (개월)</label><input id="n" type="number" min="1" max="1200" value="12"></div>
+    </div>
+    <label for="x">이자 과세</label>
+    <select id="x"><option value="0.154">일반과세 15.4%</option><option value="0.095">세금우대 9.5%</option><option value="0">비과세 0%</option></select>
+    <button onclick="calc()">계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>적금 이자가 생각보다 적은 이유</h2>
+    <p>적금은 매달 돈을 넣기 때문에 첫 달에 넣은 돈만 12개월 이자를 받고, 마지막 달에 넣은 돈은 1개월 이자만 받아요. 그래서 연 3.5% 적금의 실제 이자는 원금 전체에 3.5%를 곱한 금액의 절반 정도예요.</p>
+    <h2>세금은 얼마나 떼나요?</h2>
+    <p>예·적금 이자에는 기본적으로 이자소득세 14%와 지방소득세 1.4%를 합친 15.4%가 붙어요. 세금우대나 비과세 상품은 가입 조건이 있으니 금융기관에서 확인하세요.</p>
+    <h2>단리와 월복리</h2>
+    <p>단리는 원금에만 이자가 붙고, 월복리는 매달 붙은 이자에도 다시 이자가 붙어요. 기간이 길수록 차이가 커져요.</p>
+      <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">예금과 적금 중 무엇이 이자를 더 받나요?</h3><p>같은 금리라면 목돈을 한 번에 넣는 예금이 이자를 더 받아요. 적금은 나중에 넣은 돈일수록 이자 붙는 기간이 짧기 때문이에요.</p><h3 style="font-size:15px;margin:16px 0 4px">만기 전에 해지하면 어떻게 되나요?</h3><p>중도해지 이율이 적용돼 약정 금리보다 훨씬 낮은 이자를 받아요. 해지 이율은 상품마다 다르니 가입 전에 확인하세요.</p><h3 style="font-size:15px;margin:16px 0 4px">세금을 덜 내는 방법이 있나요?</h3><p>비과세종합저축(만 65세 이상 등 대상 제한)이나 조합 예탁금 같은 세금우대 상품을 쓰면 15.4%보다 낮은 세율이 적용돼요. 가입 요건은 금융기관에서 확인하세요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function lbl(){document.getElementById("al").textContent=document.getElementById("k").value==="s"?"월 납입액 (원)":"예치 금액 (원)";}
+function calc(){
+  const A=num("a"), r=num("r")/100, n=Math.round(num("n")), tax=Number(document.getElementById("x").value);
+  const K=document.getElementById("k").value, T=document.getElementById("t").value, m=r/12;
+  if(!A||n<1){alert("금액과 기간을 입력해 주세요.");return;}
+  let principal, interest=0;
+  if(K==="s"){
+    principal=A*n;
+    for(let k=1;k<=n;k++) interest += T==="s" ? A*m*k : A*(Math.pow(1+m,k)-1);
+  } else {
+    principal=A;
+    interest = T==="s" ? A*r*n/12 : A*(Math.pow(1+m,n)-1);
+  }
+  const t=Math.floor(interest*tax/10)*10;
+  show("out",`<div class="big">세후 수령액 ${won(principal+interest-t)}</div>
+   ${kv("원금 합계",won(principal))}${kv("세전 이자",won(interest))}${kv("이자 과세",won(t))}${kv("세후 이자",won(interest-t))}`);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>퇴직금 계산기 - 평균임금으로 법정 퇴직금 계산 | 계산모아</title>
+<meta name="description" content="입사일, 퇴사일, 최근 3개월 급여만 넣으면 1일 평균임금과 법정 퇴직금을 바로 계산해 드려요. 상여금·연차수당 반영 가능.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/severance.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "퇴직금 계산기", "url": "https://gsh4124-cyber.github.io/severance.html", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "퇴직금은 언제까지 받아야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "회사는 퇴직일로부터 14일 이내에 퇴직금을 지급해야 해요. 당사자 간 합의가 있으면 기한을 연장할 수 있어요."}}, {"@type": "Question", "name": "계약직이나 아르바이트도 퇴직금을 받나요?", "acceptedAnswer": {"@type": "Answer", "text": "네. 고용 형태와 관계없이 같은 사업장에서 1년 이상, 4주 평균 주 15시간 이상 일했다면 받을 수 있어요."}}, {"@type": "Question", "name": "퇴직연금(DC형)에 가입돼 있으면 계산이 다른가요?", "acceptedAnswer": {"@type": "Answer", "text": "DC형은 회사가 매년 연봉의 1/12 이상을 적립하고 운용 결과에 따라 금액이 달라져요. 이 계산기는 퇴직금 제도(DB형과 유사한 방식) 기준이에요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>퇴직금 계산기</h1>
+  <p class="lead">근로자퇴직급여 보장법 기준 법정 퇴직금(세전)을 계산해요.</p>
+  <div class="card">
+    <div class="row">
+      <div><label for="s">입사일</label><input id="s" type="date" value="2022-03-02"></div>
+      <div><label for="e">퇴직일 (마지막 근무일 다음 날)</label><input id="e" type="date" value="2026-11-01"></div>
+    </div>
+    <label for="w">퇴직 전 3개월 급여 총액 (세전, 원)</label>
+    <input id="w" class="money" value="10,500,000">
+    <div class="row">
+      <div><label for="b">연간 상여금 총액 (원)</label><input id="b" class="money" value="0"></div>
+      <div><label for="v">연차수당 (연간, 원)</label><input id="v" class="money" value="0"></div>
+    </div>
+    <button onclick="calc()">계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>퇴직금 계산 공식</h2>
+    <p>퇴직금 = 1일 평균임금 × 30일 × (재직일수 ÷ 365)</p>
+    <p>1일 평균임금은 퇴직일 이전 3개월 동안 받은 임금 총액을 그 기간의 총 일수(89~92일)로 나눈 금액이에요. 연간 상여금과 연차수당은 3/12만큼 더해요.</p>
+    <h2>퇴직금을 받을 수 있는 조건</h2>
+    <p>같은 사업장에서 1년 이상 일하고, 4주 평균 주 15시간 이상 근무했다면 받을 수 있어요. 계산 결과는 세전 금액이고, 실제로는 퇴직소득세가 빠져요.</p>
+      <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">퇴직금은 언제까지 받아야 하나요?</h3><p>회사는 퇴직일로부터 14일 이내에 퇴직금을 지급해야 해요. 당사자 간 합의가 있으면 기한을 연장할 수 있어요.</p><h3 style="font-size:15px;margin:16px 0 4px">계약직이나 아르바이트도 퇴직금을 받나요?</h3><p>네. 고용 형태와 관계없이 같은 사업장에서 1년 이상, 4주 평균 주 15시간 이상 일했다면 받을 수 있어요.</p><h3 style="font-size:15px;margin:16px 0 4px">퇴직연금(DC형)에 가입돼 있으면 계산이 다른가요?</h3><p>DC형은 회사가 매년 연봉의 1/12 이상을 적립하고 운용 결과에 따라 금액이 달라져요. 이 계산기는 퇴직금 제도(DB형과 유사한 방식) 기준이에요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+const D=864e5;
+function calc(){
+  const s=new Date(document.getElementById("s").value), e=new Date(document.getElementById("e").value);
+  if(isNaN(s)||isNaN(e)||e<=s){alert("입사일과 퇴직일을 확인해 주세요.");return;}
+  const days=Math.round((e-s)/D);
+  const p=new Date(e); p.setMonth(p.getMonth()-3);
+  const pdays=Math.round((e-p)/D);
+  const wage=num("w")+num("b")*3/12+num("v")*3/12;
+  const avg=wage/pdays;
+  const sev=avg*30*days/365;
+  const y=Math.floor(days/365);
+  if(days<365){show("out",`<div class="big">퇴직금 대상 아님</div>${kv("재직일수",days+"일")}<p style="font-size:14px">재직 기간이 1년 미만이면 법정 퇴직금이 없어요.</p>`);return;}
+  show("out",`<div class="big">예상 퇴직금 ${won(sev)}</div>
+   ${kv("재직일수",days.toLocaleString()+"일 (약 "+y+"년)")}${kv("평균임금 산정 기간",pdays+"일")}${kv("3개월 임금 총액(상여·연차 포함)",won(wage))}${kv("1일 평균임금",won(avg))}`);
+}
+</script>
+</body>
+</html>

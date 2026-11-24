@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>할인율 계산기 - 할인된 가격, 몇 % 할인인지 계산 | 계산모아</title>
+<meta name="description" content="정가와 할인율로 할인 가격을, 정가와 판매가로 몇 % 할인인지 계산해요. 중복 할인(추가 할인) 최종 가격도 바로 확인하세요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/discount.html">
+<meta property="og:title" content="할인율 계산기 - 할인된 가격, 몇 % 할인인지 계산 | 계산모아"><meta property="og:description" content="정가와 할인율로 할인 가격을, 정가와 판매가로 몇 % 할인인지 계산해요. 중복 할인(추가 할인) 최종 가격도 바로 확인하세요."><meta property="og:url" content="https://gsh4124-cyber.github.io/discount.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "할인율 계산기", "url": "https://gsh4124-cyber.github.io/discount.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "할인율은 어떻게 역산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "(정가 − 판매가) ÷ 정가 × 100이에요. 판매가 칸에 금액을 넣으면 자동으로 계산돼요."}}, {"@type": "Question", "name": "원 단위는 어떻게 처리하나요?", "acceptedAnswer": {"@type": "Answer", "text": "계산 결과를 원 단위로 반올림해 보여 드려요. 실제 결제 금액은 판매처 규칙에 따라 10원 단위로 버리기도 해요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>할인율 계산기</h1>
+  <p class="lead">세일 가격이 정말 싼지, 중복 할인하면 얼마인지 계산해요.</p>
+  <div class="card">
+    <label for="o">정가 (원)</label><input id="o" class="money" value="59,000">
+    <div class="row"><div><label for="r1">할인율 (%)</label><input id="r1" type="number" min="0" max="100" step="any" value="30"></div><div><label for="r2">추가 할인율 (%, 선택)</label><input id="r2" type="number" min="0" max="100" step="any" value="10"></div></div>
+    <label for="s">또는 실제 판매가 (원, 할인율 역산)</label><input id="s" class="money" placeholder="예: 39,900">
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>중복 할인은 더하지 않고 곱해요</h2><p>30% 할인에 추가 10% 할인이면 40% 할인이 아니라, 0.7 × 0.9 = 0.63이 되어 실제로는 37% 할인이에요. 쿠폰을 여러 장 쓸 때 헷갈리기 쉬워요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">할인율은 어떻게 역산하나요?</h3><p>(정가 − 판매가) ÷ 정가 × 100이에요. 판매가 칸에 금액을 넣으면 자동으로 계산돼요.</p><h3 style="font-size:15px;margin:16px 0 4px">원 단위는 어떻게 처리하나요?</h3><p>계산 결과를 원 단위로 반올림해 보여 드려요. 실제 결제 금액은 판매처 규칙에 따라 10원 단위로 버리기도 해요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function calc(){const o=num("o");if(!o){alert("정가를 입력해 주세요.");return;}const r1=Number(document.getElementById("r1").value)||0,r2=Number(document.getElementById("r2").value)||0,s=num("s");
+let h="";const p1=o*(1-r1/100),p2=p1*(1-r2/100);h+=`<div class="big">${won(r2?p2:p1)}</div>`+kv(`${r1}% 할인가`,won(p1))+kv("할인 금액",won(o-p1));
+if(r2)h+=kv(`추가 ${r2}% 후 최종가`,won(p2))+kv("실제 총 할인율",((1-p2/o)*100).toFixed(1)+"%");
+if(s)h+=kv(`${won(s)}은 정가의`,((1-s/o)*100).toFixed(1)+"% 할인");show("out",h);}
+</script>
+</body>
+</html>

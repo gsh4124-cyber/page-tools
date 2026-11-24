@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D-day 계산기 - 날짜 사이 며칠, 며칠 후 날짜 계산 | 계산모아</title>
+<meta name="description" content="오늘부터 시험일·기념일까지 며칠 남았는지, 두 날짜 사이 일수, 100일·1000일 후 날짜를 바로 계산해요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/dday.html">
+<meta property="og:title" content="D-day 계산기 - 날짜 사이 며칠, 며칠 후 날짜 계산 | 계산모아"><meta property="og:description" content="오늘부터 시험일·기념일까지 며칠 남았는지, 두 날짜 사이 일수, 100일·1000일 후 날짜를 바로 계산해요."><meta property="og:url" content="https://gsh4124-cyber.github.io/dday.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "날짜·D-day 계산기", "url": "https://gsh4124-cyber.github.io/dday.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "두 날짜 사이 일수에 마지막 날도 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "기본은 포함하지 않아요. 기념일 방식을 켜면 시작일을 1일로 세서 하루가 더해져요."}}, {"@type": "Question", "name": "평일만 세고 싶어요.", "acceptedAnswer": {"@type": "Answer", "text": "결과에 두 날짜 사이 주말을 뺀 평일 수도 함께 보여 드려요. 공휴일은 빼지 않아요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>D-day · 날짜 계산기</h1>
+  <p class="lead">시험, 전역, 기념일까지 남은 날과 며칠 뒤 날짜를 계산해요.</p>
+  <div class="card">
+    <div class="row"><div><label for="d1">시작 날짜</label><input id="d1" type="date"></div><div><label for="d2">목표 날짜</label><input id="d2" type="date"></div></div>
+    <label for="n">시작 날짜로부터 며칠 후? (선택)</label><input id="n" type="number" value="100">
+    <label><input id="inc" type="checkbox" style="width:auto"> 시작일을 1일로 세기 (기념일 방식)</label>
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>D-day와 기념일 세는 법</h2><p>시험 D-day는 보통 목표일까지 남은 날짜를 세서 "D-30"처럼 써요. 연애·출생 기념일은 시작한 날을 1일로 세기 때문에, 100일은 시작일로부터 99일 뒤예요. 기념일 방식 옵션을 켜면 이렇게 계산해요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">두 날짜 사이 일수에 마지막 날도 포함되나요?</h3><p>기본은 포함하지 않아요. 기념일 방식을 켜면 시작일을 1일로 세서 하루가 더해져요.</p><h3 style="font-size:15px;margin:16px 0 4px">평일만 세고 싶어요.</h3><p>결과에 두 날짜 사이 주말을 뺀 평일 수도 함께 보여 드려요. 공휴일은 빼지 않아요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+const td=new Date();const f=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;document.getElementById("d1").value=f(td);const nx=new Date(td);nx.setDate(nx.getDate()+100);document.getElementById("d2").value=f(nx);
+function calc(){const a=new Date(document.getElementById("d1").value),b=new Date(document.getElementById("d2").value);if(isNaN(a)){alert("시작 날짜를 입력해 주세요.");return;}
+const inc=document.getElementById("inc").checked?1:0;let h="";const W="일월화수목금토";
+if(!isNaN(b)){const diff=Math.round((b-a)/864e5);let wd=Math.floor(Math.abs(diff)/7)*5;const start=new Date(Math.min(a,b)).getUTCDay();for(let i=0;i<Math.abs(diff)%7;i++){const k=(start+i)%7;if(k&&k<6)wd++;}
+h+=`<div class="big">${diff>=0?"D-"+diff:"D+"+(-diff)}</div>`+kv("두 날짜 사이",(Math.abs(diff)+inc).toLocaleString()+"일")+kv("주 단위",Math.floor(Math.abs(diff)/7)+"주 "+Math.abs(diff)%7+"일")+kv("평일 수 (공휴일 미반영)",wd+"일");}
+const n=Number(document.getElementById("n").value);if(n){const c=new Date(a);c.setUTCDate(c.getUTCDate()+n-inc);h+=kv(`${n}일째 되는 날`,`${c.getUTCFullYear()}-${String(c.getUTCMonth()+1).padStart(2,"0")}-${String(c.getUTCDate()).padStart(2,"0")}`+" ("+W[c.getUTCDay()]+")");}
+show("out",h);}
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>글자수 세기 - 공백 포함·제외, 바이트 수 | 자기소개서 글자수 계산 | 계산모아</title>
+<meta name="description" content="자기소개서, 리포트, 블로그 글의 글자수를 공백 포함·공백 제외·바이트로 바로 세어 드려요. 입력한 글은 서버로 전송되지 않아요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/charcount.html">
+<meta property="og:title" content="글자수 세기 - 공백 포함·제외, 바이트 수 | 자기소개서 글자수 계산 | 계산모아"><meta property="og:description" content="자기소개서, 리포트, 블로그 글의 글자수를 공백 포함·공백 제외·바이트로 바로 세어 드려요. 입력한 글은 서버로 전송되지 않아요."><meta property="og:url" content="https://gsh4124-cyber.github.io/charcount.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "글자수 세기", "url": "https://gsh4124-cyber.github.io/charcount.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "줄바꿈도 글자로 세나요?", "acceptedAnswer": {"@type": "Answer", "text": "공백 포함 글자수에는 줄바꿈도 1자로 들어가요. 공백 제외 글자수에서는 빠져요."}}, {"@type": "Question", "name": "입력한 글이 저장되나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요. 글자수는 브라우저 안에서만 세고, 어디에도 저장하거나 전송하지 않아요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body>
+<header></header>
+<main class="wrap">
+  <h1>글자수 세기</h1>
+  <p class="lead">자기소개서나 과제 글자수 제한을 바로 확인해요. 입력한 글은 내 브라우저 안에서만 세요.</p>
+  <div class="card">
+    <label for="tx">글 입력</label><textarea id="tx" rows="10" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:var(--card);color:var(--ink)" placeholder="여기에 글을 붙여 넣으세요"></textarea>
+    <div class="result show" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>공백 포함과 공백 제외</h2><p>대부분의 자기소개서 입력란은 공백 포함 글자수를 기준으로 제한해요. 제출처 안내에 "공백 제외"라고 적혀 있을 때만 공백 제외 기준으로 맞추세요.</p>
+    <h2>바이트 수는 왜 다르게 나오나요?</h2><p>한글 한 글자는 예전 방식(EUC-KR)에서 2바이트, 요즘 웹에서 쓰는 UTF-8에서는 3바이트예요. 제출 시스템이 어느 방식인지에 따라 바이트 수가 달라서 두 가지를 함께 보여 드려요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">줄바꿈도 글자로 세나요?</h3><p>공백 포함 글자수에는 줄바꿈도 1자로 들어가요. 공백 제외 글자수에서는 빠져요.</p><h3 style="font-size:15px;margin:16px 0 4px">입력한 글이 저장되나요?</h3><p>아니요. 글자수는 브라우저 안에서만 세고, 어디에도 저장하거나 전송하지 않아요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+const tx=document.getElementById("tx");function count(){const s=tx.value;const all=[...s].length;const ns=[...s.replace(/\s/g,"")].length;let euc=0;for(const ch of s)euc+=ch.charCodeAt(0)>127?2:1;const utf=new TextEncoder().encode(s).length;const lines=s?s.split("\n").length:0;
+document.getElementById("out").innerHTML=`<div class="big">${all.toLocaleString()}자 (공백 포함)</div>${kv("공백 제외",ns.toLocaleString()+"자")}${kv("바이트 (한글 2byte)",euc.toLocaleString())}${kv("바이트 (UTF-8)",utf.toLocaleString())}${kv("줄 수",lines)}`;}
+tx.addEventListener("input",count);count();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="naver-site-verification" content="8cfa42b4e87a90e2974b210af3b61c5979ddde7e" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>계산모아 - 대출이자·적금·퇴직금·평수 생활 계산기 모음</title>
+<meta name="description" content="대출이자, 적금 이자, 퇴직금, 전월세 전환, 평수, 만나이까지. 자주 쓰는 생활 계산기를 한 곳에서 무료로 바로 계산하세요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/">
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body>
+<header></header>
+<main class="wrap">
+  <div class="hero">
+    <span class="eyebrow">무료 · 가입 없음 · 계산은 내 기기에서만</span>
+    <h1>돈 계산, 여기서 한 번에</h1>
+    <p class="lead">연봉 실수령액부터 연말정산, 대출이자, 평수까지. 자주 쓰는 생활 계산기와 2027년 공휴일 달력을 모았어요.</p>
+  </div>
+  <div class="search"><input id="q" type="search" placeholder="어떤 계산이 필요하세요? 예: 퇴직금, 월세, 평수" aria-label="계산기 검색" autocomplete="off"></div>
+  <div id="list"></div>
+  <section class="card article">
+    <h2>계산모아는 이런 분께 필요해요</h2>
+    <ul>
+      <li>연말정산에서 얼마나 돌려받을지 미리 알고 싶을 때</li>
+      <li>대출받기 전에 매달 갚을 돈이 얼마인지 알고 싶을 때</li>
+      <li>적금 만기에 세금 떼고 실제로 받는 돈이 궁금할 때</li>
+      <li>전세를 월세로 바꾸면 얼마인지 비교할 때</li>
+    </ul>
+    <p>모든 계산 기준(세율, 법정 기준)은 각 계산기 아래에 함께 설명해 두었어요. 입력한 값은 서버로 보내지 않아요.</p>
+  </section>
+</main>
+<footer></footer>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const list=document.getElementById("list"),q=document.getElementById("q");
+  function render(){
+    const t=q.value.trim().toLowerCase().replace(/\s+/g,"");
+    const hit=c=>!t||(c[1]+c[2]).toLowerCase().replace(/\s+/g,"").includes(t);
+    const html=GROUPS.map(([k,name])=>{const items=CALCS.filter(c=>c[3]===k&&hit(c));return items.length?`<section class="group"><h2>${name}</h2><div class="grid">${items.map(tileHTML).join("")}</div></section>`:"";}).join("");
+    list.innerHTML=html||`<p class="empty">찾는 계산기가 없어요. <a href="contact.html">필요한 계산기를 알려 주세요</a>.</p>`;
+  }
+  q.addEventListener("input",render);render();
+});
+</script>
+</body>
+</html>

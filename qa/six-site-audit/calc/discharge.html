@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전역일 계산기 - 육군·해군·공군·해병대·사회복무요원 D-day | 계산모아</title>
+<meta name="description" content="입대일과 군만 고르면 전역일, 전역까지 남은 날, 지금까지 복무한 비율을 바로 계산해요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/discharge.html">
+<meta property="og:title" content="전역일 계산기 - 육군·해군·공군·해병대·사회복무요원 D-day | 계산모아"><meta property="og:description" content="입대일과 군만 고르면 전역일, 전역까지 남은 날, 지금까지 복무한 비율을 바로 계산해요."><meta property="og:url" content="https://gsh4124-cyber.github.io/discharge.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "전역일 계산기", "url": "https://gsh4124-cyber.github.io/discharge.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "전역일이 주말이면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "주말이나 공휴일이어도 전역일은 바뀌지 않아요. 다만 부대에 따라 전날 나오는 경우가 있어요."}}, {"@type": "Question", "name": "남은 휴가는 전역일에 반영되나요?", "acceptedAnswer": {"@type": "Answer", "text": "말년 휴가를 붙여 쓰면 부대를 일찍 나오지만, 서류상 전역일은 그대로예요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>전역일 계산기</h1>
+  <p class="lead">입대한 날과 군만 고르면 전역일과 남은 날을 알려 줘요.</p>
+  <div class="card">
+    <label for="in">입대일</label><input id="in" type="date" value="2026-03-02">
+    <label>어디서 복무하나요?</label>
+    <div class="chips" id="svc" role="group"><button type="button" data-v="18" aria-pressed="true">육군 18개월</button><button type="button" data-v="18m" aria-pressed="false">해병대 18개월</button><button type="button" data-v="20" aria-pressed="false">해군 20개월</button><button type="button" data-v="21" aria-pressed="false">공군 21개월</button><button type="button" data-v="21s" aria-pressed="false">사회복무요원 21개월</button></div>
+    <button onclick="calc(true)">계산하기</button><div class="result" id="out"></div>
+  </div>
+  <section class="card article">
+    <h2>군별 복무기간</h2>
+    <ul><li>육군·해병대 18개월, 해군 20개월, 공군 21개월, 사회복무요원 21개월이에요.</li>
+    <li>전역일은 입대일에 복무기간을 더하고 하루를 뺀 날이에요. 예를 들어 2026년 3월 2일 육군 입대면 2027년 9월 1일 전역이에요.</li></ul>
+    <p>휴가, 조기 전역, 영창·군 사고 등으로 실제 전역일은 달라질 수 있어요. 정확한 날짜는 부대나 병무청에서 확인하세요.</p>
+<h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">전역일이 주말이면 어떻게 되나요?</h3><p>주말이나 공휴일이어도 전역일은 바뀌지 않아요. 다만 부대에 따라 전날 나오는 경우가 있어요.</p><h3 style="font-size:15px;margin:16px 0 4px">남은 휴가는 전역일에 반영되나요?</h3><p>말년 휴가를 붙여 쓰면 부대를 일찍 나오지만, 서류상 전역일은 그대로예요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+LIVE=1;
+function calc(force){const v=document.getElementById("in").value;if(!v){if(force)alert("입대일을 골라 주세요.");return;}
+const m=parseInt(chip("svc"));const [y,mo,d]=v.split("-").map(Number);const start=new Date(y,mo-1,d);
+let end=new Date(y,mo-1+m,d);if(end.getDate()!==d)end=new Date(y,mo+m,0);else end.setDate(end.getDate()-1);
+const today=new Date();today.setHours(0,0,0,0);const DAY=864e5;const all=Math.round((end-start)/DAY)+1;
+const done=Math.min(Math.max(Math.round((today-start)/DAY)+1,0),all),left=Math.round((end-today)/DAY);
+const pct=Math.round(done/all*1000)/10;const f=t=>`${t.getFullYear()}년 ${t.getMonth()+1}월 ${t.getDate()}일 (${"일월화수목금토"[t.getDay()]})`;
+show("out",`<div class="big">${f(end)}</div>${kv("전역까지",left>0?`D-${left}`:left===0?"오늘 전역!":"전역했어요")}${kv("지금까지 복무",`${done}일 / ${all}일`)}${kv("복무율",pct+"%")}<div style="height:10px;border-radius:9px;background:var(--line);margin-top:10px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent)"></div></div>`);}
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BMI 계산기 - 키·몸무게로 체질량지수와 비만도 확인 | 계산모아</title>
+<meta name="description" content="키와 몸무게를 입력하면 BMI(체질량지수)와 대한비만학회 기준 비만도, 정상 체중 범위를 알려 드려요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/bmi.html">
+<meta property="og:title" content="BMI 계산기 - 키·몸무게로 체질량지수와 비만도 확인 | 계산모아"><meta property="og:description" content="키와 몸무게를 입력하면 BMI(체질량지수)와 대한비만학회 기준 비만도, 정상 체중 범위를 알려 드려요."><meta property="og:url" content="https://gsh4124-cyber.github.io/bmi.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "BMI 계산기", "url": "https://gsh4124-cyber.github.io/bmi.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "어린이도 같은 기준인가요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요. 만 18세 이하는 성장 단계가 달라 나이·성별별 BMI 백분위로 판단해요."}}, {"@type": "Question", "name": "세계보건기구(WHO) 기준과 다른가요?", "acceptedAnswer": {"@type": "Answer", "text": "WHO는 25 이상을 과체중으로 보지만, 아시아인 기준을 따르는 대한비만학회는 23부터 비만 전단계로 봐요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>BMI 계산기</h1>
+  <p class="lead">키와 몸무게만 넣으면 체질량지수와 정상 체중 범위를 보여 줘요.</p>
+  <div class="card">
+    <div class="row"><div><label for="h">키 (cm)</label><input id="h" type="number" min="0.01" step="any" value="170"></div><div><label for="w">몸무게 (kg)</label><input id="w" type="number" min="0.01" step="any" value="65"></div></div>
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>BMI 계산 공식</h2><p>BMI = 몸무게(kg) ÷ 키(m)². 키 170cm, 몸무게 65kg이면 65 ÷ (1.7 × 1.7) = 22.5예요.</p>
+    <h2>대한비만학회 기준 (성인)</h2><div class="tablewrap"><table><tr><th>BMI</th><th>구분</th></tr><tr><td>18.5 미만</td><td>저체중</td></tr><tr><td>18.5 ~ 22.9</td><td>정상</td></tr><tr><td>23 ~ 24.9</td><td>비만 전단계</td></tr><tr><td>25 ~ 29.9</td><td>1단계 비만</td></tr><tr><td>30 ~ 34.9</td><td>2단계 비만</td></tr><tr><td>35 이상</td><td>3단계 비만</td></tr></table></div>
+    <p>BMI는 근육량과 체지방을 구분하지 못해요. 운동을 많이 해 근육이 많으면 실제보다 높게 나올 수 있으니 참고용으로 보세요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">어린이도 같은 기준인가요?</h3><p>아니요. 만 18세 이하는 성장 단계가 달라 나이·성별별 BMI 백분위로 판단해요.</p><h3 style="font-size:15px;margin:16px 0 4px">세계보건기구(WHO) 기준과 다른가요?</h3><p>WHO는 25 이상을 과체중으로 보지만, 아시아인 기준을 따르는 대한비만학회는 23부터 비만 전단계로 봐요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function calc(){const h=Number(document.getElementById("h").value)/100,w=Number(document.getElementById("w").value);if(!h||!w){alert("키와 몸무게를 입력해 주세요.");return;}
+const b=w/(h*h);const g=b<18.5?"저체중":b<23?"정상":b<25?"비만 전단계":b<30?"1단계 비만":b<35?"2단계 비만":"3단계 비만";
+show("out",`<div class="big">BMI ${b.toFixed(1)} · ${g}</div>${kv("정상 체중 범위",(18.5*h*h).toFixed(1)+" ~ "+(22.9*h*h).toFixed(1)+" kg")}${kv("BMI 22 기준 체중",(22*h*h).toFixed(1)+" kg")}`);}
+</script>
+</body>
+</html>

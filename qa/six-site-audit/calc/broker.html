@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>부동산 중개수수료 계산기 - 매매·전세·월세 중개보수 | 계산모아</title>
+<meta name="description" content="주택 매매, 전세, 월세 거래금액을 넣으면 법정 상한요율과 한도액에 따른 최대 중개수수료(중개보수)를 바로 계산해 드려요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/broker.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "부동산 중개수수료 계산기", "url": "https://gsh4124-cyber.github.io/broker.html", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "중개수수료에 부가세가 따로 붙나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반과세자인 중개사무소는 중개보수의 10%를 부가세로 따로 받을 수 있어요. 간이과세자는 더 낮은 비율이 적용되니 계약 전에 사업자 유형을 확인하세요."}}, {"@type": "Question", "name": "표의 요율보다 깎을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "표의 요율은 받을 수 있는 최대치라서 그 안에서 중개사와 협의해 정해요. 계약 전에 금액을 미리 합의해 두면 분쟁을 줄일 수 있어요."}}, {"@type": "Question", "name": "중개수수료는 언제 내나요?", "acceptedAnswer": {"@type": "Answer", "text": "보통 잔금을 치르는 날 지급해요. 중개사가 계약서에 확인·설명서를 첨부했는지도 함께 확인하세요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>부동산 중개수수료 계산기</h1>
+  <p class="lead">주택 거래 시 중개사무소에 내는 최대 수수료를 계산해요.</p>
+  <div class="card">
+    <label for="k">거래 종류</label>
+    <select id="k" onchange="mode()">
+      <option value="sale">매매·교환</option>
+      <option value="jeonse">전세</option>
+      <option value="wolse">월세</option>
+    </select>
+    <label for="a" id="al">매매 가격 (원)</label>
+    <input id="a" class="money" value="500,000,000">
+    <div id="mw" style="display:none"><label for="m">월세 (원)</label><input id="m" class="money" value="1,000,000"></div>
+    <label for="v">부가세 (중개사가 일반과세자인 경우)</label>
+    <select id="v"><option value="0">미포함</option><option value="0.1">10% 포함</option></select>
+    <button onclick="calc()">계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>주택 중개보수 상한요율 (2021년 10월 개정)</h2>
+    <div class="tablewrap"><table>
+      <tr><th>매매·교환 거래금액</th><th>상한요율</th><th>한도액</th></tr>
+      <tr><td>5천만 원 미만</td><td>0.6%</td><td>25만 원</td></tr>
+      <tr><td>5천만~2억 원 미만</td><td>0.5%</td><td>80만 원</td></tr>
+      <tr><td>2억~9억 원 미만</td><td>0.4%</td><td>-</td></tr>
+      <tr><td>9억~12억 원 미만</td><td>0.5%</td><td>-</td></tr>
+      <tr><td>12억~15억 원 미만</td><td>0.6%</td><td>-</td></tr>
+      <tr><td>15억 원 이상</td><td>0.7%</td><td>-</td></tr>
+    </table></div>
+    <div class="tablewrap"><table>
+      <tr><th>임대차 거래금액</th><th>상한요율</th><th>한도액</th></tr>
+      <tr><td>5천만 원 미만</td><td>0.5%</td><td>20만 원</td></tr>
+      <tr><td>5천만~1억 원 미만</td><td>0.4%</td><td>30만 원</td></tr>
+      <tr><td>1억~6억 원 미만</td><td>0.3%</td><td>-</td></tr>
+      <tr><td>6억~12억 원 미만</td><td>0.4%</td><td>-</td></tr>
+      <tr><td>12억~15억 원 미만</td><td>0.5%</td><td>-</td></tr>
+      <tr><td>15억 원 이상</td><td>0.6%</td><td>-</td></tr>
+    </table></div>
+    <h2>월세 거래금액 계산법</h2>
+    <p>월세는 보증금 + (월세 × 100)을 거래금액으로 봐요. 이 금액이 5천만 원 미만이면 보증금 + (월세 × 70)으로 다시 계산해요.</p>
+    <p>표의 요율은 받을 수 있는 최대치이고, 실제 수수료는 이 범위 안에서 중개사와 협의해 정해요. 지역 조례에 따라 다를 수 있으니 계약 전에 확인하세요.</p>
+      <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">중개수수료에 부가세가 따로 붙나요?</h3><p>일반과세자인 중개사무소는 중개보수의 10%를 부가세로 따로 받을 수 있어요. 간이과세자는 더 낮은 비율이 적용되니 계약 전에 사업자 유형을 확인하세요.</p><h3 style="font-size:15px;margin:16px 0 4px">표의 요율보다 깎을 수 있나요?</h3><p>표의 요율은 받을 수 있는 최대치라서 그 안에서 중개사와 협의해 정해요. 계약 전에 금액을 미리 합의해 두면 분쟁을 줄일 수 있어요.</p><h3 style="font-size:15px;margin:16px 0 4px">중개수수료는 언제 내나요?</h3><p>보통 잔금을 치르는 날 지급해요. 중개사가 계약서에 확인·설명서를 첨부했는지도 함께 확인하세요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+const SALE=[[5e7,.006,250000],[2e8,.005,800000],[9e8,.004,0],[12e8,.005,0],[15e8,.006,0],[Infinity,.007,0]];
+const LEASE=[[5e7,.005,200000],[1e8,.004,300000],[6e8,.003,0],[12e8,.004,0],[15e8,.005,0],[Infinity,.006,0]];
+function mode(){const k=document.getElementById("k").value;document.getElementById("mw").style.display=k==="wolse"?"":"none";
+  document.getElementById("al").textContent=k==="sale"?"매매 가격 (원)":(k==="jeonse"?"전세 보증금 (원)":"월세 보증금 (원)");}
+function calc(){
+  const k=document.getElementById("k").value, A=num("a"), M=num("m"), vat=Number(document.getElementById("v").value);
+  let amt=A, note="";
+  if(k==="wolse"){amt=A+M*100; if(amt<5e7){amt=A+M*70; note="(5천만 원 미만이라 월세×70 적용)";} }
+  if(!amt){alert("금액을 입력해 주세요.");return;}
+  const T=k==="sale"?SALE:LEASE;
+  const [,r,cap]=T.find(t=>amt<t[0]);
+  let fee=amt*r; if(cap) fee=Math.min(fee,cap);
+  fee=Math.floor(fee);
+  show("out",`<div class="big">최대 중개수수료 ${won(fee*(1+vat))}</div>
+   ${kv("거래금액 "+note,won(amt))}${kv("상한요율",(r*100).toFixed(1)+"%")}${cap?kv("한도액",won(cap)):""}${vat?kv("부가세",won(fee*vat)):""}`);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>부가세 계산기 - 공급가액·부가세 10%·합계금액 계산 | 계산모아</title>
+<meta name="description" content="공급가액에 부가가치세 10%를 더한 합계금액, 또는 합계금액에서 공급가액과 부가세를 역산해요. 세금계산서·견적서 작성에 바로 쓰세요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/vat.html">
+<meta property="og:title" content="부가세 계산기 - 공급가액·부가세 10%·합계금액 계산 | 계산모아"><meta property="og:description" content="공급가액에 부가가치세 10%를 더한 합계금액, 또는 합계금액에서 공급가액과 부가세를 역산해요. 세금계산서·견적서 작성에 바로 쓰세요."><meta property="og:url" content="https://gsh4124-cyber.github.io/vat.html"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "부가세 계산기", "url": "https://gsh4124-cyber.github.io/vat.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "간이과세자도 10%인가요?", "acceptedAnswer": {"@type": "Answer", "text": "간이과세자는 업종별 부가가치율을 곱해 계산하므로 실제 납부세액은 더 적어요. 이 계산기는 일반과세 10% 기준이에요."}}, {"@type": "Question", "name": "원 단위 끝수는 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "보통 공급가액의 원 미만은 버리고, 부가세는 합계금액에서 공급가액을 뺀 값으로 맞춰요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>부가세 계산기</h1>
+  <p class="lead">견적서나 세금계산서 쓸 때 부가가치세 10%를 바로 계산해요.</p>
+  <div class="card">
+    <label for="m">금액 (원)</label><input id="m" class="money" value="1,000,000">
+    <label for="t">입력한 금액은</label><select id="t"><option value="supply">공급가액 (부가세 별도)</option><option value="total">합계금액 (부가세 포함)</option></select>
+    <button onclick="calc()">계산하기</button><div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>부가세 계산 방법</h2><ul><li>부가세 = 공급가액 × 10%</li><li>합계금액 = 공급가액 × 1.1</li><li>합계금액에서 공급가액 구하기 = 합계금액 ÷ 1.1 (원 단위 미만 버림)</li></ul>
+    <h2>부가세 포함과 별도</h2><p>"VAT 포함 110만 원"이면 공급가액 100만 원 + 부가세 10만 원이고, "VAT 별도 110만 원"이면 실제로는 121만 원을 내야 해요. 견적서에는 어느 쪽인지 꼭 적어 두세요.</p>
+    <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">간이과세자도 10%인가요?</h3><p>간이과세자는 업종별 부가가치율을 곱해 계산하므로 실제 납부세액은 더 적어요. 이 계산기는 일반과세 10% 기준이에요.</p><h3 style="font-size:15px;margin:16px 0 4px">원 단위 끝수는 어떻게 하나요?</h3><p>보통 공급가액의 원 미만은 버리고, 부가세는 합계금액에서 공급가액을 뺀 값으로 맞춰요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+function calc(){const m=num("m");if(!m){alert("금액을 입력해 주세요.");return;}let s,v;if(document.getElementById("t").value==="supply"){s=m;v=Math.floor(m*0.1);}else{s=Math.floor(m*10/11+1e-9);v=m-s;}
+show("out",`<div class="big">합계 ${won(s+v)}</div>${kv("공급가액",won(s))}${kv("부가세 (10%)",won(v))}${kv("합계금액",won(s+v))}`);}
+</script>
+</body>
+</html>

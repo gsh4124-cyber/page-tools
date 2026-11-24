@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925434492393378" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>만나이 계산기 - 만 나이·연 나이·띠·생일 D-day | 계산모아</title>
+<meta name="description" content="생년월일만 넣으면 만 나이, 연 나이, 띠, 다음 생일까지 남은 날, 태어난 지 며칠인지 바로 알려드려요.">
+<link rel="canonical" href="https://gsh4124-cyber.github.io/age.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "만나이 계산기", "url": "https://gsh4124-cyber.github.io/age.html", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "inLanguage": "ko", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "만 나이 통일법은 언제부터 시행됐나요?", "acceptedAnswer": {"@type": "Answer", "text": "2023년 6월 28일부터 법령과 계약, 공문서의 나이는 특별한 규정이 없으면 만 나이로 계산해요."}}, {"@type": "Question", "name": "연 나이는 어디에 쓰이나요?", "acceptedAnswer": {"@type": "Answer", "text": "병역법, 청소년보호법 등 일부 법은 현재 연도에서 태어난 연도를 뺀 연 나이를 그대로 써요. 그래서 같은 해에 태어난 사람은 생일과 관계없이 같은 기준이 적용돼요."}}, {"@type": "Question", "name": "띠는 양력 1월 1일 기준인가요?", "acceptedAnswer": {"@type": "Answer", "text": "전통적으로 띠는 음력 설(또는 입춘)을 기준으로 바뀌어요. 1~2월생은 양력 연도와 띠가 다를 수 있어요."}}]}</script>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="common.js?v=8"></script>
+</head>
+<body data-live="1">
+<header></header>
+<main class="wrap">
+  <h1>만나이 계산기</h1>
+  <p class="lead">2023년 6월부터 법적·사회적 나이는 만 나이로 통일됐어요.</p>
+  <div class="card">
+    <div class="row">
+      <div><label for="b">생년월일</label><input id="b" type="date" value="1990-05-15"></div>
+      <div><label for="t">기준일</label><input id="t" type="date"></div>
+    </div>
+    <button onclick="calc()">계산하기</button>
+    <div class="result" id="out"></div>
+  </div>
+    <section class="card article">
+    <h2>만 나이 계산법</h2>
+    <p>기준일 연도에서 태어난 연도를 빼고, 올해 생일이 아직 안 지났으면 1살을 더 빼요.</p>
+    <h2>연 나이는 어디에 쓰나요?</h2>
+    <p>연 나이는 올해 연도에서 태어난 연도를 뺀 나이예요. 병역법이나 청소년보호법처럼 일부 법에서는 지금도 연 나이를 써요.</p>
+      <h2>자주 묻는 질문</h2><h3 style="font-size:15px;margin:16px 0 4px">만 나이 통일법은 언제부터 시행됐나요?</h3><p>2023년 6월 28일부터 법령과 계약, 공문서의 나이는 특별한 규정이 없으면 만 나이로 계산해요.</p><h3 style="font-size:15px;margin:16px 0 4px">연 나이는 어디에 쓰이나요?</h3><p>병역법, 청소년보호법 등 일부 법은 현재 연도에서 태어난 연도를 뺀 연 나이를 그대로 써요. 그래서 같은 해에 태어난 사람은 생일과 관계없이 같은 기준이 적용돼요.</p><h3 style="font-size:15px;margin:16px 0 4px">띠는 양력 1월 1일 기준인가요?</h3><p>전통적으로 띠는 음력 설(또는 입춘)을 기준으로 바뀌어요. 1~2월생은 양력 연도와 띠가 다를 수 있어요.</p>
+  </section>
+  <section class="card" id="more"></section>
+</main>
+<footer></footer>
+<script>
+const ZOD=["원숭이","닭","개","돼지","쥐","소","호랑이","토끼","용","뱀","말","양"];
+const D=864e5;
+const ymd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
+document.addEventListener("DOMContentLoaded",()=>{const n=new Date();document.getElementById("t").value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;});
+function calc(){
+  const bv=document.getElementById("b").value, tv=document.getElementById("t").value;
+  if(!bv||!tv){alert("날짜를 입력해 주세요.");return;}
+  const b=ymd(bv), t=ymd(tv);
+  if(t<b){alert("기준일이 생년월일보다 빨라요.");return;}
+  let age=t.getFullYear()-b.getFullYear();
+  const passed=(t.getMonth()>b.getMonth())||(t.getMonth()===b.getMonth()&&t.getDate()>=b.getDate());
+  if(!passed) age--;
+  let nb=new Date(t.getFullYear(),b.getMonth(),b.getDate());
+  if(nb<t) nb=new Date(t.getFullYear()+1,b.getMonth(),b.getDate());
+  const dd=Math.round((nb-t)/D), lived=Math.round((t-b)/D);
+  show("out",`<div class="big">만 ${age}세</div>${kv("연 나이",(t.getFullYear()-b.getFullYear())+"세")}${kv("띠",ZOD[b.getFullYear()%12]+"띠")}
+   ${kv("다음 생일",dd===0?"오늘이에요! 🎉":"D-"+dd)}${kv("태어난 지",lived.toLocaleString()+"일째")}`);
+}
+</script>
+</body>
+</html>
