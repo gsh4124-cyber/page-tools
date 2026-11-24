@@ -60,7 +60,10 @@ try{
   await page.getByRole('button',{name:'내 모아 열기',exact:true}).first().click();
   assert.ok(await page.locator('#gateDialog').isVisible());
   await page.setViewportSize({width:304,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth));
-  assert.ok(await page.locator('#gateEmail').evaluate(el=>el===document.activeElement));
+  assert.ok(await page.locator('#gateGoogle').evaluate(el=>el===document.activeElement));
+  assert.equal(await page.locator('#gateEmail').isVisible(),false);assert.equal(await page.locator('#gateAlternative').getAttribute('open'),null);
+  for(const width of [304,320,390,768,1280]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth));assert.ok(await page.locator('#gateGoogle').isVisible());if([304,390,1280].includes(width))await page.screenshot({path:new URL(`qa-evidence/google-login-${width}.png`,root).pathname.replace(/^\/(.:)/,'$1'),fullPage:true});}
+  await page.getByText('다른 방법으로 로그인',{exact:true}).click();
   assert.equal(await page.locator('#gateVerifyForm').isVisible(),false);
   await page.getByRole('button',{name:'링크가 열리지 않나요?',exact:true}).click();
   assert.ok(await page.locator('#gateVerifyForm').isVisible());
@@ -69,11 +72,13 @@ try{
   assert.equal((await cx.request.get(base+'/app.js')).status(),401);
  });
  const authOrigin='https://afiqaibosavbjzkffggr.supabase.co';
- const mockAuth=async(context,seen)=>{
+ const mockAuth=async(context,seen,oauthToken=token)=>{
   await context.route(authOrigin+'/**',async route=>{
    const req=route.request(),url=new URL(req.url());seen.push({path:url.pathname,method:req.method(),redirect:url.searchParams.get('redirect_to'),body:req.postDataJSON()});
    const headers={'access-control-allow-origin':base,'access-control-allow-headers':'authorization,apikey,content-type,x-client-info,x-supabase-api-version','access-control-allow-methods':'GET,POST,OPTIONS'};
    if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
+   if(url.pathname==='/auth/v1/authorize')return route.fulfill({status:200,contentType:'text/html',body:'<p>Mock Google account selection</p>'});
+   if(url.pathname==='/auth/v1/token'&&url.searchParams.get('grant_type')==='pkce')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({access_token:oauthToken,refresh_token:'oauth-synthetic-refresh',token_type:'bearer',expires_in:3600,provider_token:'synthetic-provider-secret',user:{id:JSON.parse(Buffer.from(oauthToken.split('.')[1],'base64url')).sub,aud:'authenticated',role:'authenticated',email:'owner@example.test',app_metadata:{provider:'google',providers:['google']},user_metadata:{},created_at:'2026-01-01T00:00:00Z'}})});
    if(url.pathname==='/auth/v1/otp')return route.fulfill({status:200,headers,contentType:'application/json',body:'{}'});
    if(url.pathname==='/auth/v1/user')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({id:owner,aud:'authenticated',role:'authenticated',email:'owner@example.test',app_metadata:{provider:'email',providers:['email']},user_metadata:{},created_at:'2026-01-01T00:00:00Z'})});
    if(url.pathname==='/auth/v1/logout')return route.fulfill({status:204,headers});
@@ -82,11 +87,42 @@ try{
  };
  await check('email request uses exact Moa callback without signup or automatic link-paste form',async()=>{
   const seen=[];await mockAuth(cx,seen);
-  await page.getByRole('button',{name:'내 모아 열기',exact:true}).click();await page.locator('#gateEmail').fill('owner@example.test');
+  await page.getByRole('button',{name:'내 모아 열기',exact:true}).click();
+  if(!await page.locator('#gateEmail').isVisible())await page.getByText('다른 방법으로 로그인',{exact:true}).click();await page.locator('#gateEmail').fill('owner@example.test');
   await page.getByRole('button',{name:'로그인 메일 받기',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('모아로 돌아와요'));
   const sent=seen.find(x=>x.path==='/auth/v1/otp'&&x.method==='POST');assert.ok(sent);assert.equal(sent.redirect,'https://moa-diary-web.pages.dev/__moa_auth_callback');assert.equal(sent.body.create_user,false);
   assert.equal(await page.locator('#gateVerifyForm').isVisible(),false);await page.keyboard.press('Escape');
+ });
+ await check('Google PKCE account selection returns to protected app without persisting provider credentials',async()=>{
+  const context=await browser.newContext(),seen=[];await mockAuth(context,seen);await context.route(base+'/app.js',route=>route.fulfill({contentType:'text/javascript',body:'// auth fixture'}));
+  const cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));await cp.goto(base+'/__moa_access');
+  await cp.getByRole('button',{name:'내 모아 열기',exact:true}).click();await cp.locator('#gateGoogle').click();await cp.waitForURL(authOrigin+'/auth/v1/authorize?**');
+  const start=new URL(cp.url());assert.equal(start.searchParams.get('provider'),'google');assert.equal(start.searchParams.get('prompt'),'select_account');assert.equal(start.searchParams.get('redirect_to'),'https://moa-diary-web.pages.dev/__moa_auth_callback');assert.equal(start.searchParams.get('code_challenge_method'),'s256');assert.match(start.searchParams.get('code_challenge'),/^[-\w]{43}$/);
+  await cp.goto(base+'/__moa_auth_callback?code=synthetic-auth-code');await cp.waitForURL(base+'/');await cp.locator('#entryForm').waitFor({state:'attached'});
+  const exchange=seen.find(x=>x.path==='/auth/v1/token');assert.equal(exchange.body.auth_code,'synthetic-auth-code');assert.ok(exchange.body.code_verifier);
+  const {createHash}=await import('node:crypto');assert.equal(createHash('sha256').update(exchange.body.code_verifier).digest('base64url'),start.searchParams.get('code_challenge'));
+  assert.equal(new URL(cp.url()).search,'');assert.equal(new URL(cp.url()).hash,'');
+  const persisted=await cp.evaluate(()=>({local:{...localStorage},temporary:{...sessionStorage}}));assert.equal(JSON.parse(persisted.local['moa-auth-v1']).user.id,owner);assert.ok(!JSON.stringify(persisted).includes('synthetic-provider-secret'));assert.ok(!persisted.local['moa-google-auth-v1']);assert.ok(!persisted.temporary['moa-google-auth-v1']);assert.ok(!persisted.temporary['moa-google-auth-v1-code-verifier']);
+  assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.ok((await context.cookies()).find(x=>x.name==='__Host-moa_gate')?.httpOnly);
+  await cp.reload();assert.equal((await context.request.get(base+'/app.js')).status(),200);await context.close();
+ });
+ await check('Google missing proof and denied consent clean URL without exchanging or clearing existing login',async()=>{
+  const context=await browser.newContext(),seen=[];await mockAuth(context,seen);const cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));
+  await cp.goto(base+'/__moa_auth_callback?code=unrequested-code');await cp.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('같은 브라우저'));
+  assert.equal(new URL(cp.url()).search,'');assert.ok(!seen.some(x=>x.path==='/auth/v1/token'));assert.equal(await cp.evaluate(()=>localStorage.getItem('moa-auth-v1')),null);assert.equal((await context.request.get(base+'/app.js')).status(),401);
+  assert.equal((await context.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}})).status(),204);const oldCookie=(await context.cookies()).find(x=>x.name==='__Host-moa_gate').value;
+  await cp.goto(base+'/__moa_auth_callback?error=access_denied&error_description=UNTRUSTED_SECRET');await cp.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('다시 눌러'));
+  assert.equal(new URL(cp.url()).search,'');assert.ok(!(await cp.locator('#gateNotice').textContent()).includes('UNTRUSTED_SECRET'));assert.equal((await context.cookies()).find(x=>x.name==='__Host-moa_gate').value,oldCookie);assert.equal((await context.request.get(base+'/app.js')).status(),200);await context.close();
+ });
+ await check('Google foreign identity cannot replace an existing owner session after code exchange',async()=>{
+  const foreign=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:'22222222-2222-4222-8222-222222222222',role:'authenticated',exp})).toString('base64url'),Buffer.from('synthetic').toString('base64url')].join('.');
+  const context=await browser.newContext(),seen=[];await mockAuth(context,seen,foreign);const cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));await cp.goto(base+'/__moa_access');
+  await cp.getByRole('button',{name:'내 모아 열기',exact:true}).click();await cp.locator('#gateGoogle').click();await cp.waitForURL(authOrigin+'/auth/v1/authorize?**');
+  assert.equal((await context.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}})).status(),204);const oldCookie=(await context.cookies()).find(x=>x.name==='__Host-moa_gate').value;
+  await context.addInitScript(session=>{if(location.origin==='http://127.0.0.1:'+session.port)localStorage.setItem('moa-auth-v1',JSON.stringify({access_token:session.token,refresh_token:'old-owner-refresh',expires_at:session.exp,token_type:'bearer',user:{id:session.owner}}));},{port:server.address().port,token,exp,owner});
+  await cp.goto(base+'/__moa_auth_callback?code=foreign-code');await cp.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('소유자 계정'));
+  assert.equal(new URL(cp.url()).search,'');assert.equal((await context.cookies()).find(x=>x.name==='__Host-moa_gate').value,oldCookie);assert.equal(await cp.evaluate(()=>JSON.parse(localStorage.getItem('moa-auth-v1')).user.id),owner);assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.ok(!await cp.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}).includes('synthetic-provider-secret')));await context.close();
  });
  await check('email callback cleans credentials and establishes SDK session plus private gate',async()=>{
   const context=await browser.newContext(),seen=[];await mockAuth(context,seen);
