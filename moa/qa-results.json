@@ -9,27 +9,27 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
+    "sourceSha256": "90c61019b62f3a1ac064b27798d00a9cbc57da85bc6f164d69db3a6439630b46",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "System sans throughout wordmark/headings/body; moderate sizes/weights. Tape CSS rules unchanged. Current app11/populated3/package7 passed, actual public304 and owner958 computed sans/600 plus screenshots. No backend/data/cost change.",
-    "codeCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
+    "reason": "Keep sans and tape; soften headings to500, apricot primary controls and rose-white ground. Quiet home heart/caption; hand-lettered SVG on sample photo. Current unit19/app11/populated3/package7 passed; live304 public and958 owner design/session readback. No backend/data/cost changes.",
+    "codeCommit": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
     "manifest": {
       "product": "moa",
-      "revision": "6c32df14dc0fe403920db6be242a46645a657e78",
-      "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
+      "revision": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
+      "sourceSha256": "90c61019b62f3a1ac064b27798d00a9cbc57da85bc6f164d69db3a6439630b46",
       "cloudConfigured": true
     },
-    "workerSha256": "1b0b8c42057576450acfa7267a80b084d234114a837a5d610e569a1a674a930c",
+    "workerSha256": "f05c2f0fb0c73caf315a02db16ec3359bde47ed10fe51b48accaf6521ce1e3a2",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
-    "cloudflareSourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd"
+    "cloudflareCodeCommit": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
+    "cloudflareSourceSha256": "90c61019b62f3a1ac064b27798d00a9cbc57da85bc6f164d69db3a6439630b46"
   },
   "unit": {
     "status": "DONE",
     "passed": 19,
     "dateKST": "2026-11-24",
-    "scope": "Historical preceding polish release unit/local PostgreSQL/Worker19; not rerun for sans-only CSS change."
+    "scope": "Current source: unit/local PostgreSQL engine/Worker, not hosted database replay."
   },
   "audit": {
     "status": "DONE",
@@ -40,12 +40,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:51439",
+    "base": "http://127.0.0.1:52796",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "80723d0647a6b5446920dd96901dcb77ea5a126e",
-      "sourceSha256": "9ce572063bad1067ef0c488833ae1f8ba126c871e41a4d3bd95f45bb55b199f6",
+      "revision": "ca6f4734daa1182de50ded1db06f1dc5bb768b20",
+      "sourceSha256": "17308c3fa7a2ce47fc45a04693e4ce651ee0bcc83e9e565efd0462a68ebd5e45",
       "cloudConfigured": false
     },
     "results": [
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Current private source, precommit80723d0 metadata, isolated local IndexedDB. Saved as6c32df1."
+    "scope": "Current source, precommitca6f473 metadata retained; isolated local IndexedDB, no hosted writes."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -375,7 +375,7 @@
     "currentCountObservationIsHistorical": true,
     "currentUiRefinement": {
       "dateKST": "2026-11-24",
-      "codeScope": "moa/ typography CSS and docs only; both photo tape rules byte-identical; backend/auth/data unchanged",
+      "codeScope": "moa/ presentation CSS/HTML and docs only; both photo tape rules byte-identical; backend/auth/data unchanged",
       "backendSchemaAuthDataWrites": false,
       "originalV7Unchanged": true,
       "newCosts": false
@@ -740,23 +740,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T02:03:28.183Z",
+      "preparedAt": "2026-11-24T02:28:28.030Z",
       "manifest": {
         "product": "moa",
-        "revision": "6c32df14dc0fe403920db6be242a46645a657e78",
-        "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
+        "revision": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
+        "sourceSha256": "90c61019b62f3a1ac064b27798d00a9cbc57da85bc6f164d69db3a6439630b46",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
-        "index.html": "6b488618dffc96f36248bb9f7b0006ae9d416d01a7209d558ad46b8b7c187270",
-        "app.js": "450629d8711dbc1ae4b3a089ccfc13b1372641baed381cfd15cac637f715b5f9",
-        "service.css": "5e937cf04deba5e13685c9a95d5161395c0dcd528de1582f544f56f7ca2c0d22",
-        "build-manifest.json": "e0a16a16bf5d4b39d01615e2286902ecc8e81e0cf4660de2fb7dabaf8e202605",
+        "index.html": "d2fe5ef0c7a8d260fd7563cf7ba1db180df425bb9a81a21c59ca196ddf170761",
+        "app.js": "d1ed46299c489f56ac773f8db5ac0fd4b1dbd908e879b5f4d0e0ed607b2d6b52",
+        "service.css": "abfcde7ee0e5081e8ea1e062a75894fec36f06f5cf38cf9af22ffb869672dfcc",
+        "build-manifest.json": "16335d425bf1bd5c31b821e75a4eb6b30948e6fd058ed2ef3d4e52ec7af43912",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "1b0b8c42057576450acfa7267a80b084d234114a837a5d610e569a1a674a930c",
+      "workerSha256": "f05c2f0fb0c73caf315a02db16ec3359bde47ed10fe51b48accaf6521ce1e3a2",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -814,20 +814,21 @@
       "actualOwnerSessionReconnect": "DONE on f50aadf: existing owner session re-established; not fresh email sign-in replay"
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
-    "deploymentId": "448d059c-90be-4a7c-8956-f70d66e28d4f",
+    "sourceCommit": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
+    "deploymentId": "51f6e97c-438f-44b0-8265-04b79e53875f",
     "published": true,
     "actualBrowserChecks": {
-      "publicMobile": "DONE: production304 no overflow, title sans/27px/600; tape rgba239,217,138,.79 width62px",
-      "publicDesktop": "DONE: final alias visually shows sans titles and retained photo tape",
-      "ownerSessionAndFont": "DONE: current build6f4f9d8af559, existing session, home sans/600, width=scrollWidth958, zero records",
+      "publicMobile": "DONE:304 no overflow, title500, apricot primary rgb247/226/218 and hand-lettered SVG present",
+      "publicDesktop": "DONE: final deployment alias visually checked with retained tape and added annotation",
+      "ownerSessionAndDesign": "DONE: current90c61019b62f, existing session/account, title500, apricot button, home caption, zero records, width=scrollWidth958",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
       "productionDataWrites": false,
       "screenshots": [
-        "qa-evidence/hosted-sans-preview-wide.jpg",
-        "qa-evidence/hosted-sans-preview-304.jpg"
+        "qa-evidence/hosted-soft-preview-wide.jpg",
+        "qa-evidence/hosted-soft-preview-304.jpg",
+        "qa-evidence/hosted-soft-owner-home.jpg"
       ]
     },
     "runtimeFixes": [
@@ -929,7 +930,7 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "Shared system sans stack throughout, headings24-32px/600, wordmark28-30px/700. Photo tape byte-identical; previous paper surfaces retained.",
+      "style": "Shared sans, heading500, wordmark600, pale apricot controls, rose-white background; original tape unchanged. Quiet home heart/caption and self-authored SVG handwriting.",
       "previewViews": [
         "record",
         "calendar",
@@ -1315,11 +1316,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T02:03:30.977Z",
+    "checkedAt": "2026-11-24T02:28:31.037Z",
     "manifest": {
       "product": "moa",
-      "revision": "6c32df14dc0fe403920db6be242a46645a657e78",
-      "sourceSha256": "6f4f9d8af559bf59983c338ad3517cdab2494181a7141723dd008e17d82650bd",
+      "revision": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
+      "sourceSha256": "90c61019b62f3a1ac064b27798d00a9cbc57da85bc6f164d69db3a6439630b46",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1464,8 +1465,8 @@
   "populatedVisualBrowser": {
     "manifest": {
       "product": "moa",
-      "revision": "80723d0647a6b5446920dd96901dcb77ea5a126e",
-      "sourceSha256": "9ce572063bad1067ef0c488833ae1f8ba126c871e41a4d3bd95f45bb55b199f6",
+      "revision": "ca6f4734daa1182de50ded1db06f1dc5bb768b20",
+      "sourceSha256": "17308c3fa7a2ce47fc45a04693e4ce651ee0bcc83e9e565efd0462a68ebd5e45",
       "cloudConfigured": false
     },
     "type": "local synthetic fixtures and CC0 media; no hosted writes",
@@ -1585,8 +1586,8 @@
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved."
   },
   "previousTypographyRelease": {
-    "codeCommit": "4d98b735b39bd91936d7940ae8fb3bf035e009f3",
-    "deploymentId": "68b52764-a240-4ef1-9bd7-996990219d98",
-    "meaning": "Earlier serif polish release; historical results are distinguished from current sans-only change."
+    "codeCommit": "6c32df14dc0fe403920db6be242a46645a657e78",
+    "deploymentId": "448d059c-90be-4a7c-8956-f70d66e28d4f",
+    "meaning": "Previous stronger sans-only typography; earlier live checks are separate."
   }
 }
