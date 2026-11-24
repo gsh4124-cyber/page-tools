@@ -20,9 +20,20 @@
     team: svg('<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16.2 14.2A5 5 0 0 1 21 19.5"/>'),
     target: svg('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12h.01" stroke-width="2.8"/>')
   };
-  const css = `.method .icon svg{width:1.45em;height:1.45em;display:block;margin:0 auto}
-.tool-tab>span:first-child svg{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.2em}
-#showPicker .tab-ico svg,#showTools .tab-ico svg{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.2em;margin-right:.35em}`;
+  // Each game/tool keeps its own color (like the old emoji), on a soft tint.
+  const C = {ladder: '#b5651d', wheel: '#e0457b', lot: '#d97706', pinball: '#7c3aed', race: '#2563eb', capsule: '#0d9488', slot: '#dc2626', bomb: '#475569',
+    dice: '#e0457b', yut: '#a16207', coin: '#ca8a04', order: '#2563eb', team: '#16a34a'};
+  const tint = c => `color:${c};background:color-mix(in srgb,${c} 14%,transparent)`;
+  const css = `.method .icon{display:grid!important;place-items:center;width:2.3em;height:2.3em;margin:0 auto 4px;border-radius:999px}
+.method .icon svg{width:1.3em;height:1.3em;display:block}
+${Object.entries(C).filter(([k]) => !['dice', 'yut', 'coin', 'order', 'team'].includes(k)).map(([k, c]) => `.method[data-method="${k}"] .icon{${tint(c)}}`).join('\n')}
+.tool-tab>span:first-child{display:inline-grid;place-items:center;width:1.9em;height:1.9em;border-radius:999px;vertical-align:middle}
+.tool-tab>span:first-child svg{width:1.1em;height:1.1em;display:block}
+${['dice', 'yut', 'coin', 'order', 'team'].map(k => `.tool-tab[data-tool="${k}"]>span:first-child{${tint(C[k])}}`).join('\n')}
+.tool-tab.active>span:first-child{background:rgba(255,255,255,.92)}
+#showPicker .tab-ico svg,#showTools .tab-ico svg{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.2em;margin-inline-end:.35em}
+#showPicker .tab-ico{color:#e0457b}#showTools .tab-ico{color:#7c3aed}
+#showPicker.active .tab-ico,#showTools.active .tab-ico{color:inherit}`;
   const style = document.createElement('style');
   style.textContent = css;
   document.head.append(style);
