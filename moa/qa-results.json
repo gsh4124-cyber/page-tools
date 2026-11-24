@@ -9,27 +9,27 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "6bdf73db70b3c5861c6055a4a7d0d7b1b56f62b567eb3aeddeb0fe1b50f2bb09",
+    "sourceSha256": "edc5027d99b7943e8fa01461caebf53acf07ef17e5e5e573c2e7bb45b1fafe76",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Polished preview tab wrapping, date/title index alignment, repeated example guidance and empty private home. White/blue/rounded/tape retained. Unit19/app11/populated3/package7 passed, actual hosted public/private screens and manifest verified.",
-    "codeCommit": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
+    "reason": "Natural everyday diary pass: concrete sample notes, no decorative handwriting/motto/category label; plain checks, simpler tabs and unboxed date-first home. White/rounding/exact tape rules preserved. Unit19/app11/populated3/package7 passed; actual desktop UI and full hosted manifest verified.",
+    "codeCommit": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
     "manifest": {
       "product": "moa",
-      "revision": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
-      "sourceSha256": "6bdf73db70b3c5861c6055a4a7d0d7b1b56f62b567eb3aeddeb0fe1b50f2bb09",
+      "revision": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
+      "sourceSha256": "edc5027d99b7943e8fa01461caebf53acf07ef17e5e5e573c2e7bb45b1fafe76",
       "cloudConfigured": true
     },
-    "workerSha256": "a7e3e9933fc72d508abcd60a3e5868b33501cc121d0132270b4c3a3bf09a158d",
+    "workerSha256": "35d854ca7483e509eb24bf98c8da1a32c5720c6c0b49b2c572133520c4569f45",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
-    "cloudflareSourceSha256": "6bdf73db70b3c5861c6055a4a7d0d7b1b56f62b567eb3aeddeb0fe1b50f2bb09"
+    "cloudflareCodeCommit": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
+    "cloudflareSourceSha256": "edc5027d99b7943e8fa01461caebf53acf07ef17e5e5e573c2e7bb45b1fafe76"
   },
   "unit": {
     "status": "DONE",
     "passed": 19,
     "dateKST": "2026-11-24",
-    "scope": "Rerun after current UI polish; 19 passed. Local PostgreSQL engine, not hosted database replay."
+    "scope": "Rerun after natural diary UI/copy change; 19 passed. Local PostgreSQL engine, not hosted database replay."
   },
   "audit": {
     "status": "DONE",
@@ -40,12 +40,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:62836",
+    "base": "http://127.0.0.1:62718",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "831006334fa6c6a5c9cee9ba507ad3c48a9a9859",
-      "sourceSha256": "f9f467fed8e2c779d6f7c2a4e1ed7e9c9e3172b3cd8e62590e49c645c6f0c9ce",
+      "revision": "7b0f66e68fcfaeb90af5a514485e50d39d6ac65c",
+      "sourceSha256": "b05038fe857a3062482e0b415bc5b49819e5720a541dee628361fb1ebd7be96f",
       "cloudConfigured": false
     },
     "results": [
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Current UI polish, precommit8310063 metadata and Windows CRLF source retained. Local isolated IndexedDB. Later LF normalization is semantically identical; final LF Worker package7 rerun."
+    "scope": "Natural diary UI/copy; precommit7b0f66e metadata. Local isolated IndexedDB, no hosted writes. Final committed Worker package7 also passed."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -740,23 +740,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T04:22:49.885Z",
+      "preparedAt": "2026-11-24T05:17:39.026Z",
       "manifest": {
         "product": "moa",
-        "revision": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
-        "sourceSha256": "6bdf73db70b3c5861c6055a4a7d0d7b1b56f62b567eb3aeddeb0fe1b50f2bb09",
+        "revision": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
+        "sourceSha256": "edc5027d99b7943e8fa01461caebf53acf07ef17e5e5e573c2e7bb45b1fafe76",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
-        "index.html": "82723023627e0e89481038953030d077bca6d0c28a826ad2f7e91b6aaad81b39",
-        "app.js": "a68334ee82875a376489f1c0101c4d53b7be78d0ebdc08a8835212e1ffa39fa6",
-        "service.css": "f998a03ecf00b3ce8c85d120b9a2dd821979181ed2032afdf31a020ffaf8da57",
-        "build-manifest.json": "3e18f525a2aab8452ae145b8d65c5afbd664efc034a55957457902f917f4f406",
+        "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
+        "app.js": "a0dbdd227099d066a2ed433bb78d555e5cfd7e52fb0374696433636c9b59172b",
+        "service.css": "d68b22ffe2676bc7fc0bfe3d6e4a2281bb8e3d05858ae4f0cc47eb63980f5be5",
+        "build-manifest.json": "b44075b952eb77668fcf63c17020316682b6f7dd40e50fc234d0c099a9f0324c",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "a7e3e9933fc72d508abcd60a3e5868b33501cc121d0132270b4c3a3bf09a158d",
+      "workerSha256": "35d854ca7483e509eb24bf98c8da1a32c5720c6c0b49b2c572133520c4569f45",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -801,7 +801,7 @@
       "browserPackageChecks": 7,
       "authenticationTest": "synthetic JWT / mocked RPC",
       "actualOwnerLogin": "DONE on previous fdf069f release; real login in new dialog NOT_TESTED",
-      "liveHostChecks": "Actual public index/guidance/photo navigation and owner empty-home wording verified using Windows UI automation. Manifest commit/full source hash matched.",
+      "liveHostChecks": "Actual public note/line breaks/tape/simple controls, habit count1/2 and photo-to-note; owner unboxed home. Full manifest matched.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -811,24 +811,25 @@
       "watchPaths": [
         "moa/*"
       ],
-      "actualOwnerSessionReconnect": "DONE: current private home opened with existing session; fresh email sign-in NOT_TESTED."
+      "actualOwnerSessionReconnect": "DONE: current private home via existing session, no motto/hero frame, count0; fresh email sign-in NOT_TESTED."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
-    "deploymentId": "7d28e59a-215b-4e76-b2cf-13a957942b9c",
+    "sourceCommit": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
+    "deploymentId": "24da45c4-b2ab-4c22-9a51-2cf3190334d7",
     "published": true,
     "actualBrowserChecks": {
-      "method": "Supported Windows Computer Use; current desktop Chrome UI, no programmatic DOM metrics",
-      "publicPolish": "DONE: new index date/title alignment, single short public label and final save note, photo/tape retained",
-      "publicPhotoToRecord": "DONE: gallery day23 opens notebook record",
-      "existingOwnerSession": "DONE: current private home, new empty wording/no dashed card, records remain0",
+      "method": "Supported Windows Computer Use / actual desktop Chrome",
+      "publicNaturalDiary": "DONE: Monday note/line breaks/photo/tape and simplified controls; decorative handwriting/category label removed",
+      "publicHabit": "DONE: clicked walk10min, count1/2 completed; ephemeral public fixture only",
+      "publicPhotoToRecord": "DONE: gallery day23 opens Monday note",
+      "existingOwnerSession": "DONE: private home without motto/hero card, new concise empty copy, records0",
       "actualManifest": {
-        "revision": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
-        "sourceSha256": "6bdf73db70b3c5861c6055a4a7d0d7b1b56f62b567eb3aeddeb0fe1b50f2bb09",
+        "revision": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
+        "sourceSha256": "edc5027d99b7943e8fa01461caebf53acf07ef17e5e5e573c2e7bb45b1fafe76",
         "cloudConfigured": true,
         "localMatch": true
       },
-      "currentLiveMobile": "NOT_TESTED; local five widths passed",
+      "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px passed",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
@@ -939,17 +940,17 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "Existing white/blue rounded diary; responsive one-row preview controls where space permits; aligned date/title index; concise example guidance; unboxed private empty state.",
+      "style": "White everyday diary; neutral ink, existing blue actions, concrete sample note/line breaks; no motto/handwriting/pill stacks. Round corners and exact tape rules retained.",
       "previewViews": [
         "record",
         "calendar",
         "photos"
       ],
-      "habits": "ephemeral toggle and count; resets on reload",
+      "habits": "Ephemeral plain check rows with aria-pressed and accessible live count; resets on reload.",
       "examplePhotos": "2H Media notebook under Unsplash License + MDN CC0 surfer. Embedded JPEGs; attribution per image; no runtime external image request.",
       "privateHome": "today/week selector/recent rows; PC sidebar/mobile bottom nav with SVG+labels",
       "draftNavigation": "retained in memory across menus; account changes still clear private drafts",
-      "examplePhotoLayout": "Date/title/text then notebook photo16:9, max380px desktop.",
+      "examplePhotoLayout": "Date/title/text then left-aligned taped photo, max300px mobile/max380px desktop, -1deg tilt.",
       "actualDesktopClientWidth": 958,
       "actualDesktopScrollWidth": 958,
       "historicalViewportMetrics": "actualClientWidth/ScrollWidth fields are earlier checkpoints. Current hosted desktop verified visually; no exact DOM viewport measurement."
@@ -1250,8 +1251,8 @@
         "actualDesktopScrollWidth": 943
       }
     },
-    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for6bbe8aa and deployment7d28e59a.",
-    "currentProviderWorkerHashReadback": "NOT_TESTED: local final LF Worker SHA recorded, no provider-log hash comparison this turn."
+    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for e3bca2a and deployment24da45c4.",
+    "currentProviderWorkerHashReadback": "NOT_TESTED: local final Worker SHA recorded; no separate provider-log hash readback."
   },
   "previousIntroductionCandidate": {
     "status": "CLOUDFLARE_INTRODUCTION_VERIFIED_WITH_LIMITATIONS",
@@ -1328,11 +1329,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T04:22:52.333Z",
+    "checkedAt": "2026-11-24T05:17:41.182Z",
     "manifest": {
       "product": "moa",
-      "revision": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
-      "sourceSha256": "6bdf73db70b3c5861c6055a4a7d0d7b1b56f62b567eb3aeddeb0fe1b50f2bb09",
+      "revision": "e3bca2ac021931ea22f6da75b1aef0b123ad56ed",
+      "sourceSha256": "edc5027d99b7943e8fa01461caebf53acf07ef17e5e5e573c2e7bb45b1fafe76",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1477,8 +1478,8 @@
   "populatedVisualBrowser": {
     "manifest": {
       "product": "moa",
-      "revision": "831006334fa6c6a5c9cee9ba507ad3c48a9a9859",
-      "sourceSha256": "f9f467fed8e2c779d6f7c2a4e1ed7e9c9e3172b3cd8e62590e49c645c6f0c9ce",
+      "revision": "7b0f66e68fcfaeb90af5a514485e50d39d6ac65c",
+      "sourceSha256": "b05038fe857a3062482e0b415bc5b49819e5720a541dee628361fb1ebd7be96f",
       "cloudConfigured": false
     },
     "type": "local synthetic fixtures; notebook Unsplash License + surfer MDN CC0; no hosted writes",
@@ -1596,29 +1597,30 @@
     "shellGitFetch": "ENOTFOUND github.com",
     "remoteSaved": true,
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved.",
-    "lineEndings": "Changed source normalized to repository LF policy before final build; full source hash matched actual hosted manifest."
+    "lineEndings": "Changed source follows repository LF policy; full source hash matched actual hosted manifest."
   },
   "previousTypographyRelease": {
-    "codeCommit": "ec75eb1f9f6efae9f9209a18e14c0d46303aea20",
-    "deploymentId": "0a09d45e-f8a7-4d8f-a228-32811014cab3",
-    "meaning": "Previous notebook/blue palette release; current work refines layout and wording."
+    "codeCommit": "6bbe8aa309101dd40476cf26effc567fc67a8a21",
+    "deploymentId": "7d28e59a-215b-4e76-b2cf-13a957942b9c",
+    "meaning": "Previous reading-control/empty-home polish; current release removes decorative sentiment and repeated containers."
   },
   "currentPalette": {
     "accent": "#45647f",
     "buttonFill": "#e4edf5",
     "buttonText": "#3e5c76",
-    "ink": "#374653",
-    "muted": "#65727e",
+    "ink": "#353a3f",
+    "muted": "#6a7075",
     "contrast": {
-      "inkOnWhite": 9.71,
-      "mutedOnWhite": 4.93,
+      "inkOnWhite": 11.49,
+      "mutedOnWhite": 5.02,
       "buttonTextOnFill": 5.92,
       "accentOnWhite": 6.21
     },
-    "allRadiusAndTapeRulesUnchanged": true,
     "userDecorationsAndMediaPreserved": true,
     "photoSource": "https://unsplash.com/photos/X5a-EyXsl6w",
     "photoLicense": "https://unsplash.com/license",
-    "note": "Contrast checks are not full accessibility certification."
+    "note": "Contrast checks are not full accessibility certification.",
+    "roundingRetained": true,
+    "photoTapeRulesByteIdenticalToPrevious": true
   }
 }
