@@ -11,25 +11,25 @@
     "status": "DONE",
     "sourceSha256": "7e7dde5288edc5e5465c02601b6bb79446d8689311f732c8e7a86c8e7c5c8b28",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Rounded friendly diary: self-authored smiling flower, apricot/pink surfaces, pill buttons/tabs, rounded recent entries/photos and floating mobile nav. Tape rules unchanged. Current unit19/app11/populated3/package7 passed; live304 public and958 owner design/session readback. No data/backend/cost changes.",
-    "codeCommit": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
+    "reason": "Desktop public preview only: photo column260-320px, text gap22px, tighter reading header and180px index. Mobile<=860px and private app unchanged. Current packaged7 passed; real943px photo277.812px/gap22px/no overflow/tape62px verified. Earlier app/unit/cloud checks historical.",
+    "codeCommit": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
     "manifest": {
       "product": "moa",
-      "revision": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
+      "revision": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
       "sourceSha256": "7e7dde5288edc5e5465c02601b6bb79446d8689311f732c8e7a86c8e7c5c8b28",
       "cloudConfigured": true
     },
-    "workerSha256": "c15911d3a240d643a85bae14993669f2ff310ad1f90681a09a860ad698d497f9",
+    "workerSha256": "32f1e76837a3f607650a1c1d47f6dc4ae8752a72d74b0a808f7fac272e50d4cf",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
+    "cloudflareCodeCommit": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
     "cloudflareSourceSha256": "7e7dde5288edc5e5465c02601b6bb79446d8689311f732c8e7a86c8e7c5c8b28"
   },
   "unit": {
     "status": "DONE",
     "passed": 19,
     "dateKST": "2026-11-24",
-    "scope": "Current source: unit/local PostgreSQL engine/Worker; not hosted database replay."
+    "scope": "Historical previous rounded UI unit/local PostgreSQL/Worker19; not rerun for desktop public CSS-only change."
   },
   "audit": {
     "status": "DONE",
@@ -96,7 +96,7 @@
       }
     ],
     "errors": [],
-    "scope": "Current source, precommit e211eb7 metadata retained; isolated local IndexedDB, no hosted writes."
+    "scope": "Historical rounded private UI local app11, isolated IndexedDB; not rerun for public desktop-only change."
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -375,7 +375,7 @@
     "currentCountObservationIsHistorical": true,
     "currentUiRefinement": {
       "dateKST": "2026-11-24",
-      "codeScope": "moa/ presentation CSS/HTML and docs only; exact tape before-rules unchanged; backend/auth/data unchanged",
+      "codeScope": "moa/ui/owner-access.html desktop CSS plus docs only; private app/data/backend/products unchanged",
       "backendSchemaAuthDataWrites": false,
       "originalV7Unchanged": true,
       "newCosts": false
@@ -740,10 +740,10 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T02:40:48.001Z",
+      "preparedAt": "2026-11-24T03:30:40.942Z",
       "manifest": {
         "product": "moa",
-        "revision": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
+        "revision": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
         "sourceSha256": "7e7dde5288edc5e5465c02601b6bb79446d8689311f732c8e7a86c8e7c5c8b28",
         "cloudConfigured": true
       },
@@ -752,11 +752,11 @@
         "index.html": "72ce277cabc8cff03175cc481174f5b259f4753a4e51a6ba63dc33a1889e1d16",
         "app.js": "9033d464f99d98ddd378bafd0b37100c234a40b15492d8419f786d476dec2112",
         "service.css": "e289fbda37f43018a07769f16e78118d3ef6bcdd9fa23dfaa3847fcb5af6c3b1",
-        "build-manifest.json": "85f7669cd0dba4a9b0e1d2ba5688797ecf5086c615bec1a6b89084f9f0b694be",
+        "build-manifest.json": "db30b888727c1c50a7483ab66ce2fed9b91e8cd62b019502f18b23ecfb78f708",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "c15911d3a240d643a85bae14993669f2ff310ad1f90681a09a860ad698d497f9",
+      "workerSha256": "32f1e76837a3f607650a1c1d47f6dc4ae8752a72d74b0a808f7fac272e50d4cf",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -814,22 +814,19 @@
       "actualOwnerSessionReconnect": "DONE on f50aadf: existing owner session re-established; not fresh email sign-in replay"
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
-    "deploymentId": "6adeae5c-bd97-4549-96c1-834c1ac49e4b",
+    "sourceCommit": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
+    "deploymentId": "bd1000a0-74d4-4314-a351-ac04ae878d4a",
     "published": true,
     "actualBrowserChecks": {
-      "publicMobile": "DONE:304 no overflow, flower SVG, journal radius28px, all tabs height44px",
-      "publicPhotoNavigation": "DONE: photos to11/23 matching sample record",
-      "publicDesktop": "DONE: final alias rounded tabs/photos/tape visually checked",
-      "ownerSessionAndDesign": "DONE: current7e7dde5288ed, existing session/account, home radius30px/button999px/flower, record0, width=scrollWidth958",
+      "publicDesktop": "DONE: final alias Chrome width=scrollWidth943, text column325.188px/photo277.812px/gap22px, tape62px and visual readback",
+      "currentLiveMobile": "NOT_TESTED: local final package5 widths passed; mobile CSS rules unchanged",
+      "currentOwnerSession": "NOT_TESTED: private app unchanged; previous live checkpoint separate",
       "freshEmailLogin": "NOT_TESTED",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
       "productionDataWrites": false,
       "screenshots": [
-        "qa-evidence/hosted-rounded-preview-wide.jpg",
-        "qa-evidence/hosted-rounded-preview-304.jpg",
-        "qa-evidence/hosted-rounded-owner-home.jpg"
+        "qa-evidence/hosted-photo-spacing-wide.jpg"
       ]
     },
     "runtimeFixes": [
@@ -931,7 +928,7 @@
       "authPoliciesChanged": false,
       "supabaseChanged": false,
       "newCosts": false,
-      "style": "Rounded friendly diary with smiling flower mark, apricot/pink pills, rounded recent records/photos and floating mobile navigation; readable sans and exact tape rules retained.",
+      "style": "Prior rounded friendly appearance preserved. Desktop public photo column260-320px, gap22px, index180px, content padding28px. Mobile and private app unchanged.",
       "previewViews": [
         "record",
         "calendar",
@@ -1317,10 +1314,10 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T02:40:50.920Z",
+    "checkedAt": "2026-11-24T03:30:43.825Z",
     "manifest": {
       "product": "moa",
-      "revision": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
+      "revision": "7ab2db8c804ecdb0f45252281a56c34335ced7c2",
       "sourceSha256": "7e7dde5288edc5e5465c02601b6bb79446d8689311f732c8e7a86c8e7c5c8b28",
       "cloudConfigured": true
     },
@@ -1476,7 +1473,8 @@
       "Populated/long-title home and all five workspaces fit 304/320/390/768/1280px",
       "Keyboard opens the real fixture record date from the recent list"
     ],
-    "errors": []
+    "errors": [],
+    "scope": "Historical rounded UI populated3; not rerun for public desktop-only change."
   },
   "impeccable": {
     "status": "PARTIAL",
@@ -1587,8 +1585,8 @@
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved."
   },
   "previousTypographyRelease": {
-    "codeCommit": "796bd0efc7fdf8366bcb933bcd026ff93ab3f20d",
-    "deploymentId": "51f6e97c-438f-44b0-8265-04b79e53875f",
-    "meaning": "Previous lighter typography release; historical live scope kept distinct."
+    "codeCommit": "b5b95787f7ab5c87f8aab787bd111c864c0e49b2",
+    "deploymentId": "6adeae5c-bd97-4549-96c1-834c1ac49e4b",
+    "meaning": "Previous rounded UI; unit19/app11/populated3 and live owner checks historical for this desktop-only change."
   }
 }
