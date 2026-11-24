@@ -22,12 +22,12 @@
 
 | 역할 | 기준 |
 |---|---|
-| 바탕/본문 | 페이지·색인·카드 모두 흰 바탕 `#ffffff` / 부드러운 잉크색 `#4b3e44` |
-| 보조 글/주 행동 | `#796b72` / 로즈 코랄 `#9e4959`; 주 버튼은 살구핑크 `#ffdfda`와 글자 `#8c3f4b` |
+| 바탕/본문 | 페이지·색인·카드 모두 흰 바탕 `#ffffff` / 중성 잉크색 `#374653` |
+| 보조 글/주 행동 | `#65727e` / 차분한 파랑 `#45647f`; 주 버튼은 연한 파랑 `#e4edf5`와 글자 `#3e5c76` |
 | 테이프 | 사진에만 연노랑 `#efd98ac9`; 격자·반복 줄무늬 배경 없음 |
 | 글자 | 제목/본문/wordmark 모두 시스템 고딕(-apple-system/BlinkMacSystemFont/Apple SD Gothic Neo/Segoe UI/Malgun Gothic). 본문 16px·보조 13~14px, 제목 24~30px/500, wordmark 28~30px/600. 명조체 제거. 사진 아래 작은 손글씨(my day)는 직접 만든 SVG 선이며, 홈에는 짧은 문구와 손그림 하트를 둔다. 외부 폰트 요청 없음 |
 | 간격/형태 | 4px 기반 간격. 주 버튼과 탭은 둥근 pill, 입력18px, dialog28px. 일기장 전체34px/모바일28px. 홈30px, 최근 기록24px. 모바일 메뉴는 둥근 floating bar. 사진 테이프는 그대로 유지하며 인화지/사진 모서리만 둥글게. 웃는 꽃 SVG를 공통 wordmark에 사용 |
-| 대비 | 배경 핑크를 제거하고 경계/그림자는 중성 회색으로 바꾼다. 선택 표시/작은 버튼의 살구핑크는 포인트로만 유지한다. 주요 글자 대비는 별도 소스 계산으로 확인한다. 전체 WCAG 인증을 의미하지 않음 |
+| 대비 | 배경 핑크를 제거하고 경계/그림자는 중성 회색으로 바꾼다. 선택 표시/작은 버튼에만 연한 파랑을 쓴다. 사용자가 원치 않은 빨강·핑크 기본 포인트는 제거한다. 소스 대비: 본문/흰색9.71, 보조/흰색4.93, 버튼 글자/배경5.92, 포인트/흰색6.21. 전체 WCAG 인증을 의미하지 않음 |
 | 동작 | 44px 이상 주요 조작, SVG+텍스트, aria-current/pressed, 제목 포커스, 메뉴 이동 시 초안 보존. 저장 알림은 제목을 가리지 않도록 하단에 배치 |
 
 파생 `index.html`의 중복 inline style을 없애고 실제 앱 스타일은 `service.css`로 모았다. 사용자 스스로 고른 핑크·라벤더·민트·옐로·나이트·종이 꾸미기 데이터와 원본 v7 파일은 보존한다. 기본 UI가 보라색을 사용하지 않는 것과 과거 기록의 선택한 꾸미기를 지우는 것은 구분한다.
@@ -42,7 +42,7 @@
 
 ## 예시 사진 출처
 
-`demo-media.json`의 JPEG 2개는 [MDN interactive-examples / cc0-images](https://github.com/mdn/interactive-examples/tree/main/live-examples/media/cc0-images)의 `grapefruit-slice-332-332.jpg`, `surfer-240-200.jpg`다. [저장소 라이선스](https://github.com/mdn/interactive-examples/blob/main/LICENSE)는 CC0 1.0 Universal이다. 실제 사용자 사진이 아니다.
+`demo-media.json`의 노트 사진은 [2H Media / Unsplash](https://unsplash.com/photos/a-notebook-with-a-pen-and-a-notebook-on-it-X5a-EyXsl6w)다. [Unsplash License](https://unsplash.com/license)의 무료 사용 가능 사진임을 공식 페이지에서 확인했고, 원본 CDN의800px JPEG를 받아 data URI로 내장한다. 색/화면 필터로 자몽을 바꾼 것이 아니라 예시 사진을 교체했다. 서퍼 사진은 기존 [MDN CC0](https://github.com/mdn/interactive-examples/blob/main/live-examples/media/cc0-images/surfer-240-200.jpg)를 유지한다. 출처·다운로드 URL·SHA-256은 JSON에 기록한다. 실제 사용자 사진이 아니며 사용자 기록은 수정하지 않는다.
 
 Cloudflare 패키징 시 검증한 data URI를 HTML에 삽입한다. 외부 이미지 요청, 추적 스크립트, 새 공개 자산 경로나 CSP 완화 없이 기존 게이트를 유지한다. `demo-media.json` 자체는 공개 라우트에 올리지 않는다.
 

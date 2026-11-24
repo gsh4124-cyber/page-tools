@@ -12,7 +12,7 @@ const views=['Record','Calendar','Photos'];
 const showExample=view=>{for(const name of views){$('#show'+name+'Example').setAttribute('aria-pressed',String(name===view));$('#'+name.toLowerCase()+'Example').hidden=name!==view;}};
 for(const view of views)$('#show'+view+'Example').onclick=()=>showExample(view);
 const entries={
- 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'늦은 아침',text:'알람을 두 번 미뤘다. 자몽을 꺼내 늦은 아침을 먹었다. 해야 할 일은 잠깐 접어 두고, 창가에 앉아 있었다.',alt:'자른 자몽의 선명한 단면'},
+ 23:{date:'2026. 11. 23 월요일',weekday:'월요일',title:'노트를 펼친 아침',text:'책상에 노트를 펴고 펜 두 자루를 꺼냈다. 오늘은 해야 할 일보다, 기억하고 싶은 일부터 적어 보기로 했다.',alt:'흰 노트 위에 놓인 파란 펜 두 자루'},
  21:{date:'2026. 11. 21 토요일',weekday:'토요일',title:'주말의 바다',text:'파도 소리를 듣고 한참을 앉아 있었다. 바다를 보러 오길 잘했다. 다음에는 조금 더 오래 머물러야지.',alt:'바다에서 파도를 타는 서퍼'}
 };
 for(const day of [21,23])entries[day].photo=$('#photosExample [data-demo-entry="'+day+'"] img').src;

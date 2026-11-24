@@ -19,7 +19,7 @@ routes['/index.html'].body=routes['/index.html'].body.replace('</head>','<script
 routes['/healthz']={body:JSON.stringify({status:'ready',product:'moa',revision:manifest.revision,build:manifest.sourceSha256,cloudConfigured:true,access:'owner-only'}),type:'application/json'};
 const demoMedia=JSON.parse(await readFile(resolve(root,'ui/demo-media.json'),'utf8'));
 let introduction=await readFile(resolve(root,'ui/owner-access.html'),'utf8');
-for(const name of ['citrus','surf']){
+for(const name of ['notebook','surf']){
  if(!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(demoMedia[name]))throw Error('Invalid embedded demo photo');
  introduction=introduction.replaceAll(`__MOA_SAMPLE_${name.toUpperCase()}__`,demoMedia[name]);
 }
