@@ -6,7 +6,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 const root=new URL('../',import.meta.url),manifest=JSON.parse(await readFile(new URL('dist/build-manifest.json',root),'utf8'));
 const owner='851fc863-0e90-442c-8f6f-34367d185429',exp=Math.floor(Date.now()/1000)+3600;
-const token=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:owner,role:'authenticated',exp,is_anonymous:false})).toString('base64url'),'synthetic'].join('.');
+const token=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:owner,role:'authenticated',exp,is_anonymous:false})).toString('base64url'),Buffer.from('synthetic').toString('base64url')].join('.');
 const realFetch=globalThis.fetch;globalThis.fetch=async(url,opts)=>String(url).endsWith('/rest/v1/rpc/moa_account_status')?new Response(JSON.stringify({status:'active'}),{headers:{'Content-Type':'application/json'}}):realFetch(url,opts);
 const worker=(await import('../dist-cloudflare/_worker.js')).default;
 const env={MOA_SUPABASE_URL:'https://afiqaibosavbjzkffggr.supabase.co',MOA_SUPABASE_PUBLISHABLE_KEY:'synthetic-public-key',MOA_GATE_OWNER_ID:owner};
@@ -62,11 +62,55 @@ try{
   await page.setViewportSize({width:304,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth));
   assert.ok(await page.locator('#gateEmail').evaluate(el=>el===document.activeElement));
   assert.equal(await page.locator('#gateVerifyForm').isVisible(),false);
-  await page.getByRole('button',{name:'이미 로그인 메일을 받았어요',exact:true}).click();
+  await page.getByRole('button',{name:'링크가 열리지 않나요?',exact:true}).click();
   assert.ok(await page.locator('#gateVerifyForm').isVisible());
   await page.keyboard.press('Escape');assert.equal(await page.locator('#gateDialog').isVisible(),false);
   assert.ok(await page.getByRole('button',{name:'내 모아 열기',exact:true}).first().evaluate(el=>el===document.activeElement));
   assert.equal((await cx.request.get(base+'/app.js')).status(),401);
+ });
+ const authOrigin='https://afiqaibosavbjzkffggr.supabase.co';
+ const mockAuth=async(context,seen)=>{
+  await context.route(authOrigin+'/**',async route=>{
+   const req=route.request(),url=new URL(req.url());seen.push({path:url.pathname,method:req.method(),redirect:url.searchParams.get('redirect_to'),body:req.postDataJSON()});
+   const headers={'access-control-allow-origin':base,'access-control-allow-headers':'authorization,apikey,content-type,x-client-info,x-supabase-api-version','access-control-allow-methods':'GET,POST,OPTIONS'};
+   if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
+   if(url.pathname==='/auth/v1/otp')return route.fulfill({status:200,headers,contentType:'application/json',body:'{}'});
+   if(url.pathname==='/auth/v1/user')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({id:owner,aud:'authenticated',role:'authenticated',email:'owner@example.test',app_metadata:{provider:'email',providers:['email']},user_metadata:{},created_at:'2026-01-01T00:00:00Z'})});
+   if(url.pathname==='/auth/v1/logout')return route.fulfill({status:204,headers});
+   return route.abort();
+  });
+ };
+ await check('email request uses exact Moa callback without signup or automatic link-paste form',async()=>{
+  const seen=[];await mockAuth(cx,seen);
+  await page.getByRole('button',{name:'내 모아 열기',exact:true}).click();await page.locator('#gateEmail').fill('owner@example.test');
+  await page.getByRole('button',{name:'로그인 메일 받기',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('모아로 돌아와요'));
+  const sent=seen.find(x=>x.path==='/auth/v1/otp'&&x.method==='POST');assert.ok(sent);assert.equal(sent.redirect,'https://moa-diary-web.pages.dev/__moa_auth_callback');assert.equal(sent.body.create_user,false);
+  assert.equal(await page.locator('#gateVerifyForm').isVisible(),false);await page.keyboard.press('Escape');
+ });
+ await check('email callback cleans credentials and establishes SDK session plus private gate',async()=>{
+  const context=await browser.newContext(),seen=[];await mockAuth(context,seen);
+  // The real private document/gate are exercised; prevent unrelated repository
+  // startup requests while checking the authentication handoff itself.
+  await context.route(base+'/app.js',route=>route.fulfill({contentType:'text/javascript',body:'// private app startup omitted in auth-only fixture'}));
+  const cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));
+  await cp.goto(base+'/__moa_auth_callback#'+new URLSearchParams({access_token:token,refresh_token:'synthetic-refresh',token_type:'bearer',type:'magiclink'}));
+  try{await cp.waitForURL(base+'/',{timeout:8000});}catch(e){console.log('Callback diagnostic',JSON.stringify({path:new URL(cp.url()).pathname,notice:await cp.locator('#gateNotice').textContent().catch(()=>''),authPaths:seen.map(x=>x.path),cookies:(await context.cookies()).map(x=>({name:x.name,secure:x.secure})),errors}));throw e;}await cp.locator('#entryForm').waitFor({state:'attached'});
+  assert.equal(new URL(cp.url()).hash,'');const session=await cp.evaluate(()=>JSON.parse(localStorage.getItem('moa-auth-v1')||'null'));assert.equal(session.user.id,owner);assert.equal(session.refresh_token,'synthetic-refresh');
+  const cookie=(await context.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.ok(seen.some(x=>x.path==='/auth/v1/user'));
+  await context.close();
+ });
+ await check('expired and non-owner callbacks clean URL, show retry and keep private app locked',async()=>{
+  const context=await browser.newContext(),seen=[];await mockAuth(context,seen);let cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));
+  await cp.goto(base+'/__moa_auth_callback#error=access_denied&error_code=otp_expired&error_description=UNTRUSTED_SECRET');
+  await cp.waitForFunction(()=>document.querySelector('#gateDialog').open&&document.querySelector('#gateNotice').textContent.includes(' 만료'));
+  assert.equal(new URL(cp.url()).hash,'');assert.ok(!(await cp.locator('#gateNotice').textContent()).includes('UNTRUSTED_SECRET'));assert.equal((await context.request.get(base+'/app.js')).status(),401);
+  await cp.close();cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));
+  const other=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:'22222222-2222-4222-8222-222222222222',role:'authenticated',exp})).toString('base64url'),Buffer.from('synthetic').toString('base64url')].join('.');
+  await cp.goto(base+'/__moa_auth_callback#'+new URLSearchParams({access_token:other,refresh_token:'other-refresh',token_type:'bearer',type:'magiclink'}));
+  await cp.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('소유자 계정'));
+  assert.equal(new URL(cp.url()).hash,'');assert.equal(await cp.evaluate(()=>localStorage.getItem('moa-auth-v1')),null);assert.equal((await context.request.get(base+'/app.js')).status(),401);assert.ok(!seen.some(x=>x.path==='/auth/v1/user'));
+  await context.close();
  });
  await check('synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application',async()=>{const r=await cx.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}});assert.equal(r.status(),204);const cookie=(await cx.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');const app=await cx.request.get(base+'/index.html');assert.equal(app.status(),200);assert.match(await app.text(),/id="entryForm"/);assert.equal((await cx.request.get(base+'/app.js')).status(),200);assert.deepEqual(await (await cx.request.get(base+'/build-manifest.json')).json(),manifest);});
  await check('logout removes access immediately; public static fallback contains no application',async()=>{assert.equal((await cx.request.post(base+'/__moa_logout',{headers:{Origin:base}})).status(),204);assert.equal((await cx.request.get(base+'/app.js')).status(),401);assert.ok(!(await readFile(new URL('dist-cloudflare/index.html',root),'utf8')).includes('entryForm'));});

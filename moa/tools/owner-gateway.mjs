@@ -40,7 +40,7 @@ export async function ownerGateway(request,env,routes,baseHeaders,transport=fetc
   return reply('',204,{'Set-Cookie':GATE_COOKIE+'='+token+'; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age='+result.maxAge});
  }
  if(!allowed)return reply('Method not allowed',405,{Allow:'GET, HEAD'});
- if(path==='/__moa_access'||path==='/__moa_access.js'){const item=routes[path];return reply(item.body,200,{'Content-Type':item.type});}
+ if(path==='/__moa_access'||path==='/__moa_access.js'||path==='/__moa_auth_callback'){const item=routes[path];return reply(item.body,200,{'Content-Type':item.type});}
  const result=await ownerSession(cookieToken(request),env,transport);
  if(result.status!==200){
   if(result.status===503)return reply('Please retry later',503,{'Content-Type':'text/plain; charset=utf-8'});

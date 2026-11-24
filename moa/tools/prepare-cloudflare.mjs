@@ -24,6 +24,7 @@ for(const name of ['notebook','surf']){
  introduction=introduction.replaceAll(`__MOA_SAMPLE_${name.toUpperCase()}__`,demoMedia[name]);
 }
 routes['/__moa_access']={body:introduction,type:'text/html; charset=utf-8'};
+routes['/__moa_auth_callback']=routes['/__moa_access'];
 for(const [name,path] of [['owner-access-client.mjs','/__moa_access.js'],['owner-session-client.mjs','/__moa_session_sync.js']]){
  const result=await build({entryPoints:[resolve(root,'tools',name)],bundle:true,write:false,format:'esm',minify:true,target:['safari15','chrome100'],define:{__MOA_GATE_CONFIG__:JSON.stringify(config)}});routes[path]={body:result.outputFiles[0].text,type:'text/javascript; charset=utf-8'};
 }

@@ -4,6 +4,12 @@
 
 기록·달력·사진 전환, 날짜 선택, 사진에서 일기로 이동, 습관 체크는 합성 예시로 동작한다. 체크와 선택은 메모리에만 있고 새로고침하면 초기화된다. 예시는 Supabase에 저장하지 않는다. 기존 소유자 인증, 비공개 앱 파일 게이트와 계정의 기록은 그대로 보존한다.
 
+## 메일 로그인 경로
+
+입장 메일은 `https://moa-diary-web.pages.dev/__moa_auth_callback`을 정확한 복귀 주소로 요청하고 신규 계정을 만들지 않는다. 사용자가 메일 링크를 누르면 Supabase 인증 후 이 공개 완료 화면으로 돌아온다. 화면은 URL의 인증 값을 먼저 지우고, 기존 서버 게이트가 JWT·소유자·현재 Auth 세션을 확인한 뒤 기존 `moa-auth-v1` SDK 세션을 저장하고 비공개 앱을 연다. 만료/오류 링크는 새 메일 안내를 표시하고 다른 사용자나 불완전한 링크는 차단한다. 정상 메일 요청 뒤 링크 붙여넣기 폼을 자동으로 열지 않으며, 수동 방식은 ‘링크가 열리지 않나요?’ 아래 보조 수단으로 남긴다.
+
+이 문제의 원인은 복귀 주소 생략과 프로젝트 기본 주소 `http://localhost:3000`이었다. 사용자 요청으로 기존 Site URL/템플릿/다른 설정을 보존하고 위 모아 주소 한 줄만 Redirect URLs에 추가했다. 전체 앱은 계속 소유자 전용이며 공개 콜백이 실제 앱 파일을 공개하지 않는다. 실제 메일/호스트 검증 범위는 `QA_REPORT.md`를 따른다. 참고: [Supabase 메일 로그인](https://supabase.com/docs/guides/auth/auth-email-passwordless), [허용 복귀 주소](https://supabase.com/docs/guides/auth/redirect-urls).
+
 ## 설계 기준과 Impeccable 적용
 
 사용자는 보라색과 정형적인 AI 화면을 거절했고 사진의 테이프는 유지해 달라고 했다. 기존 다이어리의 읽기·쓰기 목적과 테이프를 보존하면서 [Impeccable](https://github.com/pbakaus/impeccable)의 [distill](https://github.com/pbakaus/impeccable/blob/main/skill/reference/distill.md), [layout](https://github.com/pbakaus/impeccable/blob/main/skill/reference/layout.md), [typeset](https://github.com/pbakaus/impeccable/blob/main/skill/reference/typeset.md), [craft floor](https://github.com/pbakaus/impeccable/blob/main/skill/reference/craft-floor.md)를 수동 적용했다. 원저작자는 Paul Bakaus, 저장소 라이선스는 Apache-2.0이다. 해당 소프트웨어 코드를 앱에 포함하거나 전용 CLI의 통과를 주장하지 않는다.

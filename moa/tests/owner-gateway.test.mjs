@@ -17,6 +17,14 @@ test('owner portal and cookie synchronization share the diary Auth storage key',
  const key=repo.match(/storageKey:'([^']+)'/)[1];
  assert.ok(portal.includes("storageKey:'"+key+"'"));assert.ok(sync.includes("storageKey='"+key+"'"));
 });
+
+test('email callback serves only the public portal without unlocking private files',async()=>{
+ const withCallback={...routes,'/__moa_auth_callback':routes['/__moa_access']};
+ const r=await ownerGateway(request('/__moa_auth_callback?unexpected=fixture'),env,withCallback,headers,()=>{throw Error('No session verification for public HTML');});
+ assert.equal(r.status,200);assert.equal(await r.text(),'PUBLIC_OWNER_LOGIN');assert.equal(r.headers.get('cache-control'),'no-store');assert.equal(r.headers.get('set-cookie'),null);
+ assert.equal((await ownerGateway(request('/__moa_auth_callback',{method:'POST'}),env,withCallback,headers,verified)).status,405);
+ assert.equal((await ownerGateway(request('/app.js'),env,withCallback,headers,()=>{throw Error('No valid token');})).status,401);
+});
 test('owner gateway fails closed before configuration and never serves diary assets anonymously',async()=>{
  const unexpected=()=>{throw Error('Auth service should not be called');};
  for(const path of Object.keys(routes)){const r=await ownerGateway(request(path),{},routes,headers,unexpected);assert.equal(r.status,503);assert.ok(!(await r.text()).includes('PRIVATE_'));}
