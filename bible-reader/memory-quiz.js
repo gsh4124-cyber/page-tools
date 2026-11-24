@@ -651,14 +651,22 @@
   }
 
   function entry(className,mode='exam') {const l=labels(lang()),b=el('button',className,mode==='practice'?l.practiceTitle:l.title);b.type='button';b.addEventListener('click',event=>open(event,mode));return b;}
-  const menuButton=entry('memory-menu-button');menu.append(menuButton);
-  const practiceMenuButton=entry('memory-practice-menu-button','practice');menu.append(practiceMenuButton);
+  // Practice comes before the test, grouped under their own divider in the overflow menu.
+  const practiceMenuButton=entry('memory-practice-menu-button','practice');
+  const menuButton=entry('memory-menu-button');
+  const memoryDivider=el('div','toolbar-more-sep toolbar-more-sep-memory');memoryDivider.setAttribute('role','separator');
+  menu.append(memoryDivider,practiceMenuButton,menuButton);
+  // The memory test is the site's headline feature, so it also gets a first-row entry.
+  const TOOLBAR_LABEL={ko:'암송 시험',en:'Memory test',fr:'Mémoriser',de:'Auswendig',zh:'背诵测验',ru:'Заучить',la:'Memoria',pt:'Memorizar',ar:'اختبار الحفظ'};
+  const toolbarButton=entry('memory-toolbar-button');
+  function labelToolbarButton(){const code=lang();toolbarButton.textContent=TOOLBAR_LABEL[code]||TOOLBAR_LABEL.en;toolbarButton.setAttribute('aria-label',labels(code).title);}
+  labelToolbarButton();document.querySelector('#translationSelect')?.insertAdjacentElement('afterend',toolbarButton);
   const bar=document.querySelector('.verse-multi-actions');if(bar)bar.insertBefore(entry('verse-multi-memory'),bar.querySelector('.verse-multi-done'));
   if(bar&&typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{
     const height=bar.parentElement.getBoundingClientRect().height;
     if(height)document.body.style.setProperty('--memory-actionbar-space',`${Math.ceil(height)+32}px`);
   }).observe(bar.parentElement);
-  function updateAvailability(){const ready=!!root.querySelector('.verse-text')&&!!document.querySelector('#status')?.hidden,l=labels(lang());for(const [button,label] of [[menuButton,l.title],[practiceMenuButton,l.practiceTitle]]){button.disabled=!ready;button.title=ready?label:l.unavailable;}}
+  function updateAvailability(){const ready=!!root.querySelector('.verse-text')&&!!document.querySelector('#status')?.hidden,l=labels(lang());for(const [button,label] of [[menuButton,l.title],[practiceMenuButton,l.practiceTitle],[toolbarButton,l.title]]){button.disabled=!ready;button.title=ready?label:l.unavailable;}}
   new MutationObserver(updateAvailability).observe(root,{childList:true});updateAvailability();
-  new MutationObserver(()=>{const l=labels(lang());document.querySelectorAll('.memory-menu-button,.verse-multi-memory').forEach(b=>b.textContent=l.title);practiceMenuButton.textContent=l.practiceTitle;}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  new MutationObserver(()=>{const l=labels(lang());document.querySelectorAll('.memory-menu-button,.verse-multi-memory').forEach(b=>b.textContent=l.title);practiceMenuButton.textContent=l.practiceTitle;labelToolbarButton();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 })();

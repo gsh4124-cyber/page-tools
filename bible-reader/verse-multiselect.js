@@ -77,6 +77,17 @@
     row.classList.toggle('multi-selected', on);
     row.setAttribute('aria-selected', String(on));
     updateActionBar();
+    if (on) keepAboveActionBar(row);
+  }
+
+  // On phones the action panel covers the lower part of the screen; scroll the verse
+  // just selected so it stays visible above it.
+  function keepAboveActionBar(row) {
+    requestAnimationFrame(() => {
+      if (!actionBar || actionBar.hidden) return;
+      const overlap = row.getBoundingClientRect().bottom - (actionBar.getBoundingClientRect().top - 12);
+      if (overlap > 0) window.scrollBy({ top: overlap, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
   }
 
   function clearSelection() {

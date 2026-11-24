@@ -22,7 +22,8 @@ async function open(path, viewport={ width: 390, height: 844 }) {
 
 async function assertCompactTopbar(page, label) {
   const translation = await page.locator('#translationSelect').boundingBox();
-  const language = await page.locator('#languageSelect').boundingBox();
+  // First row: Bible version, memory test entry, search. The interface language lives in the overflow menu.
+  const language = await page.locator('.memory-toolbar-button').boundingBox();
   const search = await page.locator('#searchToggle').boundingBox();
   const compare = await page.locator('#compareToggle').boundingBox();
   const notebook = await page.locator('.notebook-button').boundingBox();
@@ -31,9 +32,9 @@ async function assertCompactTopbar(page, label) {
   assert(Boolean(translation && language && search && compare && notebook && more), `${label}: compact toolbar actions missing`);
   if (translation && language && search && compare && notebook && more) {
     const firstRow = [translation.y, language.y, search.y];
-    assert(Math.max(...firstRow)-Math.min(...firstRow) < 3, `${label}: translation/language/search icon must stay aligned`);
-    assert(translation.x + translation.width <= language.x + 2, `${label}: translation overlaps language`);
-    assert(language.x + language.width <= search.x + 2, `${label}: language overlaps search icon`);
+    assert(Math.max(...firstRow)-Math.min(...firstRow) < 3, `${label}: translation/memory test/search icon must stay aligned`);
+    assert(translation.x + translation.width <= language.x + 2, `${label}: translation overlaps memory test entry`);
+    assert(language.x + language.width <= search.x + 2, `${label}: memory test entry overlaps search icon`);
     if (viewportWidth >= 700) {
       assert(Math.abs(compare.y - search.y) < 3, `${label}: tablet toolbar must use one row`);
       assert(search.x + search.width <= compare.x + 3, `${label}: search icon overlaps reading actions`);
@@ -52,6 +53,7 @@ async function assertCompactTopbar(page, label) {
   await page.locator('#toolbarMoreToggle').click();
   assert(await page.locator('#toolbarMoreMenu #themeToggle').isVisible(), `${label}: theme action missing from overflow`);
   assert(await page.locator('#toolbarMoreMenu #widthToggle').isVisible(), `${label}: reading width action missing from overflow`);
+  assert(await page.locator('#toolbarMoreMenu #languageSelect').isVisible(), `${label}: language picker missing from overflow`);
   await page.locator('#toolbarMoreToggle').click();
   assert(await page.locator('#toolbarMoreMenu').isHidden(), `${label}: overflow did not close`);
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2), `${label}: toolbar causes horizontal page overflow`);
