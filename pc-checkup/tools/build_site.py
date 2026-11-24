@@ -35,6 +35,8 @@ for name in ['expand_batch2', 'append_cn_ru', 'normalize_generated_structure',
              'normalize_navigation_order', 'normalize_search_metadata', 'polish_ui', 'validate_dist']:
     subprocess.run([sys.executable, str(TOOLS / (name + '.py'))], check=True)
 
+subprocess.run(['node', 'tools/validate-mobile-media.mjs', *[str(p) for p in sorted((ROOT/'dist').rglob('mobile.js'))]], check=True)
+
 revision = os.environ.get('CF_PAGES_COMMIT_SHA') or os.environ.get('GITHUB_SHA')
 if not revision:
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()

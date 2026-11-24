@@ -22,8 +22,8 @@
   const lang = () => String(window.BibleI18n?.lang?.() || document.documentElement.lang || 'ko').toLowerCase().split('-')[0];
   const labels = () => LABELS[lang()] || LABELS.en;
   const translation = () => document.querySelector('#translationSelect')?.value || (typeof activeTranslationId !== 'undefined' ? activeTranslationId : 'krv1961');
-  const readMarks = () => { try { return JSON.parse(localStorage.getItem(MARKS_KEY)) || {}; } catch (_) { return {}; } };
-  const writeMarks = marks => { localStorage.setItem(MARKS_KEY, JSON.stringify(marks)); window.dispatchEvent(new CustomEvent('bible-reader-records-changed')); };
+  const readMarks = () => { try { return JSON.parse(window.BibleStorage.getItem(MARKS_KEY)) || {}; } catch (_) { return {}; } };
+  const writeMarks = marks => { window.BibleStorage.setItem(MARKS_KEY, JSON.stringify(marks)); window.dispatchEvent(new CustomEvent('bible-reader-records-changed')); };
   const selectedRows = () => [...versesRoot.querySelectorAll('.verse.multi-selected[data-verse]')].sort((a,b)=>Number(a.dataset.verse)-Number(b.dataset.verse));
   const rowText = row => row?.querySelector('.verse-text')?.textContent?.trim() || '';
   const markKey = verse => `${translation()}:${state.bookIndex}:${state.chapter}:${verse}`;
@@ -73,7 +73,7 @@
       if(typeof TRANSLATIONS!=='undefined'&&TRANSLATIONS[item.tr]){
         activeTranslationId=item.tr;
         const select=document.querySelector('#translationSelect'); if(select)select.value=item.tr;
-        localStorage.setItem('bible-reader-translation',item.tr);
+        window.BibleStorage.setItem('bible-reader-translation',item.tr);
       }
       state.bookIndex=item.bookIndex; state.chapter=item.chapter;
       if(!await loadCurrent({scrollTop:false})||run!==historyNavigationRun)return;
@@ -113,11 +113,11 @@
   }
   function setFocus(on){
     document.body.classList.toggle('reader-focus',!!on);
-    try{localStorage.setItem(FOCUS_KEY,on?'1':'0')}catch(_){}
+    try{window.BibleStorage.setItem(FOCUS_KEY,on?'1':'0')}catch(_){}
     const b=toolbar.querySelector('.reader-focus-toggle');if(b)b.setAttribute('aria-pressed',String(!!on));
   }
   function toggleFocus(){setFocus(!document.body.classList.contains('reader-focus'));}
-  function restoreFocus(){try{setFocus(localStorage.getItem(FOCUS_KEY)==='1')}catch(_){setFocus(false)}}
+  function restoreFocus(){try{setFocus(window.BibleStorage.getItem(FOCUS_KEY)==='1')}catch(_){setFocus(false)}}
 
   function syncHighlightColors(){
     const marks=readMarks();
@@ -137,7 +137,7 @@
   }
   function undoLast(){
     if(!undoSnapshot)return;
-    try{localStorage.setItem(MARKS_KEY,undoSnapshot);window.dispatchEvent(new CustomEvent('bible-reader-records-changed'));}catch(_){}
+    try{window.BibleStorage.setItem(MARKS_KEY,undoSnapshot);window.dispatchEvent(new CustomEvent('bible-reader-records-changed'));}catch(_){}
     undoSnapshot=null;if(toast)toast.hidden=true;syncHighlightColors();
   }
   function applyHighlightColor(color){
@@ -185,7 +185,7 @@
   }
   async function applyDeepLink(){
     const params=new URLSearchParams(location.search);const parsed=parseDeepLink(params.get('ref'));if(!parsed)return;
-    const tr=params.get('v');if(tr&&typeof TRANSLATIONS!=='undefined'&&TRANSLATIONS[tr]){activeTranslationId=tr;document.querySelector('#translationSelect').value=tr;localStorage.setItem('bible-reader-translation',tr)}
+    const tr=params.get('v');if(tr&&typeof TRANSLATIONS!=='undefined'&&TRANSLATIONS[tr]){activeTranslationId=tr;document.querySelector('#translationSelect').value=tr;window.BibleStorage.setItem('bible-reader-translation',tr)}
     restoringHistory=true;state.bookIndex=parsed.book.index;state.chapter=parsed.chapter;
     const loaded=await loadCurrent({scrollTop:false});restoringHistory=false;
     if(!loaded)return;

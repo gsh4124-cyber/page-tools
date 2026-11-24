@@ -259,7 +259,7 @@
     let quizStructure=chapters.map(ch=>({chapter:Number(ch.chapter),verses:ch.verses.map(v=>Number(v.verse))}));
     let chapterNumbers=chapters.map(ch=>Number(ch.chapter)).sort((a,b)=>a-b),bookLoadRun=0;
     const collectionKey='bible-reader-memory-passages-v1';
-    let collectionRefs=[];try{const saved=JSON.parse(localStorage.getItem(collectionKey)||'[]');if(Array.isArray(saved))collectionRefs=[...new Map(saved.filter(r=>r&&Number.isInteger(r.bookIndex)&&r.bookIndex>=0&&r.bookIndex<BOOKS.length&&Number.isInteger(r.chapter)&&r.chapter>0&&Number.isInteger(r.verse)&&r.verse>0).map(r=>[passageKey(r),{bookIndex:r.bookIndex,chapter:r.chapter,verse:r.verse}])).values()];}catch{}
+    let collectionRefs=[];try{const saved=JSON.parse(window.BibleStorage.getItem(collectionKey)||'[]');if(Array.isArray(saved))collectionRefs=[...new Map(saved.filter(r=>r&&Number.isInteger(r.bookIndex)&&r.bookIndex>=0&&r.bookIndex<BOOKS.length&&Number.isInteger(r.chapter)&&r.chapter>0&&Number.isInteger(r.verse)&&r.verse>0).map(r=>[passageKey(r),{bookIndex:r.bookIndex,chapter:r.chapter,verse:r.verse}])).values()];}catch{}
     let collectionRows=[],collectionRun=0,collectionLoading=false,collectionFailed=false,setupRun=0;
     const collectionTexts=new Map(),nameFor=index=>window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||book;
     const config={mode,view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
@@ -421,7 +421,7 @@
       let loading=false,loadFailed=false;
       const collection=el('details','memory-collection'),collectionTitle=el('summary'),collectionToggleLabel=el('label','memory-use-selected'),collectionToggle=el('input'),collectionToggleText=document.createTextNode(l.useCollection);collectionToggle.type='checkbox';collectionToggle.id='memoryUseCollection';collectionToggleLabel.append(collectionToggle,collectionToggleText);
       const collectionList=el('ul','memory-collection-list'),collectionStatus=el('p','memory-load-status');collectionStatus.setAttribute('role','status');
-      const persistCollection=()=>{try{localStorage.setItem(collectionKey,JSON.stringify(collectionRefs));}catch{}};
+      const persistCollection=()=>{try{window.BibleStorage.setItem(collectionKey,JSON.stringify(collectionRefs));}catch{}};
       const management=el('details','memory-collection-management');management.append(el('summary','',l.manageCollection));
       const clearPrompt=el('div','memory-collection-confirm');clearPrompt.hidden=true;clearPrompt.setAttribute('role','group');clearPrompt.setAttribute('aria-labelledby','memoryCollectionDeleteQuestion');
       const clearQuestion=el('p');clearQuestion.id='memoryCollectionDeleteQuestion';

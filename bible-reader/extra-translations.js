@@ -13,10 +13,10 @@
     }
   }
   let saved='';
-  try{saved=localStorage.getItem('bible-reader-translation')||'';}catch(_){}
+  try{saved=window.BibleStorage.getItem('bible-reader-translation')||'';}catch(_){}
   const requested=window.__BIBLE_TRANSLATION__ || new URLSearchParams(location.search).get('translation') || saved;
   if(requested && TRANSLATIONS[requested]){
-    try{localStorage.setItem('bible-reader-translation',requested)}catch(_){}
+    try{window.BibleStorage.setItem('bible-reader-translation',requested)}catch(_){}
     if(select.value!==requested){select.value=requested;select.dispatchEvent(new Event('change',{bubbles:true}));}
   }
 })();

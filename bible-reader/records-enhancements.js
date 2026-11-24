@@ -3,8 +3,8 @@
   const CHAPTERS_KEY = 'bible-reader-chapter-bookmarks-v1';
   const RECORD_NOTES_KEY = 'bible-reader-record-notes-v1';
   const BACKUP_VERSION = 2;
-  const readJson = key => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (_) { return {}; } };
-  const writeJson = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+  const readJson = key => { try { return JSON.parse(window.BibleStorage.getItem(key)) || {}; } catch (_) { return {}; } };
+  const writeJson = (key, value) => window.BibleStorage.setItem(key, JSON.stringify(value));
   const notifyRecordsChanged = () => window.dispatchEvent(new CustomEvent('bible-reader-records-changed'));
 
   function recordNote(id){ return String(readJson(RECORD_NOTES_KEY)[id] || '').trim(); }
@@ -25,7 +25,7 @@
     if(typeof TRANSLATIONS!=='undefined' && TRANSLATIONS[tr]){
       activeTranslationId=tr;
       const select=document.querySelector('#translationSelect'); if(select) select.value=tr;
-      localStorage.setItem('bible-reader-translation',tr);
+      window.BibleStorage.setItem('bible-reader-translation',tr);
     }
     if(typeof state!=='undefined'){ state.bookIndex=item.bookIndex; state.chapter=item.chapter; }
     document.querySelector('.notebook-close')?.click();
@@ -43,7 +43,7 @@
     if(typeof TRANSLATIONS!=='undefined' && TRANSLATIONS[tr]){
       activeTranslationId=tr;
       const select=document.querySelector('#translationSelect'); if(select) select.value=tr;
-      localStorage.setItem('bible-reader-translation',tr);
+      window.BibleStorage.setItem('bible-reader-translation',tr);
     }
     if(typeof state!=='undefined'){ state.bookIndex=Number(item.bookIndex)||0; state.chapter=Number(item.chapter)||1; }
     document.querySelector('.notebook-close')?.click();

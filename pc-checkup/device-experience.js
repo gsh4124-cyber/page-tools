@@ -52,7 +52,7 @@ if(redirectLegacy()) return;
 
 const basename=()=>location.pathname.split('/').filter(Boolean).pop()||'index.html';
 const isProd=()=>location.hostname==='pc-checkup.pages.dev';
-const parse=(key)=>{try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch{return {};}};
+const parse=(key)=>{try{const v=JSON.parse(window.DeviceStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch{return {};}};
 const count=(state,tests)=>{
   let ok=0,bad=0;
   for(const id of tests){if(state[id]==='ok')ok++;else if(state[id]==='bad')bad++;}
@@ -75,7 +75,7 @@ function style(){
   document.head.append(s);
 }
 function manualState(kind){return parse(`device-checkup-manual-${kind}-v1`);}
-function saveManual(kind,state){try{localStorage.setItem(`device-checkup-manual-${kind}-v1`,JSON.stringify(state));}catch{}}
+function saveManual(kind,state){try{window.DeviceStorage.setItem(`device-checkup-manual-${kind}-v1`,JSON.stringify(state));}catch{}}
 function statusGuidance(stats){
   const hints=[];
   if(stats.bad)hints.push(t.issueHint);
@@ -103,6 +103,12 @@ function buildCard(kind,getState,tests,anchor){
   manualLabels[kind].forEach((label,i)=>{const row=document.createElement('label');row.innerHTML=`<input type="checkbox" data-manual="${i}"><span>${label}</span>`;const input=row.querySelector('input');input.checked=!!manual[i];input.addEventListener('change',()=>{manual[i]=input.checked;saveManual(kind,manual);});list.append(row);});
   const render=()=>{const stats=count(getState(),tests);card.querySelector('[data-x="ok"]').textContent=stats.ok;card.querySelector('[data-x="bad"]').textContent=stats.bad;card.querySelector('[data-x="unknown"]').textContent=stats.unknown;card.querySelector('[data-x="guidance"]').textContent=statusGuidance(stats);return stats;};
   const copyButton=card.querySelector('[data-copy]');
+  const storageNotice=()=>{
+    if(!window.DeviceStorage?.temporary||card.querySelector('.device-storage-note'))return;
+    const copy={ko:'브라우저 저장을 사용할 수 없어 결과는 이번 화면에서만 유지됩니다.',en:'Browser storage is unavailable. Results last only for this visit.',ja:'保存できないため、結果はこの訪問中のみ保持されます。',es:'No se puede guardar. Los resultados duran solo esta visita.',de:'Speicher nicht verfügbar. Ergebnisse gelten nur für diesen Besuch.',fr:'Stockage indisponible. Les résultats restent pendant cette visite.',pt:'Sem armazenamento. Os resultados duram apenas nesta visita.',it:'Memoria non disponibile. Risultati solo per questa visita.',nl:'Opslag niet beschikbaar. Resultaten blijven alleen dit bezoek.',id:'Penyimpanan tidak tersedia. Hasil hanya untuk kunjungan ini.',vi:'Không thể lưu. Kết quả chỉ giữ trong lần truy cập này.','zh-CN':'无法使用存储，结果仅在本次访问中保留。',ru:'Хранилище недоступно. Результаты только на время посещения.'};
+    const note=document.createElement('p');note.className='device-storage-note';note.setAttribute('role','status');note.textContent=copy[language]||copy.en;card.append(note);
+  };
+  document.addEventListener('click',()=>setTimeout(storageNotice,0));storageNotice();
   async function copyWithFeedback(text){
     copyButton.disabled=true;
     try{const ok=await copyText(text);card.querySelector('[data-copy-status]').textContent=ok?t.copied:t.copyFailed;}
@@ -120,6 +126,7 @@ function watchText(target,callback){
   const observer=new MutationObserver(()=>callback());observer.observe(target,{childList:true,characterData:true,subtree:true});
 }
 function watchCompletion(kind,getState,tests,target){
+  let finished=false;
   const copy={
    ko:['{n} / {total}개 항목 확인','점검 마치고 결과 보기','남은 항목 {n}개 · 판단이 어려우면 미확인을 선택하세요.','모든 항목에 응답했습니다. 미확인은 정상 판정에 포함하지 않습니다.'],
    en:['{n} / {total} items reviewed','Finish and view results','{n} items left. Choose Unchecked if you cannot assess one.','All items reviewed. Unchecked items are not counted as OK.'],
@@ -152,7 +159,7 @@ function watchCompletion(kind,getState,tests,target){
   finish.addEventListener('click',()=>{
    if(!refresh())return;
    // Completion means reviewing results, including explicit unavailable items; never a pass.
-   track(kind==='pc'?'pc_complete':'mobile_complete');card.dataset.flowComplete='true';
+   if(!finished){track(kind==='pc'?'pc_complete':'mobile_complete');finished=true;}card.dataset.flowComplete='true';
    const heading=card.querySelector('h3');heading.tabIndex=-1;card.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});heading.focus({preventScroll:true});
   });
   next?.addEventListener('click',event=>{if(refresh()){event.preventDefault();event.stopImmediatePropagation();finish.click();}},true);
@@ -160,7 +167,7 @@ function watchCompletion(kind,getState,tests,target){
   document.addEventListener('click',event=>{if(event.target.closest('.pill,[data-result]'))setTimeout(refresh,0);});
   reset.addEventListener('click',()=>{
    try{sessionStorage.removeItem(`device-checkup-event:${kind}_start`);sessionStorage.removeItem(`device-checkup-event:${kind}_complete`);}catch{}
-   delete card.dataset.flowComplete;
+   finished=false;delete card.dataset.flowComplete;
    if(kind==='mobile')setTimeout(()=>{track('mobile_start');refresh();},0);
   },true);
   refresh();

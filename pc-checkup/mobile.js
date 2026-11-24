@@ -1,10 +1,11 @@
+if(typeof window!=='undefined'&&!window.DeviceStorage)window.DeviceStorage=(()=>{const memory=new Map();let temporary=false;return{get temporary(){return temporary;},getItem(key){if(memory.has(key))return memory.get(key);try{return localStorage.getItem(key);}catch{temporary=true;return null;}},setItem(key,value){memory.set(key,String(value));try{localStorage.setItem(key,String(value));}catch{temporary=true;}},removeItem(key){memory.set(key,null);try{localStorage.removeItem(key);}catch{temporary=true;}}};})();
 (()=>{
 const $=s=>document.querySelector(s);
 let camStream=null,micStream=null,audioCtx=null,raf=0,touchMax=0;
 const tests=['touch','display','camera','mic','speaker','motion'];
 const resultKey='device-checkup-mobile-results-v1';
 let results={};
-try{results=JSON.parse(localStorage.getItem(resultKey)||'{}')||{};if(typeof results!=='object'||Array.isArray(results))results={};}catch{results={};}
+try{results=JSON.parse(window.DeviceStorage.getItem(resultKey)||'{}')||{};if(typeof results!=='object'||Array.isArray(results))results={};}catch{results={};}
 
 const friendly=(e,k)=>{
   const n=e?.name||'';
@@ -14,7 +15,7 @@ const friendly=(e,k)=>{
   return `${k}를 시작하지 못했습니다${n?` (${n})`:''}.`;
 };
 
-function saveResults(){try{localStorage.setItem(resultKey,JSON.stringify(results));}catch{}}
+function saveResults(){try{window.DeviceStorage.setItem(resultKey,JSON.stringify(results));}catch{}}
 function setResult(test,state){
   results[test]=state;
   saveResults();renderResults();
@@ -47,7 +48,7 @@ document.querySelectorAll('.mobile-result-actions').forEach(group=>{
     setResult(group.dataset.test,b.dataset.result);
   });
 });
-$('#resetMobileResults').onclick=()=>{results={};try{localStorage.removeItem(resultKey);}catch{}renderResults();};
+$('#resetMobileResults').onclick=()=>{results={};try{window.DeviceStorage.removeItem(resultKey);}catch{}renderResults();};
 renderResults();
 
 const touchLayer=$('#touchTestLayer'),touchGrid=$('#touchGrid');
@@ -102,8 +103,8 @@ document.querySelectorAll('[data-set-screen]').forEach(b=>b.onclick=()=>setScree
 $('#closeScreen').onclick=()=>{layer.classList.remove('active');if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});};
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){layer.classList.remove('active');touchLayer.classList.remove('active');}});
 
-let frontCameraOk=false,backCameraOk=false,frontDeviceId='',backDeviceId='';
-function stopCamera(status='카메라 종료'){camStream?.getTracks().forEach(t=>t.stop());camStream=null;$('#camVideo').srcObject=null;$('#camStatus').textContent=status;}
+let frontCameraOk=false,backCameraOk=false,frontDeviceId='',backDeviceId='',cameraRun=0,microphoneRun=0;
+function stopCamera(status='카메라 종료'){cameraRun++;camStream?.getTracks().forEach(t=>t.stop());camStream=null;$('#camVideo').srcObject=null;$('#camStatus').textContent=status;}
 function verifyCameraIdentity(facing,settings){
   const actual=settings.facingMode||'';
   const deviceId=settings.deviceId||'';
@@ -119,10 +120,13 @@ function verifyCameraIdentity(facing,settings){
 }
 async function camera(facing){
   stopCamera('카메라 전환 중');
+  const run=cameraRun;
   try{
-    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing}},audio:false});
-    const video=$('#camVideo');video.srcObject=camStream;await video.play().catch(()=>{});
-    const s=camStream.getVideoTracks()[0].getSettings();
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing}},audio:false});
+    if(run!==cameraRun){stream.getTracks().forEach(t=>t.stop());return;}
+    camStream=stream;const video=$('#camVideo');video.srcObject=stream;await video.play().catch(()=>{});
+    if(run!==cameraRun||camStream!==stream)return;
+    const s=stream.getVideoTracks()[0].getSettings();
     const actual=verifyCameraIdentity(facing,s);
     const identityKnown=actual==='user'||actual==='environment'||(frontDeviceId&&backDeviceId&&frontDeviceId!==backDeviceId);
     $('#camStatus').textContent=`카메라 입력 정상${s.width&&s.height?` · ${s.width}×${s.height}`:''}${frontCameraOk&&backCameraOk?' · 서로 다른 전/후면 입력 확인':''}`;
@@ -134,25 +138,31 @@ async function camera(facing){
     }else{
       $('#cameraAutoStatus').textContent='현재 카메라 입력은 확인됐습니다. 반대쪽 카메라도 한 번 켜주세요.';
     }
-  }catch(e){stopCamera(friendly(e,'카메라'));$('#cameraAutoStatus').textContent='권한 차단이나 장치 접근 실패만으로 기기 불량 판정은 하지 않습니다.';}
+  }catch(e){if(run!==cameraRun)return;stopCamera(friendly(e,'카메라'));$('#cameraAutoStatus').textContent='권한 차단이나 장치 접근 실패만으로 기기 불량 판정은 하지 않습니다.';}
 }
 $('#frontCam').onclick=()=>camera('user');$('#backCam').onclick=()=>camera('environment');$('#stopCam').onclick=()=>stopCamera();
 
 let micPeak=0,micStart=0,micAutoDone=false;
 function stopMic(status='마이크 종료'){
+  microphoneRun++;
   if(raf)cancelAnimationFrame(raf);raf=0;micStream?.getTracks().forEach(t=>t.stop());micStream=null;if(audioCtx){audioCtx.close().catch(()=>{});audioCtx=null;}$('#mobileMicMeter').style.width='0';$('#micStatus').textContent=status;
 }
 $('#startMic').onclick=async()=>{
   stopMic('마이크 시작 중');micPeak=0;micStart=Date.now();micAutoDone=false;$('#micAutoStatus').textContent='말하거나 손뼉을 쳐주세요. 입력 반응이 확인되면 자동 판정합니다.';
+  const run=microphoneRun;
   try{
-    micStream=await navigator.mediaDevices.getUserMedia({audio:true});const C=window.AudioContext||window.webkitAudioContext;if(!C)throw new Error('AudioContext');audioCtx=new C();await audioCtx.resume?.();
-    const src=audioCtx.createMediaStreamSource(micStream),an=audioCtx.createAnalyser();an.fftSize=512;src.connect(an);const data=new Uint8Array(an.fftSize);
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    if(run!==microphoneRun){stream.getTracks().forEach(t=>t.stop());return;}
+    micStream=stream;const C=window.AudioContext||window.webkitAudioContext;if(!C)throw new Error('AudioContext');const ctx=new C();audioCtx=ctx;await ctx.resume?.();
+    if(run!==microphoneRun||micStream!==stream){stream.getTracks().forEach(t=>t.stop());ctx.close().catch(()=>{});return;}
+    const src=ctx.createMediaStreamSource(stream),an=ctx.createAnalyser();an.fftSize=512;src.connect(an);const data=new Uint8Array(an.fftSize);
     const draw=()=>{
+      if(run!==microphoneRun)return;
       an.getByteTimeDomainData(data);let sum=0;for(const v of data){const x=(v-128)/128;sum+=x*x;}const rms=Math.sqrt(sum/data.length);micPeak=Math.max(micPeak,rms);$('#mobileMicMeter').style.width=`${Math.min(100,rms*350)}%`;
       if(!micAutoDone&&Date.now()-micStart>500&&micPeak>0.025){micAutoDone=true;setResult('mic','ok');$('#micStatus').textContent='마이크 입력 반응 확인됨';$('#micAutoStatus').textContent='실제 입력 신호가 감지되어 기본 입력 기능 정상으로 자동 판정했습니다.';}
       raf=requestAnimationFrame(draw);
     };draw();$('#micStatus').textContent='마이크 입력 확인 중';
-  }catch(e){stopMic(friendly(e,'마이크'));$('#micAutoStatus').textContent='권한 차단이나 장치 접근 실패만으로 기기 불량 판정은 하지 않습니다.';}
+  }catch(e){if(run!==microphoneRun)return;stopMic(friendly(e,'마이크'));$('#micAutoStatus').textContent='권한 차단이나 장치 접근 실패만으로 기기 불량 판정은 하지 않습니다.';}
 };
 $('#stopMic').onclick=()=>stopMic();
 

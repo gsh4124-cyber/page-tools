@@ -17,7 +17,7 @@
       const code = languageSelect.value;
       const translation = DEFAULT_TRANSLATION[code];
       if (!translation) return;
-      try { localStorage.setItem('bible-reader-translation', translation); } catch (_) {}
+      try { window.BibleStorage.setItem('bible-reader-translation', translation); } catch (_) {}
       window.__BIBLE_TRANSLATION__ = translation;
 
       if (location.protocol !== 'file:') {

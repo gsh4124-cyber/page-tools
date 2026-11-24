@@ -25,9 +25,9 @@
 
   function lang() { if (window.BibleI18n?.lang) return window.BibleI18n.lang(); const tr = window.TRANSLATIONS?.[document.querySelector('#translationSelect')?.value]; return tr?.lang || (tr?.id === 'krv1961' ? 'ko' : 'en'); }
   function labels(){ return LABELS[lang()] || LABELS.en; }
-  function loadJson(key){ try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (_) { return {}; } }
-  function saveMarks(){ localStorage.setItem(STORE_KEY, JSON.stringify(marks)); }
-  function saveChapterBookmarks(){ localStorage.setItem(CHAPTER_KEY, JSON.stringify(chapterBookmarks)); }
+  function loadJson(key){ try { return JSON.parse(window.BibleStorage.getItem(key)) || {}; } catch (_) { return {}; } }
+  function saveMarks(){ window.BibleStorage.setItem(STORE_KEY, JSON.stringify(marks)); }
+  function saveChapterBookmarks(){ window.BibleStorage.setItem(CHAPTER_KEY, JSON.stringify(chapterBookmarks)); }
   function translation(){ return document.querySelector('#translationSelect')?.value || 'krv1961'; }
   function bookIndex(){ return typeof state !== 'undefined' ? state.bookIndex : 0; }
   function chapterNumber(){ return typeof state !== 'undefined' ? state.chapter : 1; }

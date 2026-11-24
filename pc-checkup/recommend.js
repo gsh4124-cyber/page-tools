@@ -95,7 +95,7 @@ details.rec-details .rec-card{background:transparent;border:0;padding:0 0 14px;m
     wrap.className = 'rec-wrap';
     wrap.setAttribute('aria-live', 'polite');
     list.after(wrap);
-    const read = () => { try { return JSON.parse(localStorage.getItem('pc-checkup-results-v1') || '{}') || {}; } catch (e) { return {}; } };
+    const read = () => { try { return JSON.parse(window.DeviceStorage.getItem('pc-checkup-results-v1') || '{}') || {}; } catch (e) { return {}; } };
     const render = () => {
       const state = read();
       const bad = Object.keys(DATA).filter(id => state[id] === 'bad');
