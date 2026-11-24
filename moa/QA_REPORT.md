@@ -1,42 +1,43 @@
 # 모아 검증 보고서
 
-2026-11-24 KST. **실제 메일이 개발용 localhost로 향하던 로그인 문제를 수정·배포하고, 새 메일의 Log In 버튼으로 운영 모아에 복귀하는 것을 확인했다.** 흰 배경·테이프·기존 앱 기록 기능은 보존했다.
+2026-11-24 KST. **주 로그인 방법을 Google로 계속하기로 변경·배포했다. 실제 Google 계정 선택 화면 연결을 확인했고, 계정 선택·동의 후 복귀는 사용자 확인 대기다.** 흰 배경·테이프·실제 앱 기록 기능·기존 세 제품과 데이터를 보존했다.
 
 ## 현재 배포
 
 - 운영 주소: https://moa-diary-web.pages.dev/
 - 저장소/브랜치: `gsh4124-cyber/page-tools` / `feature/moa-integration-20261119`
-- 실제 배포 코드: `96490d7a48cc6f87dd654acf13248a3ad4336046`
-- Cloudflare 배포 ID: `d8ce9768-1edf-42e5-8986-2378adac5e02` / completed, success
-- 앱 source SHA-256: `0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291`
-- 로컬 최종 Worker SHA-256: `7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059`
+- 실제 배포 코드: `e716e90dfbdfd78d1f685ed5addaacf46b733e7c`
+- Cloudflare 배포 ID: `943e0fbe-699f-421c-8d72-c890178fd120` / completed, success
+- 비공개 앱 source SHA-256: `0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291`
+- 로컬 최종 Worker SHA-256: `678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe`
 
-GitHub Cloudflare 검사에서 성공과 배포 ID를 확인했다. 실제 로그인한 운영 주소의 `build-manifest.json`을 읽어 위 커밋·앱 SHA-256·cloudConfigured=true 일치를 확인했다. 앱 fingerprint는 비공개 앱 파일만 계산하므로 이번 공개 인증 코드 변경에도 동일하다. 전체 Worker 해시는 로컬 최종 패키지 값이며 제공자 Worker 해시 독립 대조는 하지 않았다. 보고서 저장 커밋은 `[CF-Pages-Skip]`으로 재배포하지 않는다.
+GitHub 제공자 검사 completed/success와 실제 운영 Google 버튼/구글 계정 선택 화면을 확인했다. 앱 fingerprint는 공개 로그인 코드를 포함하지 않으므로 이전과 같고 전체 Worker 해시는 변경됐다. 이번 운영 manifest 재조회·제공자 Worker 해시 독립 대조는 아직 하지 않았다. 보고서 커밋은 `[CF-Pages-Skip]`으로 재배포하지 않는다.
 
-## 이번에 실제로 확인한 결과
+## 이번 변경과 실제 검증
 
 | 검사 | 결과 / 범위 |
 |---|---|
-| 원인 확인 | DONE · 실제 기존 메일의 redirect_to가 `http://localhost:3000`. 프런트 요청에 emailRedirectTo가 없고 Supabase의 기존 Site URL은 localhost, Redirect URLs는 비어 있었음 |
-| 허용 주소 추가 | DONE · 사용자의 ‘로그인해뒀으니 네가 해봐’ 승인 후 관리자 화면에서 `https://moa-diary-web.pages.dev/__moa_auth_callback` 한 줄 추가·저장·새로고침 확인. Site URL 유지, 기존 주소 삭제 없음 |
-| 단위·PostgreSQL 엔진·Worker | DONE · 23개 통과. 콜백 파싱·동일 출처/자격 증명 형식·오류/만료·콜백 공개 경로와 기존 보호 검사. 로컬 PostgreSQL 엔진이며 hosted DB 재시험 아님 |
-| 최종 배포 패키지 Chrome | DONE · 코드 `96490d7a48cc6f87dd654acf13248a3ad4336046`의 Worker 10개 검사군, 오류0. 304/320/390/768/1280px. 기존 소개/날짜/사진/습관/로그인 창/보호/로그아웃에 정확한 이메일 복귀 URL·콜백 URL 정리·SDK 세션/HttpOnly 쿠키·거부/만료를 추가. Auth API/RPC/JWT는 모의 |
-| 다른 사용자 콜백의 기존 로그인 보호 | DONE · 모의 최종 패키지에서 거부된 다른 사용자 콜백 후 기존 정상 소유자 쿠키·SDK 세션·비공개 app.js 접근 유지. 실서버 다른 사용자 재시험 아님 |
-| Supabase SDK 모의 계약 | DONE · 이번 작업에서 6개 통과, 오류0. 기기/계정 분리·세션 재접속·탭 로그아웃 시 비공개 상태 정리·다른 사용자 분리·네트워크 초안 보존. 빌드 메타데이터는 작업 시작07837137이며 동일 비공개 앱 SHA-256. 로컬 가로챈 API |
-| 실제 새 메일 로그인 | DONE · 운영 UI에서 새 메일 요청, 08:15:48 UTC 수신, Gmail에서 실제 Log In 버튼 클릭→운영 루트의 ‘내 계정’과 기록0 표시. 주소에 인증 fragment 없음. 링크/토큰을 파일에 저장하지 않음 |
-| 실제 세션 재접속 | DONE · 로그인 후 운영 모아 새로고침에도 ‘내 계정’ 유지. readonly Auth 조회의 last_sign_in_at=2026-11-24 08:18:59.006305+00로 새 인증 확인. 기존 Chrome 프로필의 새 메일 재인증이며 새 빈 프로필의 실서버 인증과 구분 |
-| 실제 운영 빌드 | DONE · 보호된 운영 manifest의 현재 커밋·앱 SHA-256 일치 확인 |
-| 기존 코드 보존 | DONE · 이번 변경은 moa/만. 기존 세 제품·공통 tools·workflows diff0. main 병합 없음. 실제 기록/습관/미디어 쓰기·삭제 없음 |
+| 기존 설정·계정 | DONE · 관리자 페이지 Google 제공자 활성, readonly auth.identities에서 기존 소유자 Google identity1개. 기존 정확한 콜백 `https://moa-diary-web.pages.dev/__moa_auth_callback` 재사용. 공유 설정/키/제공자/비밀번호 추가 변경 없음 |
+| 단위·로컬 PostgreSQL·Worker | DONE · 26개, 실패0. 기존 보안/백업/소유권 회귀와 Google 코드의 중복/크기/토큰 혼합 거부, 정확한 제공자 URL·S256, PKCE 증명 전용 저장 어댑터 검사. hosted DB 재시험 아님 |
+| 최종 패키지 Chrome | DONE · `e716e90dfbdfd78d1f685ed5addaacf46b733e7c`의 Worker13개 검사군, 오류0. 304/320/390/768/1280px. Google 버튼 우선/포커스·이메일 접힘·키보드·흰 배경/테이프와 기존 공개 예시 회귀. 합성 인증/RPC |
+| PKCE 성공·세션 | DONE · 실제 Supabase SDK가 만든 challenge와 교환 verifier의 SHA-256 일치. 모의 Google 시작→코드 교환→서버 소유자 확인→기존 SDK 저장 키/HttpOnly 쿠키→정확한 비공개 앱, 새로고침 접근 유지 |
+| 인증 거부·정보 보존 | DONE · 모의 증명 누락/동의 거부/다른 Google 사용자에서 비공개 앱 차단, 코드/query 제거, 오류 원문 비반영. 거부된 콜백이 기존 소유자 쿠키/세션/비공개 접근을 지우지 않음 |
+| Google 토큰 저장 제한 | DONE · 별도 임시 클라이언트의 후보 세션/Google provider_token은 localStorage/sessionStorage에 저장하지 않음. 탭 저장소는 PKCE 증명만 허용하며, 서버 통과 후 앱 토큰 쌍만 기존 앱 SDK에 저장 |
+| 실제 운영 버튼 | DONE · 지원되는 Windows Computer Use Chrome에서 운영의 Google로 계속하기 버튼 클릭→실제 Google ‘계정을 선택하세요’ 화면. 메일을 거치지 않음 |
+| 실제 Google 로그인 완료 | NOT_TESTED · 구글 계정 선택·동의는 본인 단계이므로 사용자에게 요청하고 대기. 계정 선택 화면 연결을 로그인 완료로 계산하지 않음 |
+| 기존 코드/데이터 보존 | DONE · 이번 변경은 moa/ 로그인 코드/UI/시험/문서만. 기존 세 제품/공통 tools/workflows diff0. 실제 기록·습관·미디어 쓰기/삭제 없음. 추가 비용 없음 |
 
-## 수정 동작과 보안
+사용자 목적은 메일 없이 기존 구글 계정으로 일기장을 여는 것이다. 대화상자는 Google 버튼을 먼저 보여주고 포커스를 두며 이메일/비밀번호는 다른 방법으로 로그인 안에 둔다. 기본 방문자는 이전처럼 공개 예시부터 보며, 실제 기록과 파일은 여전히 기존 소유자만 접근한다. 구글 비밀번호는 모아가 받지 않는다.
 
-메일 요청에 정확한 모아 복귀 주소와 `shouldCreateUser:false`를 지정한다. 메일 클릭 시 공개 콜백에서 인증 fragment/query를 먼저 지우고, 기존 Worker/RPC로 실제 소유자·서명·현재 Auth 세션을 확인한 뒤 SDK에 세션을 저장하고 앱으로 이동한다. 파서의 JWT 형식 검사는 서버 검증을 대체하지 않는다. 확인되지 않은 다른 사용자 콜백이 기존 정상 로그인을 지우지 않도록 수정했다. 서버 확인 후 SDK 저장에 실패하면 부분 세션을 정리한다.
+Google OAuth는 SDK PKCE를 사용한다. 정확한 운영 콜백만 요청하고 이 탭에 일시 검증 증명만 둔다. 복귀 코드/query는 SDK 요청 전 주소에서 지운다. 세션 교환은 기존 앱과 다른 임시 저장 키로 수행하고 후보 인증 세션을 영구 저장하지 않는다. 서버의 기존 소유자/서명/현재 Auth 세션 검증 후에만 앱 저장 키로 옮긴다. 실패·동의 거부·증명 누락·다른 계정은 기존 정상 소유자 세션을 보존한다. 이메일 호환 경로도 유지한다. [Google 인증 지침](https://supabase.com/docs/guides/auth/social-sign-in/auth-google), [PKCE](https://supabase.com/docs/guides/auth/sessions/pkce-flow).
 
-메일 발송 성공 후에는 ‘링크 붙여넣기’를 자동으로 요구하지 않는다. 만료/거부는 새 메일 요청을 안내하며, 붙여넣기는 ‘링크가 열리지 않나요?’의 선택형 보조 수단으로 남긴다. 기존 메일의 localhost 주소는 소급 변경되지 않으므로 열린 모아를 새로고침하고 새 메일을 받아야 한다. [Supabase Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [이메일 비밀번호 없는 로그인](https://supabase.com/docs/guides/auth/auth-email-passwordless).
+최신 vault main START_HERE·페이지 작업 Index·UI/UX·보안·실행상태 원칙과 `hwangje_ops.context_packet`의 vibecoding 실행 상태를 읽었다. 실행 상태는 view이며 함수가 아니었고, 함수형 첫 조회 실패 후 실제 view로 회수했다. DB 실행 행·스키마·정책을 변경하지 않았다. Supabase ACTIVE_HEALTHY를 확인했다.
 
-기존 날짜/간격 UI 검수는 직전8f5de98 릴리스 결과다. 실제 앱11개 검사군·사진/긴 제목3개는 이전 포근함 릴리스 결과이며 이번 인증 수정에서 재실행하지 않았다. 해당 상세 결과는 qa-results.json의 과거 체크포인트에 보존한다. 이번 패키지10개와 SDK 계약6개가 이 과거 결과를 대체하거나 실서버 미디어 시험을 의미하지 않는다.
+## 이전 검증과 이번 결과의 구분
 
-이번 실제 화면은 지원되는 Windows Computer Use의 Chrome에서 검수했다. 캡처는 도구에 표시된 화면으로 확인하고 재저장하지 않았다. 기존 로컬 미리보기 PNG를 운영 화면 증거로 계산하지 않는다. 새 빈 프로필 실서버 로그인·실서버 만료/다른 사용자 링크·실제 모바일·글/미디어/백업/복원/격리 전체 재시험은 미검증이다.
+직전96490d7 이메일 수정에서는 실제 기존 메일이 `localhost:3000`으로 향하던 원인을 확인하고 사용자가 승인한 정확한 모아 콜백 한 줄만 허용 목록에 추가했다. 실제 새 메일 Log In 클릭→내 계정 복귀→새로고침 유지와 당시 운영 manifest 일치를 확인했고, last_sign_in_at=2026-11-24 08:18:59.006305+00를 readonly 조회했다. 이 결과를 이번 Google 로그인 성공으로 계산하지 않는다.
+
+이전 SDK 모의 계약6개·앱11개·사진/긴 제목3개와 날짜/간격 UI 검수는 과거 체크포인트이며 이번에 재실행하지 않았다. 실제 Android/iOS·새 빈 프로필의 Google 로그인·실서버 다른 사용자/거부된 인증·미디어/백업/복원/격리 전체 재시험은 미검증이다. 캡처는 로컬 google-login-304/390/1280.png와 실제 도구 표시 화면을 구분하며, 실제 Chrome 캡처를 파일에 재저장하지 않았다.
 
 ## 접근 보호·비용·보존
 
@@ -48,7 +49,7 @@ PR #34의 실패 간섭도 재확인했다. 파일 감시만 제한한 뒤 만�
 
 기존 Workers Free의 계정 공유 100,000회/일 한도를 사용한다. 초과 시 접속이 실패할 수 있고 자동 유료 전환을 신청하지 않았다. 카드·유료 요금제·Access 결제/초과 과금 동의·새 Supabase 자원을 만들지 않았다. Access Free 결제 단계는 완료하지 않았다. Direct Upload `moa-diary`는 업로드/배포 없는 초안으로 남았고 실제 운영은 Git 연결 `moa-diary-web`이다. 기존 Sites 검토 사이트는 그대로 남겼다.
 
-원본 v7 SHA-256 `2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db` 일치를 자동 검사했다. 실제 소유자 기록에 시험 글·습관·미디어를 쓰거나 삭제하지 않았다. 이번 공유 Auth 설정 변경은 사용자가 승인한 Redirect URLs의 `https://moa-diary-web.pages.dev/__moa_auth_callback` 한 줄 추가뿐이다. 추가 후 새로고침으로 목록을 확인했다. Site URL `http://localhost:3000`·메일 템플릿·인증 제공자·비밀번호·DB/RLS/Storage·다른 제품 데이터는 바꾸지 않았다. 새 로그인으로 Auth 세션과 마지막 로그인 시각은 정상 갱신됐다.
+원본 v7 SHA-256 `2543b60bee56acdaa30f23462a5f9a003f4881771dfdc7f1eb826bfb1f42c5db` 일치를 자동 검사했다. 실제 소유자 기록에 시험 글·습관·미디어를 쓰거나 삭제하지 않았다. 직전 이메일 수정에서 공유 Auth 설정 변경은 사용자가 승인한 Redirect URLs의 `https://moa-diary-web.pages.dev/__moa_auth_callback` 한 줄 추가뿐이다. 추가 후 새로고침으로 목록을 확인했다. Site URL `http://localhost:3000`·메일 템플릿·인증 제공자·비밀번호·DB/RLS/Storage·다른 제품 데이터는 바꾸지 않았다. 이전 실제 이메일 로그인으로 Auth 세션과 마지막 로그인 시각이 갱신됐다. 이번 Google 로그인 완료는 위 현재 검증 표를 따른다.
 
 ## 기존 실제 검증과 구분
 

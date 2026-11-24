@@ -11,25 +11,25 @@
     "status": "DONE",
     "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Email redirect repair deployed and verified by fresh actual email click, owner home, reload and protected hosted manifest. Local unit23/package10/mock SDK6 passed; app11/populated3 historical; hosted writes/media/restore/isolation not replayed.",
-    "codeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+    "reason": "Primary Google PKCE login deployed; actual Google account chooser reached. Final package13/unit26 passed. Live user selection/consent/return pending; historical email login is separate.",
+    "codeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
     "manifest": {
       "product": "moa",
-      "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+      "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
       "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
       "cloudConfigured": true
     },
-    "workerSha256": "7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059",
+    "workerSha256": "678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+    "cloudflareCodeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
     "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
   },
   "unit": {
     "status": "DONE",
-    "passed": 23,
+    "passed": 26,
     "dateKST": "2026-11-24",
-    "scope": "Rerun for email callback repair; local PostgreSQL engine and Worker security, not hosted DB test."
+    "scope": "Current Google PKCE repair; local PostgreSQL and Worker. Not hosted DB regression."
   },
   "audit": {
     "status": "DONE",
@@ -398,6 +398,15 @@
       "authSessionsChanged": "Normal new owner sign-in/last_sign_in_at update",
       "originalV7Unchanged": true,
       "existingProductSettingsChanged": false,
+      "newCosts": false,
+      "historical": true
+    },
+    "currentGoogleLogin": {
+      "codeScope": "moa/ only, public owner login/callback, tests and documentation",
+      "newSharedAuthConfigurationChanges": false,
+      "existingGoogleProviderReused": true,
+      "existingCallbackReused": true,
+      "existingProductsDataSchemaRlsStorageChanged": false,
       "newCosts": false
     }
   },
@@ -493,6 +502,11 @@
       "item": "Clean-profile live email authentication and live expired/foreign-user callback rejection",
       "status": "NOT_TESTED",
       "verifiedAlternative": "Fresh actual mail reauthentication in existing Chrome profile; empty-context and negative cases covered by mocked packaged Worker tests."
+    },
+    {
+      "item": "Current actual Google account selection/consent and return",
+      "status": "NOT_TESTED",
+      "reason": "Real Google chooser reached; user handoff requested. Current actual success not yet observed."
     }
   ],
   "costs": {
@@ -760,10 +774,10 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T08:13:46.356Z",
+      "preparedAt": "2026-11-24T08:43:55.134Z",
       "manifest": {
         "product": "moa",
-        "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+        "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
         "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
         "cloudConfigured": true
       },
@@ -772,11 +786,11 @@
         "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
         "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
         "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
-        "build-manifest.json": "72a470f89281c133273b9bc8c956b1cf39eeec494ba0100f3f52a0b6b170febb",
+        "build-manifest.json": "26b39e75f54d4fe7fdc8c64c8fe4ba565371ae75c6b024f94b7562c25527f380",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059",
+      "workerSha256": "678eaad3d7dbb7627104865fcf42161533859d89700367a15aaba6807493a4fe",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": true
@@ -807,7 +821,7 @@
       "bucketPrivate": true,
       "fileLimit": 26214400
     },
-    "hostedMoaChecks": "PARTIAL: current live email authentication/reload/manifest DONE; full media/restore/isolation not replayed",
+    "hostedMoaChecks": "PARTIAL: actual Google account chooser reached; Google return pending; hosted media/restore/isolation not replayed",
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
@@ -817,11 +831,11 @@
     ],
     "access": "owner-only",
     "ownerGateway": {
-      "unitTests": 23,
-      "browserPackageChecks": 10,
+      "unitTests": 26,
+      "browserPackageChecks": 13,
       "authenticationTest": "synthetic JWT / mocked RPC",
-      "actualOwnerLogin": "DONE: actual new mail button click returned to owner cloud home; current release",
-      "liveHostChecks": "New mail login, owner home, clean credential URL, reload and exact protected hosted manifest verified.",
+      "actualOwnerLogin": "Google account chooser DONE; current Google selection/return pending. Previous actual email login historical.",
+      "liveHostChecks": "Production Google button and real account chooser DONE; Google return pending.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -831,37 +845,29 @@
       "watchPaths": [
         "moa/*"
       ],
-      "actualOwnerSessionReconnect": "DONE: reload after fresh actual email authentication"
+      "actualOwnerSessionReconnect": "Current Google flow NOT_TESTED; previous actual email reload retained as historical."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
-    "deploymentId": "d8ce9768-1edf-42e5-8986-2378adac5e02",
+    "sourceCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+    "deploymentId": "943e0fbe-699f-421c-8d72-c890178fd120",
     "published": true,
     "actualBrowserChecks": {
-      "method": "Supported Windows Computer Use / actual desktop Chrome",
-      "freshEmailLogin": "DONE: actual deployed UI request, received new mail, clicked actual Gmail Log In link, returned to canonical root with owner cloud account and records0",
-      "emailReceivedAtUTC": "2026-11-24 08:15:48",
-      "lastSignInAtUTC": "2026-11-24 08:18:59.006305+00",
-      "lastSignInEvidence": "Read-only query of existing owner auth.users.last_sign_in_at",
-      "existingOwnerSession": "DONE: reload after fresh email login remains authenticated",
-      "cleanCredentialURL": "DONE: root URL without credential fragment after handoff",
-      "actualManifest": {
-        "status": "DONE",
-        "manifest": {
-          "product": "moa",
-          "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
-          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
-          "cloudConfigured": true
-        },
-        "method": "Authenticated Chrome document read at production /build-manifest.json"
-      },
-      "cleanProfileLiveLogin": "NOT_TESTED; actual fresh mail reauthentication used existing regular Chrome profile",
-      "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px package passed",
+      "method": "Supported Windows Computer Use / actual Chrome",
+      "productionGoogleButton": "DONE",
+      "googleAccountChooser": "DONE",
+      "googleAccountSelectionReturn": "NOT_TESTED: user handoff pending",
+      "currentPrivateManifest": "NOT_REPLAYED",
+      "freshEmailLogin": "Historical previous96490 release; not replayed",
+      "currentLiveMobile": "NOT_TESTED; packaged five widths passed",
       "hostedMediaBackupIsolationReplay": "NOT_TESTED",
       "realDevices": "NOT_TESTED",
       "productionDiaryHabitMediaWrites": false,
-      "normalAuthSignIn": true,
-      "actualWindowScreenshots": "Displayed/reviewed in tool; not re-saved"
+      "actualWindowScreenshots": "Displayed/reviewed in tool, not re-saved",
+      "localPreviewScreenshots": [
+        "qa-evidence/google-login-304.png",
+        "qa-evidence/google-login-390.png",
+        "qa-evidence/google-login-1280.png"
+      ]
     },
     "runtimeFixes": [
       {
@@ -962,9 +968,9 @@
       "actualClientWidth": 304,
       "actualScrollWidth": 304,
       "actualLoginDialogInitiallyOpen": false,
-      "newDialogRealOwnerLoginReplay": "DONE: actual new mail link clicked in Gmail, owner app and reload verified",
+      "newDialogRealOwnerLoginReplay": "Google account chooser DONE, selection/return pending; previous email success historical",
       "authPoliciesChanged": false,
-      "supabaseChanged": true,
+      "supabaseChanged": false,
       "newCosts": false,
       "style": "White warm diary retained. Public noninteractive date is quieter and lighter; mobile24px/desktop28px text-to-photo spacing. Private app unchanged.",
       "previewViews": [
@@ -981,7 +987,8 @@
       "actualDesktopScrollWidth": 958,
       "historicalViewportMetrics": "actualClientWidth/ScrollWidth fields are earlier checkpoints. Current hosted desktop verified visually; no exact DOM viewport measurement.",
       "dateBadge": "Visible day/month/weekday and ISO/accessible full date stay synchronized; local21/23 and live23→21 checked.",
-      "authConfigurationChange": "One exact Moa callback allowed URL added; Site URL/providers/templates preserved"
+      "authConfigurationChange": "No change this Google task; reuse enabled Google provider and previously allowed exact callback",
+      "primaryLogin": "Google PKCE account selection"
     },
     "previousIntroductionRelease": {
       "sourceCommit": "528c5e5546c152434ed80bf0bd8d87356b3247ed",
@@ -1279,7 +1286,7 @@
         "actualDesktopScrollWidth": 943
       }
     },
-    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success for96490d7a48cc6f87dd654acf13248a3ad4336046, deploymentd8ce9768-1edf-42e5-8986-2378adac5e02.",
+    "currentProviderStatusEvidence": "GitHub Cloudflare check completed/success fore716e90dfbdfd78d1f685ed5addaacf46b733e7c, deployment943e0fbe-699f-421c-8d72-c890178fd120.",
     "currentProviderWorkerHashReadback": "NOT_TESTED: local final Worker SHA recorded; no provider-log hash readback."
   },
   "previousIntroductionCandidate": {
@@ -1357,10 +1364,10 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T08:13:50.182Z",
+    "checkedAt": "2026-11-24T08:44:00.569Z",
     "manifest": {
       "product": "moa",
-      "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+      "revision": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
       "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
       "cloudConfigured": true
     },
@@ -1388,6 +1395,18 @@
       },
       {
         "name": "email request uses exact Moa callback without signup or automatic link-paste form",
+        "status": "DONE"
+      },
+      {
+        "name": "Google PKCE account selection returns to protected app without persisting provider credentials",
+        "status": "DONE"
+      },
+      {
+        "name": "Google missing proof and denied consent clean URL without exchanging or clearing existing login",
+        "status": "DONE"
+      },
+      {
+        "name": "Google foreign identity cannot replace an existing owner session after code exchange",
         "status": "DONE"
       },
       {
@@ -1437,7 +1456,7 @@
   "currentCloudContract": {
     "status": "DONE",
     "passed": 6,
-    "scope": "Current auth task; intercepted API. Built at starting07837137; unchanged private-app fingerprint.",
+    "scope": "Previous email repair6; unchanged private-app fingerprint, not rerun for current Google change.",
     "evidence": {
       "type": "local intercepted Supabase API contract, not live hosted test",
       "manifest": {
@@ -1455,7 +1474,8 @@
         "second browser reopens the same A cloud record"
       ],
       "errors": []
-    }
+    },
+    "historical": true
   },
   "previousCompactHomeCandidate": {
     "status": "CLOUDFLARE_SIMPLIFIED_HOME_VERIFIED_WITH_LIMITATIONS",
@@ -1657,7 +1677,7 @@
     "shellGitFetch": "ENOTFOUND github.com",
     "remoteSaved": true,
     "method": "Native GitHub API; exact remote tree and raw commit SHA verified before importing local Git object. Working files preserved.",
-    "lineEndings": "Repository LF policy preserved; authenticated production manifest matches current96490 commit and unchanged private-app source hash."
+    "lineEndings": "LF preserved. Current provider commit and real Google UI verified. Current protected manifest not reread; prior email release match historical."
   },
   "previousTypographyRelease": {
     "codeCommit": "bad917be2e6c7549e917fc094ba64b094a096639",
@@ -1842,6 +1862,186 @@
     "references": [
       "https://supabase.com/docs/guides/auth/redirect-urls",
       "https://supabase.com/docs/guides/auth/auth-email-passwordless"
+    ],
+    "historical": true
+  },
+  "previousEmailLoginRelease": {
+    "candidate": {
+      "status": "DONE",
+      "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+      "deployment": "CLOUDFLARE_DEPLOYED",
+      "reason": "Email redirect repair deployed and verified by fresh actual email click, owner home, reload and protected hosted manifest. Local unit23/package10/mock SDK6 passed; app11/populated3 historical; hosted writes/media/restore/isolation not replayed.",
+      "codeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+      "manifest": {
+        "product": "moa",
+        "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "workerSha256": "7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059",
+      "compiledLocally": true,
+      "published": true,
+      "cloudflareCodeCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+      "cloudflareSourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291"
+    },
+    "unit": {
+      "status": "DONE",
+      "passed": 23,
+      "dateKST": "2026-11-24",
+      "scope": "Rerun for email callback repair; local PostgreSQL engine and Worker security, not hosted DB test."
+    },
+    "packagedWorkerBrowser": {
+      "checkedAt": "2026-11-24T08:13:50.182Z",
+      "manifest": {
+        "product": "moa",
+        "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+        "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+        "cloudConfigured": true
+      },
+      "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
+      "results": [
+        {
+          "name": "packaged Worker blocks anonymous HTML, assets, manifest and health",
+          "status": "DONE"
+        },
+        {
+          "name": "service introduction renders before login at 304/320/390/768/1280px with protected app assets",
+          "status": "DONE"
+        },
+        {
+          "name": "photos and calendar dates open the right synthetic record without authentication",
+          "status": "DONE"
+        },
+        {
+          "name": "habit feedback toggles accessibly and resets on reload",
+          "status": "DONE"
+        },
+        {
+          "name": "owner dialog opens only by choice and Escape restores the trigger focus",
+          "status": "DONE"
+        },
+        {
+          "name": "email request uses exact Moa callback without signup or automatic link-paste form",
+          "status": "DONE"
+        },
+        {
+          "name": "email callback cleans credentials and establishes SDK session plus private gate",
+          "status": "DONE"
+        },
+        {
+          "name": "expired and non-owner callbacks clean URL, show retry and keep private app locked",
+          "status": "DONE"
+        },
+        {
+          "name": "synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application",
+          "status": "DONE"
+        },
+        {
+          "name": "logout removes access immediately; public static fallback contains no application",
+          "status": "DONE"
+        }
+      ],
+      "errors": []
+    },
+    "currentCloudContract": {
+      "status": "DONE",
+      "passed": 6,
+      "scope": "Current auth task; intercepted API. Built at starting07837137; unchanged private-app fingerprint.",
+      "evidence": {
+        "type": "local intercepted Supabase API contract, not live hosted test",
+        "manifest": {
+          "product": "moa",
+          "revision": "07837137ea515a6008268003b2559f7c8d90d5cf",
+          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+          "cloudConfigured": true
+        },
+        "results": [
+          "guest records are not automatically uploaded; A saved through supabase-js RPC",
+          "authenticated session reload and cloud readback",
+          "cross-tab logout clears private title/body/files, backup password and selected restore file",
+          "B sees only B data after account switch; guest data preserved",
+          "network failure does not report saved or discard draft",
+          "second browser reopens the same A cloud record"
+        ],
+        "errors": []
+      }
+    },
+    "deployment": {
+      "sourceCommit": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+      "deploymentId": "d8ce9768-1edf-42e5-8986-2378adac5e02",
+      "package": {
+        "preparedAt": "2026-11-24T08:13:46.356Z",
+        "manifest": {
+          "product": "moa",
+          "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+          "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+          "cloudConfigured": true
+        },
+        "files": 3,
+        "hashes": {
+          "index.html": "d04075439f59ba2b092ef68a4a3f1342dbf224eb9ece889ef0db72a7e4d7d26a",
+          "app.js": "47bd1c660d6d339bca284ce59572aabe2ca4390c92760c2320c83c61691b8998",
+          "service.css": "f51b5ea35e91e3525d8deb4b9dcff70fb7f60509c67108f8a48c08c186cb70ec",
+          "build-manifest.json": "72a470f89281c133273b9bc8c956b1cf39eeec494ba0100f3f52a0b6b170febb",
+          "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
+          "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+        },
+        "workerSha256": "7177e258d6f650c0532469f32b21eb419d2636ae7d6e7227fe91d9a6b61f5059",
+        "access": "owner-only",
+        "staticFallback": "setup notice only",
+        "published": true
+      },
+      "actualBrowserChecks": {
+        "method": "Supported Windows Computer Use / actual desktop Chrome",
+        "freshEmailLogin": "DONE: actual deployed UI request, received new mail, clicked actual Gmail Log In link, returned to canonical root with owner cloud account and records0",
+        "emailReceivedAtUTC": "2026-11-24 08:15:48",
+        "lastSignInAtUTC": "2026-11-24 08:18:59.006305+00",
+        "lastSignInEvidence": "Read-only query of existing owner auth.users.last_sign_in_at",
+        "existingOwnerSession": "DONE: reload after fresh email login remains authenticated",
+        "cleanCredentialURL": "DONE: root URL without credential fragment after handoff",
+        "actualManifest": {
+          "status": "DONE",
+          "manifest": {
+            "product": "moa",
+            "revision": "96490d7a48cc6f87dd654acf13248a3ad4336046",
+            "sourceSha256": "0977c505bd63ed6c3a9d33aaaccb082bd3a8d71da1760a8ac61b1e78ba798291",
+            "cloudConfigured": true
+          },
+          "method": "Authenticated Chrome document read at production /build-manifest.json"
+        },
+        "cleanProfileLiveLogin": "NOT_TESTED; actual fresh mail reauthentication used existing regular Chrome profile",
+        "currentLiveMobile": "NOT_TESTED; local304/320/390/768/1280px package passed",
+        "hostedMediaBackupIsolationReplay": "NOT_TESTED",
+        "realDevices": "NOT_TESTED",
+        "productionDiaryHabitMediaWrites": false,
+        "normalAuthSignIn": true,
+        "actualWindowScreenshots": "Displayed/reviewed in tool; not re-saved"
+      }
+    }
+  },
+  "googleLogin": {
+    "status": "PARTIAL",
+    "codeCommit": "e716e90dfbdfd78d1f685ed5addaacf46b733e7c",
+    "deploymentId": "943e0fbe-699f-421c-8d72-c890178fd120",
+    "primaryButton": "Google로 계속하기",
+    "secondaryMethods": "다른 방법으로 로그인: email/password",
+    "googleProviderEnabledReadback": true,
+    "existingOwnerGoogleIdentityCount": 1,
+    "newProviderKeysOrSharedAuthSettingsChanged": false,
+    "callbackURL": "https://moa-diary-web.pages.dev/__moa_auth_callback",
+    "flow": "PKCE S256 using actual pinned SDK",
+    "proofStorage": "tab sessionStorage, code-verifier keys only; candidate session writes discarded",
+    "providerTokensPersisted": false,
+    "serverOwnerCheckBeforeAppPersistence": true,
+    "rejectCallbackPreservesOwnerSession": "DONE in mocked packaged browser",
+    "actualGoogleAccountChooser": "DONE: production button reached real Google account selection",
+    "actualGoogleAccountSelectionAndReturn": "NOT_TESTED: user account selection/consent handoff pending",
+    "actualNewAuthSession": "NOT_TESTED: previous 08:18:59 timestamp predates current Google test",
+    "realDevice": "NOT_TESTED",
+    "newCosts": false,
+    "references": [
+      "https://supabase.com/docs/guides/auth/social-sign-in/auth-google",
+      "https://supabase.com/docs/guides/auth/sessions/pkce-flow"
     ]
   }
 }
