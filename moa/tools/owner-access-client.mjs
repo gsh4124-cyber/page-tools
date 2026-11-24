@@ -33,10 +33,10 @@ $('#openCalendarRecord').onclick=()=>openEntry(selectedDay);
 document.querySelectorAll('[data-demo-habit]').forEach(button=>button.onclick=()=>{button.setAttribute('aria-pressed',String(button.getAttribute('aria-pressed')!=='true'));$('#habitCount').textContent=document.querySelectorAll('[data-demo-habit][aria-pressed="true"]').length+' / 2 완료';});
 const notice=text=>$('#gateNotice').textContent=text;
 const clearGate=async()=>{try{await fetch('/__moa_logout',{method:'POST',cache:'no-store'});}catch{}};
-const authorizeGate=async accessToken=>{
+const authorizeGate=async(accessToken,{clearOnReject=true}={})=>{
  if(!accessToken)throw Error('로그인 정보를 확인해 주세요.');
  const r=await fetch('/__moa_session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accessToken}),cache:'no-store'});
- if(!r.ok){if(r.status===401){await clearGate();await client.auth.signOut({scope:'local'});throw Error('소유자 계정으로 확인해 주세요.');}throw Error('입장 확인에 실패했어요. 잠시 후 다시 시도해 주세요.');}
+ if(!r.ok){if(r.status===401){if(clearOnReject){await clearGate();await client.auth.signOut({scope:'local'});}throw Error('소유자 계정으로 확인해 주세요.');}throw Error('입장 확인에 실패했어요. 잠시 후 다시 시도해 주세요.');}
 };
 const enter=async session=>{await authorizeGate(session?.access_token);location.replace('/');};
 const task=async fn=>{if(busy)return;busy=true;document.querySelectorAll('#gateDialog button[type="submit"]').forEach(b=>b.disabled=true);try{await fn();}catch(e){if(!dialog.open)dialog.showModal();notice(e.message||'로그인을 확인해 주세요.');}finally{busy=false;document.querySelectorAll('#gateDialog button[type="submit"]').forEach(b=>b.disabled=false);}};
@@ -49,7 +49,7 @@ task(async()=>{
   if(!dialog.open)dialog.showModal();notice('로그인을 확인하고 있어요…');
   // The server checks the owner, JWT and live Auth session before this browser
   // persists credentials. The private application remains behind the same gate.
-  await authorizeGate(callback.accessToken);
+  await authorizeGate(callback.accessToken,{clearOnReject:false});
   try{
    const {data,error}=await client.auth.setSession({access_token:callback.accessToken,refresh_token:callback.refreshToken});
    if(error||!data.session?.access_token)throw error||Error('No session');

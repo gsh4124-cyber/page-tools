@@ -98,6 +98,15 @@ try{
   try{await cp.waitForURL(base+'/',{timeout:8000});}catch(e){console.log('Callback diagnostic',JSON.stringify({path:new URL(cp.url()).pathname,notice:await cp.locator('#gateNotice').textContent().catch(()=>''),authPaths:seen.map(x=>x.path),cookies:(await context.cookies()).map(x=>({name:x.name,secure:x.secure})),errors}));throw e;}await cp.locator('#entryForm').waitFor({state:'attached'});
   assert.equal(new URL(cp.url()).hash,'');const session=await cp.evaluate(()=>JSON.parse(localStorage.getItem('moa-auth-v1')||'null'));assert.equal(session.user.id,owner);assert.equal(session.refresh_token,'synthetic-refresh');
   const cookie=(await context.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.ok(seen.some(x=>x.path==='/auth/v1/user'));
+  // A rejected return URL must not sign out a previously authenticated owner.
+  const oldCookie=cookie.value,priorUserRequests=seen.filter(x=>x.path==='/auth/v1/user').length;
+  const rejected=await context.newPage();
+  const foreign=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:'22222222-2222-4222-8222-222222222222',role:'authenticated',exp})).toString('base64url'),Buffer.from('synthetic').toString('base64url')].join('.');
+  await rejected.goto(base+'/__moa_auth_callback#'+new URLSearchParams({access_token:foreign,refresh_token:'foreign-refresh',token_type:'bearer',type:'magiclink'}));
+  await rejected.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('소유자 계정'));
+  assert.equal((await context.cookies()).find(c=>c.name==='__Host-moa_gate')?.value,oldCookie);
+  assert.equal(await rejected.evaluate(()=>JSON.parse(localStorage.getItem('moa-auth-v1')).user.id),owner);
+  assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.equal(seen.filter(x=>x.path==='/auth/v1/user').length,priorUserRequests);
   await context.close();
  });
  await check('expired and non-owner callbacks clean URL, show retry and keep private app locked',async()=>{

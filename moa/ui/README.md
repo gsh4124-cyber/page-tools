@@ -8,6 +8,8 @@
 
 입장 메일은 `https://moa-diary-web.pages.dev/__moa_auth_callback`을 정확한 복귀 주소로 요청하고 신규 계정을 만들지 않는다. 사용자가 메일 링크를 누르면 Supabase 인증 후 이 공개 완료 화면으로 돌아온다. 화면은 URL의 인증 값을 먼저 지우고, 기존 서버 게이트가 JWT·소유자·현재 Auth 세션을 확인한 뒤 기존 `moa-auth-v1` SDK 세션을 저장하고 비공개 앱을 연다. 만료/오류 링크는 새 메일 안내를 표시하고 다른 사용자나 불완전한 링크는 차단한다. 정상 메일 요청 뒤 링크 붙여넣기 폼을 자동으로 열지 않으며, 수동 방식은 ‘링크가 열리지 않나요?’ 아래 보조 수단으로 남긴다.
 
+아직 저장하지 않은 콜백 자격 증명이 거부되면 기존 정상 소유자의 SDK 세션/보호 쿠키를 지우지 않는다. 이미 로그인된 소유자가 다른 계정의 링크를 여는 회귀 검사에서도 기존 소유자 세션과 비공개 앱 접근이 유지되는 것을 확인한다.
+
 이 문제의 원인은 복귀 주소 생략과 프로젝트 기본 주소 `http://localhost:3000`이었다. 사용자 요청으로 기존 Site URL/템플릿/다른 설정을 보존하고 위 모아 주소 한 줄만 Redirect URLs에 추가했다. 전체 앱은 계속 소유자 전용이며 공개 콜백이 실제 앱 파일을 공개하지 않는다. 실제 메일/호스트 검증 범위는 `QA_REPORT.md`를 따른다. 참고: [Supabase 메일 로그인](https://supabase.com/docs/guides/auth/auth-email-passwordless), [허용 복귀 주소](https://supabase.com/docs/guides/auth/redirect-urls).
 
 ## 설계 기준과 Impeccable 적용
