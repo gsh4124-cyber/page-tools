@@ -1,3 +1,13 @@
+// Browser storage can be blocked or full. Keep this visit usable without pretending it persisted.
+if(typeof window!=='undefined')window.BibleStorage=(()=>{
+  const memory=new Map();
+  function unavailable(){
+    if(!document.body||document.getElementById('readerStorageNotice'))return;
+    const lang=(document.documentElement.lang||'ko').split('-')[0],copy={ko:'브라우저 저장을 사용할 수 없어 변경 사항은 이번 화면에서만 유지됩니다.',en:'Browser storage is unavailable. Changes last only for this visit.',fr:'Le stockage est indisponible. Les modifications restent uniquement pendant cette visite.',de:'Browserspeicher ist nicht verfügbar. Änderungen gelten nur für diesen Besuch.',zh:'浏览器存储不可用，更改仅在本次访问中保留。',ru:'Хранилище недоступно. Изменения сохраняются только на время посещения.',la:'Repositio navigatri deest. Mutationes hac visitatione tantum manent.',pt:'Armazenamento indisponível. As alterações duram apenas nesta visita.',ar:'تخزين المتصفح غير متاح. تبقى التغييرات خلال هذه الزيارة فقط.'};
+    const note=document.createElement('p');note.id='readerStorageNotice';note.setAttribute('role','status');note.textContent=copy[lang]||copy.en;(document.querySelector('footer')||document.body).append(note);
+  }
+  return {getItem(key){if(memory.has(key))return memory.get(key);try{return localStorage.getItem(key);}catch{return null;}},setItem(key,value){memory.set(key,String(value));try{localStorage.setItem(key,String(value));}catch{unavailable();}},removeItem(key){memory.set(key,null);try{localStorage.removeItem(key);}catch{unavailable();}}};
+})();
 const BOOKS = [
   ["창세기","Genesis","Gen"],["출애굽기","Exodus","Exod"],["레위기","Leviticus","Lev"],["민수기","Numbers","Num"],["신명기","Deuteronomy","Deut"],
   ["여호수아","Joshua","Josh"],["사사기","Judges","Judg"],["룻기","Ruth","Ruth"],["사무엘상","1Samuel","1Sam"],["사무엘하","2Samuel","2Sam"],
@@ -41,10 +51,10 @@ const cache=new Map(), pendingBooks=new Map(); const SEARCH_LIMIT=100,SEARCH_BAT
 let keepServerChapter=true;
 let state=restoreLocation(),currentBookData=null,activeTranslationId=restoreTranslation(),searchRun=0,loadRun=0;
 
-function restoreLocation(){try{const s=JSON.parse(localStorage.getItem("bible-reader-location"));if(s&&Number.isInteger(s.bookIndex)&&Number.isInteger(s.chapter))return{bookIndex:Math.max(0,Math.min(BOOKS.length-1,s.bookIndex)),chapter:Math.max(1,s.chapter)}}catch(_){}return{bookIndex:BOOKS.findIndex(b=>b.file==="John"),chapter:3}}
-function saveLocation(){localStorage.setItem("bible-reader-location",JSON.stringify(state))}
-function restoreTranslation(){const saved=localStorage.getItem("bible-reader-translation");return TRANSLATIONS[saved]?saved:"krv1961"}
-function saveTranslation(){localStorage.setItem("bible-reader-translation",activeTranslationId)}
+function restoreLocation(){try{const s=JSON.parse(window.BibleStorage.getItem("bible-reader-location"));if(s&&Number.isInteger(s.bookIndex)&&Number.isInteger(s.chapter))return{bookIndex:Math.max(0,Math.min(BOOKS.length-1,s.bookIndex)),chapter:Math.max(1,s.chapter)}}catch(_){}return{bookIndex:BOOKS.findIndex(b=>b.file==="John"),chapter:3}}
+function saveLocation(){window.BibleStorage.setItem("bible-reader-location",JSON.stringify(state))}
+function restoreTranslation(){const saved=window.BibleStorage.getItem("bible-reader-translation");return TRANSLATIONS[saved]?saved:"krv1961"}
+function saveTranslation(){window.BibleStorage.setItem("bible-reader-translation",activeTranslationId)}
 function setupBookSelect(){bookSelect.innerHTML="";BOOKS.forEach(book=>{const o=document.createElement("option");o.value=book.index;o.textContent=book.ko;bookSelect.append(o)});bookSelect.value=String(state.bookIndex)}
 
 function normalizeMidvash(raw){return{chapters:(raw.chapters||[]).map((ch,i)=>({chapter:Number(ch.chapter||i+1),verses:(ch.verses||[]).map((v,j)=>({verse:Number(v.number||v.verse||j+1),text:String(v.text||"")}))}))}}
@@ -85,12 +95,12 @@ function setLoading(m="본문을 불러오는 중…"){
   const reader=document.getElementById('singleReader');
   // Keep the reading area in place without leaving the previous chapter under a new heading.
   if(reader){reader.setAttribute('aria-busy','true');reader.style.minHeight=`${Math.max(320,Math.min(reader.getBoundingClientRect().height,innerHeight))}px`;}
-  statusEl.hidden=false;statusEl.classList.remove("error");statusEl.textContent=m;versesEl.innerHTML="";
+  document.getElementById("reloadChapter").hidden=true;statusEl.hidden=false;statusEl.classList.remove("error");statusEl.textContent=m;versesEl.innerHTML="";
 }
-function setError(m){document.getElementById("singleReader")?.setAttribute("aria-busy","false");statusEl.hidden=false;statusEl.classList.add("error");statusEl.textContent=m}
+function setError(m){document.getElementById("singleReader")?.setAttribute("aria-busy","false");statusEl.hidden=false;statusEl.classList.add("error");statusEl.textContent=m;const retry=document.getElementById('reloadChapter');retry.hidden=false;retry.textContent=({ko:'본문 다시 불러오기',en:'Retry loading passage',fr:'Recharger le passage',de:'Text erneut laden',zh:'重新加载经文',ru:'Загрузить отрывок снова',la:'Locum iterum onera',pt:'Recarregar passagem',ar:'إعادة تحميل النص'})[(document.documentElement.lang||'ko').split('-')[0]]||'Retry loading passage'}
 function updateNavigationState(data=currentBookData){if(!data)return;const count=data.chapters.length,atStart=state.bookIndex===0&&state.chapter===1,atEnd=state.bookIndex===BOOKS.length-1&&state.chapter===count;prevButtons.forEach(b=>{b.disabled=atStart;b.setAttribute("aria-disabled",String(atStart))});nextButtons.forEach(b=>{b.disabled=atEnd;b.setAttribute("aria-disabled",String(atEnd))})}
 function updateTranslationMeta(){const tr=TRANSLATIONS[activeTranslationId];const meta=$("#translationAttribution");if(meta)meta.textContent=tr.id==="krv1961"?"개역한글 · 대한성서공회":`${tr.name} · ${tr.language} · ${tr.rights}`}
-function renderVerses(data){const book=BOOKS[state.bookIndex],chapter=data.chapters.find(i=>Number(i.chapter)===state.chapter);chapterTitle.textContent=`${book.ko} ${state.chapter}장`;document.title=`${book.ko} ${state.chapter}장 · ${TRANSLATIONS[activeTranslationId].name}`;if(!chapter){setError("해당 장을 찾지 못했습니다.");return}const f=document.createDocumentFragment();chapter.verses.forEach(v=>{const p=document.createElement("p");p.className="verse";p.dataset.verse=v.verse;const n=document.createElement("span");n.className="verse-number";n.textContent=v.verse;const t=document.createElement("span");t.className="verse-text";t.textContent=v.text;t.title="클릭하면 이 절을 복사합니다";p.append(n,t);f.append(p)});statusEl.hidden=true;versesEl.replaceChildren(f);const reader=document.getElementById("singleReader");if(reader){reader.removeAttribute("aria-busy");reader.style.removeProperty("min-height");}chapterSelect.disabled=false;updateNavigationState(data);updateTranslationMeta()}
+function renderVerses(data){const book=BOOKS[state.bookIndex],chapter=data.chapters.find(i=>Number(i.chapter)===state.chapter);chapterTitle.textContent=`${book.ko} ${state.chapter}장`;document.title=`${book.ko} ${state.chapter}장 · ${TRANSLATIONS[activeTranslationId].name}`;if(!chapter){setError("해당 장을 찾지 못했습니다.");return}const f=document.createDocumentFragment();chapter.verses.forEach(v=>{const p=document.createElement("p");p.className="verse";p.dataset.verse=v.verse;const n=document.createElement("span");n.className="verse-number";n.textContent=v.verse;const t=document.createElement("span");t.className="verse-text";t.textContent=v.text;t.title="클릭하면 이 절을 복사합니다";p.append(n,t);f.append(p)});document.getElementById("reloadChapter").hidden=true;statusEl.hidden=true;versesEl.replaceChildren(f);const reader=document.getElementById("singleReader");if(reader){reader.removeAttribute("aria-busy");reader.style.removeProperty("min-height");}chapterSelect.disabled=false;updateNavigationState(data);updateTranslationMeta()}
 async function loadCurrent({scrollTop=true}={}){
   const run=++loadRun,book=BOOKS[state.bookIndex],translationId=activeTranslationId;
   bookSelect.value=String(state.bookIndex);
@@ -191,6 +201,7 @@ function cancelSearch(){
   searchRun++;searchPanel.hidden=true;searchButton.disabled=false;searchInput.disabled=false;
 }
 function setupControls(){
+  document.getElementById("reloadChapter").addEventListener("click",()=>loadCurrent({scrollTop:false}));
   translationSelect?.addEventListener("change",async()=>{if(!TRANSLATIONS[translationSelect.value])return;activeTranslationId=translationSelect.value;saveTranslation();cancelSearch();await loadCurrent({scrollTop:false})});
   bookSelect.addEventListener("change",async()=>{state.bookIndex=Number(bookSelect.value);state.chapter=1;await loadCurrent()});
   chapterSelect.addEventListener("change",()=>{state.chapter=Number(chapterSelect.value);renderVerses(currentBookData);saveLocation();window.scrollTo({top:0,behavior:"smooth"})});
@@ -200,8 +211,8 @@ function setupControls(){
   document.addEventListener("keydown",e=>{const tag=document.activeElement?.tagName;if(document.querySelector('#memoryQuizDialog[open],.selection-note-backdrop,.record-note-backdrop,.verse-note-editor,.notebook-panel[aria-modal="true"]')||document.activeElement?.closest('.notebook-panel')||["INPUT","TEXTAREA","SELECT"].includes(tag))return;if(e.key==="ArrowLeft"){e.preventDefault();moveChapter(-1)}if(e.key==="ArrowRight"){e.preventDefault();moveChapter(1)}if(e.key==="/"){e.preventDefault();if(!document.querySelector(".topbar")?.classList.contains("search-open"))document.querySelector("#searchToggle")?.click();searchInput.focus()}})
 }
 function restoreReadingPreferences(){window.BibleReadingPreferences?.apply();}
-function changeFont(d){const raw=getComputedStyle(document.documentElement).getPropertyValue("--font-size"),cur=parseFloat(raw)||21,next=Math.max(16,Math.min(32,cur+d));document.documentElement.style.setProperty("--font-size",`${next}px`);localStorage.setItem("bible-reader-font-size",String(next))}
-function toggleWidth(){const cur=localStorage.getItem("bible-reader-width")||"860",next=cur==="860"?"1080":cur==="1080"?"720":"860";document.documentElement.style.setProperty("--reader-width",`${next}px`);localStorage.setItem("bible-reader-width",next)}
-function toggleTheme(){const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("bible-reader-theme",next)}
+function changeFont(d){const raw=getComputedStyle(document.documentElement).getPropertyValue("--font-size"),cur=parseFloat(raw)||21,next=Math.max(16,Math.min(32,cur+d));document.documentElement.style.setProperty("--font-size",`${next}px`);window.BibleStorage.setItem("bible-reader-font-size",String(next))}
+function toggleWidth(){const cur=window.BibleStorage.getItem("bible-reader-width")||"860",next=cur==="860"?"1080":cur==="1080"?"720":"860";document.documentElement.style.setProperty("--reader-width",`${next}px`);window.BibleStorage.setItem("bible-reader-width",next)}
+function toggleTheme(){const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;window.BibleStorage.setItem("bible-reader-theme",next)}
 
 restoreReadingPreferences();if(translationSelect)translationSelect.value=activeTranslationId;setupBookSelect();setupControls();loadCurrent({scrollTop:false});

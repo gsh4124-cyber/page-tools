@@ -83,12 +83,12 @@
 
   function markHintSeen(){
     hint.hidden = true;
-    try { localStorage.setItem(HINT_KEY,'1'); } catch (_) {}
+    try { window.BibleStorage.setItem(HINT_KEY,'1'); } catch (_) {}
   }
 
   function maybeShowHint(){
     let seen = false;
-    try { seen = localStorage.getItem(HINT_KEY) === '1'; } catch (_) {}
+    try { seen = window.BibleStorage.getItem(HINT_KEY) === '1'; } catch (_) {}
     if (seen) return;
     hint.textContent = labels().hint;
     hint.hidden = false;

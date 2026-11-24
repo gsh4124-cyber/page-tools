@@ -29,9 +29,9 @@
     try { return window.BibleI18n?.bookName?.(index) || BOOKS[index]?.ko || ''; }
     catch (_) { return BOOKS[index]?.ko || ''; }
   };
-  const readMarks = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (_) { return {}; } };
+  const readMarks = () => { try { return JSON.parse(window.BibleStorage.getItem(STORE_KEY)) || {}; } catch (_) { return {}; } };
   const writeMarks = marks => {
-    localStorage.setItem(STORE_KEY, JSON.stringify(marks));
+    window.BibleStorage.setItem(STORE_KEY, JSON.stringify(marks));
     window.dispatchEvent(new CustomEvent('bible-reader-records-changed'));
   };
   const rowText = row => row?.querySelector('.verse-text')?.textContent?.trim() || '';
@@ -284,7 +284,7 @@
     if (typeof TRANSLATIONS !== 'undefined' && TRANSLATIONS[entry.tr]) {
       activeTranslationId = entry.tr;
       const select = document.querySelector('#translationSelect'); if (select) select.value = entry.tr;
-      localStorage.setItem('bible-reader-translation',entry.tr);
+      window.BibleStorage.setItem('bible-reader-translation',entry.tr);
     }
     state.bookIndex = entry.bookIndex;
     state.chapter = entry.chapter;

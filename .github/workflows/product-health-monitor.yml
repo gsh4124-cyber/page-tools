@@ -83,6 +83,13 @@ jobs:
           HOME: /root
           SITE_FLOW_ENGINES: chromium,firefox,webkit
         run: node tools/site-flow-smoke.mjs --local
+      - name: Audit links, mobile layouts, storage failures and recovery
+        env:
+          HOME: /root
+          FULL_AUDIT_ENGINES: chromium,firefox,webkit
+        run: |
+          python3 tools/audit_static.py
+          node tools/full-site-audit.mjs --local
       - name: Preserve candidate screenshots
         if: always()
         uses: actions/upload-artifact@v6
@@ -91,6 +98,7 @@ jobs:
           path: |
             qa_evidence/search-entry/
             qa_evidence/site-flow/
+            qa_evidence/full-audit/
           retention-days: 7
 
   health:
@@ -339,6 +347,8 @@ jobs:
         run: node pc-checkup/tools/device-experience-smoke.mjs
       - name: Verify live stable reading, completion and tool counters
         run: node tools/site-flow-smoke.mjs
+      - name: Audit live layouts, blocked storage and recovery
+        run: node tools/full-site-audit.mjs
       - name: Verify search guide entry and destination behavior
         if: steps.changed.outputs.projects != ''
         run: node tools/search-entry-smoke.mjs
@@ -359,5 +369,6 @@ jobs:
             pc-checkup/qa_evidence/live/
             qa_evidence/search-discovery/
             qa_evidence/site-flow/
+            qa_evidence/full-audit/
           if-no-files-found: warn
           retention-days: 7
