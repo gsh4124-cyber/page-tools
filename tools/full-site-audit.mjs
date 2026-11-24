@@ -36,6 +36,7 @@ for(const engine of (process.env.FULL_AUDIT_ENGINES||'chromium').split(',')){
   for(const [width,height] of [[320,740],[390,844],[844,390],[1280,900]])for(const host of Object.keys(hosts))await scenario(browser,{engine,width,height,site:host,flow:'home-layout'},async page=>{
    await page.goto(`https://${host}/?qa=1`,{waitUntil:'domcontentloaded'});
    await page.locator(host.startsWith('bible')?'#verses .verse':host.startsWith('random')?'#pickBtn':'#languagePicker').first().waitFor();await fit(page);
+   if(host.startsWith('bible')){await page.evaluate(()=>{for(let i=0;i<20;i++)document.getElementById('fontUp').click();});assert.equal(await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)),32,'Large text must grow on mobile as well as desktop');await fit(page);}
    const unnamed=await page.evaluate(()=>[...document.querySelectorAll('button,input[type=button],input[type=submit]')].filter(n=>n.getClientRects().length&&getComputedStyle(n).visibility!=='hidden').filter(n=>![n.getAttribute('aria-label'),n.title,n.textContent,n.value,(n.getAttribute('aria-labelledby')||'').split(/\s+/).map(id=>document.getElementById(id)?.textContent||'').join(' ')].some(v=>String(v||'').trim())).map(n=>n.id||n.outerHTML.slice(0,100)));
    assert.deepEqual(unnamed,[],'Visible controls without an accessible name');
   });
@@ -51,7 +52,7 @@ for(const engine of (process.env.FULL_AUDIT_ENGINES||'chromium').split(',')){
   for(const storage of ['blocked','malformed'])for(const site of ['bible','random','device'])await scenario(browser,{engine,width:390,height:844,site,storage,flow:'unavailable-or-damaged-storage'},async page=>{
    if(site==='bible'){
     await page.goto('https://bible-reader-1iz.pages.dev/?qa=1',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>typeof currentBookData!=='undefined'&&!!currentBookData&&document.querySelector('#status').hidden);
-    await page.locator('#fontUp').click();await page.locator('#toolbarMoreToggle').click();await page.locator('#widthToggle').click();
+    const before=await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));await page.locator('#fontUp').click();assert((await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)))>before,'Text size action must change the displayed text');await page.locator('#toolbarMoreToggle').click();await page.locator('#widthToggle').click();
     if(!(await page.locator('#themeToggle').isVisible()))await page.locator('#toolbarMoreToggle').click();await page.locator('#themeToggle').click();
     if(await page.locator('#toolbarMoreMenu').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('#compareToggle').click();assert(await page.locator('#comparePanel').isVisible());
     if(storage==='blocked')await page.locator('#readerStorageNotice').waitFor();
