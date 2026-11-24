@@ -998,3 +998,21 @@ header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
 .ladder-pick{height:52px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .ladder-svg{display:block;overflow:visible}.ladder-end{white-space:normal;line-height:1.35}
 .capsule-ball{display:flex;align-items:center;justify-content:center}.capsule-label{max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:900;color:#241c15}
+/* --- flow order: controls follow the order a pick happens --- */
+/* Recording must start before the pick, so it sits just above the pick button. */
+#mainCard .picker-record-tools{margin:0 0 10px}
+/* Winners lead the full result list and stand out from the rest. */
+.result-list .winner.is-hit{background:#fbecd2!important;border-color:rgba(176,122,46,.35)!important}
+.result-list .winner.is-hit .result-person{font-weight:900}
+/* Wide screens: settings stay on the left, the draw and its result appear beside them. */
+@media (min-width:1100px){
+  #mainCard .methods{grid-template-columns:repeat(8,minmax(0,1fr))}
+  /* Number mode: total and pick count side by side so the pick button fits on the first screen. */
+  #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;grid-auto-flow:row dense}
+  #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)) > *{grid-column:1 / -1}
+  #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)) > #totalField{grid-column:1}
+  #mainCard .content:has(#nameMode.hidden):has(#totalField:not(.hidden)):has(#pickField:not(.hidden)) > #pickField{grid-column:2}
+  #pickerArea:has(> #stage.show){display:grid;grid-template-columns:minmax(0,600px) minmax(0,1fr);gap:24px;align-items:start;width:min(1180px,calc(100vw - 48px));position:relative;left:calc(325px - min(590px,50vw - 24px))}
+  #pickerArea:has(> #stage.show) > #mainCard{grid-column:1}
+  #pickerArea:has(> #stage.show) > :not(#mainCard){grid-column:2;margin-top:0}
+}

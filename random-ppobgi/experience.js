@@ -62,7 +62,7 @@ function historyText(item){
  });
  return `${title} · ${rows.join(' / ')}`;
 }
-function renderHistory(container){const items=read(RESULTS_KEY);container.innerHTML='';items.forEach(item=>{const row=document.createElement('div');row.className='picker-history-item';row.setAttribute('translate','no');row.textContent=historyText(item);container.append(row)})}
+function renderHistory(container){const items=read(RESULTS_KEY);container.innerHTML='';items.forEach(item=>{const row=document.createElement('div');row.className='picker-history-item';row.setAttribute('translate','no');row.textContent=historyText(item);container.append(row)});const section=container.closest?.('.picker-history');if(section)section.hidden=!items.length}
 function saveResultIfNew(historyList,detail){
  if(!detail?.runId||!Array.isArray(detail.results)||!detail.results.length)return;
  const items=read(RESULTS_KEY).filter(item=>item.runId!==detail.runId);
@@ -116,7 +116,7 @@ function enhanceConfigSets(){
  window.addEventListener('storage',event=>{if(event.key===CONFIGS_KEY)refresh();});refresh();
  const style=document.createElement('style');style.textContent='.picker-config-sets{margin:14px 0;border:1px solid var(--line);border-radius:12px;padding:0 12px}.picker-config-sets summary{cursor:pointer;min-height:44px;box-sizing:border-box;padding:12px 0;font-size:14px;font-weight:800}.picker-config-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}.picker-config-row select{grid-column:1/-1;width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--soft2);font:inherit;font-size:16px;padding:8px}.picker-config-row button{min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);font:inherit;font-size:13px;font-weight:800;white-space:normal;overflow-wrap:anywhere;padding:8px}.picker-config-row button:disabled{opacity:.5;cursor:default}.picker-config-sets p{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 0}.picker-config-sets p:empty{display:none}';panel.append(style);
 }
-function enhanceResults(){const block=resultBlock();if(!block||byId('pickerResultTools'))return;const tools=document.createElement('div');tools.id='pickerResultTools';tools.className='picker-result-tools';tools.innerHTML=`<button class="again" id="copyPickerResult" type="button">${t().copy}</button><button class="again" id="sharePickerResult" type="button">${t().share}</button>`;block.append(tools);
+function enhanceResults(){const block=resultBlock();if(!block||byId('pickerResultTools'))return;const tools=document.createElement('div');tools.id='pickerResultTools';tools.className='picker-result-tools';tools.innerHTML=`<button class="again" id="copyPickerResult" type="button">${t().copy}</button><button class="again" id="sharePickerResult" type="button">${t().share}</button>`;const resultActions=block.querySelector('.actions');if(resultActions)resultActions.before(tools);else block.append(tools);
  const history=document.createElement('section');history.className='picker-history';history.innerHTML=`<div class="picker-history-head"><h3>${t().recent}</h3><button class="picker-mini-btn" id="clearPickerHistory" type="button">${t().clear}</button></div><div class="picker-history-list" id="pickerHistoryList"></div>`;block.after(history);const list=byId('pickerHistoryList');renderHistory(list);
  byId('copyPickerResult').addEventListener('click',async()=>{if(await copy(currentResultText()))toast(t().copied)});
  byId('sharePickerResult').addEventListener('click',async()=>{const text=currentResultText();if(!text)return;if(navigator.share){try{await navigator.share({title:document.title,text,url:location.href});return}catch(e){if(e?.name==='AbortError')return}}if(await copy(`${text}\n${location.href}`))toast(t().copied)});
@@ -137,7 +137,7 @@ function enhanceRecording(){
  const button=document.createElement('button');button.id='recordPickerBtn';button.type='button';
  button.className='picker-mini-btn picker-record-btn';button.textContent=t().record;button.title=t().choose;
  button.addEventListener('click',()=>{if(recorder?.state==='recording')recorder.stop();else startRecording(button)});
- row.append(button);card.after(row);
+ row.append(button);const pick=byId('pickBtn');if(pick)pick.before(row);else card.after(row);
 }
 function init(){css();enhanceNameSets();enhanceConfigSets();enhanceResults();enhanceRecording()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
