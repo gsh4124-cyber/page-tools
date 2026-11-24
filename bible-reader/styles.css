@@ -35,6 +35,8 @@ button:disabled:hover { background:transparent; }
 .toolbar-compact:hover,.quick-tool:hover { color:var(--text); border-color:var(--line); background:var(--hover); }
 main { padding:26px 24px 68px; }
 .reader-shell { width:min(var(--reader-width),100%); margin:0 auto; transition:width .2s ease; }
+#singleReader { min-block-size: max(320px, calc(100svh - 240px)); }
+#singleReader[aria-busy="true"] .status { min-height:160px; display:grid; place-items:center; }
 .search-panel { max-width:800px; margin:0 auto 24px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
 .search-panel[hidden],[hidden] { display:none !important; }
 .search-panel-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
