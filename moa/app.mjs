@@ -202,4 +202,5 @@ async function checkAccount(){if(!client||!repo?.user||busy||document.hidden)ret
 window.addEventListener('focus',checkAccount);document.addEventListener('visibilitychange',checkAccount);
 
 $('#buildId').textContent='build '+__MOA_BUILD__;
+controls(); // Keep writing disabled until the initial verified account has loaded.
 if(client){client.auth.onAuthStateChange((event,session)=>{if(authHold||event==='TOKEN_REFRESHED'||event==='INITIAL_SESSION')return;if(event==='SIGNED_OUT'||(draftIdentity!==undefined&&session?.user.id!==repo?.user?.id)){clearTimeout(draftTimer);draftActive=false;drafts.purge();}setTimeout(async()=>{if(session?.user.id===repo?.user?.id)return;if(session){const {data,error}=await client.auth.getUser();if(error){await activate(null);notice('로그인 확인이 필요해요. 다시 로그인해 주세요.',true);return;}activate(data.user);}else activate(null);},0);});const {data,error}=await client.auth.getUser();if(error&&error.name!=='AuthSessionMissingError'){notice('계정을 확인하지 못했어요. 다시 로그인해 주세요.',true);}await activate(data.user||null);}else await activate(null);
