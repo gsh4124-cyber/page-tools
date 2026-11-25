@@ -74,6 +74,15 @@
     }
     flush();return words;
   }
+  // Keep native UTF-16 selection offsets even when grading composes Hangul or ignores punctuation.
+  function answerTargets(entered,parts){
+    const value=String(entered||''),tokens=[];
+    const segments=typeof Intl.Segmenter==='function'?new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(value):Array.from(value).map((segment,index,array)=>({segment,index:array.slice(0,index).join('').length}));
+    for(const {segment,index} of segments)for(const unit of Array.from(normalize(segment)))tokens.push({start:index,end:index+segment.length});
+    let cursor=0;const targets=[];
+    for(const part of parts){const token=part.entered?tokens[cursor++]:null;if(part.kind==='correct')continue;const at=token?.start??tokens[cursor]?.start??value.length;targets.push({kind:part.kind,start:at,end:token?.end??at});}
+    return targets;
+  }
   function passageRows(chapters,fromChapter,fromVerse,toChapter,toVerse) {
     if (![fromChapter,fromVerse,toChapter,toVerse].every(n=>Number.isInteger(n)&&n>0) ||
         fromChapter>toChapter || (fromChapter===toChapter&&fromVerse>toVerse)) return [];
@@ -226,6 +235,7 @@
     ar:['العودة إلى الإجابات','إجاباتك غير المكتملة ما زالت متاحة.','إجابات غير مكتملة','سيؤدي الإغلاق الآن إلى فقدان إجاباتك غير المكتملة.','ستؤدي البداية من جديد إلى فقدان إجاباتك غير المكتملة.','متابعة الكتابة','حذف الإجابات والإغلاق','حذف الإجابات والبدء من جديد']
   };
   const labels = code => ({...Object.fromEntries(KEYS.map((key, i) => [key, (COPY[code] || COPY.en)[i]])),
+    ...Object.fromEntries(['restoreAnswer','jumpToAnswer'].map((key,i)=>[key,({ko:['지운 답안 복구','입력 위치로 이동'],en:['Restore cleared answer','Go to this in your answer'],fr:['Rétablir la réponse effacée','Aller à cet endroit dans la réponse'],de:['Gelöschte Antwort wiederherstellen','Zu dieser Stelle in der Antwort'],zh:['恢复清空的答案','跳转到答案中的此处'],ru:['Восстановить очищенный ответ','Перейти к этому месту в ответе'],la:['Responsum deletum restitue','Ad hunc locum responsi transi'],pt:['Restaurar resposta apagada','Ir para este trecho da resposta'],ar:['استعادة الإجابة الممسوحة','الانتقال إلى هذا الموضع في الإجابة']}[code]||['Restore cleared answer','Go to this in your answer'])[i]])),
     ...Object.fromEntries(['practicePending','practiceDraft','practiceChapterView','practiceHint','practiceMemoryHint','practiceChapterHelp'].map((key,i)=>[key,(FOCUS_COPY[code]||FOCUS_COPY.en)[i]])),
     ...Object.fromEntries(DRAFT_KEYS.map((key,i)=>[key,(DRAFT_COPY[code]||DRAFT_COPY.en)[i]])),
     ...Object.fromEntries(TRAINING_KEYS.map((key,i)=>[key,(TRAINING_COPY[code]||TRAINING_COPY.en)[i]])),
@@ -237,7 +247,7 @@
     ...Object.fromEntries(['previousVerse','previousChapter'].map((key,i)=>[key,({ko:['이전 절','이전 장'],en:['Previous verse','Previous chapter'],fr:['Verset précédent','Chapitre précédent'],de:['Vorheriger Vers','Vorheriges Kapitel'],zh:['上一节','上一章'],ru:['Предыдущий стих','Предыдущая глава'],la:['Versus prior','Capitulum prius'],pt:['Versículo anterior','Capítulo anterior'],ar:['الآية السابقة','الأصحاح السابق']}[code]||['Previous verse','Previous chapter'])[i]])),
     ...Object.fromEntries(['book','loading','loadError','reload'].map((key,i)=>[key,({ko:['성경책','본문을 불러오는 중…','본문을 불러오지 못했습니다. 다시 시도해 주세요.','다시 불러오기'],en:['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'],fr:['Livre','Chargement…','Impossible de charger le passage. Réessayez.','Recharger'],de:['Buch','Text wird geladen…','Text konnte nicht geladen werden. Bitte erneut versuchen.','Erneut laden'],zh:['书卷','正在加载经文…','无法加载经文，请重试。','重新加载'],ru:['Книга','Загрузка текста…','Не удалось загрузить текст. Повторите попытку.','Загрузить снова'],la:['Liber','Textus oneratur…','Textus onerari non potuit. Iterum tenta.','Iterum onera'],pt:['Livro','Carregando passagem…','Não foi possível carregar a passagem. Tente novamente.','Recarregar'],ar:['السفر','جارٍ تحميل النص…','تعذر تحميل النص. حاول مجدداً.','إعادة التحميل']}[code]||['Book','Loading passage…','Could not load the passage. Please try again.','Reload passage'])[i]])),
     ...(code==='ko'?{wrong:'오자',missing:'빠진 글자',extra:'더 쓴 글자'}:{})});
-  window.BibleMemory = {normalize, grade, comparisonRuns, comparisonWords, labels, passageRows, passageReference, subsetReference, createSession,passageKey,bookPassageReference};
+  window.BibleMemory = {normalize, grade, comparisonRuns, comparisonWords, answerTargets, labels, passageRows, passageReference, subsetReference, createSession,passageKey,bookPassageReference};
   if (typeof document === 'undefined') return;
   const root = document.querySelector('#verses'), menu = document.querySelector('#toolbarMoreMenu');
   if (!root || !menu) return;
@@ -263,7 +273,7 @@
     let collectionRows=[],collectionRun=0,collectionLoading=false,collectionFailed=false,setupRun=0;
     const collectionTexts=new Map(),nameFor=index=>window.BibleI18n?.bookName?.(index)||BOOKS[index]?.ko||book;
     const config={mode,view:'verse',selected:!!selected.length,collection:!!collectionRefs.length,fromChapter:chapter,toChapter:chapter,fromVerse:selected[0]?.verse||source[0].verse,toVerse:selected.at(-1)?.verse||source.at(-1).verse};
-    let lastDeletedCollection=null,practiceShown=true,practiceConfirmed=new Set();
+    let lastDeletedCollection=null,practiceShown=true,practiceConfirmed=new Set();const practiceUndo=new Map();
     let rows=[],attemptRows=[],draftAnswers=[],reviewOnly=false,started=0,session=null;
     let phase='setup',attemptActive=false,suspendedAttempt=null,leaveDialog=null,lastAnswerFocus=null;
     const reference=items=>bookPassageReference(items,index=>nameFor(index??quizBookIndex),config.collection);
@@ -275,11 +285,11 @@
     const header=el('header','memory-header'),title=el('h2','',l.title),closeButton=button(l.close,requestClose,'memory-close');
     title.id='memoryQuizTitle';closeButton.setAttribute('aria-label',l.close);
     const closeIcon=el('span','memory-close-icon','×');closeIcon.setAttribute('aria-hidden','true');closeButton.replaceChildren(el('span','memory-close-label',l.close),closeIcon);header.append(title,closeButton);
-    const context=el('p','memory-context',`${book} · ${version}`),content=el('div','memory-content'),dock=el('div','memory-dock');dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,content,dock);document.body.append(dialog);
+    const context=el('p','memory-context',`${book} · ${version}`),attemptHeading=el('div','memory-attempt-heading'),content=el('div','memory-content'),dock=el('div','memory-dock');attemptHeading.hidden=true;dock.hidden=true;dock.setAttribute('role','group');dock.setAttribute('aria-label',l.title);dialog.append(header,context,attemptHeading,content,dock);document.body.append(dialog);
     const viewport=window.visualViewport;let viewportFrame=0,lastContentWidth=0,revealFocused=false,shortNotices=null;
     content.addEventListener('focusin',event=>{if(event.target.matches('.memory-answer'))lastAnswerFocus=event.target;});
     dialog.addEventListener('cancel',event=>{event.preventDefault();requestClose();});
-    const hasDraftWork=()=>attemptActive&&draftAnswers.some(value=>String(value||'').trim());
+    const hasDraftWork=()=>attemptActive&&(draftAnswers.some(value=>String(value||'').trim())||practiceUndo.size>0);
     function requestClose(){if(hasDraftWork())confirmLeave('close',close);else close();}
     function confirmLeave(kind,accept){
       if(leaveDialog?.open)return;
@@ -303,6 +313,7 @@
       const saved=suspendedAttempt;suspendedAttempt=null;++bookLoadRun;++collectionRun;++setupRun;
       Object.assign(config,saved.config);quizBookIndex=saved.quizBookIndex;book=saved.book;chapters=saved.chapters;quizStructure=saved.quizStructure;chapterNumbers=saved.chapterNumbers;rows=saved.rows;collectionRows=saved.collectionRows;collectionLoading=false;collectionFailed=false;
       phase='attempt';title.textContent=saved.title;context.textContent=saved.context;dock.setAttribute('aria-label',saved.dockLabel);
+      attemptHeading.replaceChildren(...saved.heading);attemptHeading.hidden=false;
       content.classList.toggle('memory-chapter-view',config.view==='chapter');content.replaceChildren(...saved.content);dock.replaceChildren(...saved.dock);dock.hidden=false;
       resizeAnswers();syncViewport();content.scrollTop=saved.scroll;
       const focus=saved.focus?.isConnected&&saved.focus.getClientRects().length?saved.focus:content.querySelector('.memory-practice-row[open] textarea')||content.querySelector('textarea');focus?.focus({preventScroll:true});
@@ -362,10 +373,17 @@
       for(const kind of ['wrong','missing','extra']){const item=el('span',`memory-legend-item memory-legend-${kind}`,l[kind]);item.setAttribute('role','listitem');legend.append(item);}
       return legend;
     }
-    function gradeCard(row,answer,g){
+    function gradeCard(row,answer,g,onIssue){
       const card=el('section','memory-result');card.append(el('h4','',`${rowReference(row)} · ${g.score}%`));
       const line=el('p','memory-diff');line.setAttribute('dir','auto');
-      const appendRuns=(target,runs)=>{for(const run of runs){const span=el('span',`memory-${run.kind}`,run.text);if(run.kind!=='correct')span.title=l[run.kind];target.append(span);}};
+      const targets=onIssue?answerTargets(answer,g.parts):[];let issue=0;
+      const appendRuns=(target,runs)=>{for(const run of runs){const span=el('span',`memory-${run.kind}`,run.text);if(run.kind!=='correct')span.title=l[run.kind];
+        if(onIssue&&run.kind!=='correct'){
+          const count=Math.max(1,Array.from(normalize(run.kind==='wrong'?run.expected:run.text)).length),group=targets.slice(issue,issue+count);issue+=count;
+          const range={start:group[0]?.start??answer.length,end:group.at(-1)?.end??answer.length},jump=button('',()=>onIssue(range),'memory-issue');
+          jump.setAttribute('aria-label',`${l.jumpToAnswer}: ${l[run.kind]} ${run.text}`);jump.title=l.jumpToAnswer;jump.dataset.start=String(range.start);jump.dataset.end=String(range.end);jump.append(span);target.append(jump);
+        }else target.append(span);
+      }};
       for(const word of comparisonWords(comparisonRuns(row.text,answer,g.parts))){
         if(!word.wrong){appendRuns(line,word.runs);continue;}
         const correction=el('span','memory-correction'),correct=el('span','memory-correction-text',word.expected),entered=el('span','memory-correction-base');
@@ -376,8 +394,9 @@
     }
     function setup(){
       moveClose(header);
-      if(phase==='attempt')suspendedAttempt={config:{...config},quizBookIndex,book,chapters,quizStructure,chapterNumbers,rows,collectionRows,title:title.textContent,context:context.textContent,dockLabel:dock.getAttribute('aria-label'),content:[...content.childNodes],dock:[...dock.childNodes],scroll:content.scrollTop,focus:lastAnswerFocus};
+      if(phase==='attempt')suspendedAttempt={config:{...config},quizBookIndex,book,chapters,quizStructure,chapterNumbers,rows,collectionRows,title:title.textContent,context:context.textContent,dockLabel:dock.getAttribute('aria-label'),heading:[...attemptHeading.childNodes],content:[...content.childNodes],dock:[...dock.childNodes],scroll:content.scrollTop,focus:lastAnswerFocus};
       phase='setup';
+      attemptHeading.hidden=true;attemptHeading.replaceChildren();
       if(!collectionRefs.length){config.collection=false;collectionLoading=false;collectionFailed=false;}
 
       ++bookLoadRun;const activeDialog=dialog,currentSetup=++setupRun;
@@ -517,12 +536,13 @@
       content.append(modes,modeDescription,views,summary,range,collection,study,help,startButton);syncMode();refresh();if(collectionRefs.length)loadCollection();content.scrollTop=0;syncViewport();
       if(dialog.open){if(suspendedAttempt){content.scrollTop=0;content.querySelector('.memory-setup-resume')?.focus({preventScroll:true});}else{rangePickers[0].trigger.focus({preventScroll:true});bookField.scrollIntoView({block:'nearest',behavior:'instant'});}}
     }
-    function begin(items=activeRows(),isReview=false){suspendedAttempt=null;attemptActive=true;++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;practiceConfirmed=new Set();started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
+    function begin(items=activeRows(),isReview=false){suspendedAttempt=null;attemptActive=true;++bookLoadRun;attemptRows=items.slice();draftAnswers=Array(items.length).fill('');reviewOnly=isReview;practiceShown=true;practiceConfirmed=new Set();practiceUndo.clear();started=performance.now();session=createSession(attemptRows,config.view);showUnit();}
     function showUnit(){
       phase='attempt';moveClose(header);
       context.textContent=config.mode==='practice'?`${version} · ${l.practiceTitle}`:reviewOnly?`${version} · ${l.review}`:version;dock.replaceChildren();dock.hidden=false;content.classList.toggle('memory-chapter-view',config.view==='chapter');
       const practice=config.mode==='practice',items=session.current,unitHeading=el('div','memory-unit-heading'),unitProgress=el('p','memory-progress',`${session.index+1} / ${session.unitCount}`);
-      unitHeading.append(el('p','memory-reference',attemptReference(items.map(item=>item.row))),unitProgress);content.replaceChildren(unitHeading);
+      const unitReference=el('p','memory-reference',attemptReference(items.map(item=>item.row)));unitReference.title=unitReference.textContent;
+      unitHeading.append(unitReference,unitProgress);attemptHeading.replaceChildren(unitHeading);attemptHeading.hidden=false;content.replaceChildren();
       shortNotices=el('div','memory-short-notices');content.append(shortNotices);
       const navigation=el('nav','memory-unit-nav');navigation.setAttribute('aria-label',l.view);
       const previous=button(config.view==='verse'?l.previousVerse:l.previousChapter,()=>{if(session.move(-1))showUnit();});
@@ -536,12 +556,13 @@
       const status=el('div','memory-dock-status');status.hidden=config.view==='verse';status.append(entered,meter);
       function updateProgress(){const count=inputs.filter(input=>normalize(input.value)).length;meter.value=count;entered.textContent=`${l.progress} ${count} / ${items.length}`;}
       const rowFeedbacks=[];
-      const practiceSources=[],practiceCards=[],practiceStates=[],practiceChecked=items.map(({index})=>practiceConfirmed.has(index));let practiceIndex=0,practiceControls;
+      const practiceSources=[],practiceCards=[],practiceStates=[],practiceChecked=items.map(({index})=>practiceConfirmed.has(index));let practiceIndex=0,practiceControls,restoreButton;
       function clearFeedback(position){
         feedback.replaceChildren();feedback.removeAttribute('data-correct');
         rowFeedbacks.forEach((row,i)=>{if(practice&&Number.isInteger(position)&&i!==position)return;row.replaceChildren();inputs[i].removeAttribute('aria-invalid');if(practice)practiceSources[i].hidden=!practiceShown;});
       }
       function syncPracticeRows(){
+        if(restoreButton)restoreButton.hidden=!practiceUndo.has(items[practiceIndex].index);
         practiceStates.forEach((node,i)=>{
           const text=practiceChecked[i]?l.correct:normalize(inputs[i].value)?l.practiceDraft:l.practicePending,complete=String(practiceChecked[i]);
           if(node.textContent!==text)node.textContent=text;if(node.dataset.complete!==complete)node.dataset.complete=complete;
@@ -570,11 +591,17 @@
         const changed=practiceIndex!==index;practiceIndex=index;practiceCards.forEach((card,i)=>{if(card.open!==(i===index))card.open=i===index;});
         if(practiceControls&&practiceControls.parentElement!==practiceCards[index])practiceCards[index].insertBefore(practiceControls,practiceSources[index].parentElement);
         if(changed){feedback.replaceChildren();feedback.removeAttribute('data-correct');error.hidden=true;}
-        if(config.view==='chapter'){const text=`${index+1} / ${items.length}`;if(unitProgress.textContent!==text)unitProgress.textContent=text;}
-        fitAnswer(inputs[index]);syncPracticePrimary();
+        if(config.view==='chapter'){const text=`${index+1} / ${items.length}`;if(unitProgress.textContent!==text)unitProgress.textContent=text;unitReference.textContent=attemptReference([items[index].row]);unitReference.title=unitReference.textContent;}
+        fitAnswer(inputs[index]);syncPracticePrimary();syncPracticeRows();
         if(scroll)practiceCards[index].scrollIntoView({block:'nearest',behavior:'instant'});
       }
       function focusAnswer(index){if(practice)activatePractice(index,{scroll:false});const input=inputs[index];input?.focus({preventScroll:true});input?.closest('.memory-answer-label').scrollIntoView({block:practice?'nearest':'start',behavior:'instant'});if(practice)revealPracticePair(index);}
+      function focusIssue(index,range){
+        focusAnswer(index);const input=inputs[index];input.setSelectionRange(range.start,range.end);
+        fitAnswer(input);const mark=el('span','',input.value.slice(range.start,range.end)||'\u200b');measure.replaceChildren(document.createTextNode(input.value.slice(0,range.start)),mark,document.createTextNode(input.value.slice(range.end)));
+        const cursor=mark.getClientRects()[0]||mark.getBoundingClientRect(),field=input.getBoundingClientRect(),visible=content.getBoundingClientRect(),top=field.top+cursor.top-measure.getBoundingClientRect().top;
+        if(top<visible.top||top+cursor.height>visible.bottom)content.scrollTop+=top-visible.top-Math.max(0,(content.clientHeight-cursor.height)/2);
+      }
       const answerLabel=row=>`${config.collection?'':nameFor(row.bookIndex??quizBookIndex)+' '}${rowReference(row)} · ${practice&&practiceShown?l.practiceAnswer:l.answer}`;
       const inputs=items.map(({row,index},position)=>{
         const label=el('label','memory-answer-label'),caption=el('span','memory-answer-reference',rowReference(row));caption.hidden=config.view==='verse';
@@ -592,7 +619,7 @@
           input.addEventListener('focus',()=>activatePractice(position,{scroll:false}));
         }else form.append(label,rowFeedback);
         let composing=false;input.addEventListener('compositionstart',()=>{composing=true;});input.addEventListener('compositionend',()=>{composing=false;});
-        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();if(practice)revealPracticePair(position);});
+        input.addEventListener('input',()=>{draftAnswers[index]=input.value;session.invalidate();if(practice){practiceChecked[position]=false;practiceConfirmed.delete(index);if(input.value)practiceUndo.delete(index);}clearFeedback(practice?position:undefined);error.hidden=true;primary.textContent=l.checkAnswer;primary.dataset.action='check';if(practice){syncPracticeRows();syncPracticePrimary();}fitAnswer(input);updateProgress();if(practice)revealPracticePair(position);});
         input.addEventListener('keydown',e=>{if(config.view!=='verse'||e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.isComposing||composing||e.keyCode===229)return;e.preventDefault();if(!e.repeat)act();});return input;
       });
       primary.dataset.action='check';primary.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.repeat)e.preventDefault();});
@@ -606,7 +633,7 @@
           feedback.dataset.correct=String(g.exact);inputs[index].setAttribute('aria-invalid',String(!g.exact));practiceChecked[index]=g.exact;
           if(g.exact)practiceConfirmed.add(items[index].index);else practiceConfirmed.delete(items[index].index);
           if(g.exact)feedback.append(el('p','memory-correct',l.correct));
-          else{practiceSources[index].hidden=true;rowFeedbacks[index].append(gradeCard(items[index].row,value,g));feedback.append(errorLegend());error.textContent=l.editRetry;error.hidden=false;focusAnswer(index);}
+          else{practiceSources[index].hidden=true;rowFeedbacks[index].append(gradeCard(items[index].row,value,g,range=>focusIssue(index,range)));feedback.append(errorLegend());error.textContent=l.editRetry;error.hidden=false;focusAnswer(index);}
           syncPracticeRows();syncPracticePrimary();return;
         }
         const values=inputs.map(input=>input.value),checked=session.check(values);
@@ -618,7 +645,7 @@
           primary.textContent=next;primary.dataset.action='next';feedback.append(el('p','memory-correct',l.correct));
         }else{
           error.textContent=l.editRetry;error.hidden=false;feedback.append(errorLegend());
-          checked.grades.forEach((g,i)=>{if(!g.exact)rowFeedbacks[i].append(gradeCard(items[i].row,values[i],g));});
+          checked.grades.forEach((g,i)=>{if(!g.exact)rowFeedbacks[i].append(gradeCard(items[i].row,values[i],g,range=>focusIssue(i,range)));});
           focusAnswer(checked.grades.findIndex(g=>!g.exact));
           if(!values.some(value=>normalize(value)))rowFeedbacks[0]?.scrollIntoView({block:'nearest',behavior:'instant'});
         }
@@ -638,13 +665,19 @@
         }
         reveal.setAttribute('aria-controls',practiceSources.map(text=>text.id).join(' '));syncReveal();
         controls.append(reveal,button(l.repeatPractice,()=>{
-          const index=practiceIndex,input=inputs[index];input.value='';draftAnswers[items[index].index]='';practiceChecked[index]=false;practiceConfirmed.delete(items[index].index);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);
+          const index=practiceIndex,input=inputs[index];if(input.value)practiceUndo.set(items[index].index,{value:input.value,checked:practiceChecked[index],start:input.selectionStart,end:input.selectionEnd,direction:input.selectionDirection});
+          input.value='';draftAnswers[items[index].index]='';practiceChecked[index]=false;practiceConfirmed.delete(items[index].index);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);
         },'memory-practice-repeat'));
+        restoreButton=button(l.restoreAnswer,()=>{
+          const index=practiceIndex,key=items[index].index,saved=practiceUndo.get(key),input=inputs[index];if(!saved||input.value)return;
+          input.value=saved.value;draftAnswers[key]=saved.value;practiceChecked[index]=saved.checked;if(saved.checked)practiceConfirmed.add(key);else practiceConfirmed.delete(key);practiceUndo.delete(key);session.invalidate();clearFeedback(index);error.hidden=true;syncPracticeRows();syncPracticePrimary();fitAnswer(input);updateProgress();focusAnswer(index);input.setSelectionRange(saved.start,saved.end,saved.direction);
+        },'memory-practice-undo');restoreButton.hidden=true;controls.append(restoreButton);
       }
       content.append(form);if(practice){syncPracticeRows();activatePractice(0,{scroll:false});}updateProgress();resizeAnswers();content.scrollTop=0;inputs[0]?.focus({preventScroll:true});syncViewport();if(practice)revealPracticePair(0);
     }
     function results(answers){
       phase='results';attemptActive=false;suspendedAttempt=null;moveClose(header);
+      attemptHeading.hidden=true;attemptHeading.replaceChildren();practiceUndo.clear();
       answers=attemptRows.map((row,index)=>answers[index]===undefined?(draftAnswers[index]||''):answers[index]);
       dock.hidden=true;dock.replaceChildren();content.classList.remove('memory-chapter-view');
       const grades=attemptRows.map((row,i)=>grade(row.text,answers[i])),units=grades.reduce((n,g)=>n+g.units,0),distance=grades.reduce((n,g)=>n+g.distance,0),exact=grades.every(g=>g.exact),score=units?Math.min(exact?100:99,Math.round(100*(1-distance/units))):0;
