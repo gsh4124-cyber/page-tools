@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'node:http';
 
 const product=fileURLToPath(new URL('../',import.meta.url)),root=path.join(product,'dist');
-const local=process.argv.includes('--local'),output=path.join(product,'qa_evidence/local-game-contract/guides');
+const local=process.argv.includes('--local'),output=process.env.GUIDE_TEST_EVIDENCE||path.join(product,'qa_evidence/local-game-contract/guides');
 let server,base=process.env.GUIDE_TEST_BASE||'https://random-ppobgi.pages.dev';
 if(local){
  server=createServer(async(req,res)=>{
