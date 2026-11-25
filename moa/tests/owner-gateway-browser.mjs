@@ -158,6 +158,12 @@ try{
   await context.close();
  });
  await check('synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application',async()=>{const r=await cx.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}});assert.equal(r.status(),204);const cookie=(await cx.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');const app=await cx.request.get(base+'/index.html');assert.equal(app.status(),200);assert.match(await app.text(),/id="entryForm"/);assert.equal((await cx.request.get(base+'/app.js')).status(),200);assert.deepEqual(await (await cx.request.get(base+'/build-manifest.json')).json(),manifest);});
+ await check('public signed-out portal and private session synchronizer remove abandoned local drafts',async()=>{
+  const context=await browser.newContext(),cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));
+  await cp.goto(base+'/__moa_access');await cp.locator('#heroTitle').waitFor();await cp.evaluate(()=>localStorage.setItem('moa-writing-draft-v1','private abandoned text'));await cp.reload();await cp.waitForFunction(()=>localStorage.getItem('moa-writing-draft-v1')===null);
+  await context.route(base+'/app.js',route=>route.fulfill({contentType:'text/javascript',body:'// test the separate session synchronizer without private startup'}));
+  await cp.evaluate(()=>localStorage.setItem('moa-writing-draft-v1','private text before expiry'));assert.equal((await context.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}})).status(),204);await cp.goto(base+'/');await cp.waitForURL(base+'/__moa_access');assert.equal(await cp.evaluate(()=>localStorage.getItem('moa-writing-draft-v1')),null);await context.close();
+ });
  await check('logout removes access immediately; public static fallback contains no application',async()=>{assert.equal((await cx.request.post(base+'/__moa_logout',{headers:{Origin:base}})).status(),204);assert.equal((await cx.request.get(base+'/app.js')).status(),401);assert.ok(!(await readFile(new URL('dist-cloudflare/index.html',root),'utf8')).includes('entryForm'));});
  assert.deepEqual(errors,[]);await cx.close();
 }finally{await browser?.close();await new Promise(r=>server.close(r));globalThis.fetch=realFetch;await writeFile(new URL('qa-evidence/owner-gateway-browser-results.json',root),JSON.stringify({checkedAt:new Date().toISOString(),manifest,authentication:'mocked RPC / synthetic JWT; not real Supabase login',results,errors},null,2));}

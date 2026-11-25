@@ -1,4 +1,5 @@
 import {empty,today,draftTitle,validateDocument,validateFile,encodeBackup,decodeBackup,MAX_BACKUP,DECOR,CATEGORIES} from './core.mjs';
+import {DRAFT_KEY,writingDrafts} from './drafts.mjs';
 import {prepareMedia,mib} from './media.mjs';
 import {setupAccountUI} from './account-ui.mjs';
 import {LocalRepository,CloudRepository,makeClient,preflight} from './repository.mjs';
@@ -12,6 +13,23 @@ let month=new Date(new Date().getFullYear(),new Date().getMonth(),1),selection=n
 let backupMode='export',restoreFile=null;
 let draftUrls=[];
 let pendingConfirmation=null;
+let draftTimer,draftActive=false,draftIdentity;
+const draftFields=()=>({title:$('#title').value,content:$('#content').value,recordDate:$('#recordDate').value,category:$('#category').value,decoration:$('#decoration').value,sticker:$('#sticker').value,optimizePhotos:$('#optimizePhotos').checked,attachments:$('#media').files.length});
+const drafts=writingDrafts({storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value),removeItem:key=>localStorage.removeItem(key)},status:state=>{
+ const messages={empty:'글은 이 브라우저에 7일간 임시 보관해요.',pending:'초안 저장 중…',saved:'이 브라우저에 초안을 저장했어요.',restored:'작성 중이던 초안을 불러왔어요.',conflict:'다른 창에서 초안이 바뀌었어요. 이 창의 내용은 기록 저장으로 남겨 주세요.',unavailable:'초안을 자동 저장하지 못했어요. 창을 닫기 전에 기록을 저장해 주세요.'};
+ $('#draftStatus').textContent=messages[state];$('#draftStatus').dataset.state=state;
+ if(['saved','restored','pending'].includes(state))$('#resumeDraft').hidden=false;
+ if(state==='empty'){$('#resumeDraft').hidden=true;$('#draftMediaNotice').hidden=true;}
+}});
+function flushDraft(){clearTimeout(draftTimer);if(draftActive)drafts.save(draftFields());}
+function queueDraft(){if(!draftActive)return;clearTimeout(draftTimer);$('#draftStatus').textContent='초안 저장 중…';$('#draftStatus').dataset.state='pending';draftTimer=setTimeout(flushDraft,400);}
+function resetWriting(){ $('#entryForm').reset();$('#entryExtras').open=false;$('#recordDate').value=today();renderDraftMedia();$('#draftMediaNotice').hidden=true; }
+$('#entryForm').addEventListener('input',queueDraft);$('#entryForm').addEventListener('change',queueDraft);
+window.addEventListener('pagehide',flushDraft);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flushDraft();});
+window.addEventListener('storage',event=>{if(event.key===DRAFT_KEY||event.key===null)drafts.changed();});
+$('#resumeDraft').onclick=()=>{showView('write');$('#content').focus({preventScroll:true});};
+$('#discardDraft').onclick=async()=>{if(busy||!ready)return;const token=epoch;if(!await confirmChange({title:'작성 중인 초안을 비울까요?',description:'저장 전 글과 선택한 첨부를 비워요. 이미 저장한 기록은 그대로 남아요.',details:[],label:'초안 비우기'})||token!==epoch||busy)return;clearTimeout(draftTimer);drafts.clear();resetWriting();};
 const monthKey=()=>`${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`;
 const notice=(message,error=false)=>{if(error)lastProblem=/연결|fetch|Network/.test(message)?'NETWORK':/로그인|AUTH|인증/.test(message)?'AUTH':/다른 창|STALE/.test(message)?'STALE':'OPERATION';clearTimeout(noticeTimer);$('#notice').textContent=message;$('#notice').classList.toggle('error',error);$('#notice').hidden=false;noticeTimer=setTimeout(()=>$('#notice').hidden=true,error?14000:6000);};
 const errorMessage=e=>/MOA_ACCOUNT_CLOSED/.test(e.message||'')?'모아 이용 상태가 바뀌었어요. 계정 화면에서 다시 확인해 주세요.':/AUTH_REQUIRED|REAUTH_REQUIRED|NEW_LOGIN_REQUIRED/.test(e.message||'')?'로그인을 다시 확인해 주세요. 중요한 작업은 비밀번호를 다시 입력해야 해요.':/DELETION_INCOMPLETE/.test(e.message||'')?'첨부 정리가 남았어요. 계정에서 탈퇴를 이어서 실행해 주세요.':/MOA_ACTIVE_LIMIT/.test(e.message||'')?'기록에 연결된 미디어 한도는 48MiB예요. 먼저 백업하고 첨부를 정리해 주세요.':/MOA_STAGING_LIMIT/.test(e.message||'')?'임시 첨부 한도(96MiB·500개)에 도달했어요. 하루 지난 미사용 첨부를 정리해 주세요.':/STALE_WRITE|다른 창/.test(e.message||'')?'다른 창이나 기기에서 기록이 바뀌었어요. 입력한 내용은 유지됩니다. 새로고침 후 다시 저장해 주세요.':/Failed to fetch|NetworkError|fetch failed/.test(e.message||'')?'연결이 끊겼어요. 저장 결과를 확인한 뒤 다시 시도해 주세요. 입력한 내용은 유지됩니다.':e.message||'작업을 완료하지 못했어요.';
@@ -37,12 +55,21 @@ $('#changeDialog').addEventListener('close',()=>settleConfirmation(false));
 async function mutate(edit){const target=repo,token=epoch,next=structuredClone(db);await edit(next);if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');const saved=await target.commit(next);if(token===epoch){db=saved;render();}return saved;}
 function account(){const user=repo?.user;$('#accountStatus').textContent=user?`로그인: ${user.email||'내 계정'}`:client?'기기 저장 모드 · 로그인하면 계정 전용 클라우드 기록을 불러와요.':'기기 저장 모드 · 클라우드 연결은 운영 적용 승인 후 사용할 수 있어요.';$('#accountBtn').textContent=user?'내 계정':'로그인 · 계정';$('#privacyNotice').textContent=user?(repo.status==='deleting'?'삭제 정리가 중단됐어요. 계정에서 탈퇴를 이어서 실행해 주세요.':repo.status==='withdrawn'?'모아 탈퇴 상태예요. 계정에서 빈 모아를 다시 시작할 수 있어요.':'🔒 내 계정의 비공개 클라우드에 저장됩니다.'):'🔒 이 브라우저에 저장됩니다. 기기 변경 전 전체 백업을 해 주세요.';controls();}
 async function activate(user){
+  const identity=user?.id||'guest';
+  if(draftActive&&draftIdentity===identity)flushDraft();
+  clearTimeout(draftTimer);draftActive=false;draftIdentity=identity;
+  const recovered=drafts.begin(identity);
   const token=++epoch;ready=false;db=empty();clearMedia();
   settleConfirmation(false);
   $('#backupPassword').value='';restoreFile=null;$('#backupDialog').close();$('#password').value='';$('#confirmEmailLink').value='';
-  $('#entryForm').reset();$('#entryExtras').open=false;renderDraftMedia();$('#recordDate').value=today();$('#searchRecords').value='';$('#filter').value='전체';selection=null;feedMode='all';showView('home',false);render();
+  resetWriting();$('#searchRecords').value='';$('#filter').value='전체';selection=null;feedMode='all';showView('home',false);render();
   const target=user?new CloudRepository(client,user):new LocalRepository();repo=target;account();
-  try{const loaded=await target.load();if(token!==epoch)return;db=loaded;ready=true;render();account();}
+  try{const loaded=await target.load();if(token!==epoch)return;db=loaded;ready=true;
+   if(!target.status||target.status==='active'){
+    if(recovered){for(const key of ['title','content','recordDate','category','decoration','sticker'])$('#'+key).value=recovered[key];$('#optimizePhotos').checked=recovered.optimizePhotos;$('#draftMediaNotice').hidden=!recovered.attachments;}
+    draftActive=true;
+   }else drafts.purge();
+   render();account();}
   catch(e){if(token!==epoch)return;if(client&&/AUTH_REQUIRED/.test(e.message||'')){await client.auth.signOut({scope:'local'});await activate(null);notice('로그인이 만료됐어요. 다시 로그인해 주세요.',true);return;}notice('기록을 불러오지 못했어요. '+errorMessage(e),true);$('#privacyNotice').textContent='저장소 연결 실패 · 새로고침하여 다시 연결해 주세요.';controls();}
 }
 
@@ -119,7 +146,7 @@ function openEdit(card,e){
   form.onsubmit=p=>{p.preventDefault();task(async()=>{const target=repo,token=epoch,retained=keep.filter(([,n])=>n.checked).map(([k])=>k),added=await prepareMedia([...files.files],$('#optimizePhotos').checked);if(retained.length+added.length>6)throw Error('첨부 파일은 최대 6개예요.');added.forEach(validateFile);const nextEntry={...e,title:title.value,recordDate:date.value,content:content.value,category:category.value,sticker:sticker.value,decoration:decor.value,mediaKeys:retained};validateDocument({...db,entries:db.entries.map(x=>x.id===e.id?nextEntry:x)},target.user?.id);await preflight(target,{...db,entries:db.entries.map(x=>x.id===e.id?nextEntry:x)},added,e.mediaKeys.filter(k=>!retained.includes(k)));for(const file of added)nextEntry.mediaKeys.push(await target.put(file));if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');await mutate(next=>next.entries=next.entries.map(x=>x.id===e.id?nextEntry:x));try{await target.remove(e.mediaKeys.filter(k=>!retained.includes(k)));}catch{notice('수정은 저장됐지만 제거한 첨부 파일 정리가 실패했어요.',true);return;}notice('변경을 저장했어요.');});};card.append(form);title.focus();
 }
 
-$('#entryForm').onsubmit=p=>{p.preventDefault();task(async()=>{const target=repo,token=epoch,files=await prepareMedia([...$('#media').files],$('#optimizePhotos').checked);if(files.length>6)throw Error('첨부 파일은 최대 6개예요.');files.forEach(validateFile);const entry={id:crypto.randomUUID(),title:draftTitle($('#title').value,$('#content').value,files),category:$('#category').value,recordDate:$('#recordDate').value,content:$('#content').value,decoration:$('#decoration').value,sticker:$('#sticker').value,stickerX:0,stickerY:0,visibility:'private',created:new Date().toISOString(),mediaKeys:[]};validateDocument({...db,entries:[entry,...db.entries]},target.user?.id);await preflight(target,db,files);for(const f of files)entry.mediaKeys.push(await target.put(f));if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');await mutate(next=>next.entries.unshift(entry));if(token!==epoch)return;p.target.reset();$('#entryExtras').open=false;renderDraftMedia();$('#recordDate').value=today();selection=null;feedMode='all';render();notice('기록을 저장했어요.');showView('feed');});};
+$('#entryForm').onsubmit=p=>{p.preventDefault();task(async()=>{const target=repo,token=epoch,files=await prepareMedia([...$('#media').files],$('#optimizePhotos').checked);if(files.length>6)throw Error('첨부 파일은 최대 6개예요.');files.forEach(validateFile);const entry={id:crypto.randomUUID(),title:draftTitle($('#title').value,$('#content').value,files),category:$('#category').value,recordDate:$('#recordDate').value,content:$('#content').value,decoration:$('#decoration').value,sticker:$('#sticker').value,stickerX:0,stickerY:0,visibility:'private',created:new Date().toISOString(),mediaKeys:[]};validateDocument({...db,entries:[entry,...db.entries]},target.user?.id);await preflight(target,db,files);for(const f of files)entry.mediaKeys.push(await target.put(f));if(token!==epoch)throw Error('계정이 바뀌어 저장을 중단했어요.');await mutate(next=>next.entries.unshift(entry));if(token!==epoch)return;clearTimeout(draftTimer);drafts.clear();resetWriting();selection=null;feedMode='all';render();notice('기록을 저장했어요.');showView('feed');});};
 $('#addHabit').onclick=()=>task(async()=>{const name=$('#habitName').value.trim();if(!name)throw Error('습관 이름을 입력해 주세요.');if(db.habits.includes(name))throw Error('같은 이름의 습관이 있어요.');await mutate(next=>next.habits.push(name));$('#habitName').value='';});
 $('#habitName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#addHabit').click();}};
 function moveMonth(delta){month.setMonth(month.getMonth()+delta);selection=null;if(feedMode==='day')feedMode='month';render();}
@@ -128,7 +155,7 @@ $('#showMonth').onclick=()=>{selection=null;feedMode='month';render();};$('#show
 $('#writeNow').onclick=()=>{showView('write');$('#content').focus({preventScroll:true});};$('#recordDate').value=today();
 $('#photoNow').onclick=()=>{showView('write',false);$('#media').click();};
 $('#chooseMedia').onclick=()=>$('#media').click();
-document.querySelectorAll('[data-sticker]').forEach(b=>b.onclick=()=>{$('#sticker').value=($('#sticker').value+b.dataset.sticker).slice(0,12);});
+document.querySelectorAll('[data-sticker]').forEach(b=>b.onclick=()=>{$('#sticker').value=($('#sticker').value+b.dataset.sticker).slice(0,12);queueDraft();});
 document.querySelectorAll('.bottom-nav button').forEach(button=>button.onclick=()=>showView(button.dataset.go));
 document.querySelectorAll('[data-home-view]').forEach(button=>button.onclick=()=>{if(button.dataset.homeView==='habits'){selection=null;feedMode='all';render();}showView(button.dataset.homeView);});
 $('#openAllRecords').onclick=()=>{selection=null;feedMode='all';$('#searchRecords').value='';$('#filter').value='전체';render();showView('feed');};
@@ -161,7 +188,7 @@ function renderDraftMedia(){
   let valid=true;try{validateFile(file);}catch{valid=false;}
   if(valid&&file.type.startsWith('image/')){const img=el('img');const url=URL.createObjectURL(file);draftUrls.push(url);img.src=url;img.alt=`선택한 사진 ${i+1}`;img.loading='lazy';img.decoding='async';preview.append(img);}else preview.append(el('span',valid?'영상':'지원하지 않는 첨부'));
   const caption=el('figcaption',file.name);caption.title=file.name;const remove=action('빼기',()=>{
-   const transfer=new DataTransfer();files.forEach((f,n)=>{if(n!==i)transfer.items.add(f);});$('#media').files=transfer.files;renderDraftMedia();renderUploadEstimate();
+   const transfer=new DataTransfer();files.forEach((f,n)=>{if(n!==i)transfer.items.add(f);});$('#media').files=transfer.files;renderDraftMedia();renderUploadEstimate();queueDraft();
    const next=$('#draftMedia button')||$('#chooseMedia');next.focus({preventScroll:true});
   });remove.setAttribute('aria-label',`첨부 ${i+1} 빼기`);card.append(preview,caption,remove);out.append(card);
  }
@@ -175,4 +202,4 @@ async function checkAccount(){if(!client||!repo?.user||busy||document.hidden)ret
 window.addEventListener('focus',checkAccount);document.addEventListener('visibilitychange',checkAccount);
 
 $('#buildId').textContent='build '+__MOA_BUILD__;
-if(client){client.auth.onAuthStateChange((event,session)=>{if(authHold||event==='TOKEN_REFRESHED'||event==='INITIAL_SESSION')return;setTimeout(async()=>{if(session?.user.id===repo?.user?.id)return;if(session){const {data,error}=await client.auth.getUser();if(error){ready=false;db=empty();render();notice('로그인 확인이 필요해요. 다시 로그인해 주세요.',true);return;}activate(data.user);}else activate(null);},0);});const {data,error}=await client.auth.getUser();if(error&&error.name!=='AuthSessionMissingError'){notice('계정을 확인하지 못했어요. 다시 로그인해 주세요.',true);}await activate(data.user||null);}else await activate(null);
+if(client){client.auth.onAuthStateChange((event,session)=>{if(authHold||event==='TOKEN_REFRESHED'||event==='INITIAL_SESSION')return;if(event==='SIGNED_OUT'||(draftIdentity!==undefined&&session?.user.id!==repo?.user?.id)){clearTimeout(draftTimer);draftActive=false;drafts.purge();}setTimeout(async()=>{if(session?.user.id===repo?.user?.id)return;if(session){const {data,error}=await client.auth.getUser();if(error){await activate(null);notice('로그인 확인이 필요해요. 다시 로그인해 주세요.',true);return;}activate(data.user);}else activate(null);},0);});const {data,error}=await client.auth.getUser();if(error&&error.name!=='AuthSessionMissingError'){notice('계정을 확인하지 못했어요. 다시 로그인해 주세요.',true);}await activate(data.user||null);}else await activate(null);
