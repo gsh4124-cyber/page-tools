@@ -47,13 +47,13 @@ try{
     assert.equal(await input.inputValue(),original);assert.deepEqual(await input.evaluate(n=>[n.selectionStart,n.selectionEnd]),[6,8]);assert.equal(await inputs.nth(1).inputValue(),'keep second draft');
     assert.equal(await page.evaluate(()=>JSON.stringify({...localStorage})),storedBefore,'Undo never persists answers');
     await dialog.locator('.memory-practice-repeat').click();await input.fill('new answer');assert(await dialog.locator('.memory-practice-undo').isHidden(),'New typing must never be overwritten by an old undo');
-    const first=/[\p{L}\p{N}]/u.exec(expected),wrong=' \n'+expected.slice(0,first.index)+'X'+expected.slice(first.index+first[0].length);
+    const first=[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(expected)].find(part=>/[\p{L}\p{N}]/u.test(part.segment)),wrong=' \n'+expected.slice(0,first.index)+'X'+expected.slice(first.index+first.segment.length);
     await input.fill(wrong);await dialog.locator('.memory-primary').click();
     const issue=cards.first().locator('.memory-issue').first();await issue.focus();await page.keyboard.press('Enter');
     assert(await input.evaluate(n=>n===document.activeElement));assert.equal(await input.evaluate(n=>n.value.slice(n.selectionStart,n.selectionEnd)),'X');assert.equal(await input.inputValue(),wrong,'Error navigation must not rewrite input');
     await input.fill('🐟'+expected);await dialog.locator('.memory-primary').click();await cards.first().locator('.memory-issue:has(.memory-extra)').first().click();
     assert.equal(await input.evaluate(n=>n.value.slice(n.selectionStart,n.selectionEnd)),'🐟');
-    await input.fill('  '+expected.slice(first.index+first[0].length));await dialog.locator('.memory-primary').click();await cards.first().locator('.memory-issue:has(.memory-missing)').first().click();
+    await input.fill('  '+expected.slice(first.index+first.segment.length));await dialog.locator('.memory-primary').click();await cards.first().locator('.memory-issue:has(.memory-missing)').first().click();
     assert.deepEqual(await input.evaluate(n=>[n.selectionStart,n.selectionEnd]),[2,2]);
     await dialog.locator('.memory-content').evaluate(n=>n.scrollTop=n.scrollHeight);assert(await headingVisible(dialog),'Current verse and progress stay above the scrolling answers');
     await page.setViewportSize({width,height:260});await page.waitForTimeout(100);assert(await headingVisible(dialog));
