@@ -3,7 +3,7 @@
 import {openView} from './navigation.mjs';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
-import {chromium} from 'playwright';
+import {chromium,devices} from 'playwright';
 import {writeFile,mkdir,readFile} from 'node:fs/promises';
 import {serve} from '../tools/serve.mjs';
 const A='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',B='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
@@ -11,11 +11,14 @@ const origin='https://moa-qa.supabase.co',key='sb_publishable_local_contract_tes
 const manifest=JSON.parse(await readFile(new URL('../dist/build-manifest.json',import.meta.url),'utf8'));
 const bundle=await build({entryPoints:[new URL('../app.mjs',import.meta.url).pathname.replace(/^\/(.:)/,'$1')],bundle:true,write:false,format:'esm',define:{__MOA_CONFIG__:JSON.stringify({url:origin,key}),__MOA_BUILD__:JSON.stringify('cloud-contract-test')}});
 const server=await serve(),base='http://127.0.0.1:'+server.address().port,browser=await chromium.launch({channel:process.env.MOA_QA_BROWSER||'chrome',headless:true});
+const deviceName=process.env.MOA_QA_DEVICE||'';if(deviceName&&!devices[deviceName])throw Error('Unknown QA device');
+const {defaultBrowserType:ignoredBrowser,...deviceOptions}=deviceName?devices[deviceName]:{viewport:{width:390,height:844},isMobile:true,hasTouch:true};
+const evidenceName=deviceName?'cloud-contract-'+deviceName.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.json':'cloud-contract-results.json';
 const documents=new Map(),results=[],errors=[];let failWrites=false;
 const users=new Map([[A,{id:A,email:'a@example.test',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-11-19T00:00:00Z'}],[B,{id:B,email:'b@example.test',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-11-19T00:00:00Z'}]]);
 const token=id=>['e30',Buffer.from(JSON.stringify({sub:id,exp:Math.floor(Date.now()/1000)+3600})).toString('base64url'),'test'].join('.');
 const getUser=req=>{try{return users.get(JSON.parse(Buffer.from((req.headers().authorization||'').slice(7).split('.')[1],'base64url')).sub);}catch{return null;}};
-async function context(){const c=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});await c.route('**/*',async route=>{
+async function context(){const c=await browser.newContext(deviceOptions);await c.route('**/*',async route=>{
  const req=route.request(),url=new URL(req.url());
  if(req.url()===base+'/app.js')return route.fulfill({contentType:'text/javascript',body:bundle.outputFiles[0].text});
  if(req.url()===base+'/'){const r=await route.fetch();return route.fulfill({response:r,headers:{...r.headers(),'content-security-policy':`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ${origin}; img-src 'self' blob:; media-src 'self' blob:`}});}
@@ -44,5 +47,5 @@ try{
  const c2=await context(),p2=await c2.newPage();await p2.goto(base);await login(p2,'a@example.test');await p2.getByRole('button',{name:'A의 클라우드 기록 기록 열기',exact:true}).waitFor();assert.equal(await p2.getByText('B의 클라우드 기록',{exact:true}).count(),0);results.push('second browser reopens the same A cloud record');await c2.close();
  const loadingContext=await context();await loadingContext.addInitScript(session=>localStorage.setItem('moa-auth-v1',JSON.stringify(session)),{access_token:token(A),refresh_token:'refresh-'+A,token_type:'bearer',expires_at:Math.floor(Date.now()/1000)+3600,user:users.get(A)});
  let releaseUser;const userGate=new Promise(resolve=>releaseUser=resolve);await loadingContext.route(origin+'/auth/v1/user',async route=>{await userGate;await route.fallback();});const loadingPage=await loadingContext.newPage();await loadingPage.goto(base);await loadingPage.locator('#buildId').filter({hasText:'cloud-contract-test'}).waitFor({state:'attached'});assert.ok(await loadingPage.locator('#content').isDisabled());assert.ok(await loadingPage.locator('.bottom-nav [data-go=write]').isDisabled());releaseUser();await loadingPage.waitForFunction(()=>!document.querySelector('#content').disabled);assert.equal(await loadingPage.locator('#content').inputValue(),'');await loadingContext.close();results.push('initial verified-account load disables editor/navigation, avoiding input loss during startup');
- await c.close();assert.deepEqual(errors,[]);console.log('DONE cloud contract browser checks:',results.length);
-}finally{await mkdir(new URL('../qa-evidence/',import.meta.url),{recursive:true});await writeFile(new URL('../qa-evidence/cloud-contract-results.json',import.meta.url),JSON.stringify({type:'local intercepted Supabase API contract, not live hosted test',manifest,results,errors},null,2));await browser.close();server.close();}
+ await c.close();assert.deepEqual(errors,[]);console.log('DONE cloud contract browser checks:',results.length,deviceName||'default profile');
+}finally{await mkdir(new URL('../qa-evidence/',import.meta.url),{recursive:true});await writeFile(new URL('../qa-evidence/'+evidenceName,import.meta.url),JSON.stringify({type:'local intercepted Supabase API contract, not live hosted test',deviceProfile:deviceName||'default',engine:'Chrome Chromium, including iPhone profiles; not native Safari',manifest,results,errors},null,2));await browser.close();server.close();}
