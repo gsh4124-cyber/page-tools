@@ -1,15 +1,23 @@
 # PROJECT STATUS — random-ppobgi
 
-- 마지막 기술상태 갱신: 2026-10-04
+- 마지막 기술상태 갱신: 2026-11-25
 - 저장소 역할: `gsh4124-cyber/page-tools`의 `main / random-ppobgi/`가 랜덤뽑기 웹서비스의 실제 코드·배포·기술상태 원본
 - 상위 사업구조: 황제 Vault `직장/바이브코딩/_INDEX.md`
 - 빠르게 변하는 운영상태·Portfolio Mode·Gate·다음 행동: Supabase `hwangje_ops` / project key `vibecoding`
 - 로컬 checkout 경로: 환경별로 다를 수 있으며 Canonical로 고정하지 않음. 작업 시 `page-tools/main`의 실제 checkout 위치를 확인
 - 운영 주소: https://random-ppobgi.pages.dev/
 
+## 2026-11-25 AdSense 콘텐츠 심사 결과와 보완
+
+- AdSense 관리 화면에서 랜덤뽑기는 2026-11-25 06:37 KST에 `주의 필요 / 가치가 별로 없는 콘텐츠`로 확인됐다. `ads.txt`는 승인됨이다.
+- 심사 결과는 사이트 수준의 분류이며 특정 문서가 유일한 원인이라고 확인된 것은 아니다.
+- 제비뽑기의 이름 입력 안내를 실제 번호 전용 동작과 맞추고, 기존 도구 안내 8개에 실제 설정 예시·결과 해석·지원 범위를 보완한다.
+- 반복 당첨·중복 문구의 확률 안내와 수업 진행 예시를 추가하고, 앱에서 사용방법으로 이동하는 경로를 보강한다.
+- 이 보완은 콘텐츠·제품 사용성 개선이다. 승인, 검색 순위, 실제 외부 사용자 수나 수익을 확보했다는 증거가 아니다. 재검토 제출 여부와 결과는 AdSense 원본에서 따로 확인한다.
+
 ## 현재 단계
 
-**S-DESIGN / PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / CURRENT-REVISION PRODUCTION QA PASS / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_REVIEW_SUBMITTED**
+**S-DESIGN / PUBLIC PRODUCTION / 17-LANGUAGE COMPLETE / CURRENT-REVISION PRODUCTION QA PASS / CLEAN TELEMETRY OBSERVATION / SEARCH DISTRIBUTION OBSERVATION / ADSENSE_CONTENT_REVIEW_REJECTED**
 
 `S-DESIGN`은 현재 제품의 기술·QA·운영경계·복구구조가 S급 설계기준으로 닫혔다는 뜻이다. 실제 외부사용·검색노출·수익에서 반복 시장증거가 확인됐다는 뜻이 아니며, 그 전에는 `S-VERIFIED`로 승격하지 않는다.
 
@@ -103,16 +111,17 @@
 
 ## AdSense — 현재
 
-**`ADSENSE_REVIEW_SUBMITTED`**
+**`ADSENSE_CONTENT_REVIEW_REJECTED`**
 
 - 사이트 추가 완료
 - 공식 AdSense 코드 반영
 - `ads.txt` 반영
 - Production 소유확인 통과
-- 검토 요청 제출 완료
+- 이전 검토 요청에 대한 2026-11-25 결과: 주의 필요 / 가치가 별로 없는 콘텐츠
+- 이번 콘텐츠 보완 후 재검토는 아직 제출하지 않음
 - 자동 광고는 인페이지 중심
 - 앵커·사이드레일·모바일 전면광고 비활성화
-- `ads.txt` UI 재탐색 결과 대기
+- 2026-11-25 AdSense UI에서 `ads.txt` 승인됨 확인
 
 승인 완료나 광고수익 발생으로 승격하지 않는다.
 
@@ -122,7 +131,7 @@
 
 1. 2026-09-09 clean baseline 이후 실제 외부 행동신호 관찰
 2. 실제 검색 색인·노출·유입 변화 관찰
-3. AdSense 심사와 `ads.txt` 재탐색 결과 관찰
+3. 콘텐츠 보완의 실제 배포·동작을 검증하고 AdSense 재검토 여부 결정
 4. Production/CI에 실제 FAIL이 발생하면 원인분리 후 최소복구
 5. 실제 브라우저 화면녹화 사용에서 권한·저장·재생 문제가 발견되면 해당 증거로 재개
 6. 원어민 자연스러움이나 인간 시각검증은 그것이 다음 판단을 실제로 바꿀 때만 연다
