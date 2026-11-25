@@ -37,6 +37,7 @@ try{
      assert.equal(await page.locator('h1').count(),1);
      assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),`https://random-ppobgi.pages.dev/${route}/`);
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${route} overflows at ${width}`);
+     if(width===320)assert(await page.locator('.table-scroll').evaluateAll(tables=>tables.every(table=>table.scrollWidth<=table.clientWidth+1)),`${route} table needs sideways scrolling`);
      // Visible FAQs must agree with structured search data.
      const documents=await page.locator('script[type="application/ld+json"]').allTextContents();
      for(const document of documents){
@@ -83,6 +84,7 @@ try{
     if(lang!=='ko')assert.equal(await help.innerText(),await page.evaluate(lang=>window.RandomPickerLocales[lang].footer.guide,lang));
     const box=await help.boundingBox();assert(box.height>=44);assert(box.x>=0&&box.x+box.width<=321);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    if(engine==='chromium')await page.screenshot({path:path.join(output,`help-${lang}-mobile.png`)});
     await help.click();assert.equal(new URL(page.url()).pathname,'/guide/');
     if(lang!=='ko')assert.equal(new URL(page.url()).searchParams.get('lang'),lang);
     results.push({engine,phase:'help-entry',lang,pass:true});
