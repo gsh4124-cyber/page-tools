@@ -39,6 +39,14 @@
 .memory-unit-heading{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
 .memory-unit-heading .memory-reference{margin-block:14px 4px}
 .memory-unit-heading .memory-progress{flex:none;margin-block:14px 4px}
+.memory-attempt-heading{flex:none;min-width:0;padding:0 22px;border-bottom:1px solid var(--line);background:var(--bg)}
+.memory-attempt-heading .memory-unit-heading{align-items:center;gap:8px}
+.memory-attempt-heading .memory-reference{min-width:0;margin-block:6px;font-size:14px;line-height:1.4}
+.memory-attempt-heading .memory-progress{margin-block:6px;font-size:13px}
+.memory-tight-height .memory-attempt-heading{padding-inline:10px}
+.memory-tight-height .memory-attempt-heading .memory-reference{margin-block:2px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.memory-tight-height .memory-attempt-heading .memory-progress{margin-block:2px;font-size:12px}
+@media(max-width:480px){.memory-attempt-heading{padding-inline:14px}}
 .memory-progress{font-size:14px;color:var(--muted)}
 .memory-answer-label{display:block;margin:18px 0;font-size:14px;font-weight:650}
 .memory-answer{display:block;box-sizing:border-box;width:100%;min-height:108px;resize:none;overflow-y:hidden;margin-top:8px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);font-family:inherit;font-weight:400;font-size:19px;line-height:1.8;overflow-wrap:anywhere}
@@ -72,6 +80,9 @@
 .memory-legend-extra{background:var(--memory-extra-bg);color:var(--memory-extra-fg)}
 .memory-extra{color:var(--memory-extra-fg);text-decoration-color:var(--memory-extra-fg)}
 .memory-wrong,.memory-missing,.memory-extra{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.memory-quiz button.memory-issue{display:inline;min-height:0;padding:0 2px;border:0;border-radius:4px;background:transparent;color:inherit;font:inherit;line-height:inherit;vertical-align:baseline;cursor:pointer}
+.memory-quiz button.memory-issue:hover{background:var(--hover)}
+.memory-quiz button.memory-issue:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 .memory-missing{text-decoration-style:dotted}
 .memory-extra{text-decoration:line-through}
 .memory-legend{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;font-size:13px}

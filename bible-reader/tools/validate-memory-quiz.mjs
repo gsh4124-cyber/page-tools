@@ -5,6 +5,21 @@ import assert from 'node:assert/strict';
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync('memory-quiz.js','utf8'),context);
 const {grade,normalize,comparisonRuns,comparisonWords,labels,passageRows,passageReference,subsetReference,createSession,passageKey,bookPassageReference}=context.window.BibleMemory;
+const {answerTargets}=context.window.BibleMemory;
+for(const [expected,entered,kind,start,end,selected] of [
+  ['하나님','하나님요','extra',3,4,'요'],
+  ['하 나님','하 나딤','wrong',3,4,'딤'],
+  ['가나','가다','wrong',2,4,'다'],
+  ['a😀b','a💙b','wrong',1,3,'💙'],
+  ['café','cafe\u0300','wrong',3,5,'e\u0300'],
+  ['abc','a, c!','missing',3,3,''],
+  ['abc','ab!','missing',3,3,''],
+  ['a😀','A😀x','extra',3,4,'x'],
+]){
+  const issue=answerTargets(entered,grade(expected,entered).parts).find(p=>p.kind===kind);
+  assert(issue,`${kind} selection exists`);assert.equal(issue.start,start);assert.equal(issue.end,end);assert.equal(entered.slice(issue.start,issue.end),selected);
+}
+for(const language of ['ko','en','fr','de','zh','ru','la','pt','ar'])for(const key of ['restoreAnswer','jumpToAnswer'])assert(labels(language)[key]?.trim(),`${language}: ${key}`);
 // Reported Revelation 8:11 answer: one inserted character must not displace correct words.
 const wormwood='이 별 이름은 쑥이라 물들의 삼분의 일이 쑥이 되매 그 물들이 쓰게 됨을 인하여 많은 사람이 죽더라';
 for(const entered of ['이 별의 이름은 쑥이라','이별의이름은쑥이라','이 별의 이름은 쑥이라']){
