@@ -9,26 +9,26 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "bc63874de9ca624351d110f3865463db7452fda53470b913b2c10654962c5492",
+    "sourceSha256": "15ee2cbf8e5f0a6a655e3184a84d57a4939b3df0c00a4b862c452716bfc4e5ba",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "codeCommit": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
+    "codeCommit": "7ad7caa482368190fcaeb8aa9df08c9f276f1f75",
     "manifest": {
       "product": "moa",
-      "revision": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
-      "sourceSha256": "bc63874de9ca624351d110f3865463db7452fda53470b913b2c10654962c5492",
+      "revision": "7ad7caa482368190fcaeb8aa9df08c9f276f1f75",
+      "sourceSha256": "15ee2cbf8e5f0a6a655e3184a84d57a4939b3df0c00a4b862c452716bfc4e5ba",
       "cloudConfigured": true
     },
-    "workerSha256": "0e208041442d126fec74952679ca555cca1c35c6e3ceeb17d8175fa0b57b96c8",
+    "workerSha256": "90918f9df341cc91e50cdbd53f45f1651913267fc90966df38e12f638edbe591",
     "compiledLocally": true,
     "published": true,
-    "reason": "Local original-photo draft recovery added with limits, cleanup/revocation, read ownership and quota failure handling. Unit33 and local/mocked browser54 groups pass. Production provider success/build/interface observed; real production photo selection/recovery remains INCONCLUSIVE due browser tool interruption. Hosted version3/all trial counts0 unchanged."
+    "reason": "Three isolated persistent mobile Chrome profiles pass24 functional and27 intercepted SDK groups. Found touch hit-target moving on320px while draft status text wrapped; reserve two-line status area on mobile. Final general browser12 and packaged Worker14 pass. Real Android emulator failed to start; native Safari/OS/live hosted photo recovery remain unverified."
   },
   "unit": {
     "status": "DONE",
     "dateKST": "2026-11-25",
     "passed": 33,
     "failed": 0,
-    "scope": "Node/local PGlite/Worker + photo limits + deterministic clear/write interleaving. Not a hosted DB test."
+    "scope": "Previous33 local Node/PGlite/Worker tests passed; not rerun for this CSS-only product change. Application JS/data/auth logic unchanged."
   },
   "audit": {
     "status": "DONE",
@@ -39,12 +39,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:55488",
+    "base": "http://127.0.0.1:51091",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "c240d92d8e49cff8c313e454abde54a58409cf37",
-      "sourceSha256": "503c8c073d806af153317d53a725c6d2bf2b3704d82757813d46c55efdb2f9e6",
+      "revision": "5bc354fd5352d14a3fb56256aee00dfc71312348",
+      "sourceSha256": "7248225f40af72df212845357d771db406c71f96cbd1469d23579cc744f5c8cf",
       "cloudConfigured": false
     },
     "results": [
@@ -530,14 +530,20 @@
     },
     {
       "item": "Draft recovery after physical mobile OS kill, full browser process restart and real 7-day wait",
-      "status": "NOT_TESTED",
-      "verifiedAlternative": "Chrome refresh/closed-tab reopen tested; expiry via injected unit clock; visibility/pagehide flush best effort"
+      "status": "PARTIAL",
+      "verifiedAlternative": "Full isolated desktop Chrome process close/reopen with persistent mobile profiles DONE3 devices. Native mobile OS kill and natural7-day wait remain NOT_TESTED."
     },
     {
       "item": "Current production photo draft selection/recovery after actual native picker",
       "status": "INCONCLUSIVE",
       "reason": "Browser chooser call expired, debugger unattached on recovery, native click geometry unavailable. Final selected files none/empty editor observed.",
       "verifiedAlternative": "Local Chrome exact original bytes/order/name roundtrip, quota/corruption/expiry/cross-tab cleanup and intercepted real SDK9 passed."
+    },
+    {
+      "item": "Native Android OS emulator / native iOS Safari and native photo picker/keyboard",
+      "status": "NOT_TESTED",
+      "reason": "Android hardware launch unavailable, software process crash. iPhone profiles use Chrome renderer and viewport/UA/touch emulation.",
+      "verifiedAlternative": "Three mobile Chrome profiles pass51 groups. Detailed scope in virtualPhoneQA/androidEmulatorAttempt."
     }
   ],
   "costs": {
@@ -805,23 +811,23 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-25T08:34:42.295Z",
+      "preparedAt": "2026-11-25T12:02:43.364Z",
       "manifest": {
         "product": "moa",
-        "revision": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
-        "sourceSha256": "bc63874de9ca624351d110f3865463db7452fda53470b913b2c10654962c5492",
+        "revision": "7ad7caa482368190fcaeb8aa9df08c9f276f1f75",
+        "sourceSha256": "15ee2cbf8e5f0a6a655e3184a84d57a4939b3df0c00a4b862c452716bfc4e5ba",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
         "index.html": "4a90e8a33e6b32a351b96379d21caf76e32df36cbbfebc0c80f887b7ca58f2e2",
-        "app.js": "eb56a1f81586ca89d9a8390f369127cf4b4c4d81aa782193ae8f37a317059c16",
-        "service.css": "f39cf10297153bcd0ecfd7f3404e6e923be7716ab5ea459be917b9351908e514",
-        "build-manifest.json": "94c751c7a232d4ef43804d1c201c0ca77bded4287213c487899da30becfc684c",
+        "app.js": "c5bb0e9fdf696a8959e8539caeae1a0c1ad01561f24e6783cb97cb84c08eb1d1",
+        "service.css": "10eee45789444150e61e257b244b87aca5a97e74b54015863bc56fc4938ef32a",
+        "build-manifest.json": "88f5ddcdf485df14273e5121547c7b52cdb55d138385fd99021bee0ef3cfaba4",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "0e208041442d126fec74952679ca555cca1c35c6e3ceeb17d8175fa0b57b96c8",
+      "workerSha256": "90918f9df341cc91e50cdbd53f45f1651913267fc90966df38e12f638edbe591",
       "access": "owner-only",
       "staticFallback": "setup notice only",
       "published": false
@@ -852,7 +858,7 @@
       "bucketPrivate": true,
       "fileLimit": 26214400
     },
-    "hostedMoaChecks": "Current release build/interface/empty editor observed. Live photo select/recovery INCONCLUSIVE due unavailable browser automation. No record save/upload operation. Native SQL version3/entries0/habits0/checks empty/reservations0/Storage0.",
+    "hostedMoaChecks": "CSS-only touch stability update. Provider success. Current private owner/photo flow NOT_REPLAYED. Read-only server counts remain version3/all0. Virtual mobile tests use isolated local data and intercepted SDK.",
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
@@ -866,7 +872,7 @@
       "browserPackageChecks": 14,
       "authenticationTest": "synthetic JWT / mocked RPC",
       "actualOwnerLogin": "User reported working (DONE / USER_REPORTED_DONE); actual Google chooser independently observed, detailed completion not independently observed.",
-      "liveHostChecks": "Currentbc63874de9ca owner session/interface/empty draft observed. Full live photo recovery INCONCLUSIVE; local and mock9 pass.",
+      "liveHostChecks": "Current provider success; prior private owner UI only. Current hosted photo recovery not independently replayed.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -879,20 +885,16 @@
       "actualOwnerSessionReconnect": "DONE current production reload; no fresh Google sign-in replay."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
-    "deploymentId": "5a568661-4ef1-471a-89bd-25e81b244fe1",
+    "sourceCommit": "7ad7caa482368190fcaeb8aa9df08c9f276f1f75",
+    "deploymentId": "2709f225-1a29-437a-a736-99407c01c658",
     "published": true,
     "actualBrowserChecks": {
-      "method": "supported cua_repl Chrome extension, then read-only native Windows accessibility",
-      "codeCommit": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
-      "observedBuild": "bc63874de9ca",
-      "ownerReconnect": "DONE existing actual owner session",
-      "photoDraftInterface": "DONE new copy/48MiB limit/empty editor and file input observed",
-      "livePhotoSelectAndRecovery": "INCONCLUSIVE: filechooser call expired; refreshed browser binding reported debugger unattached; native click unavailable because geometry missing",
-      "trialState": "DONE native accessibility: selected files none, empty content, draft status empty; no record save/upload/restore/delete action submitted",
-      "freshGoogleSignIn": "NOT_REPLAYED",
+      "currentHostedOwnerUI": "NOT_REPLAYED for CSS-only7ad7caa; prior36266bc owner UI observed independently",
+      "currentProductionPhotoRecovery": "INCONCLUSIVE, unchanged from previous report",
+      "currentProviderCheck": "DONE completed/success",
+      "virtualMobile": "DONE three Chrome mobile profiles /24 functional +27 mocked SDK groups; not native Android/iOS/Safari",
       "serverReadback": {
-        "checkedAtUTC": "2026-11-25T10:36:36Z",
+        "checkedAtUTC": "2026-11-25T12:44:00Z",
         "version": 3,
         "entries": 0,
         "habits": 0,
@@ -900,7 +902,7 @@
         "mediaReservations": 0,
         "storageObjects": 0
       },
-      "providerWorkerHashIndependentRead": "NOT_TESTED"
+      "actualOSDevices": "NOT_TESTED; Android emulator start attempts failed"
     },
     "runtimeFixes": [
       {
@@ -1397,11 +1399,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-25T08:34:46.935Z",
+    "checkedAt": "2026-11-25T12:02:48.086Z",
     "manifest": {
       "product": "moa",
-      "revision": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
-      "sourceSha256": "bc63874de9ca624351d110f3865463db7452fda53470b913b2c10654962c5492",
+      "revision": "7ad7caa482368190fcaeb8aa9df08c9f276f1f75",
+      "sourceSha256": "15ee2cbf8e5f0a6a655e3184a84d57a4939b3df0c00a4b862c452716bfc4e5ba",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -2387,11 +2389,12 @@
     "maxRenderedDraftPreviews": 6
   },
   "validationNotes": [
-    "Unit33 pass; final device source503c8c073d80: app12/text-photo draft6/quick photo5/intercepted SDK9/photo IndexedDB8. Final36266bc Worker14. Total browser54 groups, failures0 in final runs.",
-    "Device evidence carries precommitc240 metadata while same final source includes all changes; final Cloudflare package rebuilt at36266bc. Cloud/device configuration hashes intentionally differ.",
-    "Browser tests found discard/write interleaving could recreate a stale photo reference. Cleanup now changes a shared generation before removal; writes check it before/after persistence. Unchanged text snapshots no longer churn revisions. Deterministic interleaving unit and cross-tab browser pass.",
-    "Further regression found a blank inactive tab closing could unnecessarily revoke another active tab. Empty snapshots without persisted metadata no longer purge or change generation. Final eight photo groups and existing text/account groups pass.",
-    "Production build/interface and clean editor observed; file selection tool stalled/expired, then browser debugger and native click geometry were unavailable. No unauthorized workaround or actual hosted write performed. Do not count live photo recovery as passed."
+    "Current virtual mobile matrix: Pixel7 412x839, iPhone13 390x664, iPhoneSE 320x568. All use Chrome158.0.8127.36 mobile device emulation, not Android OS or Safari.24 functional +27 intercepted SDK +general12 +final packaged Worker14 checks pass.",
+    "Mobile matrix verifies touch chooser/FileChooser file injection, original file SHA equality, reduced viewport geometry (not actual native keyboard), offline local draft save (not offline page startup), refresh and full browser process restart/reopen, portrait/landscape viewport resize, local save cleanup, explicit cancel/discard, retained saved test record. Final profiles removed; screenshots retained.",
+    "Initial320px touch check failed: touchstart/end targeted discard button but delayed click landed on section after status text wrapped. Reduced-motion alone did not fix it. Mobile status paragraph now reserves two lines. Final all-device run passes without forced clicks or arbitrary sleeps.",
+    "API35 x86_64 Android emulator35.3.11 attempted in a new isolated AVD. Accelerated launch failed with host acceleration unavailable; software cold boot exited0xC0000005 before ADB became usable. No Windows feature/security/virtualization settings changed.",
+    "Device source7248225f40af captures final CSS; precommit5bc354f metadata. Final cloud package rebuilt at7ad7caa/source15ee2cbf8e5f. Device/cloud configuration hashes differ. Unit33 and previous photo regression remain historical, same application JS.",
+    "Current production authenticated photo flow remains INCONCLUSIVE from earlier browser connection failure. Local emulation/mocked SDK success does not turn it into a live hosted pass. Read-only native server query at12:44UTC shows version3/all0 unchanged."
   ],
   "previousPhotoQuickRelease": {
     "codeCommit": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
@@ -2767,5 +2770,288 @@
     "clearOverlappingWrite": "DONE deterministic unit + browser cross-tab regression",
     "pendingOpenAfterLogout": "DONE revocation before asynchronous open/transaction",
     "productionPhotoRecovery": "INCONCLUSIVE: filechooser call expired; refreshed browser binding reported debugger unattached; native click unavailable because geometry missing"
+  },
+  "previousPhotoDraftRelease": {
+    "candidate": {
+      "status": "DONE",
+      "sourceSha256": "bc63874de9ca624351d110f3865463db7452fda53470b913b2c10654962c5492",
+      "deployment": "CLOUDFLARE_DEPLOYED",
+      "codeCommit": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
+      "manifest": {
+        "product": "moa",
+        "revision": "36266bc39ad5bdfa10ca5c1d9f68b7871d59a3c1",
+        "sourceSha256": "bc63874de9ca624351d110f3865463db7452fda53470b913b2c10654962c5492",
+        "cloudConfigured": true
+      },
+      "workerSha256": "0e208041442d126fec74952679ca555cca1c35c6e3ceeb17d8175fa0b57b96c8",
+      "compiledLocally": true,
+      "published": true,
+      "reason": "Local original-photo draft recovery added with limits, cleanup/revocation, read ownership and quota failure handling. Unit33 and local/mocked browser54 groups pass. Production provider success/build/interface observed; real production photo selection/recovery remains INCONCLUSIVE due browser tool interruption. Hosted version3/all trial counts0 unchanged."
+    },
+    "validationNotes": [
+      "Unit33 pass; final device source503c8c073d80: app12/text-photo draft6/quick photo5/intercepted SDK9/photo IndexedDB8. Final36266bc Worker14. Total browser54 groups, failures0 in final runs.",
+      "Device evidence carries precommitc240 metadata while same final source includes all changes; final Cloudflare package rebuilt at36266bc. Cloud/device configuration hashes intentionally differ.",
+      "Browser tests found discard/write interleaving could recreate a stale photo reference. Cleanup now changes a shared generation before removal; writes check it before/after persistence. Unchanged text snapshots no longer churn revisions. Deterministic interleaving unit and cross-tab browser pass.",
+      "Further regression found a blank inactive tab closing could unnecessarily revoke another active tab. Empty snapshots without persisted metadata no longer purge or change generation. Final eight photo groups and existing text/account groups pass.",
+      "Production build/interface and clean editor observed; file selection tool stalled/expired, then browser debugger and native click geometry were unavailable. No unauthorized workaround or actual hosted write performed. Do not count live photo recovery as passed."
+    ]
+  },
+  "virtualPhoneQA": {
+    "checkedAt": "2026-11-25T12:00:45.698Z",
+    "scope": "isolated persistent Chrome mobile profiles; local device build; no real owner or hosted Auth; no real OS/native photo picker/keyboard",
+    "manifest": {
+      "product": "moa",
+      "revision": "5bc354fd5352d14a3fb56256aee00dfc71312348",
+      "sourceSha256": "7248225f40af72df212845357d771db406c71f96cbd1469d23579cc744f5c8cf",
+      "cloudConfigured": false
+    },
+    "photoSha256": "8d82577bcea6d76e1f5bc5aad0acb4a01f81e1c9490c894672e288e7b5f50584",
+    "results": [
+      {
+        "device": "Pixel 7",
+        "engine": "158.0.8127.36",
+        "engineKind": "desktop Chrome with mobile device emulation",
+        "nativeOS": false,
+        "nativeSafari": false,
+        "viewport": {
+          "width": 412,
+          "height": 839
+        },
+        "photoSha256": "8d82577bcea6d76e1f5bc5aad0acb4a01f81e1c9490c894672e288e7b5f50584",
+        "checks": [
+          {
+            "name": "mobile metrics and touch controls fit the portrait viewport",
+            "status": "DONE"
+          },
+          {
+            "name": "touch photo chooser and reduced keyboard viewport retain caption and original photo",
+            "status": "DONE"
+          },
+          {
+            "name": "offline draft autosave completes locally without a cloud upload",
+            "status": "DONE"
+          },
+          {
+            "name": "refresh restores text and the exact original photo bytes",
+            "status": "DONE"
+          },
+          {
+            "name": "closing the browser process and reopening the isolated profile restores the draft",
+            "status": "DONE"
+          },
+          {
+            "name": "landscape and portrait resizing keep controls usable; local save clears temporary photos",
+            "status": "DONE"
+          },
+          {
+            "name": "cancel preserves a new photo draft; explicit discard clears only the draft",
+            "status": "DONE"
+          },
+          {
+            "name": "second process restart retains the saved record and leaves no ghost draft or temporary photo",
+            "status": "DONE"
+          }
+        ],
+        "temporaryPhotoRows": 0,
+        "savedRecords": 1
+      },
+      {
+        "device": "iPhone 13",
+        "engine": "158.0.8127.36",
+        "engineKind": "desktop Chrome with mobile device emulation",
+        "nativeOS": false,
+        "nativeSafari": false,
+        "viewport": {
+          "width": 390,
+          "height": 664
+        },
+        "photoSha256": "8d82577bcea6d76e1f5bc5aad0acb4a01f81e1c9490c894672e288e7b5f50584",
+        "checks": [
+          {
+            "name": "mobile metrics and touch controls fit the portrait viewport",
+            "status": "DONE"
+          },
+          {
+            "name": "touch photo chooser and reduced keyboard viewport retain caption and original photo",
+            "status": "DONE"
+          },
+          {
+            "name": "offline draft autosave completes locally without a cloud upload",
+            "status": "DONE"
+          },
+          {
+            "name": "refresh restores text and the exact original photo bytes",
+            "status": "DONE"
+          },
+          {
+            "name": "closing the browser process and reopening the isolated profile restores the draft",
+            "status": "DONE"
+          },
+          {
+            "name": "landscape and portrait resizing keep controls usable; local save clears temporary photos",
+            "status": "DONE"
+          },
+          {
+            "name": "cancel preserves a new photo draft; explicit discard clears only the draft",
+            "status": "DONE"
+          },
+          {
+            "name": "second process restart retains the saved record and leaves no ghost draft or temporary photo",
+            "status": "DONE"
+          }
+        ],
+        "temporaryPhotoRows": 0,
+        "savedRecords": 1
+      },
+      {
+        "device": "iPhone SE",
+        "engine": "158.0.8127.36",
+        "engineKind": "desktop Chrome with mobile device emulation",
+        "nativeOS": false,
+        "nativeSafari": false,
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "photoSha256": "8d82577bcea6d76e1f5bc5aad0acb4a01f81e1c9490c894672e288e7b5f50584",
+        "checks": [
+          {
+            "name": "mobile metrics and touch controls fit the portrait viewport",
+            "status": "DONE"
+          },
+          {
+            "name": "touch photo chooser and reduced keyboard viewport retain caption and original photo",
+            "status": "DONE"
+          },
+          {
+            "name": "offline draft autosave completes locally without a cloud upload",
+            "status": "DONE"
+          },
+          {
+            "name": "refresh restores text and the exact original photo bytes",
+            "status": "DONE"
+          },
+          {
+            "name": "closing the browser process and reopening the isolated profile restores the draft",
+            "status": "DONE"
+          },
+          {
+            "name": "landscape and portrait resizing keep controls usable; local save clears temporary photos",
+            "status": "DONE"
+          },
+          {
+            "name": "cancel preserves a new photo draft; explicit discard clears only the draft",
+            "status": "DONE"
+          },
+          {
+            "name": "second process restart retains the saved record and leaves no ghost draft or temporary photo",
+            "status": "DONE"
+          }
+        ],
+        "temporaryPhotoRows": 0,
+        "savedRecords": 1
+      }
+    ],
+    "errors": [],
+    "evidenceDirectory": "qa-evidence/virtual-phone-2026-11-25T12-00-23-928Z",
+    "cleanup": {
+      "isolatedProfilesAndAvdRemoved": 11,
+      "screenshotsAndReportsRetained": true,
+      "originalAVDsChanged": false,
+      "hostedDataWritten": false
+    }
+  },
+  "virtualPhoneCloudContracts": {
+    "Pixel 7": {
+      "type": "local intercepted Supabase API contract, not live hosted test",
+      "deviceProfile": "Pixel 7",
+      "engine": "Chrome Chromium, including iPhone profiles; not native Safari",
+      "manifest": {
+        "product": "moa",
+        "revision": "5bc354fd5352d14a3fb56256aee00dfc71312348",
+        "sourceSha256": "7248225f40af72df212845357d771db406c71f96cbd1469d23579cc744f5c8cf",
+        "cloudConfigured": false
+      },
+      "results": [
+        "guest records are not automatically uploaded; A saved through supabase-js RPC",
+        "verified same-account session reload restores only its browser draft",
+        "same verified account recovers browser-local photo draft without uploading",
+        "authenticated session reload and cloud readback",
+        "cross-tab logout cancels pending restore and clears title/body/files/previews/backup password without overwriting A records",
+        "B sees only B data after account switch; guest data preserved",
+        "network failure does not report saved or discard draft; reload recovers it",
+        "second browser reopens the same A cloud record",
+        "initial verified-account load disables editor/navigation, avoiding input loss during startup"
+      ],
+      "errors": []
+    },
+    "iPhone 13": {
+      "type": "local intercepted Supabase API contract, not live hosted test",
+      "deviceProfile": "iPhone 13",
+      "engine": "Chrome Chromium, including iPhone profiles; not native Safari",
+      "manifest": {
+        "product": "moa",
+        "revision": "5bc354fd5352d14a3fb56256aee00dfc71312348",
+        "sourceSha256": "7248225f40af72df212845357d771db406c71f96cbd1469d23579cc744f5c8cf",
+        "cloudConfigured": false
+      },
+      "results": [
+        "guest records are not automatically uploaded; A saved through supabase-js RPC",
+        "verified same-account session reload restores only its browser draft",
+        "same verified account recovers browser-local photo draft without uploading",
+        "authenticated session reload and cloud readback",
+        "cross-tab logout cancels pending restore and clears title/body/files/previews/backup password without overwriting A records",
+        "B sees only B data after account switch; guest data preserved",
+        "network failure does not report saved or discard draft; reload recovers it",
+        "second browser reopens the same A cloud record",
+        "initial verified-account load disables editor/navigation, avoiding input loss during startup"
+      ],
+      "errors": []
+    },
+    "iPhone SE": {
+      "type": "local intercepted Supabase API contract, not live hosted test",
+      "deviceProfile": "iPhone SE",
+      "engine": "Chrome Chromium, including iPhone profiles; not native Safari",
+      "manifest": {
+        "product": "moa",
+        "revision": "5bc354fd5352d14a3fb56256aee00dfc71312348",
+        "sourceSha256": "7248225f40af72df212845357d771db406c71f96cbd1469d23579cc744f5c8cf",
+        "cloudConfigured": false
+      },
+      "results": [
+        "guest records are not automatically uploaded; A saved through supabase-js RPC",
+        "verified same-account session reload restores only its browser draft",
+        "same verified account recovers browser-local photo draft without uploading",
+        "authenticated session reload and cloud readback",
+        "cross-tab logout cancels pending restore and clears title/body/files/previews/backup password without overwriting A records",
+        "B sees only B data after account switch; guest data preserved",
+        "network failure does not report saved or discard draft; reload recovers it",
+        "second browser reopens the same A cloud record",
+        "initial verified-account load disables editor/navigation, avoiding input loss during startup"
+      ],
+      "errors": []
+    }
+  },
+  "androidEmulatorAttempt": {
+    "scope": "isolated Moa_QA_API_35 copied configuration; original AVDs untouched",
+    "emulatorVersion": "35.3.11.0",
+    "api": 35,
+    "abi": "x86_64",
+    "hardwareAcceleration": {
+      "status": "FAILED",
+      "exitCode": 1,
+      "reportedAccelerationCheckCode": 6,
+      "message": "x86_64 emulation requires usable hardware acceleration; host reports Hyper-V/WHP availability but it was not usable in this execution environment"
+    },
+    "softwareEmulation": {
+      "status": "FAILED",
+      "exitCode": -1073741819,
+      "hex": "0xC0000005",
+      "message": "process terminated during cold boot before an ADB device became available"
+    },
+    "androidOSChecksPassed": false,
+    "windowsFeaturesChanged": false,
+    "systemSettingsChanged": false,
+    "newResourcesOrCosts": false
   }
 }
