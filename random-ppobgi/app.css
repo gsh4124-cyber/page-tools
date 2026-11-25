@@ -1016,3 +1016,6 @@ header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
   #pickerArea:has(> #stage.show) > #mainCard{grid-column:1}
   #pickerArea:has(> #stage.show) > :not(#mainCard){grid-column:2;margin-top:0}
 }
+
+/* Keep help reachable without squeezing the localized introduction. */
+.hero{align-items:center;flex-direction:row;gap:8px}.hero p{display:block;flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere}.quick-guide{display:inline-flex;align-items:center;justify-content:center;min-height:44px;flex:none;max-width:45%;padding:6px 10px;border:1px solid var(--line);border-radius:12px;color:inherit;font-size:13px;font-weight:800;text-align:center;text-decoration:none;overflow-wrap:anywhere}.quick-guide:focus-visible{outline:3px solid currentColor;outline-offset:2px}

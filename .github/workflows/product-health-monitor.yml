@@ -341,6 +341,11 @@ jobs:
           GAME_CONTRACT_EVIDENCE: random-ppobgi/qa_evidence/live/game-contract
           DEPLOY_VERIFIED_SHA: ${{ contains(steps.changed.outputs.deploy_projects, 'random-ppobgi') && github.sha || '' }}
         run: node random-ppobgi/tests/game-contract-browser.mjs
+      - name: Random Picker production guide layout and tool entry
+        if: contains(steps.changed.outputs.projects, 'random-ppobgi')
+        env:
+          GUIDE_TEST_EVIDENCE: random-ppobgi/qa_evidence/live/guides
+        run: node random-ppobgi/tests/guide-browser-smoke.mjs
       - name: Bible Reader production navigation and multilingual interactions
         if: contains(steps.changed.outputs.projects, 'bible-reader')
         run: node bible-reader/tools/production-smoke.mjs
