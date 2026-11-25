@@ -81,6 +81,7 @@ try{
     if(lang!=='ko')await page.waitForFunction(()=>window.__RANDOM_PICKER_I18N_READY__);
     const help=page.locator('[data-guide-link]');
     assert(await help.isVisible());
+    assert(await page.locator('.hero p').isVisible());
     if(lang!=='ko')assert.equal(await help.innerText(),await page.evaluate(lang=>window.RandomPickerLocales[lang].footer.guide,lang));
     const box=await help.boundingBox();assert(box.height>=44);assert(box.x>=0&&box.x+box.width<=321);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
