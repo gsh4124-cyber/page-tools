@@ -118,6 +118,9 @@ jobs:
       - name: Test typing practice and recoverable collection deletion
         if: matrix.engine == 'chromium'
         run: node tools/memory-practice-smoke.mjs --local
+      - name: Test the full production memory flow before deployment
+        if: matrix.engine == 'chromium'
+        run: node tools/memory-quiz-smoke.mjs --local
       - name: Keep long practice passages and input visible on tablets
         env:
           HOME: /root
