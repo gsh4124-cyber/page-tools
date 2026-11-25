@@ -80,7 +80,8 @@
 .memory-legend-extra{background:var(--memory-extra-bg);color:var(--memory-extra-fg)}
 .memory-extra{color:var(--memory-extra-fg);text-decoration-color:var(--memory-extra-fg)}
 .memory-wrong,.memory-missing,.memory-extra{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
-.memory-quiz button.memory-issue{display:inline;min-height:0;padding:0 2px;border:0;border-radius:4px;background:transparent;color:inherit;font:inherit;line-height:inherit;vertical-align:baseline;cursor:pointer}
+.memory-quiz button.memory-issue{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;max-width:100%;padding:2px 4px;border:0;border-radius:4px;background:transparent;color:inherit;font:inherit;line-height:inherit;white-space:pre-wrap;vertical-align:middle;cursor:pointer}
+.memory-quiz button.memory-issue>span{min-width:0;overflow-wrap:anywhere}
 .memory-quiz button.memory-issue:hover{background:var(--hover)}
 .memory-quiz button.memory-issue:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 .memory-missing{text-decoration-style:dotted}

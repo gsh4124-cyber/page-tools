@@ -49,7 +49,7 @@ try{
     await dialog.locator('.memory-practice-repeat').click();await input.fill('new answer');assert(await dialog.locator('.memory-practice-undo').isHidden(),'New typing must never be overwritten by an old undo');
     const first=[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(expected)].find(part=>/[\p{L}\p{N}]/u.test(part.segment)),wrong=' \n'+expected.slice(0,first.index)+'X'+expected.slice(first.index+first.segment.length);
     await input.fill(wrong);await dialog.locator('.memory-primary').click();
-    const issue=cards.first().locator('.memory-issue').first();await issue.focus();await page.keyboard.press('Enter');
+    const issue=cards.first().locator('.memory-issue').first();assert(await cards.first().locator('.memory-issue').evaluateAll(nodes=>nodes.every(n=>{const r=n.getBoundingClientRect();return r.width>=44&&r.height>=44;})),'Corrections have touch-sized hit areas');await issue.focus();await page.keyboard.press('Enter');
     assert(await input.evaluate(n=>n===document.activeElement));assert.equal(await input.evaluate(n=>n.value.slice(n.selectionStart,n.selectionEnd)),'X');assert.equal(await input.inputValue(),wrong,'Error navigation must not rewrite input');
     await input.fill('🐟'+expected);await dialog.locator('.memory-primary').click();await cards.first().locator('.memory-issue:has(.memory-extra)').first().click();
     assert.equal(await input.evaluate(n=>n.value.slice(n.selectionStart,n.selectionEnd)),'🐟');
