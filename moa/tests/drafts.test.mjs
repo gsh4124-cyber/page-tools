@@ -23,3 +23,10 @@ test('storage failure never reports saved and a successful clear removes only it
  storage.setItem=(k,v)=>storage.data.set(k,v);draft.save(input);assert.equal(states.at(-1),'saved');draft.clear();assert.equal(storage.getItem(DRAFT_KEY),null);
  const broken=writingDrafts({storage:{getItem(){throw Error('denied');}},status:s=>states.push(s)});assert.equal(broken.begin('guest'),null);broken.save(input);assert.equal(states.at(-1),'unavailable');
 });
+
+test('clearing during another tab write revokes that write; unchanged snapshots do not churn revisions',()=>{
+ const storage=fixture();let fence=0;const options={storage,generation:()=>fence,removeMedia:()=>fence++};
+ const a=writingDrafts(options),b=writingDrafts(options);a.begin('A');a.save({...input,content:''});assert.equal(fence,0);a.save(input);const first=storage.getItem(DRAFT_KEY);a.save(input);assert.equal(storage.getItem(DRAFT_KEY),first);b.begin('A');
+ const original=storage.setItem;let interleave=true;storage.setItem=(key,value)=>{if(interleave){interleave=false;b.clear();}original(key,value);};
+ a.save({...input,content:'overlap'});assert.equal(storage.getItem(DRAFT_KEY),null);a.save(input);assert.equal(storage.getItem(DRAFT_KEY),null);
+});

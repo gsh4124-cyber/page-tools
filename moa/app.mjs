@@ -1,5 +1,6 @@
 import {empty,today,draftTitle,validateDocument,validateFile,encodeBackup,decodeBackup,MAX_BACKUP,DECOR,CATEGORIES} from './core.mjs';
 import {DRAFT_KEY,writingDrafts} from './drafts.mjs';
+import {PHOTO_FENCE_KEY,photoFence,putDraftPhotos,getDraftPhotos,removeDraftPhotoSet,pruneDraftPhotos,purgeDraftPhotos} from './draft-photos.mjs';
 import {prepareMedia,mib} from './media.mjs';
 import {setupAccountUI} from './account-ui.mjs';
 import {LocalRepository,CloudRepository,makeClient,preflight} from './repository.mjs';
@@ -13,21 +14,45 @@ let month=new Date(new Date().getFullYear(),new Date().getMonth(),1),selection=n
 let backupMode='export',restoreFile=null;
 let draftUrls=[];
 let pendingConfirmation=null;
-let draftTimer,draftActive=false,draftIdentity;
+let draftTimer,draftActive=false,draftIdentity,draftRun=0,mediaGeneration=0,photoCache=null,draftQueue=Promise.resolve();
 const draftFields=()=>({title:$('#title').value,content:$('#content').value,recordDate:$('#recordDate').value,category:$('#category').value,decoration:$('#decoration').value,sticker:$('#sticker').value,optimizePhotos:$('#optimizePhotos').checked,attachments:$('#media').files.length});
-const drafts=writingDrafts({storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value),removeItem:key=>localStorage.removeItem(key)},status:state=>{
- const messages={empty:'글은 이 브라우저에 7일간 임시 보관해요.',pending:'초안 저장 중…',saved:'이 브라우저에 초안을 저장했어요.',restored:'작성 중이던 초안을 불러왔어요.',conflict:'다른 창에서 초안이 바뀌었어요. 이 창의 내용은 기록 저장으로 남겨 주세요.',unavailable:'초안을 자동 저장하지 못했어요. 창을 닫기 전에 기록을 저장해 주세요.'};
+const drafts=writingDrafts({storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value),removeItem:key=>localStorage.removeItem(key)},removeMedia:()=>{const token=epoch;void purgeDraftPhotos().then(ok=>{if(!ok&&token===epoch)draftPhotoProblem('임시 사진 정리를 완료하지 못했어요. 브라우저 저장소 접근을 확인해 주세요.');});},generation:photoFence,status:state=>{
+ const messages={empty:'글·사진은 이 브라우저에 7일간 임시 보관해요.',pending:'초안 저장 중…',saved:'글·사진 초안을 이 브라우저에 저장했어요.',restored:'작성 중이던 초안을 불러왔어요.',conflict:'다른 창에서 초안이 바뀌었어요. 이 창의 내용은 기록 저장으로 남겨 주세요.',unavailable:'초안을 자동 저장하지 못했어요. 창을 닫기 전에 기록을 저장해 주세요.'};
  $('#draftStatus').textContent=messages[state];$('#draftStatus').dataset.state=state;
  if(['saved','restored','pending'].includes(state))$('#resumeDraft').hidden=false;
  if(state==='empty'){$('#resumeDraft').hidden=true;$('#draftMediaNotice').hidden=true;}
 }});
-function flushDraft(){clearTimeout(draftTimer);if(draftActive)drafts.save(draftFields());}
+function draftPhotoProblem(message='사진 초안을 보관하지 못했어요. 사진을 다시 선택해야 할 수 있어요. 지금 기록을 저장해 주세요.'){$('#draftStatus').textContent=message;$('#draftStatus').dataset.state='partial';}
+function flushDraft(){
+ clearTimeout(draftTimer);if(!draftActive)return Promise.resolve();
+ const run=++draftRun,token=epoch,identity=draftIdentity,mediaVersion=mediaGeneration,files=[...$('#media').files].filter(file=>file.type.startsWith('image/')),snapshot=draftFields(),oldRef=photoCache?.ref;
+ const cached=photoCache?.generation===mediaVersion?photoCache.ref:null;
+ if(cached)snapshot.photos=cached;
+ const state=drafts.save(snapshot);if(state!=='saved')return Promise.resolve();
+ if(photoCache?.generation===mediaVersion)return draftQueue;
+ const allowed=()=>draftActive&&token===epoch&&identity===draftIdentity&&run===draftRun&&mediaVersion===mediaGeneration&&drafts.current();
+ let fence;try{fence=photoFence();}catch{draftPhotoProblem();return Promise.resolve();}
+ $('#draftStatus').textContent='글·사진 초안 저장 중…';$('#draftStatus').dataset.state='pending';
+ draftQueue=draftQueue.catch(()=>{}).then(async()=>{
+  if(!allowed())return;
+  let ref;
+  try{
+   ref=await putDraftPhotos(identity,files,{fence,allowed});
+   if(!allowed()){await removeDraftPhotoSet(ref?.id);return;}
+   const saved=drafts.save({...snapshot,...(ref?{photos:ref}:{})});
+   if(saved!=='saved'){await removeDraftPhotoSet(ref?.id);return;}
+   photoCache={generation:mediaVersion,ref};
+   if(oldRef?.id&&oldRef.id!==ref?.id)await removeDraftPhotoSet(oldRef.id);
+  }catch{if(allowed())draftPhotoProblem();}
+ });return draftQueue;
+}
 function queueDraft(){if(!draftActive)return;clearTimeout(draftTimer);$('#draftStatus').textContent='초안 저장 중…';$('#draftStatus').dataset.state='pending';draftTimer=setTimeout(flushDraft,400);}
-function resetWriting(){ $('#entryForm').reset();$('#entryExtras').open=false;$('#recordDate').value=today();renderDraftMedia();$('#draftMediaNotice').hidden=true; }
+function mediaChanged(){mediaGeneration++;void flushDraft();}
+function resetWriting(){draftRun++;mediaGeneration++;photoCache=null;$('#entryForm').reset();$('#entryExtras').open=false;$('#recordDate').value=today();renderDraftMedia();$('#draftMediaNotice').hidden=true;}
 $('#entryForm').addEventListener('input',queueDraft);$('#entryForm').addEventListener('change',queueDraft);
 window.addEventListener('pagehide',flushDraft);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushDraft();});
-window.addEventListener('storage',event=>{if(event.key===DRAFT_KEY||event.key===null)drafts.changed();});
+window.addEventListener('storage',event=>{if(event.key===DRAFT_KEY||event.key===PHOTO_FENCE_KEY||event.key===null)drafts.changed();});
 $('#resumeDraft').onclick=()=>{showView('write');$('#content').focus({preventScroll:true});};
 $('#discardDraft').onclick=async()=>{if(busy||!ready)return;const token=epoch;if(!await confirmChange({title:'작성 중인 초안을 비울까요?',description:'저장 전 글과 선택한 첨부를 비워요. 이미 저장한 기록은 그대로 남아요.',details:[],label:'초안 비우기'})||token!==epoch||busy)return;clearTimeout(draftTimer);drafts.clear();resetWriting();};
 const monthKey=()=>`${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`;
@@ -56,20 +81,31 @@ async function mutate(edit){const target=repo,token=epoch,next=structuredClone(d
 function account(){const user=repo?.user;$('#accountStatus').textContent=user?`로그인: ${user.email||'내 계정'}`:client?'기기 저장 모드 · 로그인하면 계정 전용 클라우드 기록을 불러와요.':'기기 저장 모드 · 클라우드 연결은 운영 적용 승인 후 사용할 수 있어요.';$('#accountBtn').textContent=user?'내 계정':'로그인 · 계정';$('#privacyNotice').textContent=user?(repo.status==='deleting'?'삭제 정리가 중단됐어요. 계정에서 탈퇴를 이어서 실행해 주세요.':repo.status==='withdrawn'?'모아 탈퇴 상태예요. 계정에서 빈 모아를 다시 시작할 수 있어요.':'🔒 내 계정의 비공개 클라우드에 저장됩니다.'):'🔒 이 브라우저에 저장됩니다. 기기 변경 전 전체 백업을 해 주세요.';controls();}
 async function activate(user){
   const identity=user?.id||'guest';
-  if(draftActive&&draftIdentity===identity)flushDraft();
-  clearTimeout(draftTimer);draftActive=false;draftIdentity=identity;
+  if(draftActive&&draftIdentity===identity){const previous=epoch;await flushDraft();if(previous!==epoch)return;}
+  clearTimeout(draftTimer);draftRun++;draftActive=false;draftIdentity=identity;
   const recovered=drafts.begin(identity);
   const token=++epoch;ready=false;db=empty();clearMedia();
   settleConfirmation(false);
   $('#backupPassword').value='';restoreFile=null;$('#backupDialog').close();$('#password').value='';$('#confirmEmailLink').value='';
   resetWriting();$('#searchRecords').value='';$('#filter').value='전체';selection=null;feedMode='all';showView('home',false);render();
   const target=user?new CloudRepository(client,user):new LocalRepository();repo=target;account();
-  try{const loaded=await target.load();if(token!==epoch)return;db=loaded;ready=true;
+  try{const loaded=await target.load();if(token!==epoch)return;db=loaded;
    if(!target.status||target.status==='active'){
-    if(recovered){for(const key of ['title','content','recordDate','category','decoration','sticker'])$('#'+key).value=recovered[key];$('#optimizePhotos').checked=recovered.optimizePhotos;$('#draftMediaNotice').hidden=!recovered.attachments;}
-    draftActive=true;
+    if(recovered){
+     let recoveredPhotos=[],photoFailure=false;
+     try{recoveredPhotos=await getDraftPhotos(identity,recovered.photos);}catch{photoFailure=true;}
+     if(token!==epoch)return;
+     for(const key of ['title','content','recordDate','category','decoration','sticker'])$('#'+key).value=recovered[key];$('#optimizePhotos').checked=recovered.optimizePhotos;
+     try{const transfer=new DataTransfer();for(const file of recoveredPhotos)transfer.items.add(file);$('#media').files=transfer.files;}catch{photoFailure=true;recoveredPhotos=[];}
+     renderDraftMedia();
+     if(!photoFailure)photoCache={generation:mediaGeneration,ref:recovered.photos||null};
+     $('#draftMediaNotice').hidden=recovered.attachments<=recoveredPhotos.length;
+     $('#draftMediaNotice').textContent=photoFailure?'글은 복구했지만 사진을 불러오지 못했어요. 첨부를 다시 선택해 주세요.':'보관하지 않은 영상이나 이전 초안의 첨부는 다시 선택해 주세요.';
+     if(photoFailure)draftPhotoProblem('글은 복구했지만 사진 초안을 불러오지 못했어요. 사진을 다시 선택해 주세요.');
+    }
+    draftActive=true;void pruneDraftPhotos(recovered?.photos?.id).catch(()=>{});
    }else drafts.purge();
-   render();account();}
+   ready=true;render();account();}
   catch(e){if(token!==epoch)return;if(client&&/AUTH_REQUIRED/.test(e.message||'')){await client.auth.signOut({scope:'local'});await activate(null);notice('로그인이 만료됐어요. 다시 로그인해 주세요.',true);return;}notice('기록을 불러오지 못했어요. '+errorMessage(e),true);$('#privacyNotice').textContent='저장소 연결 실패 · 새로고침하여 다시 연결해 주세요.';controls();}
 }
 
@@ -188,13 +224,13 @@ function renderDraftMedia(){
   let valid=true;try{validateFile(file);}catch{valid=false;}
   if(valid&&file.type.startsWith('image/')){const img=el('img');const url=URL.createObjectURL(file);draftUrls.push(url);img.src=url;img.alt=`선택한 사진 ${i+1}`;img.loading='lazy';img.decoding='async';preview.append(img);}else preview.append(el('span',valid?'영상':'지원하지 않는 첨부'));
   const caption=el('figcaption',file.name);caption.title=file.name;const remove=action('빼기',()=>{
-   const transfer=new DataTransfer();files.forEach((f,n)=>{if(n!==i)transfer.items.add(f);});$('#media').files=transfer.files;renderDraftMedia();renderUploadEstimate();queueDraft();
+   const transfer=new DataTransfer();files.forEach((f,n)=>{if(n!==i)transfer.items.add(f);});$('#media').files=transfer.files;renderDraftMedia();renderUploadEstimate();mediaChanged();
    const next=$('#draftMedia button')||$('#chooseMedia');next.focus({preventScroll:true});
   });remove.setAttribute('aria-label',`첨부 ${i+1} 빼기`);card.append(preview,caption,remove);out.append(card);
  }
  renderUploadEstimate();controls();
 }
-$('#media').addEventListener('change',renderDraftMedia);
+$('#media').addEventListener('change',()=>{renderDraftMedia();mediaChanged();});
 const networkState=()=>{$('#connectionNotice').hidden=navigator.onLine;};window.addEventListener('online',networkState);window.addEventListener('offline',networkState);networkState();
 $('#diagnosticBtn').onclick=()=>accountTask(async()=>{let cloud='not-configured';if(client){const health=await client.rpc('moa_health');if(health.error||!health.data?.ready)throw Error('클라우드 연결 점검에 실패했어요. 연결을 확인한 뒤 다시 실행해 주세요.');cloud='ready';}const report={product:'moa',build:__MOA_BUILD__,checkedAt:new Date().toISOString(),online:navigator.onLine,cloud,viewport:{width:innerWidth,height:innerHeight},storage:repo?.user?'cloud':'device',lastErrorCode:lastProblem};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='moa-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('연결을 점검하고 개인정보가 없는 진단 파일을 만들었어요.');});
 const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('moa-account-events'):null;channel?.addEventListener('message',e=>{if(e.data?.user===repo?.user?.id)activate(repo.user);});

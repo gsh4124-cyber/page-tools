@@ -1,4 +1,6 @@
+import {purgeDraftPhotos} from '../draft-photos.mjs';
 import {DRAFT_KEY} from '../drafts.mjs';
+const clearDraft=async()=>{const cleanup=purgeDraftPhotos();try{localStorage.removeItem(DRAFT_KEY);}catch{}await cleanup;};
 import {createClient} from '@supabase/supabase-js';
 import {OWNER_CALLBACK_PATH,OWNER_EMAIL_REDIRECT,OWNER_GOOGLE_STORAGE_KEY,googleProofStorage,googleAuthorizeURL,readOwnerCallback} from './owner-auth-flow.mjs';
 const callback=readOwnerCallback(location.href,location.origin);
@@ -39,7 +41,7 @@ const clearGate=async()=>{try{await fetch('/__moa_logout',{method:'POST',cache:'
 const authorizeGate=async(accessToken,{clearOnReject=true}={})=>{
  if(!accessToken)throw Error('로그인 정보를 확인해 주세요.');
  const r=await fetch('/__moa_session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accessToken}),cache:'no-store'});
- if(!r.ok){if(r.status===401){if(clearOnReject){try{localStorage.removeItem(DRAFT_KEY);}catch{}await clearGate();await client.auth.signOut({scope:'local'});}throw Error('소유자 계정으로 확인해 주세요.');}throw Error('입장 확인에 실패했어요. 잠시 후 다시 시도해 주세요.');}
+ if(!r.ok){if(r.status===401){if(clearOnReject){await clearDraft();await clearGate();await client.auth.signOut({scope:'local'});}throw Error('소유자 계정으로 확인해 주세요.');}throw Error('입장 확인에 실패했어요. 잠시 후 다시 시도해 주세요.');}
 };
 const enter=async session=>{await authorizeGate(session?.access_token);location.replace('/');};
 const task=async fn=>{if(busy)return;busy=true;document.querySelectorAll('#gateDialog button[type="submit"],#gateGoogle').forEach(b=>b.disabled=true);try{await fn();}catch(e){if(!dialog.open)dialog.showModal();notice(e.message||'로그인을 확인해 주세요.');}finally{busy=false;document.querySelectorAll('#gateDialog button[type="submit"],#gateGoogle').forEach(b=>b.disabled=false);}};
@@ -73,5 +75,5 @@ task(async()=>{
   }catch{await clearGate();await client.auth.signOut({scope:'local'});throw Error('로그인을 완료하지 못했어요. Google로 계속하기를 다시 눌러 주세요.');}
   location.replace('/');return;
  }
- const {data}=await client.auth.getSession();if(data.session)await enter(data.session);else{try{localStorage.removeItem(DRAFT_KEY);}catch{}}
+ const {data}=await client.auth.getSession();if(data.session)await enter(data.session);else{await clearDraft();}
 });

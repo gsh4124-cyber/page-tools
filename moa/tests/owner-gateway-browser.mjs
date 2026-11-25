@@ -12,6 +12,8 @@ const worker=(await import('../dist-cloudflare/_worker.js')).default;
 const env={MOA_SUPABASE_URL:'https://afiqaibosavbjzkffggr.supabase.co',MOA_SUPABASE_PUBLISHABLE_KEY:'synthetic-public-key',MOA_GATE_OWNER_ID:owner};
 const server=createServer(async(req,res)=>{try{const chunks=[];for await(const c of req)chunks.push(c);const r=await worker.fetch(new Request('http://127.0.0.1:'+server.address().port+req.url,{method:req.method,headers:req.headers,...(['GET','HEAD'].includes(req.method)?{}:{body:Buffer.concat(chunks)})}),env);res.writeHead(r.status,Object.fromEntries(r.headers));res.end(Buffer.from(await r.arrayBuffer()));}catch{res.writeHead(500);res.end('Test adapter failure');}});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port,results=[],errors=[];let browser;
+const seedPhotoDraft=async page=>page.evaluate(async()=>{localStorage.setItem('moa-writing-draft-v1','synthetic private draft');const db=await new Promise(r=>{const q=indexedDB.open('moa-writing-photos-v1',1);q.onupgradeneeded=()=>q.result.createObjectStore('photos',{keyPath:'id'});q.onsuccess=()=>r(q.result);});await new Promise(r=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put({id:'synthetic',files:[new Blob(['synthetic private photo'])]});tx.oncomplete=r;});db.close();});
+const photoDraftCount=async page=>page.evaluate(async()=>{const db=await new Promise(r=>{const q=indexedDB.open('moa-writing-photos-v1',1);q.onupgradeneeded=()=>q.result.createObjectStore('photos',{keyPath:'id'});q.onsuccess=()=>r(q.result);});const count=await new Promise(r=>{const q=db.transaction('photos').objectStore('photos').count();q.onsuccess=()=>r(q.result);});db.close();return count;});
 const check=async(name,fn)=>{await fn();results.push({name,status:'DONE'});console.log('DONE',name);};
 try{
  browser=await chromium.launch({channel:'chrome',headless:true});const cx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await cx.newPage();page.on('pageerror',e=>errors.push(e.message));
@@ -135,14 +137,14 @@ try{
   assert.equal(new URL(cp.url()).hash,'');const session=await cp.evaluate(()=>JSON.parse(localStorage.getItem('moa-auth-v1')||'null'));assert.equal(session.user.id,owner);assert.equal(session.refresh_token,'synthetic-refresh');
   const cookie=(await context.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.ok(seen.some(x=>x.path==='/auth/v1/user'));
   // A rejected return URL must not sign out a previously authenticated owner.
-  const oldCookie=cookie.value,priorUserRequests=seen.filter(x=>x.path==='/auth/v1/user').length;
+  await seedPhotoDraft(cp);const oldCookie=cookie.value,priorUserRequests=seen.filter(x=>x.path==='/auth/v1/user').length;
   const rejected=await context.newPage();
   const foreign=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({sub:'22222222-2222-4222-8222-222222222222',role:'authenticated',exp})).toString('base64url'),Buffer.from('synthetic').toString('base64url')].join('.');
   await rejected.goto(base+'/__moa_auth_callback#'+new URLSearchParams({access_token:foreign,refresh_token:'foreign-refresh',token_type:'bearer',type:'magiclink'}));
   await rejected.waitForFunction(()=>document.querySelector('#gateNotice').textContent.includes('소유자 계정'));
   assert.equal((await context.cookies()).find(c=>c.name==='__Host-moa_gate')?.value,oldCookie);
   assert.equal(await rejected.evaluate(()=>JSON.parse(localStorage.getItem('moa-auth-v1')).user.id),owner);
-  assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.equal(seen.filter(x=>x.path==='/auth/v1/user').length,priorUserRequests);
+  assert.equal((await context.request.get(base+'/app.js')).status(),200);assert.equal(seen.filter(x=>x.path==='/auth/v1/user').length,priorUserRequests);assert.equal(await photoDraftCount(rejected),1);assert.equal(await rejected.evaluate(()=>localStorage.getItem('moa-writing-draft-v1')),'synthetic private draft');
   await context.close();
  });
  await check('expired and non-owner callbacks clean URL, show retry and keep private app locked',async()=>{
@@ -160,9 +162,9 @@ try{
  await check('synthetic owner login establishes HttpOnly cookie and unlocks exact packaged application',async()=>{const r=await cx.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}});assert.equal(r.status(),204);const cookie=(await cx.cookies()).find(c=>c.name==='__Host-moa_gate');assert.ok(cookie?.secure&&cookie.httpOnly&&cookie.sameSite==='Strict');const app=await cx.request.get(base+'/index.html');assert.equal(app.status(),200);assert.match(await app.text(),/id="entryForm"/);assert.equal((await cx.request.get(base+'/app.js')).status(),200);assert.deepEqual(await (await cx.request.get(base+'/build-manifest.json')).json(),manifest);});
  await check('public signed-out portal and private session synchronizer remove abandoned local drafts',async()=>{
   const context=await browser.newContext(),cp=await context.newPage();cp.on('pageerror',e=>errors.push(e.message));
-  await cp.goto(base+'/__moa_access');await cp.locator('#heroTitle').waitFor();await cp.evaluate(()=>localStorage.setItem('moa-writing-draft-v1','private abandoned text'));await cp.reload();await cp.waitForFunction(()=>localStorage.getItem('moa-writing-draft-v1')===null);
+  await cp.goto(base+'/__moa_access');await cp.locator('#heroTitle').waitFor();await seedPhotoDraft(cp);await cp.reload();await cp.waitForFunction(()=>localStorage.getItem('moa-writing-draft-v1')===null);assert.equal(await photoDraftCount(cp),0);
   await context.route(base+'/app.js',route=>route.fulfill({contentType:'text/javascript',body:'// test the separate session synchronizer without private startup'}));
-  await cp.evaluate(()=>localStorage.setItem('moa-writing-draft-v1','private text before expiry'));assert.equal((await context.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}})).status(),204);await cp.goto(base+'/');await cp.waitForURL(base+'/__moa_access');assert.equal(await cp.evaluate(()=>localStorage.getItem('moa-writing-draft-v1')),null);await context.close();
+  await seedPhotoDraft(cp);assert.equal((await context.request.post(base+'/__moa_session',{headers:{Origin:base},data:{accessToken:token}})).status(),204);await cp.goto(base+'/');await cp.waitForURL(base+'/__moa_access');assert.equal(await cp.evaluate(()=>localStorage.getItem('moa-writing-draft-v1')),null);assert.equal(await photoDraftCount(cp),0);await context.close();
  });
  await check('logout removes access immediately; public static fallback contains no application',async()=>{assert.equal((await cx.request.post(base+'/__moa_logout',{headers:{Origin:base}})).status(),204);assert.equal((await cx.request.get(base+'/app.js')).status(),401);assert.ok(!(await readFile(new URL('dist-cloudflare/index.html',root),'utf8')).includes('entryForm'));});
  assert.deepEqual(errors,[]);await cx.close();
