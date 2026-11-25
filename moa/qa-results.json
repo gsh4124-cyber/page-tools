@@ -1,6 +1,6 @@
 {
   "status": "PARTIAL",
-  "dateKST": "2026-11-24",
+  "dateKST": "2026-11-25",
   "scope": {
     "repository": "gsh4124-cyber/page-tools",
     "branch": "feature/moa-integration-20261119",
@@ -9,27 +9,26 @@
   },
   "candidate": {
     "status": "DONE",
-    "sourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052",
+    "sourceSha256": "59919c31b35047306bf1b796277b5d352b63f5675d5a57303ea9e0b09fcb6115",
     "deployment": "CLOUDFLARE_DEPLOYED",
-    "reason": "Clear deletion/restore summaries with cancel-first focus, Escape, synchronous private-summary cleanup and account-change cancellation. Unit27/app12/photo5/mock SDK6/Worker13 pass. Earlier actual production photo restore matches original SHA; server confirms all trial rows/files/reservations0. New production preview/cancel leaves version3 unchanged.",
-    "codeCommit": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
+    "codeCommit": "b61c9efe15883694e5b013d65714c710061d66f3",
     "manifest": {
       "product": "moa",
-      "revision": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
-      "sourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052",
+      "revision": "b61c9efe15883694e5b013d65714c710061d66f3",
+      "sourceSha256": "59919c31b35047306bf1b796277b5d352b63f5675d5a57303ea9e0b09fcb6115",
       "cloudConfigured": true
     },
-    "workerSha256": "80dccf66a5af4f3bc0d725f2409f0b6919fcdb3dd8835f96b3aff8e96fc3505e",
+    "workerSha256": "7b2ee1f5e84f8272b53a210fb2ab8571ae43f25242ee48fcf78e473d6e1ccee4",
     "compiledLocally": true,
     "published": true,
-    "cloudflareCodeCommit": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
-    "cloudflareSourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052"
+    "reason": "Browser-local writing draft autosave/recovery, explicit discard, account/logout purge, conflict/failure notice and initial verified-account loading protection. Unit31 + browser45 groups pass. Current live Chrome refresh recovery/cleanup observed. Hosted document version3 and all trial counts0 unchanged."
   },
   "unit": {
     "status": "DONE",
-    "passed": 27,
-    "dateKST": "2026-11-24",
-    "scope": "Current confirmation flow; same JS before final Korean word-wrap CSS. Local DB/Worker, not hosted DB regression."
+    "dateKST": "2026-11-25",
+    "passed": 31,
+    "failed": 0,
+    "scope": "local Node tests including PGlite Postgres, Worker, draft validation/TTL/ownership/storage failure; not hosted regression"
   },
   "audit": {
     "status": "DONE",
@@ -40,12 +39,12 @@
     }
   },
   "browser": {
-    "base": "http://127.0.0.1:52924",
+    "base": "http://127.0.0.1:53224",
     "engine": "Google Chrome Chromium",
     "manifest": {
       "product": "moa",
-      "revision": "875cdc043d4923a40efeaeb7712b8e1e6ef54e5b",
-      "sourceSha256": "ec6580453ea0fa505f5e4e7ef64a001af0e6049b76d4b4aa1f8c5da065663b0e",
+      "revision": "e87032b966695b7a5707cf1f13be382c75c90153",
+      "sourceSha256": "68da1507c29e8de1c9588a9b63c8f9b1b204b24ea2e007d4a007dd32dd307101",
       "cloudConfigured": false
     },
     "results": [
@@ -99,8 +98,7 @@
         "count": 0
       }
     ],
-    "errors": [],
-    "scope": "Current final CSS, precommit875cdc0 metadata; code saved inca2ca33. Twelve local groups, not hosted data writes."
+    "errors": []
   },
   "cloudContract": {
     "type": "local intercepted Supabase API contract, not live hosted test",
@@ -471,12 +469,12 @@
     {
       "item": "Historical hosted UI scripts after navigation update",
       "status": "NOT_TESTED",
-      "verifiedAlternative": "Three scripts syntax-checked; no hosted operations executed. Current local app 11 and mock contract 6 passed."
+      "verifiedAlternative": "Historical scripts syntax-checked in previous release only; not hosted operations this release. Current local app12/photo5/draft6 and intercepted SDK8 passed."
     },
     {
       "item": "Full media write / restore / different-user replay on current Cloudflare host",
       "status": "PARTIAL",
-      "verifiedAlternative": "Actual same-host photo1 save/reload/encrypted backup/restore/hash/cleanup DONE on priorf33. Current UI summary/cancel DONE; new apply/video/different-user replay not performed."
+      "verifiedAlternative": "Prior same-host photo save/reload/encrypted backup/restore/hash/cleanup DONE. This release actual browser-local draft recovery/cleanup only; no new hosted media/video/different-user writes."
     },
     {
       "item": "Exact HTTP status and security headers on real Cloudflare network",
@@ -529,6 +527,11 @@
       "item": "Independent observation of complete real Google selection/consent/return sequence",
       "status": "NOT_TESTED",
       "reason": "User confirmed it works (USER_REPORTED_DONE). Real chooser independently observed. Detailed completion not observed; last_sign_in_at remains historical email timestamp."
+    },
+    {
+      "item": "Draft recovery after physical mobile OS kill, full browser process restart and real 7-day wait",
+      "status": "NOT_TESTED",
+      "verifiedAlternative": "Chrome refresh/closed-tab reopen tested; expiry via injected unit clock; visibility/pagehide flush best effort"
     }
   ],
   "costs": {
@@ -778,7 +781,7 @@
     ]
   },
   "cloudflareDeployment": {
-    "dateKST": "2026-11-24",
+    "dateKST": "2026-11-25",
     "status": "DONE",
     "provider": "Cloudflare Pages",
     "accountId": "19564c62ca98f5f006440e6cd33ee072",
@@ -796,26 +799,26 @@
     "buildCommand": "npm run build:cloudflare",
     "outputDirectory": "dist-cloudflare",
     "package": {
-      "preparedAt": "2026-11-24T14:14:03.121Z",
+      "preparedAt": "2026-11-25T05:26:04.004Z",
       "manifest": {
         "product": "moa",
-        "revision": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
-        "sourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052",
+        "revision": "b61c9efe15883694e5b013d65714c710061d66f3",
+        "sourceSha256": "59919c31b35047306bf1b796277b5d352b63f5675d5a57303ea9e0b09fcb6115",
         "cloudConfigured": true
       },
       "files": 3,
       "hashes": {
-        "index.html": "92835b9022a829e3382744f096994fc7400c50098f974c5ce8ce16bf65518944",
-        "app.js": "6e74f2c1591d24bd4a7dfc0a2eb1940b540bb68fe9bf1bc5f097fcf384fa3990",
-        "service.css": "3f37470544316f58d9e6baaaf46fcabcfd45769981f9c2c4613460774fb0e2a2",
-        "build-manifest.json": "3e9ba0fbba63180f6b3db4cca3aa892db4a653ccc8f207283f63d0056c69aca8",
+        "index.html": "ed0531b690fb4897e025a82e87caf4483908c6e099838397a330387efbe20d57",
+        "app.js": "dbe06873c7f0ed0e7dafa395887eb1f19161b93bad85e176fc75cafb9f09bb7d",
+        "service.css": "f39cf10297153bcd0ecfd7f3404e6e923be7716ab5ea459be917b9351908e514",
+        "build-manifest.json": "7deafe83b62c0ce53b4599c5d753d01dfb14c024ffeb72b44c2ba825e62cf939",
         "404.html": "829553e6ff0366428245a7abb3f62ab6f97c5b59a801f06acc7850311e5c257b",
         "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
       },
-      "workerSha256": "80dccf66a5af4f3bc0d725f2409f0b6919fcdb3dd8835f96b3aff8e96fc3505e",
+      "workerSha256": "7b2ee1f5e84f8272b53a210fb2ab8571ae43f25242ee48fcf78e473d6e1ccee4",
       "access": "owner-only",
       "staticFallback": "setup notice only",
-      "published": true
+      "published": false
     },
     "directUploadDraft": {
       "name": "moa-diary",
@@ -843,7 +846,7 @@
       "bucketPrivate": true,
       "fileLimit": 26214400
     },
-    "hostedMoaChecks": "PARTIAL: actual prior same-host photo save/backup/restore/hash/cleanup DONE. Current summary/cancel DONE; current new apply/video/different-user/device replay not performed.",
+    "hostedMoaChecks": "Current browser-local draft refresh recovery/cleanup DONE. SQL version3/entries0/habits0/checks empty/reservations0/objects0 unchanged. No hosted writes or full media replay this release.",
     "references": [
       "https://developers.cloudflare.com/pages/get-started/direct-upload/",
       "https://developers.cloudflare.com/pages/configuration/headers/",
@@ -853,11 +856,11 @@
     ],
     "access": "owner-only",
     "ownerGateway": {
-      "unitTests": 27,
-      "browserPackageChecks": 13,
+      "unitTests": 31,
+      "browserPackageChecks": 14,
       "authenticationTest": "synthetic JWT / mocked RPC",
       "actualOwnerLogin": "User reported working (DONE / USER_REPORTED_DONE); actual Google chooser independently observed, detailed completion not independently observed.",
-      "liveHostChecks": "Owner reconnect/current608513fd1f38, new restore summary and cancel DONE. Trial records/objects/reservations0, version3 unchanged.",
+      "liveHostChecks": "Current59919c31b350 owner reconnect and browser draft recovery/cleanup DONE; version3 and counts0 unchanged.",
       "staticFallback": "notice only",
       "paidPlanActivated": false,
       "cardRegistered": false,
@@ -870,28 +873,28 @@
       "actualOwnerSessionReconnect": "DONE current production reload; no fresh Google sign-in replay."
     },
     "url": "https://moa-diary-web.pages.dev",
-    "sourceCommit": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
-    "deploymentId": "9b239e30-ef0e-4ac6-a622-a7bd23848622",
+    "sourceCommit": "b61c9efe15883694e5b013d65714c710061d66f3",
+    "deploymentId": "84eca1a3-1e46-48c1-9b4d-020d3aad86ea",
     "published": true,
     "actualBrowserChecks": {
-      "method": "Supported Windows Computer Use / actual Chrome",
-      "existingOwnerSessionReconnect": "DONE",
-      "currentShortBuild": "608513fd1f38",
-      "currentPrivateManifest": "NOT_REPLAYED",
-      "restoreSummary": "DONE: empty preview file, current/backup/media/habits0 visible",
-      "restoreCancel": "DONE: cancel then close, no data writes/version3 unchanged",
-      "productionPhotoRestore": "DONE priorf33 checkpoint, see productionPhotoRestore",
-      "trialCleanup": "DONE native server counts: entries/habits/checks/objects/reservations0",
-      "productionNewConfirmationApply": "NOT_TESTED",
-      "currentLiveMobile": "NOT_TESTED; local five widths passed",
-      "realDevices": "NOT_TESTED",
-      "currentDifferentUserReplay": "NOT_TESTED",
-      "actualWindowScreenshots": "Displayed/reviewed, not re-saved",
-      "localPreviewScreenshots": [
-        "qa-evidence/confirmation-304.png",
-        "qa-evidence/confirmation-390.png",
-        "qa-evidence/confirmation-1280.png"
-      ]
+      "method": "supported cua_repl Chrome extension / DOM UI, existing actual owner session",
+      "codeCommit": "b61c9efe15883694e5b013d65714c710061d66f3",
+      "observedBuild": "59919c31b350",
+      "ownerReconnect": "DONE",
+      "draftRefreshRecovery": "DONE: synthetic text restored by resume button after refresh",
+      "draftCleanup": "DONE: only synthetic text emptied, refreshed, empty editor and resume button absent",
+      "hostedDiaryWrites": 0,
+      "freshGoogleSignIn": "NOT_REPLAYED",
+      "realDevice": "NOT_TESTED",
+      "serverReadback": {
+        "version": 3,
+        "entries": 0,
+        "habits": 0,
+        "checksEmpty": true,
+        "mediaReservations": 0,
+        "storageObjects": 0
+      },
+      "providerWorkerHashIndependentRead": "NOT_TESTED"
     },
     "runtimeFixes": [
       {
@@ -1388,11 +1391,11 @@
     "scope": "Isolated local browser / IndexedDB; precommit build metadata retained accurately. Final CSS is committed in 9be54c3; no real owner data used."
   },
   "packagedWorkerBrowser": {
-    "checkedAt": "2026-11-24T14:14:07.551Z",
+    "checkedAt": "2026-11-25T05:26:08.696Z",
     "manifest": {
       "product": "moa",
-      "revision": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
-      "sourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052",
+      "revision": "b61c9efe15883694e5b013d65714c710061d66f3",
+      "sourceSha256": "59919c31b35047306bf1b796277b5d352b63f5675d5a57303ea9e0b09fcb6115",
       "cloudConfigured": true
     },
     "authentication": "mocked RPC / synthetic JWT; not real Supabase login",
@@ -1446,6 +1449,10 @@
         "status": "DONE"
       },
       {
+        "name": "public signed-out portal and private session synchronizer remove abandoned local drafts",
+        "status": "DONE"
+      },
+      {
         "name": "logout removes access immediately; public static fallback contains no application",
         "status": "DONE"
       }
@@ -1478,27 +1485,25 @@
     "cloudflareSourceSha256": "6be81de8f52f51e6416ce32071f5dfe10b706bec8501d8e265947adc70bb95e2"
   },
   "currentCloudContract": {
-    "status": "DONE",
-    "passed": 6,
-    "scope": "Current JS before final word-wrap CSS, intercepted SDK. Pending restore canceled on cross-tab logout without overwriting original A data.",
-    "evidence": {
-      "type": "local intercepted Supabase API contract, not live hosted test",
-      "manifest": {
-        "product": "moa",
-        "revision": "875cdc043d4923a40efeaeb7712b8e1e6ef54e5b",
-        "sourceSha256": "3658092703cdcc64e66d0e9b8339d756c7fee3d2a5a45526ebbc142bb78af0b5",
-        "cloudConfigured": false
-      },
-      "results": [
-        "guest records are not automatically uploaded; A saved through supabase-js RPC",
-        "authenticated session reload and cloud readback",
-        "cross-tab logout cancels pending restore and clears title/body/files/previews/backup password without overwriting A records",
-        "B sees only B data after account switch; guest data preserved",
-        "network failure does not report saved or discard draft",
-        "second browser reopens the same A cloud record"
-      ],
-      "errors": []
-    }
+    "type": "local intercepted Supabase API contract, not live hosted test",
+    "manifest": {
+      "product": "moa",
+      "revision": "e87032b966695b7a5707cf1f13be382c75c90153",
+      "sourceSha256": "68da1507c29e8de1c9588a9b63c8f9b1b204b24ea2e007d4a007dd32dd307101",
+      "cloudConfigured": false
+    },
+    "results": [
+      "guest records are not automatically uploaded; A saved through supabase-js RPC",
+      "verified same-account session reload restores only its browser draft",
+      "authenticated session reload and cloud readback",
+      "cross-tab logout cancels pending restore and clears title/body/files/previews/backup password without overwriting A records",
+      "B sees only B data after account switch; guest data preserved",
+      "network failure does not report saved or discard draft; reload recovers it",
+      "second browser reopens the same A cloud record",
+      "initial verified-account load disables editor/navigation, avoiding input loss during startup"
+    ],
+    "errors": [],
+    "scope": "8 groups, actual SDK with intercepted local API. No hosted Auth/write operations."
   },
   "previousCompactHomeCandidate": {
     "status": "CLOUDFLARE_SIMPLIFIED_HOME_VERIFIED_WITH_LIMITATIONS",
@@ -2328,8 +2333,8 @@
   "photoQuick": {
     "manifest": {
       "product": "moa",
-      "revision": "875cdc043d4923a40efeaeb7712b8e1e6ef54e5b",
-      "sourceSha256": "3658092703cdcc64e66d0e9b8339d756c7fee3d2a5a45526ebbc142bb78af0b5",
+      "revision": "e87032b966695b7a5707cf1f13be382c75c90153",
+      "sourceSha256": "68da1507c29e8de1c9588a9b63c8f9b1b204b24ea2e007d4a007dd32dd307101",
       "cloudConfigured": false
     },
     "authentication": "isolated local IndexedDB, no hosted Supabase writes",
@@ -2355,9 +2360,7 @@
         "status": "DONE"
       }
     ],
-    "errors": [],
-    "status": "DONE",
-    "scope": "Current JS before final Korean word-wrap CSS; local five groups. Not production writes."
+    "errors": []
   },
   "photoQuickExperience": {
     "status": "DONE",
@@ -2378,9 +2381,10 @@
     "maxRenderedDraftPreviews": 6
   },
   "validationNotes": [
-    "Initial generic app QA used cloud-configured output and failed its device-only login-disabled expectation. Proper device build rerun passed all11; no product change for that condition.",
-    "Initial photo preview test checked image.complete before decode; explicit load/decode completion wait fixed test race. Final5 passed.",
-    "Cancel initially cleared private summary only on async close event; synchronous settle now clears immediately. Final delete/Escape/restore cancel/account-switch tests passed."
+    "Current unit31 pass, device browser12 + photo5 + draft6 + intercepted SDK8 pass, packaged Worker14 pass. All final application code. Device bundles carry prior e870 commit metadata while source includes final b61 startup guard; source68da1507c29e identifies exact tested bytes. Cloud Worker is rebuilt at b61 with source59919c31b350.",
+    "Current live draft verification used only browser-local synthetic text. No diary save/restore/delete/upload operations. SQL readback unchanged version3 with all counts0.",
+    "Initial real refresh inspection revealed a startup navigation race while getUser was pending. Editor/navigation now disabled before initial verification; delayed-user mock test passes.",
+    "Historical photo/backup/restore tests remain separate; no fresh live Google login, new hosted user B, video replay, native mobile or OS eviction tested."
   ],
   "previousPhotoQuickRelease": {
     "codeCommit": "f33d59ef5bcacaeb23d59601415e0439dbb39745",
@@ -2469,5 +2473,158 @@
       "reservations": 0
     },
     "productionNewApplyReplay": "NOT_TESTED; actual restore bytes/cleanup confirmed on priorf33 release"
+  },
+  "previousConfirmationRelease": {
+    "candidate": {
+      "status": "DONE",
+      "sourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052",
+      "deployment": "CLOUDFLARE_DEPLOYED",
+      "reason": "Clear deletion/restore summaries with cancel-first focus, Escape, synchronous private-summary cleanup and account-change cancellation. Unit27/app12/photo5/mock SDK6/Worker13 pass. Earlier actual production photo restore matches original SHA; server confirms all trial rows/files/reservations0. New production preview/cancel leaves version3 unchanged.",
+      "codeCommit": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
+      "manifest": {
+        "product": "moa",
+        "revision": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
+        "sourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052",
+        "cloudConfigured": true
+      },
+      "workerSha256": "80dccf66a5af4f3bc0d725f2409f0b6919fcdb3dd8835f96b3aff8e96fc3505e",
+      "compiledLocally": true,
+      "published": true,
+      "cloudflareCodeCommit": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
+      "cloudflareSourceSha256": "608513fd1f384a7b42d3a0dff1de48501c4c0ba3cfa60af4bb5119beba6bd052"
+    },
+    "unit": {
+      "status": "DONE",
+      "passed": 27,
+      "dateKST": "2026-11-24",
+      "scope": "Current confirmation flow; same JS before final Korean word-wrap CSS. Local DB/Worker, not hosted DB regression."
+    },
+    "confirmationUi": {
+      "status": "DONE",
+      "codeCommit": "ca2ca33b6de5fb7b49a796d03ac7dd925d1860d3",
+      "deleteSummary": [
+        "title",
+        "date",
+        "media count"
+      ],
+      "restoreSummary": [
+        "current records",
+        "backup records",
+        "media",
+        "habits"
+      ],
+      "initialFocus": "cancel",
+      "escapeCancels": true,
+      "summaryClearedSynchronously": true,
+      "accountChangeCancelsPendingAction": true,
+      "restoreChecksAccountBeforeUploads": true,
+      "productionSummaryCancelReadback": {
+        "status": "DONE",
+        "versionBefore": 3,
+        "versionAfter": 3,
+        "records": 0,
+        "objects": 0,
+        "reservations": 0
+      },
+      "productionNewApplyReplay": "NOT_TESTED; actual restore bytes/cleanup confirmed on priorf33 release"
+    }
+  },
+  "draftBrowser": {
+    "manifest": {
+      "product": "moa",
+      "revision": "e87032b966695b7a5707cf1f13be382c75c90153",
+      "sourceSha256": "68da1507c29e8de1c9588a9b63c8f9b1b204b24ea2e007d4a007dd32dd307101",
+      "cloudConfigured": false
+    },
+    "scope": "isolated device browser, no hosted writes",
+    "results": [
+      {
+        "name": "immediate reload flushes and restores text/date/details without saving a diary record",
+        "status": "DONE"
+      },
+      {
+        "name": "closed tab reopens the draft; attachments require reselect and no names or bytes persist",
+        "status": "DONE"
+      },
+      {
+        "name": "discard cancel/Escape preserves draft; confirm clears it and cannot resurrect on reload",
+        "status": "DONE"
+      },
+      {
+        "name": "successful record save clears draft while the saved record survives reload",
+        "status": "DONE"
+      },
+      {
+        "name": "another tab change is reported; old tab cannot overwrite or resurrect discarded draft",
+        "status": "DONE"
+      },
+      {
+        "name": "quota failure is visible, keeps text, and does not pretend to have saved",
+        "status": "DONE"
+      }
+    ],
+    "errors": []
+  },
+  "draftAutosave": {
+    "status": "DONE",
+    "storage": "separate localStorage moa-writing-draft-v1 slot, verified user identity or device guest",
+    "retention": "7 days since last successful draft save; expired draft removed at next activation",
+    "savedFields": [
+      "title",
+      "content",
+      "recordDate",
+      "category",
+      "decoration",
+      "sticker",
+      "optimizePhotos",
+      "attachmentCountOnly"
+    ],
+    "excluded": [
+      "file names",
+      "file bytes",
+      "passwords",
+      "JWT",
+      "backup contents"
+    ],
+    "timing": "400ms debounce plus visibility hidden/pagehide flush",
+    "privacy": "same-user restoration only; logout/account change/closed account purge; public signed-out portal and gate rejection purge",
+    "conflicts": "revision comparison blocks stale tab updates and resurrection; not an atomic multi-writer database",
+    "onSave": "clear only after successful diary commit; failed commit preserves recoverable text",
+    "limits": [
+      "one current draft per browser origin",
+      "no automatic cloud sync or backup inclusion",
+      "photos/videos require reselect",
+      "browser data clearing/private mode/OS crash may lose draft",
+      "400ms tail before unexpected process kill not guaranteed"
+    ],
+    "live": {
+      "method": "supported cua_repl Chrome extension / DOM UI, existing actual owner session",
+      "codeCommit": "b61c9efe15883694e5b013d65714c710061d66f3",
+      "observedBuild": "59919c31b350",
+      "ownerReconnect": "DONE",
+      "draftRefreshRecovery": "DONE: synthetic text restored by resume button after refresh",
+      "draftCleanup": "DONE: only synthetic text emptied, refreshed, empty editor and resume button absent",
+      "hostedDiaryWrites": 0,
+      "freshGoogleSignIn": "NOT_REPLAYED",
+      "realDevice": "NOT_TESTED",
+      "serverReadback": {
+        "version": 3,
+        "entries": 0,
+        "habits": 0,
+        "checksEmpty": true,
+        "mediaReservations": 0,
+        "storageObjects": 0
+      },
+      "providerWorkerHashIndependentRead": "NOT_TESTED"
+    }
+  },
+  "draftPreservation": {
+    "changedPaths": "moa/ only",
+    "otherProductsDiff": 0,
+    "schemaAuthStorageSettingsChanged": false,
+    "newDependencies": false,
+    "paidResourcesCreated": false,
+    "planChanged": false,
+    "mainChanged": false
   }
 }
