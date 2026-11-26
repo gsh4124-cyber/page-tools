@@ -5,6 +5,13 @@
   font-size: 14px;
 }
 
+article h1,
+article h2,
+article p {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 .topic-list,
 .passage-links {
   list-style: none;
