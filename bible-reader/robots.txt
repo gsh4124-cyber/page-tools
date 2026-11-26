@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://bible-reader-1iz.pages.dev/sitemap.xml
+
+#DaumWebMasterTool:afc4df7db4fdd1a39ec2dd19d37279491ad6eb0c39fff9b2adf18943cebf4d33:pdYA2AN84tHnNET51D/IqQ==
