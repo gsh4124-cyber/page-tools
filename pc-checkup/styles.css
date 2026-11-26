@@ -7,3 +7,10 @@
 .device-card .icon svg{width:28px;height:28px}
 .card:hover .icon{background:rgba(110,231,183,.16)}
 @media print{.card .icon{color:#111;background:none;border-color:#ccc}}
+
+.home-tools-jump{display:none}
+@media(max-width:600px){
+  .home-tools-jump{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-top:8px;color:var(--accent);font-size:14px;font-weight:700;text-underline-offset:4px}
+  .home-tools-jump:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+  #tools.home-tools{scroll-margin-top:80px}
+}

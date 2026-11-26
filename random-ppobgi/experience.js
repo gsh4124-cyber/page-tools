@@ -97,7 +97,7 @@ th:['ชุดการตั้งค่า','บันทึกการตั
 ar:['الإعدادات المحفوظة','حفظ الإعدادات','اسم الإعدادات','تم التحميل','تعذر حفظ هذه الإعدادات أو تحميلها.','تُحفظ حتى 12 مجموعة إعدادات في هذا المتصفح.','لا توجد إعدادات محفوظة']
 };
 function enhanceConfigSets(){
- const api=window.RandomPickerSettings,anchor=byId('pickBtn')?.parentElement;if(!api||!anchor||byId('pickerConfigSets'))return;
+ const api=window.RandomPickerSettings,anchor=document.querySelector('#mainCard .content');if(!api||!anchor||byId('pickerConfigSets'))return;
  const c=Object.fromEntries(CONFIG_KEYS.map((key,i)=>[key,(CONFIG_TEXT[lang()]||CONFIG_TEXT.en)[i]]));
  const panel=document.createElement('details');panel.id='pickerConfigSets';panel.className='picker-config-sets';
  const summary=document.createElement('summary');summary.textContent=c.title;

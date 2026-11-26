@@ -1001,6 +1001,10 @@ header .logo{margin:0;font-size:28px;line-height:1.15;letter-spacing:-1px}
 /* --- flow order: controls follow the order a pick happens --- */
 /* Recording must start before the pick, so it sits just above the pick button. */
 #mainCard .picker-record-tools{margin:0 0 10px}
+#mainCard > .pick-actions{display:flex;align-items:center;gap:8px;margin:0 18px 14px}
+#mainCard > .pick-actions .primary{flex:1;min-width:0}
+#mainCard > .pick-actions .picker-record-tools{flex:none;margin:0}
+@media(max-width:500px){#mainCard > .pick-actions{margin-inline:12px}}
 /* Winners lead the full result list and stand out from the rest. */
 .result-list .winner.is-hit{background:#fbecd2!important;border-color:rgba(176,122,46,.35)!important}
 .result-list .winner.is-hit .result-person{font-weight:900}
