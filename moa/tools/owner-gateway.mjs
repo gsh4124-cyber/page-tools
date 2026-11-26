@@ -47,6 +47,9 @@ export async function ownerGateway(request,env,routes,baseHeaders,transport=fetc
   // Allow the analytics provider only in the two public demo documents.
   // The callback and all authenticated diary responses keep the original CSP.
   if(path==='/about/'||path==='/__moa_access'){
+   // Share only the public origin, never URL paths or authentication parameters.
+   // The manual analytics endpoint requires a Referer header.
+   extra['Referrer-Policy']='strict-origin';
    const csp=headers['Content-Security-Policy']||"default-src 'self'; script-src 'self'; connect-src 'self'";
    extra['Content-Security-Policy']=csp.replace(/script-src ([^;]*)/,"script-src $1 https://static.cloudflareinsights.com/beacon.min.js").replace(/connect-src ([^;]*)/,"connect-src $1 https://cloudflareinsights.com");
   }

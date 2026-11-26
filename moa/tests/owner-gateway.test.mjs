@@ -13,19 +13,21 @@ const verified=async(url,init)=>{assert.equal(url,env.MOA_SUPABASE_URL+'/rest/v1
 
 test('only the public introduction is indexable and analytics never expands private or callback CSP',async()=>{
  const publicRoutes={...routes,'/about/':routes['/__moa_access'],'/robots.txt':{body:'PUBLIC_ROBOTS',type:'text/plain'},'/sitemap.xml':{body:'PUBLIC_SITEMAP',type:'application/xml'},'/about/sitemap.xml':{body:'PUBLIC_SITEMAP',type:'application/xml'},'/__moa_public_metrics.js':{body:'PUBLIC_METRICS',type:'text/javascript'},'/__moa_auth_callback':routes['/__moa_access']};
- const cspHeaders={...headers,'Content-Security-Policy':headers['Content-Security-Policy']+"; connect-src 'self' https://afiqaibosavbjzkffggr.supabase.co; object-src 'none'"};
+ const cspHeaders={...headers,'Referrer-Policy':'no-referrer','Content-Security-Policy':headers['Content-Security-Policy']+"; connect-src 'self' https://afiqaibosavbjzkffggr.supabase.co; object-src 'none'"};
  const unexpected=()=>{throw Error('Public resources must not read account data');};
  for(const path of ['/about/','/robots.txt','/sitemap.xml','/about/sitemap.xml','/__moa_public_metrics.js','/__moa_access']){
   const r=await ownerGateway(request(path),env,publicRoutes,cspHeaders,unexpected);
   assert.equal(r.status,200);assert.match(await r.text(),/^PUBLIC_/);
   assert.equal(r.headers.get('x-robots-tag'),path==='/about/'?'index, follow':'noindex, nofollow, noarchive');
   assert.equal(r.headers.get('content-security-policy').includes('static.cloudflareinsights.com'),['/about/','/__moa_access'].includes(path));
+  assert.equal(r.headers.get('referrer-policy'),['/about/','/__moa_access'].includes(path)?'strict-origin':'no-referrer');
   assert.equal(r.headers.get('set-cookie'),null);
  }
  for(const path of ['/','/app.js','/healthz','/__moa_auth_callback?code=synthetic']){
   const r=await ownerGateway(request(path,{headers:{Cookie:GATE_COOKIE+'='+token}}),env,publicRoutes,cspHeaders,verified);
   assert.equal(r.status,200);assert.equal(r.headers.get('content-security-policy'),cspHeaders['Content-Security-Policy']);
   assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow, noarchive');
+  assert.equal(r.headers.get('referrer-policy'),'no-referrer');
  }
  assert.equal((await ownerGateway(request('/app.js'),env,publicRoutes,cspHeaders,unexpected)).status,401);
 });
