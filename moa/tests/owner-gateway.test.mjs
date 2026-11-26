@@ -12,10 +12,10 @@ const post=(value,origin='https://moa.test')=>request('/__moa_session',{method:'
 const verified=async(url,init)=>{assert.equal(url,env.MOA_SUPABASE_URL+'/rest/v1/rpc/moa_account_status');assert.equal(init.headers.Authorization,'Bearer '+token);assert.equal(init.headers.apikey,env.MOA_SUPABASE_PUBLISHABLE_KEY);assert.equal(init.redirect,'manual');return Response.json({status:'active'});};
 
 test('only the public introduction is indexable and analytics never expands private or callback CSP',async()=>{
- const publicRoutes={...routes,'/about/':routes['/__moa_access'],'/robots.txt':{body:'PUBLIC_ROBOTS',type:'text/plain'},'/sitemap.xml':{body:'PUBLIC_SITEMAP',type:'application/xml'},'/__moa_public_metrics.js':{body:'PUBLIC_METRICS',type:'text/javascript'},'/__moa_auth_callback':routes['/__moa_access']};
+ const publicRoutes={...routes,'/about/':routes['/__moa_access'],'/robots.txt':{body:'PUBLIC_ROBOTS',type:'text/plain'},'/sitemap.xml':{body:'PUBLIC_SITEMAP',type:'application/xml'},'/about/sitemap.xml':{body:'PUBLIC_SITEMAP',type:'application/xml'},'/__moa_public_metrics.js':{body:'PUBLIC_METRICS',type:'text/javascript'},'/__moa_auth_callback':routes['/__moa_access']};
  const cspHeaders={...headers,'Content-Security-Policy':headers['Content-Security-Policy']+"; connect-src 'self' https://afiqaibosavbjzkffggr.supabase.co; object-src 'none'"};
  const unexpected=()=>{throw Error('Public resources must not read account data');};
- for(const path of ['/about/','/robots.txt','/sitemap.xml','/__moa_public_metrics.js','/__moa_access']){
+ for(const path of ['/about/','/robots.txt','/sitemap.xml','/about/sitemap.xml','/__moa_public_metrics.js','/__moa_access']){
   const r=await ownerGateway(request(path),env,publicRoutes,cspHeaders,unexpected);
   assert.equal(r.status,200);assert.match(await r.text(),/^PUBLIC_/);
   assert.equal(r.headers.get('x-robots-tag'),path==='/about/'?'index, follow':'noindex, nofollow, noarchive');

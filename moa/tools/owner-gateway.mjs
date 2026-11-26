@@ -40,7 +40,7 @@ export async function ownerGateway(request,env,routes,baseHeaders,transport=fetc
   return reply('',204,{'Set-Cookie':GATE_COOKIE+'='+token+'; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age='+result.maxAge});
  }
  if(!allowed)return reply('Method not allowed',405,{Allow:'GET, HEAD'});
- if(path==='/about/'||path==='/robots.txt'||path==='/sitemap.xml'||path==='/__moa_public_metrics.js'||path==='/__moa_access'||path==='/__moa_access.js'||path==='/__moa_auth_callback'){
+ if(path==='/about/'||path==='/robots.txt'||path==='/sitemap.xml'||path==='/about/sitemap.xml'||path==='/__moa_public_metrics.js'||path==='/__moa_access'||path==='/__moa_access.js'||path==='/__moa_auth_callback'){
   const item=routes[path];if(!item)return reply('Not found',404,{'Content-Type':'text/plain; charset=utf-8'});
   const extra={'Content-Type':item.type};
   if(path==='/about/')extra['X-Robots-Tag']='index, follow';
