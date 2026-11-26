@@ -1,3 +1,4 @@
+from html import escape, unescape
 from pathlib import Path
 import ast
 import re
@@ -106,6 +107,30 @@ def inject_experience_script(path: Path):
     path.write_text(text, encoding='utf-8')
 
 
+
+def add_touch_shortcut(folder: Path):
+    home = folder / 'index.html'
+    mobile = folder / 'mobile.html'
+    if not home.exists() or not mobile.exists():
+        return
+    homepage = home.read_text(encoding='utf-8')
+    if 'home-touch-card' in homepage:
+        return
+    touch = re.search(r'<h3 id="touch-test"[^>]*>([^<]+)</h3>\s*<p>([^<]+)</p>',
+                      mobile.read_text(encoding='utf-8'))
+    keyboard_card = '<a class="card" href="keyboard.html">'
+    action = re.search(re.escape(keyboard_card) + r'.*?<div class="go">([^<]+)</div>', homepage, re.S)
+    if not touch or not action or homepage.count(keyboard_card) != 1:
+        raise RuntimeError(f'{folder}: individual touch shortcut markup could not be located')
+    title = escape(re.sub(r'^\s*1[.)]\s*', '', unescape(touch[1])).strip())
+    description = escape(unescape(touch[2]).strip())
+    open_label = escape(unescape(action[1]).strip())
+    shortcut = ('<a class="card home-touch-card" href="mobile.html#touch-test">'
+                '<div class="icon">📱</div>'
+                f'<h3>{title}</h3><p>{description}</p><div class="go">{open_label}</div></a>')
+    home.write_text(homepage.replace(keyboard_card, shortcut + keyboard_card, 1), encoding='utf-8')
+
+
 # Raw localization must never be allowed to alter DOM structure. Restore ids,
 # classes, names and data attributes from the canonical English markup while
 # preserving visible translated text.
@@ -142,6 +167,7 @@ folders = [ROOT, ROOT/'en', *[ROOT/locale for locale in LOCALES]]
 for folder in folders:
     folder.mkdir(parents=True, exist_ok=True)
     shutil.copy2(experience, folder/'device-experience.js')
+    add_touch_shortcut(folder)
     for page in PAGES:
         html = folder/page
         if html.exists():

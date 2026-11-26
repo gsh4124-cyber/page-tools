@@ -1,6 +1,34 @@
 (() => {
+  async function copyText(text) {
+    if (!text) return false;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      const previousFocus = document.activeElement;
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.readOnly = true;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      try {
+        document.body.append(textarea);
+        textarea.select();
+        return document.execCommand('copy');
+      } catch (_) {
+        return false;
+      } finally {
+        textarea.remove();
+        previousFocus?.focus({preventScroll: true});
+      }
+    }
+  }
+
   const versesRoot = document.querySelector('#verses');
-  if (!versesRoot || typeof BOOKS === 'undefined' || typeof state === 'undefined') return;
+  if (!versesRoot || typeof BOOKS === 'undefined' || typeof state === 'undefined') {
+    window.BibleClipboard = {copyText};
+    return;
+  }
 
   const SITE_URL = 'https://bible-reader-1iz.pages.dev/';
 
@@ -99,26 +127,6 @@
     const lines = rows.map(row => verseLine(row)).filter(Boolean);
     if (!numbers.length || !lines.length) return '';
     return `[${translationName()}] ${referenceForVerseNumbers(numbers)}\n\n${lines.join('\n')}\n\n${localizedPageName()} · ${SITE_URL}`;
-  }
-
-  async function copyText(text) {
-    if (!text) return false;
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch (_) {
-      try {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.append(textarea);
-        textarea.select();
-        const ok = document.execCommand('copy');
-        textarea.remove();
-        return ok;
-      } catch (_) { return false; }
-    }
   }
 
   versesRoot.addEventListener('copy', (event) => {
