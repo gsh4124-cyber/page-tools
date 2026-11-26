@@ -143,10 +143,13 @@ try{
         const source=node.querySelector('.memory-practice-text'),input=node.querySelector('textarea'),primary=node.querySelector('.memory-primary');
         const inputBox=input.getBoundingClientRect(),primaryBox=primary.getBoundingClientRect();
         const textTop=element=>{const style=getComputedStyle(element);return element.getBoundingClientRect().top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop);};
-        return {top:node.getBoundingClientRect().top,gap:primaryBox.top-inputBox.bottom,aligned:Math.abs(textTop(source)-textTop(input)),buttonOffset:Math.abs(primaryBox.left-inputBox.left)};
+        const panelStyle=element=>{const style=getComputedStyle(element);return [style.borderTopLeftRadius,style.borderTop,style.backgroundColor];};
+        return {top:node.getBoundingClientRect().top,gap:primaryBox.top-inputBox.bottom,aligned:Math.abs(textTop(source)-textTop(input)),buttonOffset:Math.abs(primaryBox.left-inputBox.left),sourceStyle:panelStyle(source),inputStyle:panelStyle(input),panelHeightDifference:Math.abs(source.getBoundingClientRect().height-inputBox.height)};
       });
       assert(layout.gap>=0&&layout.gap<48,'Answer check stays close below the single-verse input');
       assert(layout.aligned<=1&&layout.buttonOffset<=6,'Passage, input and answer check align');
+      assert.deepEqual(layout.sourceStyle,layout.inputStyle,'Passage and answer use the same rounded panel styling');
+      assert(layout.panelHeightDifference<=1,'A short passage and its input have matching panel heights');
       await input.fill(Array(8).fill('입력 줄 늘리기').join('\n'));
       assert(Math.abs((await dialog.boundingBox()).y-layout.top)<=1,'Wrapping the draft keeps the dialog anchored');
       await fit(page);

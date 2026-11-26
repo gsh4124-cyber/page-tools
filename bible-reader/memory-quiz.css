@@ -207,7 +207,18 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
   height:auto;
   max-height:calc(var(--memory-view-height,100dvh) - var(--memory-verse-top) - var(--memory-inset-bottom));
 }
-.memory-practice-verse-wide .memory-practice-body>.memory-practice-text{padding-block-start:27px}
+.memory-practice-verse-wide .memory-practice-body>.memory-answer-label{border-inline-start:0}
+.memory-practice-verse-wide .memory-practice-row .memory-answer{min-height:max(108px,100%)}
+.memory-practice-verse-wide .memory-practice-body>.memory-practice-text,
+.memory-practice-verse-wide .memory-practice-body>.memory-row-feedback:not(:empty){
+  align-self:stretch;
+  min-height:108px;
+  margin:12px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+}
 .memory-practice-verse-wide .memory-dock{grid-template-columns:repeat(2,minmax(0,1fr))}
 .memory-practice-verse-wide .memory-dock>.memory-primary{grid-column:2;margin-inline:12px}
 .memory-practice-verse-wide .memory-dock>.memory-aids{grid-column:1;justify-self:start}
