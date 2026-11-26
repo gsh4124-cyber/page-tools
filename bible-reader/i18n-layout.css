@@ -176,18 +176,6 @@
 }
 .topbar-inner.centered-nav .search-toggle:hover,
 .topbar.search-open .search-toggle{background:var(--hover)}
-/* Keep the Korean topics link in the same row as the search control. */
-.topbar .topics-nav-link{
-  display:inline-flex;align-items:center;justify-content:center;flex:none;
-  min-height:44px;padding-inline:8px;border-radius:10px;color:var(--text);
-  font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap
-}
-.topbar .topics-nav-link:hover{background:var(--hover)}
-.topbar .topics-nav-link:focus-visible{outline:2px solid currentColor;outline-offset:2px}
-html:not(:lang(ko)) .topbar .topics-nav-link{display:none}
-@media(max-width:380px){
-  html:lang(ko) .centered-nav .location-controls > .memory-toolbar-button{flex-basis:72px!important}
-}
 .topbar:not(.search-open) .location-controls .top-search{display:none!important}
 .topbar.search-open .location-controls .top-search{
   display:grid!important;position:absolute!important;z-index:35;
@@ -213,7 +201,7 @@ html:not(:lang(ko)) .topbar .topics-nav-link{display:none}
   background:var(--bg);box-shadow:0 14px 36px rgba(0,0,0,.17);
 }
 .topbar .toolbar-more-menu[hidden]{display:none!important}
-.topbar .toolbar-more-menu button{
+.topbar .toolbar-more-menu :is(button,.topics-menu-link){
   width:100%!important;min-width:0!important;min-height:44px!important;height:44px!important;
   display:flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:flex-start!important;
   padding:0 12px!important;margin:0!important;gap:14px!important;
@@ -224,7 +212,11 @@ html:not(:lang(ko)) .topbar .topics-nav-link{display:none}
   content:attr(title);display:inline;min-width:0;
   font:500 13px/1.4 system-ui,sans-serif;overflow:hidden;text-overflow:ellipsis
 }
-.topbar .toolbar-more-menu button:hover{background:var(--hover);border-color:var(--line)}
+.topbar .toolbar-more-menu :is(button,.topics-menu-link):hover{background:var(--hover);border-color:var(--line)}
+.topbar .toolbar-more-menu .topics-menu-link{font-size:13px;font-weight:500;text-decoration:none}
+.topbar .toolbar-more-menu .topics-menu-link span{font-size:19px}
+.topbar .toolbar-more-menu .topics-menu-link:focus-visible{outline:2px solid currentColor;outline-offset:-2px}
+html:not(:lang(ko)) .topbar .toolbar-more-menu .topics-menu-link{display:none!important}
 .topbar .toolbar-more-menu button:disabled{opacity:.4}
 .topbar.topbar-scrolled{padding-block:4px!important}
 @media(min-width:700px){
