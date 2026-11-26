@@ -139,6 +139,21 @@ try{
       await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-practice-menu-button').click();await page.locator('.memory-primary').click();
       assert.equal(await dialog.locator('.memory-practice-row').count(),1);assert(await dialog.locator('.memory-practice-row>summary').isHidden());
       const input=dialog.locator('textarea'),answer=(await expectedAnswers(page))[0];
+      await input.evaluate(node=>node.blur());
+      const layout=await dialog.evaluate(node=>{
+        const source=node.querySelector('.memory-practice-text'),input=node.querySelector('textarea'),primary=node.querySelector('.memory-primary');
+        const inputBox=input.getBoundingClientRect(),primaryBox=primary.getBoundingClientRect();
+        const textTop=element=>{const style=getComputedStyle(element);return element.getBoundingClientRect().top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop);};
+        const panelStyle=element=>{const style=getComputedStyle(element);return [style.borderTopLeftRadius,style.borderTop,style.backgroundColor];};
+        return {top:node.getBoundingClientRect().top,gap:primaryBox.top-inputBox.bottom,aligned:Math.abs(textTop(source)-textTop(input)),buttonOffset:Math.abs(primaryBox.left-inputBox.left),sourceStyle:panelStyle(source),inputStyle:panelStyle(input),panelHeightDifference:Math.abs(source.getBoundingClientRect().height-inputBox.height)};
+      });
+      assert(layout.gap>=0&&layout.gap<48,'Answer check stays close below the single-verse input');
+      assert(layout.aligned<=1&&layout.buttonOffset<=6,'Passage, input and answer check align');
+      assert.deepEqual(layout.sourceStyle,layout.inputStyle,'Passage and answer use the same rounded panel styling');
+      assert(layout.panelHeightDifference<=1,'A short passage and its input have matching panel heights');
+      await input.fill(Array(8).fill('입력 줄 늘리기').join('\n'));
+      assert(Math.abs((await dialog.boundingBox()).y-layout.top)<=1,'Wrapping the draft keeps the dialog anchored');
+      await fit(page);
       await input.fill('wrong');await input.press('Enter');assert.equal(await dialog.locator('.memory-practice-text:visible').count(),0);assert.equal(await dialog.locator('.memory-diff:visible').count(),1);
       await input.fill(answer);await input.press('Enter');assert.equal(await dialog.locator('.memory-diff:visible').count(),0);assert.equal(await dialog.locator('.memory-practice-text:visible').count(),1);
       await input.press('Enter');assert.equal(await input.getAttribute('data-verse'),'17');
