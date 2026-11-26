@@ -239,7 +239,7 @@ jobs:
           files=$(git diff --name-only "$before" "$GITHUB_SHA")
           projects=()
           shared=false
-          if grep -Eq '^tools/(build_static|release_metadata|asset_cache)\.py$|^tools/notify-indexnow\.mjs$' <<< "$files"; then shared=true; fi
+          if grep -Eq '^tools/(build_static|release_metadata|asset_cache)\.py$' <<< "$files"; then shared=true; fi
           deploy_projects=()
           # A workflow-only change runs all three live tests; it does not force a site deployment.
           if grep -Eq '^(\.github/workflows/product-health-monitor\.yml|tools/verify-production\.mjs)$' <<< "$files"; then
