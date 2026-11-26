@@ -354,7 +354,9 @@
       if(leaveDialog)for(const property of ['--memory-view-height','--memory-view-width','--memory-center-x','--memory-center-y'])leaveDialog.style.setProperty(property,dialog.style.getPropertyValue(property));
       dialog.classList.toggle('memory-compact-height',height<500);
       dialog.classList.toggle('memory-tight-height',height<400);
-      dialog.classList.toggle('memory-practice-wide',phase==='attempt'&&config.mode==='practice'&&width>=900);
+      const widePractice=phase==='attempt'&&config.mode==='practice'&&width>=900;
+      dialog.classList.toggle('memory-practice-wide',widePractice);
+      dialog.classList.toggle('memory-practice-verse-wide',widePractice&&config.view==='verse'&&height>=500);
       dialog.classList.toggle('memory-minimal-header',height<320&&width<500);
       const ultraShort=height<320&&!dock.hidden,stacked=ultraShort&&width<500&&parseFloat(getComputedStyle(dock.querySelector('.memory-primary')).fontSize)>20;
       dialog.classList.toggle('memory-ultra-short',ultraShort);dialog.classList.toggle('memory-stacked-controls',stacked);moveClose(ultraShort?dock:header,stacked?dock.querySelector('.memory-aids'):null);

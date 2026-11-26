@@ -199,6 +199,18 @@ body.verse-multi-selecting:has(.verse-multi-memory){padding-bottom:max(92px,var(
 .memory-practice-wide .memory-dock>.memory-primary,.memory-practice-wide .memory-dock>.memory-aids{min-width:0;grid-row:1}
 .memory-practice-wide.memory-ultra-short .memory-dock{grid-template-columns:minmax(0,1fr) minmax(160px,.38fr) 44px}
 .memory-practice-wide.memory-ultra-short .memory-close{grid-row:1}
+/* Fit a single verse without moving the focused field when its text wraps. */
+.memory-quiz[open].memory-practice-verse-wide{
+  --memory-verse-top:max(var(--memory-inset-top),calc((var(--memory-view-height,100dvh) - 540px) / 2));
+  top:calc(var(--memory-center-y,50%) - var(--memory-view-height,100dvh) / 2 + var(--memory-verse-top));
+  transform:translateX(-50%);
+  height:auto;
+  max-height:calc(var(--memory-view-height,100dvh) - var(--memory-verse-top) - var(--memory-inset-bottom));
+}
+.memory-practice-verse-wide .memory-practice-body>.memory-practice-text{padding-block-start:27px}
+.memory-practice-verse-wide .memory-dock{grid-template-columns:repeat(2,minmax(0,1fr))}
+.memory-practice-verse-wide .memory-dock>.memory-primary{grid-column:2;margin-inline:12px}
+.memory-practice-verse-wide .memory-dock>.memory-aids{grid-column:1;justify-self:start}
 .memory-practice-review{margin-block:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .memory-practice-review>summary{min-height:44px;padding:10px 12px;font-size:14px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
 .memory-practice-review .memory-result{margin:0;padding:12px}
