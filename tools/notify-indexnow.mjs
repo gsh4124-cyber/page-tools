@@ -1,9 +1,9 @@
 // These are public ownership files, not account credentials.
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 const sites = {
-  'random-ppobgi': { host: 'random-ppobgi.pages.dev', key: '5e2e0b34361f1bec6589eecf94582b9f', count: 31 },
-  'bible-reader': { host: 'bible-reader-1iz.pages.dev', key: '193977ee04feba4a99f471a555a2aa54', count: 118 },
-  'pc-checkup': { host: 'pc-checkup.pages.dev', key: 'b3399cb87eb74ba9bb8315bfbeda117f', count: 117 },
+  'random-ppobgi': { host: 'random-ppobgi.pages.dev', key: '5e2e0b34361f1bec6589eecf94582b9f' },
+  'bible-reader': { host: 'bible-reader-1iz.pages.dev', key: '193977ee04feba4a99f471a555a2aa54' },
+  'pc-checkup': { host: 'pc-checkup.pages.dev', key: 'b3399cb87eb74ba9bb8315bfbeda117f' },
 };
 const projects = (process.env.PROJECTS || '').split(/\s+/).filter(Boolean);
 if (!projects.length || projects.some(name => !sites[name])) throw new Error('Known PROJECTS required');
@@ -16,15 +16,17 @@ async function getText(url) {
 }
 const reports = [];
 for (const project of projects) {
-  const { host, key, count } = sites[project];
+  const { host, key } = sites[project];
   const origin = `https://${host}`;
   const marker = (await getText(`${origin}/build-revision.txt?indexnow=${revision}`)).trim();
   if (marker !== revision) throw new Error(`${project}: production revision changed before URL notification`);
   const keyLocation = `${origin}/${key}.txt`;
   if ((await getText(keyLocation)).trim() !== key) throw new Error(`${project}: ownership file mismatch`);
-  const sitemap = await getText(`${origin}/sitemap.xml`);
+  const sitemap = await getText(`${origin}/sitemap.xml?indexnow=${revision}`);
+  const expectedSitemap = await readFile(`${project}/dist/sitemap.xml`, 'utf8');
+  if (sitemap !== expectedSitemap) throw new Error(`${project}: production sitemap differs from the CI build`);
   const urlList = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replace(/&amp;/g, '&'));
-  if (urlList.length !== count || new Set(urlList).size !== count || urlList.some(url => {
+  if (urlList.length === 0 || urlList.length > 10000 || new Set(urlList).size !== urlList.length || urlList.some(url => {
     const parsed = new URL(url);
     return parsed.origin !== origin || parsed.username || parsed.password || parsed.hash;
   })) throw new Error(`${project}: unexpected sitemap URL list`);
