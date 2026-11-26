@@ -70,6 +70,10 @@ assert(fs.readFileSync('index.html','utf8').includes('href="/topics/"'));
 const topicOrigin='https://bible-reader-1iz.pages.dev';
 assert(siteMap.includes('<loc>'+topicOrigin+'/topics/</loc>'));
 const topicUnescape=value=>value.replace(/&quot;/g,'"').replace(/&#39;|&#x27;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+const sitemapUrls=[...siteMap.matchAll(/<loc>([^<]+)<\/loc>/g)]
+ .map(([,url])=>topicUnescape(url.trim().replace(/&apos;/g,"'")));
+assert.equal(fs.readFileSync('sitemap.txt','utf8').replace(/\r\n/g,'\n'),sitemapUrls.join('\n')+'\n',
+ 'The text sitemap must list the same URLs as sitemap.xml');
 const topicBooks=new Map();
 for(const path of topicPaths){
  const page=fs.readFileSync('.'+path+'index.html','utf8');
