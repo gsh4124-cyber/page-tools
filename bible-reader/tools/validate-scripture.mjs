@@ -60,3 +60,47 @@ assert(runtime.getBookStructure(43,'asv')[7].verses.includes(40));
 vm.runInContext("cache.set('asv:Acts',{chapters:[{chapter:8,verses:[{verse:3},{verse:7}]}]})",runtime);
 assert.equal(JSON.stringify(runtime.getBookStructure(43,'asv')),'[{"chapter":8,"verses":[3,7]}]','Fetched passage numbering takes precedence');
 console.log(`Scripture PASS: KRV 66 books, 1189 chapters, 31102 verses; John matches existing text exactly. Instant grids validated for all ${ids.length} translations (726 books).`);
+
+const topicHub=fs.readFileSync('topics/index.html','utf8');
+const siteMap=fs.readFileSync('sitemap.xml','utf8');
+const topicPaths=[...topicHub.matchAll(/href="(\/topics\/[a-z-]+\/)"/g)].map(match=>match[1]);
+assert(topicPaths.length>=12,'Topic directory should expose at least twelve subjects');
+assert.equal(new Set(topicPaths).size,topicPaths.length,'Topic links must be unique');
+assert(fs.readFileSync('index.html','utf8').includes('href="/topics/"'));
+const topicOrigin='https://bible-reader-1iz.pages.dev';
+assert(siteMap.includes('<loc>'+topicOrigin+'/topics/</loc>'));
+const topicUnescape=value=>value.replace(/&quot;/g,'"').replace(/&#39;|&#x27;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+const topicBooks=new Map();
+for(const path of topicPaths){
+ const page=fs.readFileSync('.'+path+'index.html','utf8');
+ const canonical=topicOrigin+path;
+ assert(page.includes('rel="canonical" href="'+canonical+'"'),path);
+ assert(siteMap.includes('<loc>'+canonical+'</loc>'),path);
+ const selections=[...page.matchAll(/<section class="topic-passage" data-ref="([^"]+)">([\s\S]*?)<\/section>/g)];
+ assert(selections.length>=3,path+' should offer at least three readings');
+ for(const [,reference,section] of selections){
+  const parsed=reference.match(/^([A-Za-z0-9]+)\.(\d+)\.(\d+)(?:-(\d+))?$/);
+  assert(parsed,reference);
+  const [,osis,chapter,start,end=start]=parsed;
+  const book=books.find(item=>item.osis===osis);
+  assert(book,reference);
+  if(!topicBooks.has(osis)){
+   topicBooks.set(osis,JSON.parse(fs.readFileSync('scripture/krv1961/'+book.file+'.json','utf8')));
+  }
+  const selected=topicBooks.get(osis).chapters[Number(chapter)-1].verses
+   .filter(verse=>Number(verse.verse)>=Number(start)&&Number(verse.verse)<=Number(end))
+   .map(verse=>[Number(verse.verse),verse.text]);
+  const rendered=[...section.matchAll(/<p><sup>(\d+)<\/sup> <span class="topic-verse">([^<]+)<\/span><\/p>/g)]
+   .map(match=>[Number(match[1]),topicUnescape(match[2])]);
+  assert.equal(selected.length,Number(end)-Number(start)+1,reference);
+  assert.deepEqual(rendered,selected,reference+' must match the bundled KRV verses exactly');
+  assert(section.includes('href="/?v=krv1961&amp;ref='+reference+'"'),reference);
+  const anchor=section.match(/href="(\/passage\/[a-z0-9-]+\/)#v(\d+)"/);
+  assert(anchor,reference);
+  assert.equal(anchor[2],start,reference);
+  const sourceChapter=fs.readFileSync('.'+anchor[1]+'index.html','utf8');
+  assert(sourceChapter.includes('id="v'+start+'"'),reference);
+  assert(sourceChapter.includes('ref='+osis+'.'+chapter+'.'),reference);
+ }
+}
+console.log('Topic Scripture PASS: '+topicPaths.length+' linked topics with exact bundled KRV text and working passage anchors.');

@@ -1,0 +1,76 @@
+.topic-trail {
+  align-items: center;
+  column-gap: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+article h1,
+article h2,
+article p {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.topic-list,
+.passage-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.topic-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: 10px;
+}
+
+.topic-list li,
+.passage-links li {
+  margin: 0;
+}
+
+.topic-list a,
+.passage-links a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.topic-list a {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-weight: 650;
+}
+
+.topic-list a:hover {
+  background: var(--bg);
+}
+
+.topic-passage blockquote {
+  margin: 0;
+  padding: 12px clamp(10px, 4vw, 24px);
+  border-inline-start: 3px solid var(--accent);
+  background: var(--bg);
+}
+
+.topic-passage blockquote p {
+  margin: 0;
+  color: var(--ink);
+}
+
+.topic-passage blockquote p + p {
+  margin-top: 8px;
+}
+
+.topic-passage sup {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.passage-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
