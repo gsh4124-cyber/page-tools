@@ -25,6 +25,10 @@ for(const name of ['notebook','surf']){
 }
 routes['/__moa_access']={body:introduction,type:'text/html; charset=utf-8'};
 routes['/__moa_auth_callback']=routes['/__moa_access'];
+routes['/about/']=routes['/__moa_access'];
+routes['/__moa_public_metrics.js']={body:await readFile(resolve(root,'tools/public-metrics.js'),'utf8'),type:'text/javascript; charset=utf-8'};
+routes['/robots.txt']={body:'User-agent: *\nDisallow: /\nAllow: /about/\nAllow: /__moa_access.js\nSitemap: https://moa-diary-web.pages.dev/sitemap.xml\n',type:'text/plain; charset=utf-8'};
+routes['/sitemap.xml']={body:'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://moa-diary-web.pages.dev/about/</loc></url></urlset>',type:'application/xml; charset=utf-8'};
 for(const [name,path] of [['owner-access-client.mjs','/__moa_access.js'],['owner-session-client.mjs','/__moa_session_sync.js']]){
  const result=await build({entryPoints:[resolve(root,'tools',name)],bundle:true,write:false,format:'esm',minify:true,target:['safari15','chrome100'],define:{__MOA_GATE_CONFIG__:JSON.stringify(config)}});routes[path]={body:result.outputFiles[0].text,type:'text/javascript; charset=utf-8'};
 }
