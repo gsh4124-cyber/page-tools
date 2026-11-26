@@ -139,6 +139,7 @@ try{
       await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-practice-menu-button').click();await page.locator('.memory-primary').click();
       assert.equal(await dialog.locator('.memory-practice-row').count(),1);assert(await dialog.locator('.memory-practice-row>summary').isHidden());
       const input=dialog.locator('textarea'),answer=(await expectedAnswers(page))[0];
+      await input.evaluate(node=>node.blur());
       const layout=await dialog.evaluate(node=>{
         const source=node.querySelector('.memory-practice-text'),input=node.querySelector('textarea'),primary=node.querySelector('.memory-primary');
         const inputBox=input.getBoundingClientRect(),primaryBox=primary.getBoundingClientRect();
