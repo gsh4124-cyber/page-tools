@@ -17,6 +17,14 @@ DIRECTORY_STYLE = '''<style id="language-directory-style">
 .language-directory{margin-top:12px;text-align:start}.language-directory summary{width:fit-content;min-height:44px;padding:12px 0;cursor:pointer;font-size:13px}.language-directory nav{display:flex;flex-wrap:wrap;gap:4px}.language-directory a{display:inline-flex;align-items:center;min-height:44px;padding:8px 10px;border-radius:10px;color:inherit;font-size:12px;text-decoration:none}.language-directory a:hover,.language-directory a:focus-visible{background:var(--line)}.language-directory a[aria-current]{font-weight:800;text-decoration:underline}
 #device-flow-guide .wrap{max-width:960px;text-align:start}#device-flow-guide p,#device-flow-guide dd{text-align:start;line-height:1.8;max-width:75ch}#device-flow-guide dd{margin:6px 0 20px;color:var(--muted)}#device-flow-guide dt{margin-top:20px;font-weight:750}#device-flow-guide ol,#device-flow-guide ul{padding-inline-start:1.4em;line-height:1.8}#device-flow-guide h2,#device-flow-guide h3{line-height:1.45;scroll-margin-top:100px}
 </style>'''
+KOREAN_TOOL_TITLES = {
+    'keyboard.html': '키보드 입력 테스트 | 키 인식·동시입력 확인',
+    'mouse.html': '마우스 더블클릭 테스트 | 버튼·휠·포인터 확인',
+    'display.html': '모니터 불량화소 테스트 | 단색 화면으로 픽셀 검사',
+    'speaker.html': '스피커·헤드폰 좌우 테스트 | 왼쪽·오른쪽 소리 확인',
+    'mic.html': '마이크 테스트 | 실시간 입력 음량·파형 확인',
+    'webcam.html': '웹캠·카메라 테스트 | 영상·해상도 확인',
+}
 PRIVACY_LABELS = {'ko':'개인정보처리방침','en':'Privacy Policy','ja':'プライバシーポリシー',
                   'es':'Privacidad','de':'Datenschutz','fr':'Confidentialité','pt':'Privacidade',
                   'it':'Privacy','nl':'Privacybeleid','id':'Privasi','vi':'Quyền riêng tư',
@@ -90,6 +98,9 @@ for path in pages:
         guide = Path(__file__).with_name('search_' + path.stem + '_ko.html').read_text(encoding='utf-8')
         if 'id="device-flow-guide"' not in text:
             text = text.replace('</main>', guide + '</main>', 1)
+    if lang == 'ko' and path.name in KOREAN_TOOL_TITLES:
+        page_title = KOREAN_TOOL_TITLES[path.name] + ' - DEVICE CHECKUP'
+        text = re.sub(r'<title>[\s\S]*?</title>', lambda _: f'<title>{page_title}</title>', text, count=1)
     summary = VisibleSummary()
     summary.feed(text)
     title = ' '.join(''.join(summary.parts['title']).split())
@@ -129,7 +140,7 @@ last_modified = {ORIGIN+'/': '2026-11-05', ORIGIN+'/checkup': '2026-11-04', ORIG
 last_modified.update({url(lang, 'mic.html'): '2026-11-14' for lang in LOCALES})
 last_modified.update({url(lang, page): '2026-11-16' for lang in LOCALES for page in ['speaker.html', 'webcam.html']})
 last_modified[ORIGIN+'/checkup'] = '2026-11-19'
-last_modified[ORIGIN+'/'] = '2026-11-19'
+last_modified[ORIGIN+'/'] = '2026-11-26'
 (ROOT / 'sitemap.xml').write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>{escape(address)}</loc>' + (f'<lastmod>{last_modified[address]}</lastmod>' if address in last_modified else '') + '</url>\n' for address in canonical_urls)

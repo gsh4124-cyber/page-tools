@@ -21,7 +21,7 @@ if(local){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;
 }
 await fs.mkdir(output,{recursive:true});
-const routes={ladder:'ladder',roulette:'wheel',lots:'lot',team:'team',order:'order',dice:'dice',coin:'coin',yut:'yut','guide/fair-draw':null,'guide/classroom':'wheel'};
+const routes={ladder:'ladder',roulette:'wheel',lots:'lot',pinball:'pinball',race:'race',capsule:'capsule',slot:'slot',bomb:'bomb',team:'team',order:'order',dice:'dice',coin:'coin',yut:'yut','guide/fair-draw':null,'guide/classroom':'wheel'};
 const results=[];
 try{
  for(const engine of (process.env.GAME_CONTRACT_ENGINES||'chromium').split(',')){
@@ -52,7 +52,7 @@ try{
       const links=await page.locator('main a[href^="/"]').evaluateAll(links=>[...new Set(links.map(a=>new URL(a.href).pathname))]);
       for(const link of links)assert.equal((await context.request.get(base+link)).status(),200,`${route} broken link ${link}`);
      }
-     if(engine==='chromium'&&width===320&&['lots','guide/fair-draw','guide/classroom'].includes(route))await page.screenshot({path:path.join(output,`${route.replaceAll('/','-')}-mobile.png`),fullPage:true});
+     if(engine==='chromium'&&width===320&&['lots','pinball','race','capsule','slot','bomb','guide/fair-draw','guide/classroom'].includes(route))await page.screenshot({path:path.join(output,`${route.replaceAll('/','-')}-mobile.png`),fullPage:true});
      if(route==='guide/classroom'){
       const start=page.getByRole('link',{name:'발표자 뽑기 시작',exact:true});
       assert.equal(await page.locator('h1').innerText(),'수업 발표자 랜덤 뽑기');
@@ -63,7 +63,7 @@ try{
      if(target&&width===320){
       await page.locator('article a.button').first().click();
       await page.waitForFunction(()=>window.RandomPickerSettings);
-      if(['ladder','wheel','lot'].includes(target)){
+      if(['ladder','wheel','lot','pinball','race','capsule','slot','bomb'].includes(target)){
        assert.equal(await page.locator(`.methods [data-method="${target}"]`).getAttribute('aria-checked'),'true');
        if(target==='lot'){
         assert(!(await page.locator('#inputTabs').isVisible()));
