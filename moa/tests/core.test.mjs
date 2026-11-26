@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {empty,validateDocument,validateFile,validDate,encodeBackup,decodeBackup} from '../core.mjs';
+import {empty,parseTags,validateDocument,validateFile,validDate,encodeBackup,decodeBackup} from '../core.mjs';
 const entry=()=>({id:'entry-one',title:'하루',content:'<img src=x onerror=alert(1)>',recordDate:'2026-11-19',created:'2026-11-19T09:00:00Z',category:'일상',decoration:'night',sticker:'🌷',stickerX:0,stickerY:0,visibility:'private',mediaKeys:['photo']});
 test('calendar validates real dates including leap years',()=>{for(const s of ['2024-02-29','2026-12-31'])assert.ok(validDate(s));for(const s of ['2026-02-29','2026-04-31','2026-13-01','0000-01-01','2026-1-1'])assert.ok(!validDate(s));});
 test('document rejects malformed data, duplicate IDs, unsafe media and other user references',()=>{
@@ -20,4 +20,13 @@ test('encrypted full backup roundtrip includes media and detects wrong password,
  const legacy={format:'moa-full-backup-v4',db,files:{photo:{name:'x',type:'image/png',data:'https://evil.test/tracker'}}};await assert.rejects(()=>decodeBackup(JSON.stringify(legacy),''));
  legacy.files.photo.data='data:image/png;base64,iVBORw==';assert.equal((await decodeBackup(JSON.stringify(legacy),'')).files.size,1);
  legacy.files.photo.sha256='bad';await assert.rejects(()=>decodeBackup(JSON.stringify(legacy),''));
+});
+
+test('legacy entries and backups keep their shape; malformed tags and star values are rejected',async()=>{
+ const legacy={...empty(),entries:[{...entry(),mediaKeys:[]}]};
+ assert.deepEqual((await decodeBackup(JSON.stringify(legacy),'')).db,legacy);
+ assert.deepEqual(parseTags(' #제주,가족 #JEJU jeju'),['제주','가족','JEJU']);
+ for(const fields of [{favorite:'true'},{tags:'가족'},{tags:Array(11).fill('a')},{tags:['a'.repeat(25)]},{tags:[null]}]){
+   assert.throws(()=>validateDocument({...legacy,entries:[{...legacy.entries[0],...fields}]}));
+ }
 });

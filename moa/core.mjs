@@ -9,6 +9,18 @@ export const today = () => {const d=new Date();return `${d.getFullYear()}-${Stri
 export function validDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s)||s<'1900-01-01'||s>'2200-12-31')return false;const d=new Date(s+'T12:00:00Z');return Number.isFinite(+d)&&d.toISOString().slice(0,10)===s;}
 const text = (s,n) => typeof s==='string' && s.length<=n;
 const fail = s => {throw new Error(s);};
+export function parseTags(input){
+  const tags=[];
+  const seen=new Set();
+  for(const word of input.normalize('NFC').split(/[\s,#]+/u)){
+    const key=word.toLowerCase();
+    if(!key||seen.has(key))continue;
+    if([...word].length>24||tags.length===10)fail('태그는 10개까지, 하나에 24자까지 입력해 주세요.');
+    tags.push(word);
+    seen.add(key);
+  }
+  return tags;
+}
 export function draftTitle(title,content,files=[]){
  const explicit=title.trim();if(explicit)return explicit;
  const first=content.trim().split(/\r?\n/,1)[0].trim();
@@ -32,7 +44,10 @@ export function validateDocument(input, owner){
     if(!Array.isArray(keys)||keys.length>6||new Set(keys).size!==keys.length||keys.some(k=>!text(k,200)||!/^[a-zA-Z0-9/_-]+$/.test(k)||(owner&&!new RegExp('^'+owner+'/[0-9a-f-]{36}$').test(k))))fail('첨부 파일 경로가 올바르지 않아요.');
     const coords=['stickerX','stickerY'].map(k=>e[k]??0);
     if(coords.some(x=>!Number.isFinite(x))||coords[0]<-30||coords[0]>230||coords[1]<-15||coords[1]>200)fail('스티커 위치가 올바르지 않아요.');
-    out.entries.push({id:e.id,title:e.title.trim(),content:e.content||'',category:e.category,recordDate:date,created:e.created,decoration:e.decoration||'none',sticker:e.sticker||'',stickerX:coords[0],stickerY:coords[1],visibility:'private',mediaKeys:[...keys]});
+    if(e.favorite!==undefined&&typeof e.favorite!=='boolean')fail('별표 형식을 확인해 주세요.');
+    if(e.tags!==undefined&&(!Array.isArray(e.tags)||e.tags.length>10||e.tags.some(t=>!text(t,48)||!t||/[\s,#]/u.test(t))))fail('태그 형식을 확인해 주세요.');
+    const tags=parseTags((e.tags||[]).join(' '));
+    out.entries.push({...(e.favorite?{favorite:true}:{}),...(tags.length?{tags}:{}),id:e.id,title:e.title.trim(),content:e.content||'',category:e.category,recordDate:date,created:e.created,decoration:e.decoration||'none',sticker:e.sticker||'',stickerX:coords[0],stickerY:coords[1],visibility:'private',mediaKeys:[...keys]});
   }
   if(new TextEncoder().encode(JSON.stringify(out)).length>2*1024*1024)fail('글 저장 한도(2MB)를 초과했어요. 전체 백업 후 기록을 정리해 주세요.');
   return out;

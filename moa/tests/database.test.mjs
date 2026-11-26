@@ -40,7 +40,9 @@ test('real PostgreSQL: migration, auth, ownership, CAS, shape and private storag
   // under-declared files when caller RLS is bypassed by its internal transaction.
   await assert.rejects(()=>pg.query("insert into storage.objects(bucket_id,name,metadata) values('moa-private',$1,$2)",[p,{size:1,mimetype:'image/png'}]),/MOA_UPLOAD_SIZE_MISMATCH/);
   const q=await reserve(23*1024*1024);await upload(q,23*1024*1024);
-  const doc={...empty(),entries:[{...entry,mediaKeys:[p,q]}]};await as('authenticated',A,()=>commit(4,doc));
+  const doc={...empty(),entries:[{...entry,mediaKeys:[p,q],favorite:true,tags:['가족','바다']}]};await as('authenticated',A,()=>commit(4,doc));
+  const stored=await as('authenticated',A,()=>pg.query('select document from public.moa_documents'));
+  assert.deepEqual(stored.rows[0].document.entries[0],doc.entries[0]);
   assert.equal(Number((await as('authenticated',A,()=>pg.query('select public.moa_storage_usage() as u'))).rows[0].u.active),48*1024*1024);
   assert.equal((await as('authenticated',A,()=>pg.query('delete from storage.objects returning *'))).rows.length,0);
   assert.equal((await as('authenticated',A,()=>pg.query('delete from public.moa_media returning *'))).rows.length,0);

@@ -3,12 +3,16 @@ import {CATEGORIES,DECOR,validDate} from './core.mjs';
 // A separate, bounded browser-local draft. Never part of the diary/backup schema.
 export const DRAFT_KEY='moa-writing-draft-v1';
 export const DRAFT_TTL=7*24*60*60*1000;
-const meaningful=f=>Boolean(f.title.trim()||f.content.trim()||f.sticker||f.decoration!=='none'||f.category!==CATEGORIES[0]||f.attachments);
+const meaningful=f=>Boolean(f.tagInput?.trim()||f.title.trim()||f.content.trim()||f.sticker||f.decoration!=='none'||f.category!==CATEGORIES[0]||f.attachments);
 function fields(input){
  if(!input||typeof input!=='object')throw Error('Invalid draft');
  const out={};
  for(const [key,max] of [['title',100],['content',20000],['sticker',12]]){
   if(typeof input[key]!=='string'||input[key].length>max)throw Error('Invalid draft');out[key]=input[key];
+ }
+ if(input.tagInput!==undefined){
+  if(typeof input.tagInput!=='string'||input.tagInput.length>512)throw Error('Invalid draft tags');
+  if(input.tagInput)out.tagInput=input.tagInput;
  }
  if(!validDate(input.recordDate)||!CATEGORIES.includes(input.category)||!DECOR.includes(input.decoration)||typeof input.optimizePhotos!=='boolean'||!Number.isInteger(input.attachments)||input.attachments<0||input.attachments>1000)throw Error('Invalid draft');
  if(input.photos!==undefined){if(!input.photos||!/^[-a-f0-9]{36}$/.test(input.photos.id)||!Number.isInteger(input.photos.count)||input.photos.count<1||input.photos.count>6||input.photos.count>input.attachments)throw Error('Invalid draft photos');out.photos={id:input.photos.id,count:input.photos.count};}
