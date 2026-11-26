@@ -21,7 +21,7 @@ if(local){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;
 }
 await fs.mkdir(output,{recursive:true});
-const routes={ladder:'ladder',roulette:'wheel',lots:'lot',team:'team',order:'order',dice:'dice',coin:'coin',yut:'yut','guide/fair-draw':null,'guide/classroom':null};
+const routes={ladder:'ladder',roulette:'wheel',lots:'lot',team:'team',order:'order',dice:'dice',coin:'coin',yut:'yut','guide/fair-draw':null,'guide/classroom':'wheel'};
 const results=[];
 try{
  for(const engine of (process.env.GAME_CONTRACT_ENGINES||'chromium').split(',')){
@@ -53,6 +53,13 @@ try{
       for(const link of links)assert.equal((await context.request.get(base+link)).status(),200,`${route} broken link ${link}`);
      }
      if(engine==='chromium'&&width===320&&['lots','guide/fair-draw','guide/classroom'].includes(route))await page.screenshot({path:path.join(output,`${route.replaceAll('/','-')}-mobile.png`),fullPage:true});
+     if(route==='guide/classroom'){
+      const start=page.getByRole('link',{name:'발표자 뽑기 시작',exact:true});
+      assert.equal(await page.locator('h1').innerText(),'수업 발표자 랜덤 뽑기');
+      assert.equal(await start.getAttribute('href'),'/#wheel');
+      const box=await start.boundingBox();
+      assert(box&&box.y>=0&&box.y+box.height<=850&&box.height>=44,`classroom start link is outside the first screen at ${width}`);
+     }
      if(target&&width===320){
       await page.locator('article a.button').first().click();
       await page.waitForFunction(()=>window.RandomPickerSettings);
