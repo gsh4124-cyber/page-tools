@@ -212,7 +212,7 @@ function setupControls(){
 }
 function restoreReadingPreferences(){window.BibleReadingPreferences?.apply();}
 function changeFont(d){const raw=getComputedStyle(document.documentElement).getPropertyValue("--font-size"),cur=parseFloat(raw)||21,next=Math.max(16,Math.min(32,cur+d));document.documentElement.style.setProperty("--font-size",`${next}px`);window.BibleStorage.setItem("bible-reader-font-size",String(next))}
-function toggleWidth(){const cur=window.BibleStorage.getItem("bible-reader-width")||"860",next=cur==="860"?"1080":cur==="1080"?"720":"860";document.documentElement.style.setProperty("--reader-width",`${next}px`);window.BibleStorage.setItem("bible-reader-width",next)}
+function toggleWidth(){const cur=window.BibleStorage.getItem("bible-reader-width"),next=cur==="720"?"860":cur==="860"?"1080":"720";document.documentElement.style.setProperty("--reader-width",`${next}px`);window.BibleStorage.setItem("bible-reader-width",next)}
 function toggleTheme(){const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;window.BibleStorage.setItem("bible-reader-theme",next)}
 
 restoreReadingPreferences();if(translationSelect)translationSelect.value=activeTranslationId;setupBookSelect();setupControls();loadCurrent({scrollTop:false});
