@@ -18,7 +18,7 @@ test('only the public introduction is indexable and analytics never expands priv
  for(const path of ['/about/','/robots.txt','/sitemap.xml','/about/sitemap.xml','/__moa_public_metrics.js','/__moa_access']){
   const r=await ownerGateway(request(path),env,publicRoutes,cspHeaders,unexpected);
   assert.equal(r.status,200);assert.match(await r.text(),/^PUBLIC_/);
-  assert.equal(r.headers.get('x-robots-tag'),path==='/about/'?'index, follow':'noindex, nofollow, noarchive');
+  assert.equal(r.headers.get('x-robots-tag'),['/about/','/robots.txt','/sitemap.xml','/about/sitemap.xml'].includes(path)?'index, follow':'noindex, nofollow, noarchive');
   assert.equal(r.headers.get('content-security-policy').includes('static.cloudflareinsights.com'),['/about/','/__moa_access'].includes(path));
   assert.equal(r.headers.get('referrer-policy'),['/about/','/__moa_access'].includes(path)?'strict-origin':'no-referrer');
   assert.equal(r.headers.get('set-cookie'),null);

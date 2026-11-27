@@ -43,7 +43,8 @@ export async function ownerGateway(request,env,routes,baseHeaders,transport=fetc
  if(path==='/about/'||path==='/robots.txt'||path==='/sitemap.xml'||path==='/about/sitemap.xml'||path==='/__moa_public_metrics.js'||path==='/__moa_access'||path==='/__moa_access.js'||path==='/__moa_auth_callback'){
   const item=routes[path];if(!item)return reply('Not found',404,{'Content-Type':'text/plain; charset=utf-8'});
   const extra={'Content-Type':item.type};
-  if(path==='/about/')extra['X-Robots-Tag']='index, follow';
+  // Public discovery files must remain crawlable; private diary responses keep noindex.
+  if(['/about/','/robots.txt','/sitemap.xml','/about/sitemap.xml'].includes(path))extra['X-Robots-Tag']='index, follow';
   // Allow the analytics provider only in the two public demo documents.
   // The callback and all authenticated diary responses keep the original CSP.
   if(path==='/about/'||path==='/__moa_access'){
