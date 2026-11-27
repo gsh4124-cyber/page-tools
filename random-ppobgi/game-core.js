@@ -9,7 +9,34 @@ function analyticsResultMode(){if(method==='bomb')return'bomb';return resultMode
 function analyticsContext(pool){return{method,input_mode:method==='bomb'?'na':inputMode,participant_bucket:participantBucket(pool.length),result_mode:analyticsResultMode()}}
 function trackEvent(eventName,context=currentRunAnalytics){if(!context)return;const payload={event_name:eventName,method:context.method,input_mode:context.input_mode,participant_bucket:context.participant_bucket,result_mode:context.result_mode};try{fetch(ANALYTICS_ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),credentials:'omit',cache:'no-store',keepalive:true}).catch(()=>{})}catch(_){}}
 function markGameComplete(){if(currentRunCompleted||!currentRunAnalytics)return;currentRunCompleted=true;trackEvent('game_complete')}function renderRemainingCandidates(pool){const visible=excluded.size>0&&method!=='bomb';remainingCandidates.classList.toggle('hidden',!visible);if(!visible){remainingCount.textContent='';remainingList.innerHTML='';return}remainingCount.textContent=`${pool.length}명`;remainingList.innerHTML=pool.map(v=>`<span class="remaining-chip">${esc(label(v))}</span>`).join('')}
-const parseNames=()=>names.value.split(/[\n,]+/).map(v=>v.trim()).filter(Boolean);const parseCustomResults=()=>customResults.value.split(/[\n,]+/).map(v=>v.trim()).filter(Boolean);const maxAvailable=()=>inputMode==='name'?Math.max(1,parseNames().length):Math.max(2,Math.floor(Number(totalPeople.value)||2));function items(){const n=Math.max(2,Math.min(100,Math.floor(Number(totalPeople.value)||2)));if(inputMode==='number')return Array.from({length:n},(_,i)=>({id:`number-${i+1}`,label:String(i+1)}));return parseNames().map((name,i)=>({id:`name-${i+1}`,label:name}))}function label(v){if(!v)return'';if(method==='lot')return `${gamePack()?.dynamic.lot||'제비'} ${v.label}`;const lang=window.__RANDOM_PICKER_LANG__||document.documentElement.lang||'ko';return inputMode==='number'?(lang==='ko'?`${v.label}번`:`#${v.label}`):v.label}function sameParticipant(a,b){return !!a&&!!b&&a.id===b.id}function esc(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}function rand(max){if(max<=1)return 0;const limit=Math.floor(0x100000000/max)*max,a=new Uint32Array(1);let x;do{crypto.getRandomValues(a);x=a[0]}while(x>=limit);return x%max}function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}function choose(source,count){return shuffle(source).slice(0,Math.min(count,source.length))}
+const parseNames=()=>names.value.split(/[\n,]+/).map(v=>v.trim()).filter(Boolean);const parseCustomResults=()=>customResults.value.split(/[\n,]+/).map(v=>v.trim()).filter(Boolean);const maxAvailable=()=>inputMode==='name'?Math.max(1,parseNames().length):Math.max(2,Math.floor(Number(totalPeople.value)||2));
+function items(){
+  if(inputMode==='number'){
+    const total=Math.max(2,Math.min(100,Math.floor(Number(totalPeople.value)||2)));
+    return Array.from({length:total},(_,i)=>({id:`number-${i+1}`,label:String(i+1)}));
+  }
+
+  const roster=parseNames();
+  const counts=new Map();
+  for(const name of roster) counts.set(name,(counts.get(name)||0)+1);
+
+  const usedLabels=new Set(roster);
+  const lastNumber=new Map();
+  return roster.map((name,index)=>{
+    let displayName=name;
+    if(counts.get(name)>1){
+      let number=lastNumber.get(name)||0;
+      do{
+        number++;
+        displayName=`${name} (${number})`;
+      }while(usedLabels.has(displayName));
+      lastNumber.set(name,number);
+      usedLabels.add(displayName);
+    }
+    return {id:`name-${index+1}`,label:displayName};
+  });
+}
+function label(v){if(!v)return'';if(method==='lot')return `${gamePack()?.dynamic.lot||'제비'} ${v.label}`;const lang=window.__RANDOM_PICKER_LANG__||document.documentElement.lang||'ko';return inputMode==='number'?(lang==='ko'?`${v.label}번`:`#${v.label}`):v.label}function sameParticipant(a,b){return !!a&&!!b&&a.id===b.id}function esc(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}function rand(max){if(max<=1)return 0;const limit=Math.floor(0x100000000/max)*max,a=new Uint32Array(1);let x;do{crypto.getRandomValues(a);x=a[0]}while(x>=limit);return x%max}function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}function choose(source,count){return shuffle(source).slice(0,Math.min(count,source.length))}
 // One settings contract for saved setups; applying a setup never starts a draw.
 function validSettings(data){
   if(!data||typeof data!=='object'||Array.isArray(data)||data.version!==1||!Object.prototype.hasOwnProperty.call(methodProfile,data.method)||!['number','name'].includes(data.inputMode)||!['winner','rank','custom'].includes(data.resultMode)||!['random','fixed'].includes(data.bombTimerMode))return false;
