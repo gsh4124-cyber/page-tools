@@ -218,6 +218,8 @@
 .topbar .toolbar-more-menu .topics-menu-link:focus-visible{outline:2px solid currentColor;outline-offset:-2px}
 html:not(:lang(ko)) .topbar .toolbar-more-menu .topics-menu-link{display:none!important}
 .topbar .toolbar-more-menu button:disabled{opacity:.4}
+/* Up to 760px the reader is already full width and single column (features.css), so these two do nothing there. */
+@media(max-width:760px){.topbar :is(#widthToggle,#pageViewToggle){display:none!important}}
 .topbar.topbar-scrolled{padding-block:4px!important}
 @media(min-width:700px){
   .topbar{padding:7px 12px!important}

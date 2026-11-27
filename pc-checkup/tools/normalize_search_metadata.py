@@ -65,8 +65,12 @@ for path in pages:
         text = add_mic_guide(text, lang)
     if path.name in {'speaker.html', 'webcam.html'}:
         text = add_output_guide(text, lang, path.name)
-    privacy = (f'<p class="privacy-policy-link"><a href="/privacy/#{"ko" if lang == "ko" else "en"}" '
-               f'style="display:inline-block;min-height:44px;padding:10px 0;color:inherit">{PRIVACY_LABELS[lang]}</a></p>')
+    anchor = "ko" if lang == "ko" else "en"
+    link_style = 'display:inline-block;min-height:44px;padding:10px 0;color:inherit'
+    about_label = '서비스 소개·이용약관·문의' if lang == 'ko' else 'About · Terms · Contact'
+    # The about and privacy pages are bilingual (ko/en) and sit outside the translated app pages.
+    privacy = (f'<p class="privacy-policy-link"><a href="/about/#{anchor}" style="{link_style}">{about_label}</a>'
+               f' · <a href="/privacy/#{anchor}" style="{link_style}">{PRIVACY_LABELS[lang]}</a></p>')
     if text.count('</footer>') != 1:
         raise RuntimeError(f'Missing or duplicated footer: {rel}')
     # Select options are not crawlable links. Keep ordinary same-page locale

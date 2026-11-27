@@ -69,6 +69,7 @@ for path in ROOT.glob('*.txt'):
         shutil.copyfile(path, dist / path.name)
 # The bilingual privacy document is outside the 117-page translated app contract.
 shutil.copytree(ROOT / 'privacy', dist / 'privacy', dirs_exist_ok=True)
+shutil.copytree(ROOT / 'about', dist / 'about', dirs_exist_ok=True)
 # A top-level error page disables Pages' implicit SPA fallback for unknown URLs.
 # Keep it outside the translated 117-page app and sitemap validation contract.
 shutil.copyfile(ROOT / '404.html', dist / '404.html')

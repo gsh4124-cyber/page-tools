@@ -137,7 +137,7 @@ function enhanceRecording(){
  const button=document.createElement('button');button.id='recordPickerBtn';button.type='button';
  button.className='picker-mini-btn picker-record-btn';button.textContent=t().record;button.title=t().choose;
  button.addEventListener('click',()=>{if(recorder?.state==='recording')recorder.stop();else startRecording(button)});
- row.append(button);const pick=byId('pickBtn');if(pick)pick.before(row);else card.after(row);
+ row.append(button);const actions=byId('pickActions');if(actions)actions.before(row);else card.after(row);
 }
 function init(){css();enhanceNameSets();enhanceConfigSets();enhanceResults();enhanceRecording()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

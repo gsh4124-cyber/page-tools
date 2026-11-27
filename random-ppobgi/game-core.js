@@ -72,9 +72,10 @@ function resetStage(){animationToken++;cancelAllAsync();revealAllHandler=null;sh
 function revealResults(){showingAll=false;resultHTML(false);resultBlock.classList.add('show');stageStatus.textContent='완료';markGameComplete();publishPickerResult()}
 function revealFullResults(results){showingAll=true;lastResults=[...results];lastWinners=lastResults.filter(r=>r.entry&&r.entry.active).map(r=>r.person);resultHTML(true);resultBlock.classList.add('show');stageStatus.textContent='전체';showAllBtn.hidden=true;markGameComplete();publishPickerResult();setTimeout(()=>scrollToElement(resultBlock,{block:'nearest'}),30)}
 
+// The start button always follows the settings it uses; CSS keeps it in view on small screens.
 function placePickActions(){
-  if(method==='ladder') inputTabs.before(pickActions);
-  else resultSettings.after(pickActions);
+  const content=mainCard.querySelector('.content');
+  if(content&&pickActions.parentElement!==content)content.append(pickActions);
 }
 
 function gamePack(){const lang=window.__RANDOM_PICKER_LANG__||document.documentElement.lang||'ko';return window.RandomPickerLocales?.[lang];}
