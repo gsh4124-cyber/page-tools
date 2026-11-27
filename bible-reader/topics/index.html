@@ -14,43 +14,63 @@
   <meta property="og:locale" content="ko_KR">
   <link rel="stylesheet" href="/guide/guide.css">
   <link rel="stylesheet" href="/topics/topics.css">
+  <link rel="stylesheet" href="/topics/directory.css">
+  <script src="/topics/directory.js" defer></script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"성경 읽기","item":"https://bible-reader-1iz.pages.dev/"},{"@type":"ListItem","position":2,"name":"주제별 성구","item":"https://bible-reader-1iz.pages.dev/topics/"}]}</script>
 </head>
-<body>
-<main>
+<body class="topic-directory">
+<main class="directory-main">
   <nav class="topic-trail" aria-label="현재 위치"><a href="/">성경 읽기</a> <span aria-hidden="true">›</span> <span aria-current="page">주제별 성구</span></nav>
-  <article>
-    <h1>주제별 성경 구절</h1>
-    <p>불안과 염려, 위로, 사랑, 감사 등 필요한 주제를 골라 개역한글 말씀을 읽어 보세요.</p>
-    <section>
-      <h2>마음이 힘들 때</h2>
-      <ul class="topic-list">
-        <li><a href="/topics/anxiety/">불안과 염려</a></li>
-        <li><a href="/topics/comfort/">위로</a></li>
-        <li><a href="/topics/peace/">마음의 평안</a></li>
-        <li><a href="/topics/hope/">소망</a></li>
-        <li><a href="/topics/endurance/">인내와 힘</a></li>
+  <header class="directory-hero">
+    <div class="directory-intro">
+      <h1>주제별 성경 구절</h1>
+      <p>마음이 무거운 날부터 감사한 날까지, 지금 필요한 개역한글 말씀을 찾아보세요.</p>
+      <a class="directory-start" href="#topics-heart">마음에 맞는 말씀 고르기 <span aria-hidden="true">↓</span></a>
+    </div>
+    <img src="/topics/bible-reading.png" class="directory-photo" alt="" width="960" height="640" fetchpriority="high">
+  </header>
+
+  <nav class="directory-jump" aria-label="주제 묶음 바로가기">
+    <a href="#topics-heart">마음이 힘들 때</a>
+    <a href="#topics-faith">신앙을 돌아볼 때</a>
+    <a href="#topics-life">관계와 삶의 선택</a>
+  </nav>
+
+  <div class="directory-groups">
+    <section class="directory-group group-heart" aria-labelledby="topics-heart">
+      <h2 id="topics-heart" tabindex="-1">마음이 힘들 때</h2>
+      <ul class="directory-cards">
+        <li><a href="/topics/anxiety/"><strong>불안과 염려</strong><span>걱정이 꼬리를 물 때</span></a></li>
+        <li><a href="/topics/comfort/"><strong>위로</strong><span>슬픔을 견디기 어려울 때</span></a></li>
+        <li><a href="/topics/peace/"><strong>마음의 평안</strong><span>마음을 가라앉히고 싶을 때</span></a></li>
+        <li><a href="/topics/hope/"><strong>소망</strong><span>앞날이 막막하게 느껴질 때</span></a></li>
+        <li><a href="/topics/endurance/"><strong>인내와 힘</strong><span>지치고 포기하고 싶을 때</span></a></li>
       </ul>
     </section>
-    <section>
-      <h2>신앙을 돌아볼 때</h2>
-      <ul class="topic-list">
-        <li><a href="/topics/prayer/">기도</a></li>
-        <li><a href="/topics/faith/">믿음</a></li>
-        <li><a href="/topics/gratitude/">감사</a></li>
+
+    <section class="directory-group group-faith" aria-labelledby="topics-faith">
+      <h2 id="topics-faith" tabindex="-1">신앙을 돌아볼 때</h2>
+      <ul class="directory-cards">
+        <li><a href="/topics/prayer/"><strong>기도</strong><span>무엇부터 기도할지 막막할 때</span></a></li>
+        <li><a href="/topics/faith/"><strong>믿음</strong><span>믿음이 흔들릴 때</span></a></li>
+        <li><a href="/topics/gratitude/"><strong>감사</strong><span>일상에서 감사할 일을 찾을 때</span></a></li>
       </ul>
     </section>
-    <section>
-      <h2>관계와 삶의 선택</h2>
-      <ul class="topic-list">
-        <li><a href="/topics/love/">사랑</a></li>
-        <li><a href="/topics/forgiveness/">용서</a></li>
-        <li><a href="/topics/courage/">용기와 담대함</a></li>
-        <li><a href="/topics/wisdom/">지혜와 선택</a></li>
+
+    <section class="directory-group group-life" aria-labelledby="topics-life">
+      <h2 id="topics-life" tabindex="-1">관계와 삶의 선택</h2>
+      <ul class="directory-cards">
+        <li><a href="/topics/love/"><strong>사랑</strong><span>사람을 어떻게 대할지 고민될 때</span></a></li>
+        <li><a href="/topics/forgiveness/"><strong>용서</strong><span>서운함을 내려놓기 어려울 때</span></a></li>
+        <li><a href="/topics/courage/"><strong>용기와 담대함</strong><span>두렵지만 한 걸음을 내디뎌야 할 때</span></a></li>
+        <li><a href="/topics/wisdom/"><strong>지혜와 선택</strong><span>중요한 결정을 앞두었을 때</span></a></li>
       </ul>
     </section>
-    <section id="sources">
-      <h2>참고 자료</h2>
+  </div>
+
+  <details class="directory-sources" id="sources">
+    <summary>참고 자료와 성경 본문 출처</summary>
+    <div>
       <p>아래 자료에서 주제와 구절을 참고해 다시 골랐습니다. 성경 본문은 대한성서공회의 성경전서 개역한글판(1961)을 사용합니다.</p>
       <ul>
         <li><a href="https://www.americanbible.org/engage/bible-resources/articles/finding-help-in-the-bible/">미국성서공회 주제별 성경 안내</a></li>
@@ -58,8 +78,8 @@
         <li><a href="https://somangbook.co.kr/bible/topics/">소망북 주제별 말씀</a></li>
         <li><a href="https://www.bskorea.or.kr/bbs/board.php?bo_table=copyright_faq&amp;wr_id=5">대한성서공회 개역한글판 이용 안내</a></li>
       </ul>
-    </section>
-  </article>
+    </div>
+  </details>
   <footer>
     <a href="/">성경 읽기</a>
     <a href="/passage/">많이 찾는 성경 본문</a>
