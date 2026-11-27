@@ -62,9 +62,9 @@ try{
      }
      if(target&&width===320){
       await page.locator('article a.button').first().click();
-      await page.waitForFunction(()=>window.RandomPickerSettings);
+      // The deferred tool entry can finish after the game core is ready.
       if(['ladder','wheel','lot','pinball','race','capsule','slot','bomb'].includes(target)){
-       assert.equal(await page.locator(`.methods [data-method="${target}"]`).getAttribute('aria-checked'),'true');
+       await page.locator(`.methods [data-method="${target}"][aria-checked="true"]`).waitFor({state:'visible',timeout:10000});
        if(target==='lot'){
         assert(!(await page.locator('#inputTabs').isVisible()));
         await page.locator('#totalPeople').fill('8');await page.locator('#totalPeople').dispatchEvent('input');
@@ -74,8 +74,8 @@ try{
         assert(!(await page.locator('#excludeBtn').isVisible()));
        }
       }else{
+       await page.locator(`#gameTools [data-tool="${target}"][aria-selected="true"]`).waitFor({state:'visible',timeout:10000});
        assert.equal(await page.locator('#showTools').getAttribute('aria-pressed'),'true');
-       assert.equal(await page.locator(`[data-tool="${target}"]`).getAttribute('aria-selected'),'true');
        assert(await page.locator(`[data-panel="${target}"]`).isVisible());
       }
      }
