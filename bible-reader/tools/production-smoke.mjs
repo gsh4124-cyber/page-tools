@@ -53,7 +53,8 @@ async function assertCompactTopbar(page, label) {
   assert(await page.locator('#searchForm').isHidden(), `${label}: search did not close`);
   await page.locator('#toolbarMoreToggle').click();
   assert(await page.locator('#toolbarMoreMenu #themeToggle').isVisible(), `${label}: theme action missing from overflow`);
-  assert(await page.locator('#toolbarMoreMenu #widthToggle').isVisible(), `${label}: reading width action missing from overflow`);
+  const widthVisible = await page.locator('#toolbarMoreMenu #widthToggle').isVisible();
+  assert(widthVisible === (viewportWidth > 760), `${label}: reading width action must only show above 760px`);
   assert(await page.locator('#toolbarMoreMenu #languageSelect').isVisible(), `${label}: language picker missing from overflow`);
   await page.locator('#toolbarMoreToggle').click();
   assert(await page.locator('#toolbarMoreMenu').isHidden(), `${label}: overflow did not close`);

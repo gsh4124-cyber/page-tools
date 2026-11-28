@@ -11,7 +11,7 @@ Before changing a project:
 
 ## Production browser checks
 
-For Random Ppobgi, Bible Reader, DEVICE CHECKUP and Calculatormoa, open live product pages through the protected QA browser. Its separate browser context blocks Cloudflare Web Analytics, product counters and ad telemetry before navigation, including when a check follows a link or changes language. Use a local build or preview for browser sessions that cannot apply these protections. The product's `?qa=1` flag alone only affects its own counters.
+For Random Ppobgi, Bible Reader, DEVICE CHECKUP and Calculatormoa, open live product pages through the protected QA browser. Its separate browser context blocks Cloudflare Web Analytics, product counters and ad telemetry before navigation, including when a check follows a link or changes language. Use a local build or a preview with analytics disabled for browser sessions that cannot apply these protections. The product's `?qa=1` flag alone only affects its own counters.
 
 - Interactive check: `node .github/qa/open.mjs <production URL>`
 - Verify all four home pages: `node .github/qa/open.mjs --check`
