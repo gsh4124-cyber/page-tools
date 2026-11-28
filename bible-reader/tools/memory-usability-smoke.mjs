@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -24,7 +25,7 @@ try{
  for(const engine of (process.env.MEMORY_USABILITY_ENGINES||'chromium').split(',')){
   const browser=await engines[engine].launch({headless:true});
   try{for(const [width,height,language] of [[1024,500,'ko'],[390,700,'en'],[844,390,'ar'],[1280,800,'fr']]){
-   const context=await browser.newContext({viewport:{width,height},hasTouch:true,reducedMotion:'reduce'});
+   const context=await newQaContext(browser, {viewport:{width,height},hasTouch:true,reducedMotion:'reduce'});
    await context.route(/googlesyndication|doubleclick|adtrafficquality|cloudflareinsights/,r=>r.abort());await context.route('**/functions/v1/**',r=>r.fulfill({status:204}));
    await context.addInitScript(()=>localStorage.setItem('bible-reader-memory-passages-v1',JSON.stringify([{bookIndex:42,chapter:3,verse:16},{bookIndex:42,chapter:3,verse:17}])));
    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));const id=`${engine}-${language}-${width}`;

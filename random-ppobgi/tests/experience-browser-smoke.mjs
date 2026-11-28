@@ -1,8 +1,9 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 
 const base=process.env.EXPERIENCE_TEST_BASE||'https://random-ppobgi.pages.dev';
 const browser=await chromium.launch({headless:true});
-const context=await browser.newContext({viewport:{width:390,height:844},locale:'ko-KR',reducedMotion:'reduce'});
+const context=await newQaContext(browser, {viewport:{width:390,height:844},locale:'ko-KR',reducedMotion:'reduce'});
 await context.addInitScript(()=>{
   const listeners={};
   const track={addEventListener:(name,fn)=>{listeners[name]=fn},stop:()=>{}};

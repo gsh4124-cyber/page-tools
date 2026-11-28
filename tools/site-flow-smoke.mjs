@@ -1,3 +1,4 @@
+import { newQaContext } from '../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -8,7 +9,7 @@ await fs.mkdir(output,{recursive:true});
 const projects={'random-ppobgi.pages.dev':'random-ppobgi','bible-reader-1iz.pages.dev':'bible-reader','pc-checkup.pages.dev':'pc-checkup'};
 const results=[],engines={chromium,firefox,webkit};
 async function contextFor(browser,width,holdApp){
- const events=[],context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',locale:'ko-KR',userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36'});
+ const events=[],context=await newQaContext(browser, {viewport:{width,height:900},reducedMotion:'reduce',locale:'ko-KR',userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36'});
  await context.addInitScript(()=>Object.defineProperty(navigator,'webdriver',{get:()=>false}));
  // Every analytics request is intercepted: these checks never add visits or usage records.
  await context.route(/googlesyndication|doubleclick|adtrafficquality|cloudflareinsights/,route=>route.abort());

@@ -1,3 +1,4 @@
+import { newQaContext, newQaPage } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -10,7 +11,7 @@ const problems = [];
 function assert(ok, message) { if (!ok) problems.push(message); }
 
 async function open(path, viewport={ width: 390, height: 844 }) {
-  const page = await browser.newPage({ viewport });
+  const page = await newQaPage(browser, { viewport });
   const pageErrors = [];
   page.on('pageerror', e => pageErrors.push(String(e)));
   await page.goto(`${base}${path}`, { waitUntil: 'networkidle', timeout: 30000 });
@@ -170,7 +171,7 @@ async function assertMultiVerseSelection(page, label) {
 }
 
 {
-  const context = await browser.newContext({ javaScriptEnabled:false });
+  const context = await newQaContext(browser, { javaScriptEnabled:false });
   const page = await context.newPage();
   await page.goto(`${base}/?qa=1`, { waitUntil:'domcontentloaded', timeout:30000 });
   assert(await page.locator('#verses .verse').count() === 36, 'static reader: John 3 must be readable before JavaScript');
@@ -178,7 +179,7 @@ async function assertMultiVerseSelection(page, label) {
   await context.close();
 }
 {
-  const context = await browser.newContext();
+  const context = await newQaContext(browser);
   await context.route('https://raw.githubusercontent.com/**', route => route.abort());
   const page = await context.newPage();
   await page.goto(`${base}/?qa=1`, { waitUntil:'domcontentloaded', timeout:30000 });

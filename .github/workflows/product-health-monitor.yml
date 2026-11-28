@@ -10,12 +10,14 @@ on:
       - "pc-checkup/**"
       - "tools/**"
       - ".github/workflows/product-health-monitor.yml"
+      - ".github/qa/**"
   schedule:
     - cron: '40 */6 * * *'
   push:
     branches: ["main"]
     paths:
       - '.github/workflows/product-health-monitor.yml'
+      - '.github/qa/**'
       - 'random-ppobgi/**'
       - 'bible-reader/**'
       - 'pc-checkup/**'
@@ -242,20 +244,20 @@ jobs:
           if grep -Eq '^tools/(build_static|release_metadata|asset_cache)\.py$' <<< "$files"; then shared=true; fi
           deploy_projects=()
           # A workflow-only change runs all three live tests; it does not force a site deployment.
-          if grep -Eq '^(\.github/workflows/product-health-monitor\.yml|tools/verify-production\.mjs)$' <<< "$files"; then
+          if grep -Eq '^(\.github/workflows/product-health-monitor\.yml$|\.github/qa/|tools/verify-production\.mjs$)' <<< "$files"; then
             projects=(bible-reader random-ppobgi pc-checkup)
           fi
           for project in bible-reader random-ppobgi pc-checkup; do
             if [ "$shared" = true ] || grep -q "^$project/" <<< "$files"; then
               if [[ ! " ${projects[*]} " =~ " $project " ]]; then projects+=("$project"); fi
             fi
-            # These files change QA behavior only; the deployed application is unchanged.
+            # Tests can exercise the published app using its current revision.
             case "$project" in
-              bible-reader) qa_script='bible-reader/tools/production-smoke.mjs' ;;
-              random-ppobgi) qa_script='random-ppobgi/tests/live-browser-proof.mjs' ;;
-              pc-checkup) qa_script='pc-checkup/tools/device-experience-smoke.mjs' ;;
+              bible-reader) qa_paths='^bible-reader/tools/(production-smoke|reader-(detail|experience)-smoke|memory-(collection|draft|grading|practice|quiz|usability)-smoke|memory-(quiz-mobile|tablet-layout|detail-audit))\.mjs$' ;;
+              random-ppobgi) qa_paths='^random-ppobgi/tests/' ;;
+              pc-checkup) qa_paths='^pc-checkup/tools/(device-experience|production|header-layout)-smoke\.mjs$' ;;
             esac
-            if [ "$shared" = true ] || { grep -q "^$project/" <<< "$files" && grep "^$project/" <<< "$files" | grep -Fvx "$qa_script" | grep -q .; }; then
+            if [ "$shared" = true ] || { grep "^$project/" <<< "$files" | grep -Ev "$qa_paths" | grep -q .; }; then
               deploy_projects+=("$project")
             fi
           done
@@ -321,6 +323,13 @@ jobs:
       - name: Install matching Playwright package
         if: steps.changed.outputs.projects != ''
         run: npm install --no-save playwright@1.55.0
+      - name: Verify production QA excludes analytics traffic
+        if: steps.changed.outputs.projects != ''
+        env:
+          QA_BROWSER_TEST: "1"
+        run: |
+          node --test .github/qa/browser.test.mjs
+          node .github/qa/open.mjs --check
       - name: Random Picker desktop and mobile production interaction
         if: contains(steps.changed.outputs.projects, 'random-ppobgi')
         env:

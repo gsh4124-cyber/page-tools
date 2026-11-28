@@ -1,3 +1,4 @@
+import { newQaContext, newQaPage } from '../../.github/qa/browser.mjs';
 import { chromium, firefox, webkit } from 'playwright';
 
 const base = 'https://pc-checkup.pages.dev';
@@ -106,7 +107,7 @@ const collectLayoutProblems = async (page, label) => {
 };
 
 for (const item of representative) {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: item.browserLocale });
+  const context = await newQaContext(browser, { viewport: { width: 390, height: 844 }, locale: item.browserLocale });
   const page = await context.newPage();
   const pageErrors = [];
   const externalRequests = new Set();
@@ -134,7 +135,7 @@ for (const item of representative) {
 }
 
 for (const path of ['/en/keyboard.html', '/en/mobile.html', '/zh-CN/keyboard.html', '/ru/mobile.html']) {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const page = await newQaPage(browser, { viewport: { width: 390, height: 844 } });
   const pageErrors = [];
   const externalRequests = new Set();
   page.on('pageerror', error => capturePageError(pageErrors, error));
@@ -160,7 +161,7 @@ if (browserName === 'chromium') {
     { name: 'mobile-360', width: 360, height: 800 },
     { name: 'desktop-1280', width: 1280, height: 900 },
   ]) {
-    const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, locale: 'ko-KR' });
+    const context = await newQaContext(browser, { viewport: { width: viewport.width, height: viewport.height }, locale: 'ko-KR' });
     const page = await context.newPage();
     const pageErrors = [];
     page.on('pageerror', error => capturePageError(pageErrors, error));

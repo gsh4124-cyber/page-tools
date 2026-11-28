@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -27,7 +28,7 @@ try{
  for(const engine of (process.env.GAME_CONTRACT_ENGINES||'chromium').split(',')){
   const browser=await ({chromium,firefox,webkit})[engine].launch({headless:true});
   try{
-   const context=await browser.newContext({viewport:{width:320,height:850},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+   const context=await newQaContext(browser, {viewport:{width:320,height:850},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
    page.on('pageerror',error=>errors.push(String(error)));
    await context.route(/googlesyndication|doubleclick|adtrafficquality|\/api\/events|supabase\.co/,route=>route.abort());
    for(const width of [320,1280]){

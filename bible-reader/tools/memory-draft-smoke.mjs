@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -25,7 +26,7 @@ try{for(const engine of (process.env.MEMORY_DRAFT_ENGINES||'chromium').split(','
  const browser=await engines[engine].launch({headless:true});
  try{for(const [li,language] of languages.entries())for(const mode of ['practice','exam'])for(const view of ['verse','chapter']){
   const [width,height]=[[320,740],[390,844],[844,390],[1280,800]][li%4],id=`${engine}-${language}-${mode}-${view}`;debugId=id;
-  const context=await browser.newContext({viewport:{width,height},hasTouch:true});await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
+  const context=await newQaContext(browser, {viewport:{width,height},hasTouch:true});await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
   await context.addInitScript(({key,refs,dark})=>{localStorage.setItem(key,JSON.stringify(refs));localStorage.setItem('bible-reader-theme',dark?'dark':'light');},{key,refs,dark:li%2===1});
   if(language==='ko')await context.addInitScript(()=>{const v=new EventTarget();Object.assign(v,{width:innerWidth,height:innerHeight,offsetTop:0,offsetLeft:0,scale:1});Object.defineProperty(window,'visualViewport',{configurable:true,value:v});window.__draftViewport=v;});
   const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',e=>errors.push(String(e)));

@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium} from 'playwright';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -11,7 +12,7 @@ const browser=await chromium.launch({headless:true,...(process.env.MEMORY_QUIZ_C
 const profiles=[[320,568],[390,844],[844,390],[1280,900]];
 try{for(const [width,height] of profiles)for(const language of ['ko','en']){
  if(process.env.READING_QA_ONE&&(width!==320||language!=='ko'))continue;
- const context=await browser.newContext({viewport:{width,height},locale:language,reducedMotion:'reduce'});await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
+ const context=await newQaContext(browser, {viewport:{width,height},locale:language,reducedMotion:'reduce'});await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
  const check=(flow,pass,data={})=>observations.push({width,height,language,flow,pass,...data});
  try{

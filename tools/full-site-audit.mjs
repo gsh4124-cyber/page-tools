@@ -1,3 +1,4 @@
+import { newQaContext } from '../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -7,7 +8,7 @@ const root=fileURLToPath(new URL('../',import.meta.url)),local=process.argv.incl
 await fs.mkdir(output,{recursive:true});
 const hosts={'bible-reader-1iz.pages.dev':'bible-reader','random-ppobgi.pages.dev':'random-ppobgi','pc-checkup.pages.dev':'pc-checkup'},results=[],engines={chromium,firefox,webkit};
 async function makeContext(browser,width=390,height=844,storage='normal',language='ko'){
- const context=await browser.newContext({viewport:{width,height},locale:language==='ko'?'ko-KR':language,reducedMotion:'reduce'});
+ const context=await newQaContext(browser, {viewport:{width,height},locale:language==='ko'?'ko-KR':language,reducedMotion:'reduce'});
  await context.route(/googlesyndication|doubleclick|adtrafficquality|cloudflareinsights/,route=>route.abort());
  await context.route('**/functions/v1/**',route=>route.fulfill({status:204}));
  if(local)await context.route(/https:\/\/(?:bible-reader-1iz|random-ppobgi|pc-checkup)\.pages\.dev\//,async route=>{

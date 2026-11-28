@@ -1,3 +1,4 @@
+import { newQaPage } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 
 const base = process.env.I18N_TEST_BASE || 'http://127.0.0.1:4173';
@@ -68,7 +69,7 @@ async function waitReady(page) {
 }
 
 for (const lang of allForeign) {
-  const page = await browser.newPage({viewport:{width:1280,height:900}});
+  const page = await newQaPage(browser, {viewport:{width:1280,height:900}});
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   await page.goto(`${base}/${lang}/`, {waitUntil:'networkidle'});
@@ -90,7 +91,7 @@ for (const lang of allForeign) {
 
 for (const lang of priority) {
   for (const width of [390,360]) {
-    const page = await browser.newPage({viewport:{width,height:844}});
+    const page = await newQaPage(browser, {viewport:{width,height:844}});
     const errors = [];
     page.on('pageerror', e => errors.push(String(e)));
     await page.goto(`${base}/${lang}/`, {waitUntil:'networkidle'});
@@ -127,7 +128,7 @@ for (const lang of priority) {
 }
 
 for (const width of [390,360]) {
-  const page=await browser.newPage({viewport:{width,height:844}});
+  const page=await newQaPage(browser, {viewport:{width,height:844}});
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
   await page.goto(`${base}/`,{waitUntil:'networkidle'});
   await page.addScriptTag({url:`${base}/language-switch.js`});

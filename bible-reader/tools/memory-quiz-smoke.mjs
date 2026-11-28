@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chooseMemory,closeMemory} from './picker-test-helpers.mjs';
 import {chromium} from 'playwright';
 import {createServer} from 'node:http';
@@ -24,7 +25,7 @@ if(local){
 const browser=await chromium.launch({headless:true,...(process.env.MEMORY_QUIZ_CHANNEL?{channel:process.env.MEMORY_QUIZ_CHANNEL}:{})});
 const observations=[];
 async function openPage(width=390,route='/',expectedChapter=null,options={}){
-  const context=await browser.newContext({viewport:{width,height:844},locale:'ko-KR'});
+  const context=await newQaContext(browser, {viewport:{width,height:844},locale:'ko-KR'});
   if(options.visualViewportMock)await context.addInitScript(()=>{
     const viewport=new EventTarget();Object.assign(viewport,{height:innerHeight,width:innerWidth,offsetTop:0,offsetLeft:0,scale:1});
     Object.defineProperty(window,'visualViewport',{configurable:true,value:viewport});window.__qaVisualViewport=viewport;

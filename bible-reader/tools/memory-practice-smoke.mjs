@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -34,7 +35,7 @@ async function expectedAnswers(page){
 }
 try{
   for(const [width,height,language] of [[320,740,'ko'],[390,844,'en'],[844,390,'ar'],[1280,800,'ko']]){
-    const context=await browser.newContext({viewport:{width,height},hasTouch:true});
+    const context=await newQaContext(browser, {viewport:{width,height},hasTouch:true});
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
     const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));
     await page.goto(base+(language==='ko'?'/':`/${language}/`)+'?qa=memory-practice',{waitUntil:'domcontentloaded'});
@@ -167,7 +168,7 @@ try{
   }
   // A long chapter must keep its controls beside the active verse and never size hidden fields at zero width.
   {
-    const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true});await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
+    const context=await newQaContext(browser, {viewport:{width:390,height:844},hasTouch:true});await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
     const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));
     await page.goto(base+'/?qa=practice-long-chapter',{waitUntil:'domcontentloaded'});await page.locator('#verses .verse').first().waitFor({timeout:40000});await page.waitForFunction(()=>document.querySelector('.memory-practice-menu-button'));
     await page.locator('#toolbarMoreToggle').click();await page.locator('.memory-practice-menu-button').click();

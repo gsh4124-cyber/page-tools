@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 
 const base='https://bible-reader-1iz.pages.dev';
@@ -10,7 +11,7 @@ async function clickMoreTool(page,selector){
 }
 
 async function freshPage(path='/'){
-  const context=await browser.newContext({viewport:{width:720,height:900}});
+  const context=await newQaContext(browser, {viewport:{width:720,height:900}});
   await context.addInitScript(()=>{
     try{
       localStorage.removeItem('bible-reader-navigation-history-v1');

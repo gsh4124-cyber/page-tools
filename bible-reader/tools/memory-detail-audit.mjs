@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -42,7 +43,7 @@ try{
  for(const engine of (process.env.MEMORY_DETAIL_ENGINES||'chromium').split(',')){
   const browser=await engines[engine].launch({headless:true});
   try{for(const [languageIndex,language] of languages.entries()){
-   const profile=profiles[languageIndex%profiles.length],context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,reducedMotion:'reduce'});
+   const profile=profiles[languageIndex%profiles.length],context=await newQaContext(browser, {viewport:{width:profile.width,height:profile.height},hasTouch:true,reducedMotion:'reduce'});
    await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
    if(language==='ko')await context.addInitScript(()=>{const v=new EventTarget();Object.assign(v,{width:innerWidth,height:innerHeight,offsetTop:0,offsetLeft:0,scale:1});Object.defineProperty(window,'visualViewport',{configurable:true,value:v});window.__detailViewport=v;});
    await context.addInitScript(({refs,collectionKey,theme})=>{localStorage.setItem(collectionKey,JSON.stringify(refs));localStorage.setItem('bible-reader-theme',theme);},{refs,collectionKey,theme:profile.theme});

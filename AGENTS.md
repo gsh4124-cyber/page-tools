@@ -9,4 +9,14 @@ Before changing a project:
 4. Preserve unrelated products and their deployment identities. Run the existing checks relevant to the changed behavior and verify their output. For documentation-only changes, check accuracy and links; run product builds or tests only when the change can affect them. Distinguish local tests from actual production readback. Do not deploy, incur costs, or modify external accounts without the relevant authorization.
 5. In the completion report, identify the actual source revision and relevant rules used, commands and observed results, and any untested or blocked conditions. A document receipt is not proof that its instructions were followed.
 
+## Production browser checks
+
+For Random Ppobgi, Bible Reader, DEVICE CHECKUP and Calculatormoa, open live product pages through the protected QA browser. Its separate browser context blocks Cloudflare Web Analytics, product counters and ad telemetry before navigation, including when a check follows a link or changes language. Use a local build or preview for browser sessions that cannot apply these protections. The product's `?qa=1` flag alone only affects its own counters.
+
+- Interactive check: `node .github/qa/open.mjs <production URL>`
+- Verify all four home pages: `node .github/qa/open.mjs --check`
+- Automated checks: start pages and contexts with `newQaPage` or `newQaContext` from `.github/qa/browser.mjs`. Mock analytics responses locally if the test needs them.
+
+The commands reuse the Playwright installation from the browser QA jobs.
+
 This is a thin entry point, not a replacement for the authoritative rules.

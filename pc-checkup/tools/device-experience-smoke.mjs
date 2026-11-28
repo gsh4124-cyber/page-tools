@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -7,7 +8,7 @@ await mkdir(proofDir,{recursive:true});
 const base=process.env.DEVICE_TEST_BASE||'https://pc-checkup.pages.dev';
 const browser=await chromium.launch({headless:true});
 // Googlebot's browser language must not turn the Korean URL into a redirect.
-const crawlerContext=await browser.newContext({locale:'en-US',viewport:{width:390,height:844}});
+const crawlerContext=await newQaContext(browser, {locale:'en-US',viewport:{width:390,height:844}});
 const crawlerPage=await crawlerContext.newPage();
 await crawlerPage.goto(`${base}/?qa=1`,{waitUntil:'domcontentloaded',timeout:30000});
 await crawlerPage.locator('#languagePicker').waitFor({state:'visible'});
@@ -18,7 +19,7 @@ await crawlerPage.screenshot({path:fileURLToPath(new URL('crawler-root-ko.png',p
 await crawlerContext.close();
 const locales=['ko','en','ja','es','de','fr','pt','it','nl','id','vi','zh-CN','ru'];
 for(const locale of locales){
-  const context=await browser.newContext({viewport:{width:390,height:844},locale:locale==='ko'?'ko-KR':locale,permissions:['clipboard-read','clipboard-write']});
+  const context=await newQaContext(browser, {viewport:{width:390,height:844},locale:locale==='ko'?'ko-KR':locale,permissions:['clipboard-read','clipboard-write']});
   await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
   await context.addInitScript(()=>{Object.defineProperty(navigator,'share',{configurable:true,value:async data=>{window.__sharedDeviceReport=data;}});});
   const page=await context.newPage(),errors=[];

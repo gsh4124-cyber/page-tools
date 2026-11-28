@@ -1,3 +1,4 @@
+import { newQaContext } from '../.github/qa/browser.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -14,7 +15,7 @@ const browser = await chromium.launch({ headless: true, ...(process.env.SEARCH_B
 const observations = [];
 try {
   for (const width of [320, 1280]) {
-    const context = await browser.newContext({viewport:{width,height:900},locale:'ko-KR'});
+    const context = await newQaContext(browser, {viewport:{width,height:900},locale:'ko-KR'});
     await context.route(/googlesyndication|doubleclick|adtrafficquality|\/api\/events/, route => route.abort());
     const page = await context.newPage();
     const errors = [];
@@ -71,7 +72,7 @@ try {
     await context.close();
   }
   // Guide content and ordinary links remain available without JavaScript.
-  const noJs = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+  const noJs = await newQaContext(browser, {javaScriptEnabled:false,viewport:{width:390,height:844}});
   for (const [key,base] of Object.entries(bases).filter(([key]) => key !== 'device')) {
     const page = await noJs.newPage();
     await page.goto(base + '/guide/');

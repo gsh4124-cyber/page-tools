@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import {createServer} from 'node:http';
 import fs from 'node:fs/promises';
@@ -31,7 +32,7 @@ try{
  for(const engine of (process.env.MEMORY_GRADING_ENGINES||process.env.MEMORY_QUIZ_ENGINES||'chromium').split(',')){
   const browser=await engines[engine].launch({headless:true});
   try{for(const width of [320,390,1280])for(const mode of ['exam','practice'])for(const view of ['Verse','Chapter']){
-   const context=await browser.newContext({viewport:{width,height:900},locale:'ko-KR'});
+   const context=await newQaContext(browser, {viewport:{width,height:900},locale:'ko-KR'});
    try{
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,route=>route.abort());
     const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',error=>errors.push(String(error)));

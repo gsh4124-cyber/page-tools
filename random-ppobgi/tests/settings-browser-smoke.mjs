@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,webkit,firefox} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -9,7 +10,7 @@ for(const engine of (process.env.SETTINGS_TEST_ENGINES||'chromium').split(',')){
  const browser=await engines[engine].launch({headless:true});
  try{for(const [language,width] of [['ko',320],['ko',1280],['en',390],['ar',390]]){
   console.log(`Settings QA ${engine} ${language} ${width}`);
-  const context=await browser.newContext({viewport:{width,height:844},locale:language==='ko'?'ko-KR':language,hasTouch:width<600});
+  const context=await newQaContext(browser, {viewport:{width,height:844},locale:language==='ko'?'ko-KR':language,hasTouch:width<600});
   try{
    const legacy=JSON.stringify([{name:'Old list',value:'Alice\nBob',at:1}]);
    await context.addInitScript(value=>localStorage.setItem('random-picker-saved-sets-v1',value),legacy);

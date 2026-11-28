@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -39,7 +40,7 @@ try{
   const browser=await engines[engine].launch({headless:true});
   try{
    for(const [lang,width] of [['ko',320],['ko',390],['ko',1280],['en',390],['ar',390]]){
-    const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',locale:lang==='ko'?'ko-KR':lang});
+    const context=await newQaContext(browser, {viewport:{width,height:900},reducedMotion:'reduce',locale:lang==='ko'?'ko-KR':lang});
     await seedYut(context);
     const page=await context.newPage(),errors=[];debugPage=page;page.on('pageerror',e=>{errors.push(String(e));console.error('Page script error:',e);});page.on('crash',()=>console.error(`Browser page crashed: ${engine} ${lang} ${width}`));
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
@@ -104,7 +105,7 @@ try{
     assert.deepEqual(errors,[]);await context.close();
    }
    // Exercise stop-animation interruptions with ordinary motion, not just accessibility shortcuts.
-   const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();
+   const context=await newQaContext(browser, {viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();
    await seedYut(context);
    await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());await page.goto(base+'/?qa=1',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.RandomPickerSettings);
    for(const method of ['wheel','capsule','slot']){
@@ -123,7 +124,7 @@ try{
    await page.evaluate(()=>{window.__testYutBits=[1,0,1,0];window.__testYutCalls=0;for(let i=0;i<20;i++)document.getElementById('throwYut').dispatchEvent(new MouseEvent('click',{bubbles:true}));});
    assert(await page.locator('#throwYut').isDisabled());await page.locator('#yutResult[aria-busy="false"]').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>window.__testYutCalls),4);assert.equal(await page.locator('#yutResult').getAttribute('data-result'),'gae');results.push({engine,method:'yut',phase:'single-result-during-rapid-clicks',pass:true});
    await context.close();
-   const raceContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+   const raceContext=await newQaContext(browser, {viewport:{width:390,height:844},reducedMotion:'reduce'});
    await raceContext.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
    await raceContext.addInitScript(()=>{const native=crypto.getRandomValues.bind(crypto);Object.defineProperty(crypto,'getRandomValues',{value(array){if(window.__raceTestValues?.length){array[0]=window.__raceTestValues.shift();return array;}return native(array);}});});
    const racePage=await raceContext.newPage();await racePage.goto(base+'/?qa=1',{waitUntil:'domcontentloaded'});await racePage.waitForFunction(()=>window.RandomPickerSettings);

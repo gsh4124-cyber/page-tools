@@ -1,3 +1,4 @@
+import { newQaPage } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -26,7 +27,7 @@ for (const test of cases) {
   const runtimeErrors = [];
   let page;
   try {
-    page = await browser.newPage({ viewport: test.viewport });
+    page = await newQaPage(browser, { viewport: test.viewport });
     page.on('pageerror', error => runtimeErrors.push(String(error)));
     const url = new URL(test.path, origin);
     // Explicitly exclude automated QA from anonymous D1 usage metrics.

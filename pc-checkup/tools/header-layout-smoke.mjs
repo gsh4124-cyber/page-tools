@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import { chromium } from 'playwright';
 
 const base = 'https://pc-checkup.pages.dev';
@@ -11,7 +12,7 @@ const assert = (ok, message) => { if (!ok) problems.push(message); };
 const browser = await chromium.launch({ headless: true });
 
 for (const viewport of viewports) {
-  const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
+  const context = await newQaContext(browser, { viewport: { width: viewport.width, height: viewport.height } });
   const page = await context.newPage();
   for (const path of localePaths) {
     const response = await page.goto(`${base}${path}`, { waitUntil: 'networkidle', timeout: 30000 });

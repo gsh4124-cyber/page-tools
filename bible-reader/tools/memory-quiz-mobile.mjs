@@ -1,3 +1,4 @@
+import { newQaContext } from '../../.github/qa/browser.mjs';
 import {chooseMemory} from './picker-test-helpers.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import {createServer} from 'node:http';
@@ -39,7 +40,7 @@ try{
   const browser=await engines[engine].launch({headless:true,...(engine==='chromium'&&process.env.MEMORY_QUIZ_CHANNEL?{channel:process.env.MEMORY_QUIZ_CHANNEL}:{})});
   try{for(const profile of profiles.filter(p=>!process.env.MEMORY_QUIZ_PROFILES||process.env.MEMORY_QUIZ_PROFILES.split(',').includes(p.name)))for(const view of ['verse','chapter']){
    const id=`${engine}-${profile.name}-${view}`,errors=[];console.log('Checking '+id);
-   const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,deviceScaleFactor:2,...(engine!=='firefox'?{isMobile:true}:{}),locale:'ko-KR'});let page;
+   const context=await newQaContext(browser, {viewport:{width:profile.width,height:profile.height},hasTouch:true,deviceScaleFactor:2,...(engine!=='firefox'?{isMobile:true}:{}),locale:'ko-KR'});let page;
    try{
     await context.route(/googlesyndication|doubleclick|adtrafficquality/,r=>r.abort());
     if(profile.keyboard)await context.addInitScript(()=>{const v=new EventTarget();Object.assign(v,{width:innerWidth,height:innerHeight,offsetTop:0,offsetLeft:0,scale:1});Object.defineProperty(window,'visualViewport',{configurable:true,value:v});window.__qaViewport=v;});

@@ -1,3 +1,4 @@
+import { newQaContext } from '../.github/qa/browser.mjs';
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -5,7 +6,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url)),local=process.argv.includes('--local'),out=path.join(root,'qa_evidence/continuity');await fs.mkdir(out,{recursive:true});
 const hosts={'bible-reader-1iz.pages.dev':'bible-reader','pc-checkup.pages.dev':'pc-checkup','random-ppobgi.pages.dev':'random-ppobgi'},engines={chromium,firefox,webkit},results=[];
-async function run(browser,meta,fn){const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:meta.language==='ko'?'ko-KR':meta.language});
+async function run(browser,meta,fn){const context=await newQaContext(browser, {viewport:{width:390,height:844},reducedMotion:'reduce',locale:meta.language==='ko'?'ko-KR':meta.language});
  await context.route(/googlesyndication|doubleclick|adtrafficquality|cloudflareinsights/,r=>r.abort());await context.route('**/functions/v1/**',r=>r.fulfill({status:204}));
  if(local)await context.route(/https:\/\/(?:bible-reader-1iz|pc-checkup|random-ppobgi)\.pages\.dev\//,async route=>{const u=new URL(route.request().url()),dist=path.join(root,hosts[u.hostname],'dist');let file=path.resolve(dist,'.'+decodeURIComponent(u.pathname));if(file!==dist&&!file.startsWith(dist+path.sep))return route.fulfill({status:403});try{if((await fs.stat(file)).isDirectory())file=path.join(file,'index.html');return route.fulfill({status:200,contentType:({'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json'})[path.extname(file)]||'application/octet-stream',body:await fs.readFile(file)});}catch{return route.fulfill({status:404});}});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));try{await fn(page);assert.deepEqual(errors,[]);results.push({...meta,pass:true});}catch(e){await page.screenshot({path:path.join(out,`${results.length}-failure.png`),fullPage:true}).catch(()=>{});results.push({...meta,pass:false,error:String(e)});console.error(JSON.stringify(results.at(-1)));}finally{await context.close();}}
