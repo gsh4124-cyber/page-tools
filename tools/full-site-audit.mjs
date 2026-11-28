@@ -56,8 +56,10 @@ for(const engine of (process.env.FULL_AUDIT_ENGINES||'chromium').split(',')){
   for(const storage of ['blocked','malformed'])for(const site of ['bible','random','device'])await scenario(browser,{engine,width:390,height:844,site,storage,flow:'unavailable-or-damaged-storage'},async page=>{
    if(site==='bible'){
     await page.goto('https://bible-reader-1iz.pages.dev/?qa=1',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>typeof currentBookData!=='undefined'&&!!currentBookData&&document.querySelector('#status').hidden);
-    const before=await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));await page.locator('#fontUp').click();assert((await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)))>before,'Text size action must change the displayed text');await page.locator('#toolbarMoreToggle').click();await page.locator('#widthToggle').click();
-    if(!(await page.locator('#themeToggle').isVisible()))await page.locator('#toolbarMoreToggle').click();await page.locator('#themeToggle').click();
+    const before=await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize));await page.locator('#fontUp').click();assert((await page.locator('#verses').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)))>before,'Text size action must change the displayed text');
+    await page.locator('#toolbarMoreToggle').click();
+    assert(await page.locator('#widthToggle').isHidden(),'Reading width stays hidden on the phone');
+    await page.locator('#themeToggle').click();
     if(await page.locator('#toolbarMoreMenu').isVisible())await page.locator('#toolbarMoreToggle').click();await page.locator('#compareToggle').click();assert(await page.locator('#comparePanel').isVisible());
     if(storage==='blocked'){await page.locator('#readerStorageNotice').waitFor();assert(['light','dark'].includes(await page.locator('html').getAttribute('data-theme')));}
    }else if(site==='random'){

@@ -244,7 +244,7 @@ jobs:
           if grep -Eq '^tools/(build_static|release_metadata|asset_cache)\.py$' <<< "$files"; then shared=true; fi
           deploy_projects=()
           # A workflow-only change runs all three live tests; it does not force a site deployment.
-          if grep -Eq '^(\.github/workflows/product-health-monitor\.yml$|\.github/qa/|tools/verify-production\.mjs$)' <<< "$files"; then
+          if grep -Eq '^(\.github/workflows/product-health-monitor\.yml$|\.github/qa/|tools/(verify-production|full-site-audit|site-flow-smoke|continuity-smoke|search-entry-smoke)\.mjs$)' <<< "$files"; then
             projects=(bible-reader random-ppobgi pc-checkup)
           fi
           for project in bible-reader random-ppobgi pc-checkup; do
